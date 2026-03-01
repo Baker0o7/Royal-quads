@@ -1,57 +1,207 @@
-import type { Booking, Quad, User, Promotion, SalesData } from '../types';
+/**
+ * Local storage API — works fully offline on Android (no Express server needed).
+ * All data persists in localStorage under namespaced keys.
+ */
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
-  return data as T;
+import type { Quad, Booking, User, Promotion, SalesData } from '../types';
+
+// ─── Storage helpers ──────────────────────────────────────────────────────────
+function load<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function save(key: string, value: unknown) {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
-export const api = {
-  // Quads
-  getQuads: () => request<Quad[]>('/api/quads'),
-  createQuad: (body: { name: string; imageUrl?: string; imei?: string }) =>
-    request<Quad>('/api/quads', { method: 'POST', body: JSON.stringify(body) }),
-  updateQuad: (id: number, body: { name: string; status: string; imageUrl?: string; imei?: string }) =>
-    request<{ success: boolean }>(`/api/quads/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  updateQuadStatus: (id: number, status: string) =>
-    request<{ success: boolean }>(`/api/quads/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+function nextId(key: string): number {
+  const id = load<number>(key, 0) + 1;
+  save(key, id);
+  return id;
+}
 
-  // Bookings
-  createBooking: (body: {
+// ─── Data accessors ───────────────────────────────────────────────────────────
+function getQuads(): Quad[] {
+  const quads = load<Quad[] | null>('rq:quads', null);
+  if (!quads) {
+    const seed: Quad[] = [1,2,3,4,5].map(i => ({
+      id: i, name: `Quad ${i}`, status: 'available', imageUrl: null, imei: null,
+    }));
+    save('rq:quads', seed);
+    save('rq:quad_seq', 5);
+    return seed;
+  }
+  return quads;
+}
+function setQuads(q: Quad[]) { save('rq:quads', q); }
+
+type StoredUser = User & { password: string };
+function getUsers(): StoredUser[] { return load<StoredUser[]>('rq:users', []); }
+function setUsers(u: StoredUser[]) { save('rq:users', u); }
+
+function getBookings(): Booking[] { return load<Booking[]>('rq:bookings', []); }
+function setBookings(b: Booking[]) { save('rq:bookings', b); }
+
+function getPromotions(): Promotion[] { return load<Promotion[]>('rq:promotions', []); }
+function setPromotions(p: Promotion[]) { save('rq:promotions', p); }
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+export const api = {
+
+  // ── Quads ──
+  getQuads: async (): Promise<Quad[]> => getQuads(),
+
+  createQuad: async (body: { name: string; imageUrl?: string; imei?: string }): Promise<Quad> => {
+    if (!body.name?.trim()) throw new Error('Name is required');
+    const quad: Quad = {
+      id: nextId('rq:quad_seq'),
+      name: body.name.trim(),
+      status: 'available',
+      imageUrl: body.imageUrl || null,
+      imei: body.imei || null,
+    };
+    setQuads([...getQuads(), quad]);
+    return quad;
+  },
+
+  updateQuad: async (id: number, body: { name: string; status: string; imageUrl?: string; imei?: string }) => {
+    setQuads(getQuads().map(q => q.id === id
+      ? { ...q, name: body.name.trim(), status: body.status as Quad['status'], imageUrl: body.imageUrl || null, imei: body.imei || null }
+      : q));
+    return { success: true };
+  },
+
+  updateQuadStatus: async (id: number, status: string) => {
+    setQuads(getQuads().map(q => q.id === id ? { ...q, status: status as Quad['status'] } : q));
+    return { success: true };
+  },
+
+  // ── Bookings ──
+  createBooking: async (body: {
     quadId: number; userId?: number | null; customerName: string;
     customerPhone: string; duration: number; price: number;
     originalPrice: number; promoCode?: string | null;
-  }) => request<{ id: number; receiptId: string; startTime: string }>('/api/bookings', { method: 'POST', body: JSON.stringify(body) }),
-  getActiveBookings: () => request<Booking[]>('/api/bookings/active'),
-  getBookingHistory: () => request<Booking[]>('/api/bookings/history'),
-  completeBooking: (id: number) =>
-    request<{ success: boolean; endTime: string }>(`/api/bookings/${id}/complete`, { method: 'POST' }),
-  submitFeedback: (id: number, rating: number, feedback: string) =>
-    request<{ success: boolean }>(`/api/bookings/${id}/feedback`, {
-      method: 'POST', body: JSON.stringify({ rating, feedback }),
-    }),
+  }): Promise<{ id: number; receiptId: string; startTime: string }> => {
+    const quads = getQuads();
+    const quad = quads.find(q => q.id === body.quadId);
+    if (!quad) throw new Error('Quad not found');
+    if (quad.status !== 'available') throw new Error('Quad is not available');
 
-  // Sales
-  getSales: () => request<SalesData>('/api/sales'),
+    const id = nextId('rq:booking_seq');
+    const receiptId = 'RQ-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    const startTime = new Date().toISOString();
 
-  // Auth
-  login: (phone: string, password: string) =>
-    request<User>('/api/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) }),
-  register: (name: string, phone: string, password: string) =>
-    request<User>('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, password }) }),
-  getUserHistory: (userId: number) => request<Booking[]>(`/api/users/${userId}/history`),
+    const booking: Booking = {
+      id, quadId: body.quadId, userId: body.userId ?? null,
+      customerName: body.customerName.trim(),
+      customerPhone: body.customerPhone,
+      duration: body.duration, price: body.price,
+      originalPrice: body.originalPrice,
+      promoCode: body.promoCode ?? null,
+      startTime, endTime: null, status: 'active',
+      receiptId, rating: null, feedback: null,
+      quadName: quad.name, quadImageUrl: quad.imageUrl, quadImei: quad.imei,
+    };
 
-  // Promotions
-  getPromotions: () => request<Promotion[]>('/api/promotions'),
-  createPromotion: (code: string, discountPercentage: number) =>
-    request<Promotion>('/api/promotions', { method: 'POST', body: JSON.stringify({ code, discountPercentage }) }),
-  togglePromotion: (id: number, isActive: boolean) =>
-    request<{ success: boolean }>(`/api/promotions/${id}/toggle`, { method: 'POST', body: JSON.stringify({ isActive }) }),
-  deletePromotion: (id: number) =>
-    request<{ success: boolean }>(`/api/promotions/${id}`, { method: 'DELETE' }),
-  validatePromotion: (code: string) => request<Promotion>(`/api/promotions/validate/${code}`),
+    setBookings([...getBookings(), booking]);
+    setQuads(quads.map(q => q.id === body.quadId ? { ...q, status: 'rented' } : q));
+    return { id, receiptId, startTime };
+  },
+
+  getActiveBookings: async (): Promise<Booking[]> =>
+    getBookings().filter(b => b.status === 'active'),
+
+  getBookingHistory: async (): Promise<Booking[]> =>
+    getBookings()
+      .filter(b => b.status === 'completed')
+      .sort((a, b) => new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime()),
+
+  completeBooking: async (id: number) => {
+    const endTime = new Date().toISOString();
+    let quadId = 0;
+    setBookings(getBookings().map(b => {
+      if (b.id === id) { quadId = b.quadId; return { ...b, status: 'completed' as const, endTime }; }
+      return b;
+    }));
+    if (quadId) setQuads(getQuads().map(q => q.id === quadId ? { ...q, status: 'available' } : q));
+    return { success: true, endTime };
+  },
+
+  submitFeedback: async (id: number, rating: number, feedback: string) => {
+    setBookings(getBookings().map(b => b.id === id ? { ...b, rating, feedback } : b));
+    return { success: true };
+  },
+
+  // ── Sales ──
+  getSales: async (): Promise<SalesData> => {
+    const completed = getBookings().filter(b => b.status === 'completed');
+    const today = new Date().toDateString();
+    return {
+      total: completed.reduce((s, b) => s + b.price, 0),
+      today: completed
+        .filter(b => b.endTime && new Date(b.endTime).toDateString() === today)
+        .reduce((s, b) => s + b.price, 0),
+    };
+  },
+
+  // ── Auth ──
+  login: async (phone: string, password: string): Promise<User> => {
+    const user = getUsers().find(u => u.phone === phone && u.password === password);
+    if (!user) throw new Error('Invalid phone number or password');
+    const { password: _, ...safe } = user; void _;
+    return safe;
+  },
+
+  register: async (name: string, phone: string, password: string): Promise<User> => {
+    if (!name?.trim()) throw new Error('Name is required');
+    if (!phone?.trim()) throw new Error('Phone is required');
+    if (!password || password.length < 4) throw new Error('Password must be at least 4 characters');
+    if (getUsers().find(u => u.phone === phone)) throw new Error('Phone number already registered');
+
+    const user: StoredUser = {
+      id: nextId('rq:user_seq'),
+      name: name.trim(), phone,
+      role: 'user', password,
+    };
+    setUsers([...getUsers(), user]);
+    const { password: _, ...safe } = user; void _;
+    return safe;
+  },
+
+  getUserHistory: async (userId: number): Promise<Booking[]> =>
+    getBookings().filter(b => b.userId === userId).sort((a, b) => b.id - a.id),
+
+  // ── Promotions ──
+  getPromotions: async (): Promise<Promotion[]> =>
+    getPromotions().slice().reverse(),
+
+  createPromotion: async (code: string, discountPercentage: number): Promise<Promotion> => {
+    if (!code?.trim()) throw new Error('Code is required');
+    if (discountPercentage < 1 || discountPercentage > 100) throw new Error('Discount must be 1–100%');
+    const upper = code.toUpperCase().trim();
+    if (getPromotions().find(p => p.code === upper)) throw new Error('Promo code already exists');
+    const promo: Promotion = { id: nextId('rq:promo_seq'), code: upper, discountPercentage, isActive: 1 };
+    setPromotions([...getPromotions(), promo]);
+    return promo;
+  },
+
+  togglePromotion: async (id: number, isActive: boolean) => {
+    setPromotions(getPromotions().map(p => p.id === id ? { ...p, isActive: isActive ? 1 : 0 } : p));
+    return { success: true };
+  },
+
+  deletePromotion: async (id: number) => {
+    setPromotions(getPromotions().filter(p => p.id !== id));
+    return { success: true };
+  },
+
+  validatePromotion: async (code: string): Promise<Promotion> => {
+    const promo = getPromotions().find(p => p.code === code.toUpperCase().trim() && p.isActive === 1);
+    if (!promo) throw new Error('Invalid or inactive promo code');
+    return promo;
+  },
 };
