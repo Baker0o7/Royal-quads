@@ -21,17 +21,11 @@ jobs:
           node-version: 22.x
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (skip native modules)
+        run: npm install --ignore-scripts
 
       - name: Build Web App
         run: npm run build
-
-      - name: Add Android Platform
-        run: npx cap add android
-
-      - name: Sync Capacitor
-        run: npx cap sync android
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -40,13 +34,22 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Install Capacitor CLI
+        run: npm install -g @capacitor/cli
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
         run: |
@@ -72,9 +75,9 @@ jobs:
           body: |
             ## 🏍️ Royal Quads — Android APK
 
-            **Download the APK below and install on your Android device.**
+            **Download `Royal-Quads.apk` below and install on your Android device.**
 
-            > ⚠️ Enable *Install from unknown sources* in Android settings before installing.
+            > ⚠️ Enable *Install from unknown sources* in Android Settings before installing.
 
             ### Features
             - Quad bike booking with M-Pesa payment
