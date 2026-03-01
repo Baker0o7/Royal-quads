@@ -11,7 +11,6 @@ import { PRICING } from '../types';
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const [quads, setQuads] = useState<Quad[]>([]);
   const [selectedQuad, setSelectedQuad] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
@@ -28,89 +27,67 @@ export default function Home() {
   useEffect(() => {
     api.getQuads().then(data => {
       setQuads(data);
-      const params = new URLSearchParams(location.search);
-      const quadParam = params.get('quad');
+      const quadParam = new URLSearchParams(location.search).get('quad');
       if (quadParam) {
-        const quadId = Number(quadParam);
-        if (data.find(q => q.id === quadId && q.status === 'available')) {
-          setSelectedQuad(quadId);
-        }
+        const id = Number(quadParam);
+        if (data.find(q => q.id === id && q.status === 'available')) setSelectedQuad(id);
       }
-    }).catch(console.error);
-
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const u = JSON.parse(storedUser);
-      setCustomerName(u.name || '');
-      setCustomerPhone(u.phone || '');
-    }
+    });
+    const u = localStorage.getItem('user');
+    if (u) { const p = JSON.parse(u); setCustomerName(p.name || ''); setCustomerPhone(p.phone || ''); }
   }, [location.search]);
 
-  const availableQuads = quads.filter(q => q.status === 'available');
+  const available = quads.filter(q => q.status === 'available');
   const originalPrice = PRICING.find(p => p.duration === selectedDuration)?.price ?? 0;
-  const discountedPrice = promoDiscount > 0
-    ? Math.round(originalPrice * (1 - promoDiscount / 100))
-    : originalPrice;
+  const finalPrice = promoDiscount > 0 ? Math.round(originalPrice * (1 - promoDiscount / 100)) : originalPrice;
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
-    setPromoError('');
-    setPromoSuccess('');
+    setPromoError(''); setPromoSuccess('');
     try {
-      const promo = await api.validatePromotion(promoCode.trim());
-      setPromoDiscount(promo.discountPercentage);
-      setPromoSuccess(`${promo.discountPercentage}% discount applied! 🎉`);
-    } catch (err: unknown) {
+      const p = await api.validatePromotion(promoCode.trim());
+      setPromoDiscount(p.discountPercentage);
+      setPromoSuccess(`${p.discountPercentage}% discount applied! 🎉`);
+    } catch (e: unknown) {
       setPromoDiscount(0);
-      setPromoError(err instanceof Error ? err.message : 'Invalid promo code');
+      setPromoError(e instanceof Error ? e.message : 'Invalid promo code');
     }
   };
-
-  const validatePhone = (phone: string) => /^0[17]\d{8}$/.test(phone.replace(/\s/g, ''));
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedQuad || !selectedDuration || !customerName.trim() || !customerPhone.trim()) {
       setError('Please fill in all fields'); return;
     }
-    if (!validatePhone(customerPhone)) {
-      setError('Enter a valid Kenyan phone number (e.g. 0712345678)'); return;
-    }
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
-      const storedUser = localStorage.getItem('user');
-      const userId = storedUser ? JSON.parse(storedUser).id : null;
+      const u = localStorage.getItem('user');
+      const userId = u ? JSON.parse(u).id : null;
       const data = await api.createBooking({
         quadId: selectedQuad, userId,
         customerName: customerName.trim(),
         customerPhone: customerPhone.replace(/\s/g, ''),
-        duration: selectedDuration,
-        price: discountedPrice,
-        originalPrice,
+        duration: selectedDuration, price: finalPrice, originalPrice,
         promoCode: promoDiscount > 0 ? promoCode.toUpperCase() : null,
       });
       setTimeout(() => navigate(`/ride/${data.id}`), 1200);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to book');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to book');
       setLoading(false);
     }
   };
 
   const copyTill = () => {
-    navigator.clipboard.writeText('6685024').then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText('6685024').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
-  const inputCls = 'w-full p-4 rounded-2xl border-2 border-stone-200 bg-white focus:border-emerald-600 focus:outline-none transition-colors text-stone-900 placeholder:text-stone-400';
+  const inputCls = 'w-full p-4 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none transition-colors';
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
 
       {/* Hero */}
-      <div className="bg-emerald-600 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
+      <div className="bg-emerald-600 dark:bg-emerald-700 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <h1 className="text-3xl font-bold mb-1 tracking-tight">Ride the Dunes 🏍️</h1>
           <p className="text-emerald-100 mb-4 text-sm">Experience Mambrui like never before.</p>
@@ -124,32 +101,29 @@ export default function Home() {
 
       <form onSubmit={handleBook} className="flex flex-col gap-6">
 
-        {/* Step 1 — Select Quad */}
+        {/* Step 1 */}
         <section>
           <StepHeader step={1} title="Select Quad" />
-          {availableQuads.length === 0 ? (
-            <div className="p-4 bg-amber-50 text-amber-800 rounded-2xl flex items-start gap-3 border border-amber-200">
+          {available.length === 0 ? (
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 rounded-2xl flex items-start gap-3 border border-amber-200 dark:border-amber-800">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <p className="text-sm">No quads available right now. Please check back later.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {availableQuads.map(quad => (
+              {available.map(quad => (
                 <button key={quad.id} type="button" onClick={() => setSelectedQuad(quad.id)}
-                  className={cn(
-                    'p-3 rounded-2xl border-2 text-left transition-all flex flex-col gap-2 active:scale-[0.98]',
+                  className={cn('p-3 rounded-2xl border-2 text-left transition-all flex flex-col gap-2 active:scale-[0.98]',
                     selectedQuad === quad.id
-                      ? 'border-emerald-600 bg-emerald-50 shadow-md shadow-emerald-100'
-                      : 'border-stone-200 bg-white hover:border-emerald-300'
-                  )}>
-                  {quad.imageUrl ? (
-                    <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl border border-stone-100" />
-                  ) : (
-                    <div className="w-full h-20 bg-stone-100 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
-                  )}
+                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-md'
+                      : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-emerald-300 dark:hover:border-emerald-700')}>
+                  {quad.imageUrl
+                    ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl border border-stone-100 dark:border-stone-700" />
+                    : <div className="w-full h-20 bg-stone-100 dark:bg-stone-700 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
+                  }
                   <div>
-                    <div className="font-bold text-stone-900 text-sm">{quad.name}</div>
-                    <div className="text-xs text-emerald-600 font-semibold mt-0.5">Available ✓</div>
+                    <div className="font-bold text-stone-900 dark:text-stone-100 text-sm">{quad.name}</div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">Available ✓</div>
                   </div>
                 </button>
               ))}
@@ -157,27 +131,25 @@ export default function Home() {
           )}
         </section>
 
-        {/* Step 2 — Duration */}
+        {/* Step 2 */}
         <section>
           <StepHeader step={2} title="Duration" />
           <div className="grid grid-cols-3 gap-2">
             {PRICING.map(p => (
               <button key={p.duration} type="button" onClick={() => setSelectedDuration(p.duration)}
-                className={cn(
-                  'p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center gap-1 active:scale-[0.97]',
+                className={cn('p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center gap-1 active:scale-[0.97]',
                   selectedDuration === p.duration
-                    ? 'border-emerald-600 bg-emerald-50 shadow-md shadow-emerald-100'
-                    : 'border-stone-200 bg-white hover:border-emerald-300'
-                )}>
-                <Clock className={cn('w-5 h-5', selectedDuration === p.duration ? 'text-emerald-600' : 'text-stone-400')} />
-                <div className="font-bold text-sm">{p.label}</div>
-                <div className="text-xs font-medium text-stone-500">{p.price.toLocaleString()} KES</div>
+                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-md'
+                    : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-emerald-300 dark:hover:border-emerald-700')}>
+                <Clock className={cn('w-5 h-5', selectedDuration === p.duration ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-400 dark:text-stone-500')} />
+                <div className="font-bold text-sm text-stone-900 dark:text-stone-100">{p.label}</div>
+                <div className="text-xs font-medium text-stone-500 dark:text-stone-400">{p.price.toLocaleString()} KES</div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* Step 3 — Details */}
+        {/* Step 3 */}
         <section>
           <StepHeader step={3} title="Your Details" />
           <div className="flex flex-col gap-3">
@@ -186,13 +158,12 @@ export default function Home() {
             <div className="relative">
               <Phone className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
               <input type="tel" placeholder="M-Pesa Number (e.g. 0712345678)" value={customerPhone}
-                onChange={e => setCustomerPhone(e.target.value)}
-                className={cn(inputCls, 'pl-12')} required maxLength={13} />
+                onChange={e => setCustomerPhone(e.target.value)} className={cn(inputCls, 'pl-12')} required />
             </div>
           </div>
         </section>
 
-        {/* Step 4 — Promo */}
+        {/* Step 4 */}
         <section>
           <StepHeader step={4} title="Promo Code (Optional)" />
           <div className="flex flex-col gap-2">
@@ -204,49 +175,48 @@ export default function Home() {
                   className={cn(inputCls, 'pl-12 uppercase tracking-wider')} />
               </div>
               <button type="button" onClick={handleApplyPromo} disabled={!promoCode.trim()}
-                className="bg-stone-200 text-stone-900 px-5 rounded-2xl font-bold hover:bg-stone-300 transition-colors disabled:opacity-40">
+                className="bg-stone-200 dark:bg-stone-700 text-stone-900 dark:text-stone-100 px-5 rounded-2xl font-bold hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors disabled:opacity-40">
                 Apply
               </button>
             </div>
-            {promoError   && <p className="text-red-600   text-sm pl-2">⚠ {promoError}</p>}
-            {promoSuccess && <p className="text-emerald-600 text-sm pl-2">{promoSuccess}</p>}
+            {promoError   && <p className="text-red-600 dark:text-red-400 text-sm pl-2">⚠ {promoError}</p>}
+            {promoSuccess && <p className="text-emerald-600 dark:text-emerald-400 text-sm pl-2">{promoSuccess}</p>}
           </div>
         </section>
 
-        {/* Step 5 — Payment */}
+        {/* Step 5 */}
         <section>
           <StepHeader step={5} title="Payment Instructions" />
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex flex-col gap-3">
+          <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4 rounded-2xl flex flex-col gap-3">
             <div className="flex items-start gap-3">
-              <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600 shrink-0">
+              <div className="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 shrink-0">
                 <CreditCard className="w-6 h-6" />
               </div>
               <div>
-                <div className="font-bold text-emerald-900">M-Pesa Buy Goods & Services</div>
-                <div className="text-sm text-emerald-700 mt-0.5">Pay to the till below before confirming.</div>
+                <div className="font-bold text-emerald-900 dark:text-emerald-300">M-Pesa Buy Goods & Services</div>
+                <div className="text-sm text-emerald-700 dark:text-emerald-400 mt-0.5">Pay to the till below before confirming.</div>
               </div>
             </div>
-            <div className="bg-white p-3 rounded-xl border border-emerald-100 flex flex-col gap-2">
+            <div className="bg-white dark:bg-stone-800 p-3 rounded-xl border border-emerald-100 dark:border-stone-700 flex flex-col gap-2">
               <div className="flex justify-between items-center">
-                <span className="text-stone-500 text-sm">Till Number</span>
+                <span className="text-stone-500 dark:text-stone-400 text-sm">Till Number</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-xl tracking-widest text-stone-900">6685024</span>
+                  <span className="font-mono font-bold text-xl tracking-widest text-stone-900 dark:text-stone-100">6685024</span>
                   <button type="button" onClick={copyTill}
-                    className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 transition-colors text-stone-500"
-                    title="Copy till number">
+                    className="p-1.5 rounded-lg bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors text-stone-500">
                     {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-stone-500 text-sm">Name</span>
-                <span className="font-semibold text-sm text-stone-900 text-right">YUSUF OMAR SHEIKH AHMED TAIB</span>
+                <span className="text-stone-500 dark:text-stone-400 text-sm">Name</span>
+                <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 text-right">YUSUF OMAR SHEIKH AHMED TAIB</span>
               </div>
-              <div className="flex justify-between items-center pt-2 mt-1 border-t border-stone-100">
-                <span className="text-stone-500 text-sm">Amount</span>
+              <div className="flex justify-between items-center pt-2 mt-1 border-t border-stone-100 dark:border-stone-700">
+                <span className="text-stone-500 dark:text-stone-400 text-sm">Amount</span>
                 <div className="text-right">
-                  <span className="font-bold text-emerald-600 text-lg">
-                    {discountedPrice ? `${discountedPrice.toLocaleString()} KES` : '— KES'}
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">
+                    {finalPrice ? `${finalPrice.toLocaleString()} KES` : '— KES'}
                   </span>
                   {promoDiscount > 0 && originalPrice > 0 && (
                     <div className="text-xs text-stone-400 line-through">{originalPrice.toLocaleString()} KES</div>
@@ -261,12 +231,8 @@ export default function Home() {
 
         <button type="submit"
           disabled={!selectedQuad || !selectedDuration || !customerName || !customerPhone || loading}
-          className="w-full bg-stone-900 text-white p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-800 transition-colors mt-2 shadow-xl shadow-stone-900/20 active:scale-[0.99]">
-          {loading ? (
-            <><Spinner /> Confirming Payment...</>
-          ) : (
-            <> Confirm Payment <ChevronRight className="w-5 h-5" /></>
-          )}
+          className="w-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors mt-2 shadow-xl active:scale-[0.99]">
+          {loading ? <><Spinner /> Confirming Payment...</> : <>Confirm Payment <ChevronRight className="w-5 h-5" /></>}
         </button>
       </form>
     </motion.div>

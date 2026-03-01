@@ -118,17 +118,17 @@ export default function Admin() {
     fetchData();
   };
 
-  const inputCls = 'w-full p-3 rounded-xl border-2 border-stone-200 focus:border-emerald-600 focus:outline-none transition-colors text-sm bg-white';
+  const inputCls = 'w-full p-3 rounded-xl border-2 border-stone-200 dark:border-stone-700 focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none transition-colors text-sm bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100';
   const tabs: Tab[] = ['overview', 'promotions', 'inventory'];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-5">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-5 text-stone-900 dark:text-stone-100">
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Admin Dashboard</h1>
         <button onClick={handleRefresh}
-          className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 transition-colors text-stone-500">
+          className="p-2 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors text-stone-500 dark:text-stone-400">
           <RefreshCw className={cn('w-4 h-4', refreshing && 'animate-spin')} />
         </button>
       </div>
@@ -153,13 +153,13 @@ export default function Admin() {
               <div className="text-emerald-200 text-xs font-semibold mb-1 flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5" /> Today's Sales
               </div>
-              <div className="text-2xl font-bold">{sales.today.toLocaleString()} KES</div>
+              <div className="text-2xl font-bold text-stone-100">{sales.today.toLocaleString()} KES</div>
             </div>
             <div className="bg-stone-900 text-white p-5 rounded-3xl">
               <div className="text-stone-400 text-xs font-semibold mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> All-Time Sales
               </div>
-              <div className="text-2xl font-bold">{sales.total.toLocaleString()} KES</div>
+              <div className="text-2xl font-bold text-stone-100">{sales.total.toLocaleString()} KES</div>
             </div>
           </div>
 
@@ -194,10 +194,10 @@ export default function Admin() {
                     const end = new Date(b.startTime).getTime() + b.duration * 60_000;
                     const minsLeft = Math.max(0, Math.floor((end - Date.now()) / 60_000));
                     return (
-                      <div key={b.id} className="bg-white p-4 rounded-2xl border-2 border-emerald-100 shadow-sm">
+                      <div key={b.id} className="bg-white dark:bg-stone-900 p-4 rounded-2xl border-2 border-emerald-100 dark:border-emerald-900 shadow-sm">
                         <div className="flex justify-between items-start mb-2">
                           <div className="font-bold">{b.quadName}</div>
-                          <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md">
                             {minsLeft > 0 ? `${minsLeft} min left` : 'Overtime'}
                           </span>
                         </div>
@@ -205,16 +205,16 @@ export default function Admin() {
                           <span className="font-medium text-stone-900">{b.customerName}</span> · {b.customerPhone}
                         </div>
                         <div className="flex justify-between items-center mt-3">
-                          <span className="text-xs text-stone-400">Started {new Date(b.startTime).toLocaleTimeString()}</span>
+                          <span className="text-xs text-stone-400 dark:text-stone-500">Started {new Date(b.startTime).toLocaleTimeString()}</span>
                           <div className="flex gap-2">
                             {b.quadImei && (
                               <Link to={`/track/${b.quadImei}`}
-                                className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1 hover:bg-emerald-100 transition-colors">
+                                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg flex items-center gap-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
                                 <Navigation className="w-3 h-3" /> Track
                               </Link>
                             )}
                             <button onClick={() => handleForceComplete(b.id)}
-                              className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg hover:bg-red-100 transition-colors">
+                              className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
                               End Ride
                             </button>
                           </div>
@@ -235,15 +235,15 @@ export default function Admin() {
               : (
                 <div className="flex flex-col gap-2">
                   {history.slice(0, 15).map(b => (
-                    <div key={b.id} className="bg-white p-3.5 rounded-2xl border border-stone-200 flex justify-between items-center shadow-sm">
+                    <div key={b.id} className="bg-white dark:bg-stone-900 p-3.5 rounded-2xl border border-stone-200 dark:border-stone-800 flex justify-between items-center shadow-sm">
                       <div>
-                        <div className="font-bold text-sm">{b.quadName}</div>
-                        <div className="text-xs text-stone-500">{b.customerName} · {b.duration} min</div>
+                        <div className="font-bold text-sm text-stone-900 dark:text-stone-100">{b.quadName}</div>
+                        <div className="text-xs text-stone-500 dark:text-stone-400">{b.customerName} · {b.duration} min</div>
                         <div className="text-xs text-stone-400 font-mono mt-0.5">{b.receiptId}</div>
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-emerald-600 text-sm">+{b.price.toLocaleString()} KES</div>
-                        {b.endTime && <div className="text-xs text-stone-400">{new Date(b.endTime).toLocaleTimeString()}</div>}
+                        {b.endTime && <div className="text-xs text-stone-400 dark:text-stone-500">{new Date(b.endTime).toLocaleTimeString()}</div>}
                         {b.rating != null && (
                           <div className="text-xs text-amber-500 font-bold">{'★'.repeat(b.rating)}</div>
                         )}
@@ -278,7 +278,7 @@ export default function Admin() {
               </div>
               {promoError && <ErrorMessage message={promoError} />}
               <button type="submit"
-                className="w-full bg-stone-900 text-white p-3 rounded-xl font-bold hover:bg-stone-800 transition-colors text-sm">
+                className="w-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 p-3 rounded-xl font-bold hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors text-sm">
                 Create Code
               </button>
             </form>
@@ -293,12 +293,12 @@ export default function Admin() {
                   {promotions.map(p => (
                     <div key={p.id}
                       className={cn('p-4 rounded-2xl border-2 flex justify-between items-center transition-colors',
-                        p.isActive ? 'bg-white border-emerald-100' : 'bg-stone-50 border-stone-200 opacity-60')}>
+                        p.isActive ? 'bg-white dark:bg-stone-900 border-emerald-100 dark:border-emerald-900' : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 opacity-60')}>
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold font-mono tracking-wider text-sm">{p.code}</span>
                           <span className={cn('text-xs px-2 py-0.5 rounded-full font-bold',
-                            p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-200 text-stone-600')}>
+                            p.isActive ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400')}>
                             {p.discountPercentage}% OFF
                           </span>
                         </div>
@@ -309,11 +309,11 @@ export default function Admin() {
                       <div className="flex gap-2">
                         <button onClick={() => handleTogglePromo(p.id, p.isActive)}
                           className={cn('p-2 rounded-full transition-colors',
-                            p.isActive ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100')}>
+                            p.isActive ? 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30')}>
                           <Power className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDeletePromo(p.id)}
-                          className="p-2 rounded-full bg-stone-100 text-stone-400 hover:bg-red-50 hover:text-red-500 transition-colors">
+                          className="p-2 rounded-full bg-stone-100 dark:bg-stone-700 text-stone-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -342,7 +342,7 @@ export default function Admin() {
                 onChange={e => setNewQuadImei(e.target.value)} className={inputCls} />
               {quadError && <ErrorMessage message={quadError} />}
               <button type="submit"
-                className="w-full bg-stone-900 text-white p-3 rounded-xl font-bold hover:bg-stone-800 transition-colors text-sm">
+                className="w-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 p-3 rounded-xl font-bold hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors text-sm">
                 Add Quad
               </button>
             </form>
@@ -354,18 +354,18 @@ export default function Admin() {
               {quads.length === 0
                 ? <EmptyState message="No quads found." />
                 : quads.map(quad => (
-                  <div key={quad.id} className="bg-white p-4 rounded-2xl border-2 border-stone-200 flex flex-col gap-3">
+                  <div key={quad.id} className="bg-white dark:bg-stone-900 p-4 rounded-2xl border-2 border-stone-200 dark:border-stone-800 flex flex-col gap-3">
                     {editingQuadId === quad.id ? (
                       <div className="flex flex-col gap-3">
                         <input value={editQuadData.name} placeholder="Name"
                           onChange={e => setEditQuadData({ ...editQuadData, name: e.target.value })}
-                          className={cn(inputCls, 'font-bold')} />
+                          className={cn(inputCls, 'font-bold text-stone-900 dark:text-stone-100')} />
                         <input value={editQuadData.imageUrl} placeholder="Image URL"
                           onChange={e => setEditQuadData({ ...editQuadData, imageUrl: e.target.value })}
                           className={inputCls} />
                         <input value={editQuadData.imei} placeholder="IMEI"
                           onChange={e => setEditQuadData({ ...editQuadData, imei: e.target.value })}
-                          className={cn(inputCls, 'font-mono')} />
+                          className={cn(inputCls, 'font-mono text-stone-900 dark:text-stone-100')} />
                         <div className="flex gap-2 justify-end">
                           <button onClick={() => setEditingQuadId(null)}
                             className="p-2 bg-stone-100 text-stone-600 rounded-xl hover:bg-stone-200 transition-colors">
@@ -390,7 +390,7 @@ export default function Admin() {
                               <button onClick={() => {
                                 setEditingQuadId(quad.id);
                                 setEditQuadData({ name: quad.name, imageUrl: quad.imageUrl ?? '', imei: quad.imei ?? '' });
-                              }} className="text-stone-300 hover:text-emerald-600 transition-colors">
+                              }} className="text-stone-300 dark:text-stone-600 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -406,7 +406,7 @@ export default function Admin() {
                           </div>
                         </div>
                         <select value={quad.status} onChange={e => handleStatusChange(quad.id, e.target.value)}
-                          className="p-1.5 rounded-xl border-2 border-stone-200 bg-stone-50 text-xs font-bold focus:outline-none focus:border-emerald-600 cursor-pointer">
+                          className="p-1.5 rounded-xl border-2 border-stone-200 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-bold focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 cursor-pointer">
                           <option value="available">Available</option>
                           <option value="rented">Rented</option>
                           <option value="maintenance">Maintenance</option>
@@ -414,8 +414,8 @@ export default function Admin() {
                       </div>
                     )}
                     {showQrFor === quad.id && !editingQuadId && (
-                      <div className="pt-3 border-t border-stone-100 flex flex-col items-center gap-2">
-                        <div className="bg-white p-2 rounded-xl border border-stone-200 shadow-sm">
+                      <div className="pt-3 border-t border-stone-100 dark:border-stone-700 flex flex-col items-center gap-2">
+                        <div className="bg-white dark:bg-stone-800 p-2 rounded-xl border border-stone-200 dark:border-stone-700 shadow-sm">
                           <QRCodeSVG value={`${window.location.origin}/quad/${quad.id}`} size={140} level="H" includeMargin />
                         </div>
                         <p className="text-xs text-stone-400 text-center">Scan to book this quad</p>

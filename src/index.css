@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -7,42 +10,26 @@
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
 
-/* Better focus ring */
 :focus-visible {
   outline: 2px solid #16a34a;
   outline-offset: 2px;
 }
 
-/* Print styles for receipt */
 @media print {
-  header, footer, nav, button, .no-print {
-    display: none !important;
-  }
-  body {
-    background: white;
-  }
-  main {
-    padding: 0 !important;
-    max-width: 100% !important;
-  }
+  header, footer, nav, button, .no-print { display: none !important; }
+  body { background: white; }
+  main { padding: 0 !important; max-width: 100% !important; }
 }
 
-/* Number inputs — hide arrows */
 input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-/* Mono font for codes */
-.font-mono {
-  font-variant-numeric: tabular-nums;
-}
+.font-mono { font-variant-numeric: tabular-nums; }
