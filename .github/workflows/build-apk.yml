@@ -1,0 +1,87 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mkdir -p output
+          cp android/app/build/outputs/apk/debug/app-debug.apk output/Royal-Quads.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Royal-Quads-APK
+          path: output/Royal-Quads.apk
+          retention-days: 30
+
+      - name: Get version tag
+        id: version
+        run: echo "tag=v$(date +'%Y.%m.%d')-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Royal Quads ${{ steps.version.outputs.tag }}"
+          body: |
+            ## 🏍️ Royal Quads — Android APK
+
+            **Download the APK below and install on your Android device.**
+
+            > ⚠️ Enable *Install from unknown sources* in Android settings before installing.
+
+            ### Features
+            - Quad bike booking with M-Pesa payment
+            - Live ride countdown timer
+            - Admin dashboard (sales, inventory, promos)
+            - User profiles & ride history
+            - Mambrui Sand Dunes — Royal Quads
+          files: output/Royal-Quads.apk
+          draft: false
+          prerelease: false
