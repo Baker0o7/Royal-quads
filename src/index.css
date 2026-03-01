@@ -1,35 +1,154 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode */
 @custom-variant dark (&:where(.dark, .dark *));
 
-* {
-  -webkit-tap-highlight-color: transparent;
+/* ── Design tokens ─────────────────────────────────────────────────────── */
+:root {
+  --sand:      #f5f0e8;
+  --sand-mid:  #e8dfc9;
+  --sand-deep: #c9b99a;
+  --gold:      #c9972a;
+  --gold-light:#e8b84b;
+  --charcoal:  #1a1612;
+  --ink:       #0d0b09;
+  --bark:      #2d2318;
+  --mist:      #7a6e60;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
 }
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Subtle grain texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
-html {
-  scroll-behavior: smooth;
+/* ── Typography helpers ─────────────────────────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+.font-mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ── Gold gradient ──────────────────────────────────────────────────────── */
+.text-gold {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-:focus-visible {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
+/* ── Glass card ─────────────────────────────────────────────────────────── */
+.glass {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
 
-@media print {
-  header, footer, nav, button, .no-print { display: none !important; }
-  body { background: white; }
-  main { padding: 0 !important; max-width: 100% !important; }
+/* ── Input base ─────────────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 0.875rem;
+  border: 1.5px solid rgba(201, 185, 154, 0.4);
+  background: rgba(245, 240, 232, 0.6);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.input::placeholder { color: var(--mist); }
+.input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 151, 42, 0.15);
 }
 
+.dark .input {
+  background: rgba(29, 22, 13, 0.7);
+  border-color: rgba(201, 185, 154, 0.15);
+  color: var(--sand);
+}
+.dark .input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 151, 42, 0.2);
+}
+
+/* ── Btn primary ────────────────────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #2d2318, #1a1612);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(201, 151, 42, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #3d3020, #2d2318);
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.dark .btn-primary {
+  background: linear-gradient(135deg, var(--sand), var(--sand-mid));
+  color: var(--charcoal);
+  border-color: transparent;
+}
+.dark .btn-primary:hover {
+  background: linear-gradient(135deg, #fff, var(--sand));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sand-deep); border-radius: 2px; }
+
+/* ── Focus ring ─────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ── Number input ───────────────────────────────────────────────────────── */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-.font-mono { font-variant-numeric: tabular-nums; }
+/* ── Print ──────────────────────────────────────────────────────────────── */
+@media print {
+  header, footer, nav, button { display: none !important; }
+  body { background: white !important; }
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(201,151,42,0.1) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+.float { animation: float 3s ease-in-out infinite; }

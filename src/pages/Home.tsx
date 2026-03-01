@@ -47,7 +47,7 @@ export default function Home() {
     try {
       const p = await api.validatePromotion(promoCode.trim());
       setPromoDiscount(p.discountPercentage);
-      setPromoSuccess(`${p.discountPercentage}% discount applied! 🎉`);
+      setPromoSuccess(`${p.discountPercentage}% discount applied`);
     } catch (e: unknown) {
       setPromoDiscount(0);
       setPromoError(e instanceof Error ? e.message : 'Invalid promo code');
@@ -70,7 +70,7 @@ export default function Home() {
         duration: selectedDuration, price: finalPrice, originalPrice,
         promoCode: promoDiscount > 0 ? promoCode.toUpperCase() : null,
       });
-      setTimeout(() => navigate(`/ride/${data.id}`), 1200);
+      setTimeout(() => navigate(`/ride/${data.id}`), 1000);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to book');
       setLoading(false);
@@ -81,49 +81,68 @@ export default function Home() {
     navigator.clipboard.writeText('6685024').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
-  const inputCls = 'w-full p-4 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none transition-colors';
-
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+      className="flex flex-col gap-7">
 
-      {/* Hero */}
-      <div className="bg-emerald-600 dark:bg-emerald-700 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
+      {/* ── Hero ───────────────────────────────────────── */}
+      <div className="relative rounded-3xl overflow-hidden bg-[#1a1612] text-white min-h-[180px] flex flex-col justify-end p-6">
+        {/* Desert gradient bg */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#2d2318] via-[#1a1612] to-[#0d0b09]" />
+        <div className="absolute inset-0 opacity-30"
+          style={{ backgroundImage: 'radial-gradient(ellipse 80% 60% at 70% 20%, rgba(201,151,42,0.35) 0%, transparent 70%)' }} />
+        {/* Dune silhouette */}
+        <svg className="absolute bottom-0 left-0 right-0 opacity-10" viewBox="0 0 400 80" preserveAspectRatio="none">
+          <path d="M0,80 Q100,20 200,50 Q300,80 400,30 L400,80 Z" fill="white"/>
+        </svg>
+
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-1 tracking-tight">Ride the Dunes 🏍️</h1>
-          <p className="text-emerald-100 mb-4 text-sm">Experience Mambrui like never before.</p>
+          <p className="font-mono text-[#c9972a] text-[10px] tracking-[0.2em] uppercase mb-2">Mambrui Sand Dunes</p>
+          <h1 className="font-display text-3xl font-bold leading-tight mb-3">
+            Ride the<br />
+            <span className="italic text-[#e8b84b]">Dunes</span>
+          </h1>
           <a href="https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-semibold bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm hover:bg-white/30 transition-colors">
-            <MapPin className="w-4 h-4" /> Mambrui Sand Dunes
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-[#c9b99a] hover:text-[#e8b84b] transition-colors bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+            <MapPin className="w-3 h-3" /> Get Directions
           </a>
         </div>
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500 rounded-full blur-3xl opacity-40 pointer-events-none" />
       </div>
 
-      <form onSubmit={handleBook} className="flex flex-col gap-6">
+      <form onSubmit={handleBook} className="flex flex-col gap-7">
 
-        {/* Step 1 */}
+        {/* ── Step 1 — Quad ──────────────────────────── */}
         <section>
-          <StepHeader step={1} title="Select Quad" />
+          <StepHeader step={1} title="Choose Your Quad" />
           {available.length === 0 ? (
-            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 rounded-2xl flex items-start gap-3 border border-amber-200 dark:border-amber-800">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <p className="text-sm">No quads available right now. Please check back later.</p>
+            <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-700/30 flex items-start gap-3 text-amber-800 dark:text-amber-400">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <p className="text-sm">No quads available right now. Please check back shortly.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {available.map(quad => (
                 <button key={quad.id} type="button" onClick={() => setSelectedQuad(quad.id)}
-                  className={cn('p-3 rounded-2xl border-2 text-left transition-all flex flex-col gap-2 active:scale-[0.98]',
+                  className={cn(
+                    'p-3 rounded-2xl border-1.5 text-left transition-all duration-200 flex flex-col gap-2 active:scale-[0.97] group',
                     selectedQuad === quad.id
-                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-md'
-                      : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-emerald-300 dark:hover:border-emerald-700')}>
+                      ? 'border-[#c9972a] bg-[#c9972a]/5 dark:bg-[#c9972a]/8 shadow-[0_0_0_1px_#c9972a]'
+                      : 'border-[#c9b99a]/30 dark:border-[#c9b99a]/10 bg-white/60 dark:bg-[#1a1612]/60 hover:border-[#c9972a]/50'
+                  )}>
                   {quad.imageUrl
-                    ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl border border-stone-100 dark:border-stone-700" />
-                    : <div className="w-full h-20 bg-stone-100 dark:bg-stone-700 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
+                    ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl" />
+                    : (
+                      <div className="w-full h-20 rounded-xl bg-gradient-to-br from-[#e8dfc9] to-[#c9b99a] dark:from-[#2d2318] dark:to-[#1a1612] flex items-center justify-center">
+                        <span className={cn('text-3xl transition-transform duration-300 group-hover:scale-110', selectedQuad === quad.id && 'scale-110')}>🏍️</span>
+                      </div>
+                    )
                   }
                   <div>
-                    <div className="font-bold text-stone-900 dark:text-stone-100 text-sm">{quad.name}</div>
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">Available ✓</div>
+                    <p className="font-semibold text-sm text-[#1a1612] dark:text-[#f5f0e8]">{quad.name}</p>
+                    <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse inline-block" />
+                      Available
+                    </p>
                   </div>
                 </button>
               ))}
@@ -131,95 +150,108 @@ export default function Home() {
           )}
         </section>
 
-        {/* Step 2 */}
+        {/* ── Step 2 — Duration ──────────────────────── */}
         <section>
-          <StepHeader step={2} title="Duration" />
+          <StepHeader step={2} title="Select Duration" />
           <div className="grid grid-cols-3 gap-2">
-            {PRICING.map(p => (
-              <button key={p.duration} type="button" onClick={() => setSelectedDuration(p.duration)}
-                className={cn('p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center gap-1 active:scale-[0.97]',
-                  selectedDuration === p.duration
-                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-md'
-                    : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-emerald-300 dark:hover:border-emerald-700')}>
-                <Clock className={cn('w-5 h-5', selectedDuration === p.duration ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-400 dark:text-stone-500')} />
-                <div className="font-bold text-sm text-stone-900 dark:text-stone-100">{p.label}</div>
-                <div className="text-xs font-medium text-stone-500 dark:text-stone-400">{p.price.toLocaleString()} KES</div>
-              </button>
-            ))}
+            {PRICING.map(p => {
+              const active = selectedDuration === p.duration;
+              return (
+                <button key={p.duration} type="button" onClick={() => setSelectedDuration(p.duration)}
+                  className={cn(
+                    'p-3 rounded-2xl border transition-all duration-200 flex flex-col items-center gap-1.5 active:scale-[0.96]',
+                    active
+                      ? 'border-[#c9972a] bg-[#c9972a]/5 dark:bg-[#c9972a]/8 shadow-[0_0_0_1px_#c9972a]'
+                      : 'border-[#c9b99a]/30 dark:border-[#c9b99a]/10 bg-white/60 dark:bg-[#1a1612]/60 hover:border-[#c9972a]/50'
+                  )}>
+                  <Clock className={cn('w-4 h-4', active ? 'text-[#c9972a]' : 'text-[#7a6e60] dark:text-[#a09070]')} />
+                  <span className="font-semibold text-sm text-[#1a1612] dark:text-[#f5f0e8]">{p.label}</span>
+                  <span className={cn('text-[10px] font-mono font-medium', active ? 'text-[#c9972a]' : 'text-[#7a6e60] dark:text-[#a09070]')}>
+                    {p.price.toLocaleString()} KES
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        {/* Step 3 */}
+        {/* ── Step 3 — Details ───────────────────────── */}
         <section>
           <StepHeader step={3} title="Your Details" />
           <div className="flex flex-col gap-3">
             <input type="text" placeholder="Full Name" value={customerName}
-              onChange={e => setCustomerName(e.target.value)} className={inputCls} required />
+              onChange={e => setCustomerName(e.target.value)} className="input" required />
             <div className="relative">
-              <Phone className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
-              <input type="tel" placeholder="M-Pesa Number (e.g. 0712345678)" value={customerPhone}
-                onChange={e => setCustomerPhone(e.target.value)} className={cn(inputCls, 'pl-12')} required />
+              <Phone className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#7a6e60] pointer-events-none" />
+              <input type="tel" placeholder="M-Pesa Number (e.g. 0712 345 678)" value={customerPhone}
+                onChange={e => setCustomerPhone(e.target.value)}
+                style={{ paddingLeft: '2.75rem' }} className="input" required />
             </div>
           </div>
         </section>
 
-        {/* Step 4 */}
+        {/* ── Step 4 — Promo ─────────────────────────── */}
         <section>
-          <StepHeader step={4} title="Promo Code (Optional)" />
+          <StepHeader step={4} title="Promo Code" />
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Tag className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                <Tag className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#7a6e60] pointer-events-none" />
                 <input type="text" placeholder="Enter code" value={promoCode}
                   onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoError(''); setPromoSuccess(''); }}
-                  className={cn(inputCls, 'pl-12 uppercase tracking-wider')} />
+                  style={{ paddingLeft: '2.75rem' }} className="input uppercase tracking-widest font-mono" />
               </div>
               <button type="button" onClick={handleApplyPromo} disabled={!promoCode.trim()}
-                className="bg-stone-200 dark:bg-stone-700 text-stone-900 dark:text-stone-100 px-5 rounded-2xl font-bold hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors disabled:opacity-40">
+                className="px-5 rounded-xl bg-[#1a1612] dark:bg-[#f5f0e8]/10 text-white dark:text-[#f5f0e8] text-sm font-semibold hover:bg-[#2d2318] dark:hover:bg-[#f5f0e8]/15 disabled:opacity-40 transition-colors border border-[#c9b99a]/20">
                 Apply
               </button>
             </div>
-            {promoError   && <p className="text-red-600 dark:text-red-400 text-sm pl-2">⚠ {promoError}</p>}
-            {promoSuccess && <p className="text-emerald-600 dark:text-emerald-400 text-sm pl-2">{promoSuccess}</p>}
+            {promoError   && <p className="text-red-600 dark:text-red-400 text-xs font-mono pl-1">⚠ {promoError}</p>}
+            {promoSuccess && <p className="text-emerald-600 dark:text-emerald-400 text-xs font-mono pl-1">✓ {promoSuccess}</p>}
           </div>
         </section>
 
-        {/* Step 5 */}
+        {/* ── Step 5 — Payment ───────────────────────── */}
         <section>
-          <StepHeader step={5} title="Payment Instructions" />
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4 rounded-2xl flex flex-col gap-3">
-            <div className="flex items-start gap-3">
-              <div className="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 shrink-0">
-                <CreditCard className="w-6 h-6" />
+          <StepHeader step={5} title="Payment via M-Pesa" />
+          <div className="rounded-2xl border border-[#c9b99a]/25 dark:border-[#c9b99a]/10 overflow-hidden bg-white/70 dark:bg-[#1a1612]/70 backdrop-blur-sm shadow-sm">
+            <div className="p-4 border-b border-[#c9b99a]/15 dark:border-[#c9b99a]/8 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#c9972a] to-[#8a6010] flex items-center justify-center shrink-0">
+                <CreditCard className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="font-bold text-emerald-900 dark:text-emerald-300">M-Pesa Buy Goods & Services</div>
-                <div className="text-sm text-emerald-700 dark:text-emerald-400 mt-0.5">Pay to the till below before confirming.</div>
+                <p className="font-semibold text-sm text-[#1a1612] dark:text-[#f5f0e8]">Buy Goods & Services</p>
+                <p className="text-xs text-[#7a6e60] dark:text-[#a09070] mt-0.5">Pay before confirming your booking</p>
               </div>
             </div>
-            <div className="bg-white dark:bg-stone-800 p-3 rounded-xl border border-emerald-100 dark:border-stone-700 flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-stone-500 dark:text-stone-400 text-sm">Till Number</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-xl tracking-widest text-stone-900 dark:text-stone-100">6685024</span>
-                  <button type="button" onClick={copyTill}
-                    className="p-1.5 rounded-lg bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors text-stone-500">
-                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                  </button>
+            <div className="p-4 flex flex-col gap-3">
+              {[
+                { label: 'Till Number',
+                  value: (
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-lg text-[#1a1612] dark:text-[#f5f0e8] tracking-widest">6685024</span>
+                      <button type="button" onClick={copyTill}
+                        className="p-1.5 rounded-lg bg-[#f5f0e8] dark:bg-[#2d2318] hover:bg-[#e8dfc9] dark:hover:bg-[#3d3020] transition-colors text-[#7a6e60]">
+                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  )
+                },
+                { label: 'Business Name', value: <span className="font-semibold text-xs text-[#1a1612] dark:text-[#f5f0e8] text-right">YUSUF OMAR SHEIKH<br/>AHMED TAIB</span> },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center">
+                  <span className="text-xs text-[#7a6e60] dark:text-[#a09070]">{label}</span>
+                  {value}
                 </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-stone-500 dark:text-stone-400 text-sm">Name</span>
-                <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 text-right">YUSUF OMAR SHEIKH AHMED TAIB</span>
-              </div>
-              <div className="flex justify-between items-center pt-2 mt-1 border-t border-stone-100 dark:border-stone-700">
-                <span className="text-stone-500 dark:text-stone-400 text-sm">Amount</span>
+              ))}
+              <div className="pt-3 mt-1 border-t border-[#c9b99a]/15 dark:border-[#c9b99a]/8 flex justify-between items-center">
+                <span className="text-xs text-[#7a6e60] dark:text-[#a09070]">Amount to Pay</span>
                 <div className="text-right">
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-                    {finalPrice ? `${finalPrice.toLocaleString()} KES` : '— KES'}
-                  </span>
+                  <p className="font-display font-bold text-xl text-[#c9972a]">
+                    {finalPrice ? `${finalPrice.toLocaleString()} KES` : '—'}
+                  </p>
                   {promoDiscount > 0 && originalPrice > 0 && (
-                    <div className="text-xs text-stone-400 line-through">{originalPrice.toLocaleString()} KES</div>
+                    <p className="text-[10px] font-mono text-[#7a6e60] line-through">{originalPrice.toLocaleString()} KES</p>
                   )}
                 </div>
               </div>
@@ -231,8 +263,8 @@ export default function Home() {
 
         <button type="submit"
           disabled={!selectedQuad || !selectedDuration || !customerName || !customerPhone || loading}
-          className="w-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors mt-2 shadow-xl active:scale-[0.99]">
-          {loading ? <><Spinner /> Confirming Payment...</> : <>Confirm Payment <ChevronRight className="w-5 h-5" /></>}
+          className="btn-primary">
+          {loading ? <><Spinner /> Confirming...</> : <>Confirm Booking <ChevronRight className="w-4 h-4" /></>}
         </button>
       </form>
     </motion.div>
