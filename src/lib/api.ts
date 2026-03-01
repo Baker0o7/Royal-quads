@@ -26,16 +26,29 @@ function nextId(key: string): number {
 
 // ─── Data accessors ───────────────────────────────────────────────────────────
 function getQuads(): Quad[] {
-  const quads = load<Quad[] | null>('rq:quads', null);
-  if (!quads) {
-    const seed: Quad[] = [1,2,3,4,5].map(i => ({
-      id: i, name: `Quad ${i}`, status: 'available', imageUrl: null, imei: null,
+  const stored = load<Quad[] | null>('rq:quads', null);
+
+  // First launch — seed 5 default quads
+  if (!stored || stored.length === 0) {
+    const seed: Quad[] = [1, 2, 3, 4, 5].map(i => ({
+      id: i, name: `Quad ${i}`, status: 'available' as const, imageUrl: null, imei: null,
     }));
     save('rq:quads', seed);
     save('rq:quad_seq', 5);
     return seed;
   }
-  return quads;
+
+  // Heal: reset any 'rented' quad that has no active booking (e.g. app was closed mid-ride)
+  const activeQuadIds = new Set(
+    load<Booking[]>('rq:bookings', [])
+      .filter(b => b.status === 'active')
+      .map(b => b.quadId)
+  );
+  const healed = stored.map(q =>
+    q.status === 'rented' && !activeQuadIds.has(q.id) ? { ...q, status: 'available' as const } : q
+  );
+  if (healed.some((q, i) => q.status !== stored[i].status)) save('rq:quads', healed);
+  return healed;
 }
 function setQuads(q: Quad[]) { save('rq:quads', q); }
 
