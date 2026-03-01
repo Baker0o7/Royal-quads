@@ -27,6 +27,18 @@ export interface Booking {
   quadName: string;
   quadImageUrl?: string | null;
   quadImei?: string | null;
+  // new fields
+  isPrebooked?: boolean;
+  prebookTime?: string | null;
+  groupSize?: number;
+  idPhotoUrl?: string | null;
+  waiverSigned?: boolean;
+  waiverSignedAt?: string | null;
+  overtimeMinutes?: number;
+  overtimeCharge?: number;
+  depositAmount?: number;
+  depositReturned?: boolean;
+  operatorId?: number | null;
 }
 
 export interface User {
@@ -40,13 +52,93 @@ export interface Promotion {
   id: number;
   code: string;
   discountPercentage: number;
-  isActive: number; // SQLite boolean: 0 or 1
+  isActive: number;
+}
+
+export interface Package {
+  id: number;
+  name: string;
+  description: string;
+  rides: number;
+  price: number;
+  isActive: number;
+}
+
+export interface MaintenanceLog {
+  id: number;
+  quadId: number;
+  quadName: string;
+  type: 'service' | 'fuel' | 'repair' | 'inspection';
+  description: string;
+  cost: number;
+  date: string;
+  operatorId: number | null;
+  operatorName: string | null;
+}
+
+export interface DamageReport {
+  id: number;
+  quadId: number;
+  quadName: string;
+  bookingId: number | null;
+  customerName: string | null;
+  description: string;
+  photoUrl: string | null;
+  severity: 'minor' | 'moderate' | 'severe';
+  repairCost: number;
+  resolved: boolean;
+  date: string;
+}
+
+export interface Staff {
+  id: number;
+  name: string;
+  phone: string;
+  pin: string;
+  role: 'operator' | 'manager';
+  isActive: boolean;
+}
+
+export interface Shift {
+  id: number;
+  staffId: number;
+  staffName: string;
+  startTime: string;
+  endTime: string | null;
+  notes: string;
+}
+
+export interface WaitlistEntry {
+  id: number;
+  customerName: string;
+  customerPhone: string;
+  duration: number;
+  addedAt: string;
+  notified: boolean;
+}
+
+export interface Prebooking {
+  id: number;
+  quadId: number | null;
+  quadName: string | null;
+  customerName: string;
+  customerPhone: string;
+  duration: number;
+  price: number;
+  scheduledFor: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'converted';
+  createdAt: string;
 }
 
 export interface SalesData {
   total: number;
   today: number;
+  thisWeek: number;
+  thisMonth: number;
+  overtimeRevenue: number;
 }
+
+export const OVERTIME_RATE = 100; // KES per minute
 
 export const PRICING = [
   { duration: 5,  price: 1000, label: '5 min'  },
@@ -56,3 +148,6 @@ export const PRICING = [
   { duration: 30, price: 3500, label: '30 min' },
   { duration: 60, price: 6000, label: '1 hour' },
 ] as const;
+
+export const ADMIN_PIN_KEY = 'rq:admin_pin';
+export const DEFAULT_ADMIN_PIN = '1234';
