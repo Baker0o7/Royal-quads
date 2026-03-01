@@ -1,85 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Bike, Tag, Navigation, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { Navigation, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { api } from '../lib/api';
+import { LoadingScreen, StatusBadge } from '../lib/components/ui';
+import type { Quad } from '../types';
 
 export default function QuadDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [quad, setQuad] = useState<any>(null);
+  const { id } = useParams<{ id: string }>();
+  const [quad, setQuad] = useState<Quad | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/quads')
-      .then(res => res.json())
-      .then(data => {
-        const current = data.find((q: any) => q.id === Number(id));
-        if (current) {
-          setQuad(current);
-        }
-        setLoading(false);
-      });
+    api.getQuads().then(data => {
+      setQuad(data.find(q => q.id === Number(id)) ?? null);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="p-8 text-center text-stone-500 animate-pulse">Loading quad details...</div>;
-  if (!quad) return <div className="p-8 text-center text-red-500">Quad not found</div>;
+  if (loading) return <LoadingScreen text="Loading quad details..." />;
+  if (!quad)   return <div className="p-8 text-center text-red-500 text-sm">Quad not found.</div>;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col gap-6"
-    >
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-5">
+      <Link to="/" className="flex items-center gap-2 text-stone-500 hover:text-stone-900 transition-colors text-sm font-medium w-fit">
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
+
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-200">
         {quad.imageUrl ? (
-          <img src={quad.imageUrl} alt={quad.name} className="w-full h-64 object-cover" />
+          <img src={quad.imageUrl} alt={quad.name} className="w-full h-56 object-cover" />
         ) : (
-          <div className="w-full h-64 bg-stone-100 flex items-center justify-center text-stone-400">
-            <Bike className="w-16 h-16" />
-          </div>
+          <div className="w-full h-56 bg-stone-100 flex items-center justify-center text-6xl">🏍️</div>
         )}
-        
+
         <div className="p-6">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-5">
             <div>
               <h1 className="text-2xl font-bold text-stone-900">{quad.name}</h1>
-              <div className="text-sm text-stone-500 mt-1">ID: #{quad.id}</div>
+              <p className="text-stone-400 text-xs mt-1">Fleet ID #{quad.id}</p>
             </div>
-            <span className={cn(
-              "px-3 py-1 rounded-full text-sm font-bold",
-              quad.status === 'available' ? "bg-emerald-100 text-emerald-700" :
-              quad.status === 'rented' ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-            )}>
-              {quad.status.toUpperCase()}
-            </span>
+            <StatusBadge status={quad.status} />
           </div>
 
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-2 mb-7">
             {quad.imei && (
               <div className="flex items-center gap-2 text-stone-600 bg-stone-50 p-3 rounded-xl border border-stone-100">
-                <Navigation className="w-5 h-5 text-stone-400" />
-                <span className="font-mono text-sm">IMEI: {quad.imei}</span>
+                <Navigation className="w-4 h-4 text-stone-400 shrink-0" />
+                <span className="font-mono text-xs">IMEI: {quad.imei}</span>
+                <Link to={`/track/${quad.imei}`}
+                  className="ml-auto text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                  Live Track →
+                </Link>
               </div>
             )}
             <div className="flex items-center gap-2 text-stone-600 bg-stone-50 p-3 rounded-xl border border-stone-100">
-              <Tag className="w-5 h-5 text-stone-400" />
+              <span className="text-lg">🏖️</span>
               <span className="text-sm">Royal Quads Mambrui Fleet</span>
             </div>
           </div>
 
           {quad.status === 'available' ? (
-            <Link
-              to={`/?quad=${quad.id}`}
-              className="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
-            >
-              <CheckCircle2 className="w-6 h-6" />
-              Book This Quad
+            <Link to={`/?quad=${quad.id}`}
+              className="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20">
+              <CheckCircle2 className="w-5 h-5" /> Book This Quad
             </Link>
           ) : (
-            <div className="w-full bg-stone-100 text-stone-500 p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 border border-stone-200">
-              <AlertCircle className="w-6 h-6" />
-              Currently Unavailable
+            <div className="w-full bg-stone-100 text-stone-400 p-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 border border-stone-200">
+              <AlertCircle className="w-5 h-5" /> Currently Unavailable
             </div>
           )}
         </div>
