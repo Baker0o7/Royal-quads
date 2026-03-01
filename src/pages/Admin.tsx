@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/api';
 import { EmptyState, ErrorMessage, StatusBadge } from '../lib/components/ui';
+import { ImagePicker } from '../lib/components/ImagePicker';
 import type { Quad, Booking, Promotion, SalesData } from '../types';
 
 type Tab = 'overview' | 'promotions' | 'inventory';
@@ -242,7 +243,7 @@ export default function Admin() {
             </h2>
             <form onSubmit={handleCreateQuad} className="flex flex-col gap-3">
               <input type="text" placeholder="Quad Name" value={newQuadName} onChange={e => setNewQuadName(e.target.value)} className="input" required />
-              <input type="url" placeholder="Image URL (optional)" value={newQuadImage} onChange={e => setNewQuadImage(e.target.value)} className="input" />
+              <ImagePicker value={newQuadImage} onChange={setNewQuadImage} />
               <input type="text" placeholder="IMEI for GPS tracking (optional)" value={newQuadImei} onChange={e => setNewQuadImei(e.target.value)} className="input font-mono" />
               {quadError && <ErrorMessage message={quadError} />}
               <button type="submit" className="btn-primary">Add to Fleet</button>
@@ -257,7 +258,7 @@ export default function Admin() {
                   {editingQuadId === quad.id ? (
                     <div className="flex flex-col gap-3">
                       <input value={editQuadData.name} onChange={e => setEditQuadData({ ...editQuadData, name: e.target.value })} className="input font-semibold" />
-                      <input value={editQuadData.imageUrl} onChange={e => setEditQuadData({ ...editQuadData, imageUrl: e.target.value })} className="input text-sm" placeholder="Image URL" />
+                      <ImagePicker value={editQuadData.imageUrl} onChange={v => setEditQuadData({ ...editQuadData, imageUrl: v })} />
                       <input value={editQuadData.imei} onChange={e => setEditQuadData({ ...editQuadData, imei: e.target.value })} className="input font-mono text-sm" placeholder="IMEI" />
                       <div className="flex gap-2 justify-end">
                         <button onClick={() => setEditingQuadId(null)} className="p-2 rounded-xl bg-[#f5f0e8] dark:bg-[#2d2318] text-[#7a6e60]"><X className="w-4 h-4" /></button>
