@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { LogOut, History, Clock, Star, TrendingUp, Calendar } from 'lucide-react';
+import { LogOut, History, Clock, Star, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
-import { LoadingScreen, ErrorMessage } from '../lib/components/ui';
+import { ErrorMessage } from '../lib/components/ui';
+import { renderGoogleButton } from '../lib/googleAuth';
 import type { User, Booking } from '../types';
 
+// Extended user type that may include Google fields
+type FullUser = User & { googleId?: string; avatarUrl?: string };
+
+const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID as string) || '';
+
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FullUser | null>(null);
   const [history, setHistory] = useState<Booking[]>([]);
   const [isLogin, setIsLogin] = useState(true);
   const [phone, setPhone] = useState('');
@@ -14,20 +20,40 @@ export default function Profile() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
     if (stored) {
-      const u: User = JSON.parse(stored);
+      const u: FullUser = JSON.parse(stored);
       setUser(u);
       api.getUserHistory(u.id).then(setHistory).catch(console.error);
     }
   }, []);
 
+  // Mount Google button once user is not logged in
+  useEffect(() => {
+    if (user || !GOOGLE_CLIENT_ID) return;
+    const tryMount = () => {
+      if (googleBtnRef.current) {
+        renderGoogleButton('google-btn', (googleUser) => {
+          localStorage.setItem('user', JSON.stringify(googleUser));
+          setUser(googleUser);
+          api.getUserHistory(googleUser.id).then(setHistory).catch(console.error);
+        });
+      }
+    };
+    // GSI may not be loaded yet — retry with a small delay
+    const t = setTimeout(tryMount, 600);
+    return () => clearTimeout(t);
+  }, [user]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true);
     try {
-      const u = isLogin ? await api.login(phone, password) : await api.register(name, phone, password);
+      const u = isLogin
+        ? await api.login(phone, password)
+        : await api.register(name, phone, password);
       localStorage.setItem('user', JSON.stringify(u));
       setUser(u);
       api.getUserHistory(u.id).then(setHistory).catch(console.error);
@@ -36,8 +62,15 @@ export default function Profile() {
     } finally { setLoading(false); }
   };
 
-  const handleLogout = () => { localStorage.removeItem('user'); setUser(null); setHistory([]); };
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    setHistory([]);
+    window.google?.accounts?.id?.disableAutoSelect?.();
+  };
+
   const totalSpent = history.reduce((s, b) => s + b.price, 0);
+  const isGoogleUser = !!(user as FullUser | null)?.googleId;
 
   if (!user) return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-5">
@@ -53,15 +86,45 @@ export default function Profile() {
             {isLogin ? 'Sign in to your account' : 'Create your rider profile'}
           </p>
         </div>
+
+        {/* Google Sign-In Button */}
+        {GOOGLE_CLIENT_ID ? (
+          <>
+            <div id="google-btn" ref={googleBtnRef} className="w-full mb-4 flex justify-center min-h-[44px]" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-[#c9b99a]/20 dark:bg-[#c9b99a]/10" />
+              <span className="text-[10px] font-mono text-[#7a6e60] dark:text-[#a09070] uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-[#c9b99a]/20 dark:bg-[#c9b99a]/10" />
+            </div>
+          </>
+        ) : (
+          <div className="mb-4 p-3 bg-amber-50/80 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-xl flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-amber-800 dark:text-amber-400">Google Sign-In not configured</p>
+              <p className="text-[10px] text-amber-700/80 dark:text-amber-500 mt-0.5 font-mono">
+                Set <code className="bg-amber-100 dark:bg-amber-900/30 px-1 rounded">GOOGLE_CLIENT_ID</code> in your <code className="bg-amber-100 dark:bg-amber-900/30 px-1 rounded">.env</code> file to enable.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Phone/Password form */}
         <form onSubmit={handleAuth} className="flex flex-col gap-3">
-          {!isLogin && <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} className="input" required />}
-          <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className="input" required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="input" required />
+          {!isLogin && (
+            <input type="text" placeholder="Full Name" value={name}
+              onChange={e => setName(e.target.value)} className="input" required />
+          )}
+          <input type="tel" placeholder="Phone Number" value={phone}
+            onChange={e => setPhone(e.target.value)} className="input" required />
+          <input type="password" placeholder="Password" value={password}
+            onChange={e => setPassword(e.target.value)} className="input" required />
           {error && <ErrorMessage message={error} />}
           <button type="submit" disabled={loading} className="btn-primary mt-1">
-            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+            {loading ? 'Please wait…' : isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
+
         <div className="mt-4 text-center">
           <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
             className="text-[#c9972a] hover:text-[#e8b84b] text-sm transition-colors font-medium">
@@ -81,12 +144,19 @@ export default function Profile() {
         <div className="absolute top-0 right-0 w-40 h-40 bg-[#c9972a]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#c9972a] to-[#8a6010] flex items-center justify-center text-xl shadow-lg">
-              👤
-            </div>
+            {(user as FullUser).avatarUrl ? (
+              <img src={(user as FullUser).avatarUrl} alt={user.name}
+                className="w-12 h-12 rounded-2xl object-cover border-2 border-[#c9972a]/40 shadow-lg" />
+            ) : (
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#c9972a] to-[#8a6010] flex items-center justify-center text-xl shadow-lg">
+                👤
+              </div>
+            )}
             <div>
               <h1 className="font-display text-lg font-bold text-white">{user.name}</h1>
-              <p className="font-mono text-[11px] text-[#c9b99a]/60">{user.phone}</p>
+              <p className="font-mono text-[11px] text-[#c9b99a]/60">
+                {isGoogleUser ? '● Google Account' : user.phone}
+              </p>
             </div>
           </div>
           <button onClick={handleLogout}
@@ -110,7 +180,7 @@ export default function Profile() {
         ))}
       </div>
 
-      {/* History */}
+      {/* Ride History */}
       <section>
         <h2 className="font-display text-base font-bold mb-3 text-[#1a1612] dark:text-[#f5f0e8] flex items-center gap-2">
           <History className="w-4 h-4 text-[#c9972a]" /> Ride History
@@ -132,7 +202,9 @@ export default function Profile() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-display font-bold text-[#c9972a]">{b.price.toLocaleString()} <span className="text-xs font-sans">KES</span></p>
+                    <p className="font-display font-bold text-[#c9972a]">
+                      {b.price.toLocaleString()} <span className="text-xs font-sans">KES</span>
+                    </p>
                     {b.promoCode && <p className="font-mono text-[9px] text-[#7a6e60] line-through">{b.originalPrice.toLocaleString()} KES</p>}
                   </div>
                 </div>
