@@ -77,7 +77,7 @@ export default function Home() {
 
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden bg-[#1a1612] text-white min-h-[180px] flex flex-col justify-end p-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2d2318] via-[#1a1612] to-[#0d0b09]" />
+        <div style={{ background: "linear-gradient(135deg, var(--t-hero-from), var(--t-hero-to))" }} className="absolute inset-0" />
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(ellipse 80% 60% at 70% 20%, rgba(201,151,42,0.35) 0%, transparent 70%)' }} />
         <svg className="absolute bottom-0 left-0 right-0 opacity-10" viewBox="0 0 400 80" preserveAspectRatio="none"><path d="M0,80 Q100,20 200,50 Q300,80 400,30 L400,80 Z" fill="white"/></svg>
         <div className="relative z-10">
@@ -124,7 +124,7 @@ export default function Home() {
               {available.map(quad => (
                 <button key={quad.id} type="button" onClick={() => setSelectedQuad(quad.id)}
                   className={cn('p-3 rounded-2xl border text-left transition-all duration-200 flex flex-col gap-2 active:scale-[0.97] group',
-                    selectedQuad === quad.id ? 'border-[#c9972a] bg-[#c9972a]/5 dark:bg-[#c9972a]/8 shadow-[0_0_0_1px_#c9972a]' : 'border-[#c9b99a]/30 dark:border-[#c9b99a]/10 bg-white/60 dark:bg-[#1a1612]/60 hover:border-[#c9972a]/50')}>
+                    selectedQuad === quad.id ? 'shadow-[0_0_0_2px_var(--t-accent)]' : '')}>
                   {quad.imageUrl
                     ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl" />
                     : <div className="w-full h-20 rounded-xl bg-gradient-to-br from-[#e8dfc9] to-[#c9b99a] dark:from-[#2d2318] dark:to-[#1a1612] flex items-center justify-center"><span className="text-3xl">🏍️</span></div>
@@ -148,7 +148,7 @@ export default function Home() {
               return (
                 <button key={p.duration} type="button" onClick={() => setSelectedDuration(p.duration)}
                   className={cn('p-3 rounded-2xl border transition-all duration-200 flex flex-col items-center gap-1.5 active:scale-[0.96]',
-                    active ? 'border-[#c9972a] bg-[#c9972a]/5 dark:bg-[#c9972a]/8 shadow-[0_0_0_1px_#c9972a]' : 'border-[#c9b99a]/30 dark:border-[#c9b99a]/10 bg-white/60 dark:bg-[#1a1612]/60 hover:border-[#c9972a]/50')}>
+                    active ? 'shadow-[0_0_0_2px_var(--t-accent)]' : '')}>
                   <Clock className={cn('w-4 h-4', active ? 'text-[#c9972a]' : 'text-[#7a6e60] dark:text-[#a09070]')} />
                   <span className="font-semibold text-sm text-[#1a1612] dark:text-[#f5f0e8]">{p.label}</span>
                   <span className={cn('text-[10px] font-mono font-medium', active ? 'text-[#c9972a]' : 'text-[#7a6e60] dark:text-[#a09070]')}>{p.price.toLocaleString()} KES</span>

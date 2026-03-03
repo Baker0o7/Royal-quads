@@ -1,59 +1,57 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, Home, Sun, Moon } from 'lucide-react';
-import { cn } from '../utils';
-import { useTheme } from '../ThemeContext';
+import { LayoutDashboard, User, Home } from 'lucide-react';
+import { ThemePicker } from './ThemePicker';
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const { theme, toggle } = useTheme();
   const isAdmin = pathname.startsWith('/admin');
 
   const navLink = (to: string, icon: React.ReactNode, label: string) => {
     const active = pathname === to || (to === '/admin' && isAdmin);
     return (
       <Link to={to} title={label}
-        className={cn(
-          'p-2.5 rounded-xl transition-all duration-200 relative',
-          active
-            ? 'text-[#c9972a] bg-[#c9972a]/10'
-            : 'text-[#7a6e60] dark:text-[#a09070] hover:text-[#c9972a] hover:bg-[#c9972a]/5'
-        )}>
-        {icon}
-        {active && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#c9972a] rounded-full" />}
+        className="p-2.5 rounded-xl transition-all duration-200 relative"
+        style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }}>
+        <span style={active ? { filter: 'drop-shadow(0 0 6px var(--t-accent))' } : undefined}>
+          {icon}
+        </span>
+        {active && (
+          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+            style={{ background: 'var(--t-accent)' }} />
+        )}
       </Link>
     );
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8] dark:bg-[#0d0b09] text-[#1a1612] dark:text-[#f5f0e8] flex flex-col transition-colors duration-300">
+    <div className="min-h-screen flex flex-col transition-colors duration-300"
+      style={{ background: 'var(--t-bg)', color: 'var(--t-text)' }}>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#f5f0e8]/90 dark:bg-[#0d0b09]/90 backdrop-blur-md border-b border-[#c9b99a]/30 dark:border-[#c9b99a]/10">
+      <header className="sticky top-0 z-30 backdrop-blur-md border-b"
+        style={{ background: 'color-mix(in srgb, var(--t-bg) 90%, transparent)', borderColor: 'var(--t-border)' }}>
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c9972a] to-[#8a6010] flex items-center justify-center shadow-md group-hover:shadow-[#c9972a]/30 transition-shadow">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md transition-all"
+              style={{ background: `linear-gradient(135deg, var(--t-accent2), var(--t-accent))` }}>
               <span className="text-sm">🏍️</span>
             </div>
             <div>
-              <span className="font-display font-bold text-base tracking-tight text-[#1a1612] dark:text-[#f5f0e8]">
+              <span className="font-display font-bold text-base tracking-tight" style={{ color: 'var(--t-text)' }}>
                 Royal Quads
               </span>
-              <span className="block text-[9px] font-mono text-[#7a6e60] dark:text-[#a09070] leading-none tracking-[0.15em] uppercase -mt-0.5">
+              <span className="block text-[9px] font-mono leading-none tracking-[0.15em] uppercase -mt-0.5"
+                style={{ color: 'var(--t-muted)' }}>
                 Mambrui
               </span>
             </div>
           </Link>
 
           <nav className="flex items-center gap-0.5">
-            {navLink('/', <Home className="w-4.5 h-4.5" style={{width:'18px',height:'18px'}} />, 'Home')}
-            {navLink('/profile', <User className="w-4.5 h-4.5" style={{width:'18px',height:'18px'}} />, 'Profile')}
-            {navLink(isAdmin ? '/' : '/admin', <LayoutDashboard style={{width:'18px',height:'18px'}} />, 'Admin')}
-            <button onClick={toggle} title="Toggle theme"
-              className="p-2.5 rounded-xl text-[#7a6e60] dark:text-[#a09070] hover:text-[#c9972a] hover:bg-[#c9972a]/5 transition-all duration-200">
-              {theme === 'dark'
-                ? <Sun style={{width:'18px',height:'18px'}} className="text-[#e8b84b]" />
-                : <Moon style={{width:'18px',height:'18px'}} />}
-            </button>
+            {navLink('/', <Home style={{ width: 18, height: 18 }} />, 'Home')}
+            {navLink('/profile', <User style={{ width: 18, height: 18 }} />, 'Profile')}
+            {navLink(isAdmin ? '/' : '/admin', <LayoutDashboard style={{ width: 18, height: 18 }} />, 'Admin')}
+            <ThemePicker />
           </nav>
         </div>
       </header>
@@ -62,18 +60,20 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="bg-[#1a1612] dark:bg-[#0d0b09] text-[#7a6e60] py-8 mt-auto border-t border-[#2d2318] print:hidden">
+      <footer className="py-8 mt-auto border-t print:hidden"
+        style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)' }}>
         <div className="max-w-md mx-auto px-4 text-center space-y-2">
-          <p className="font-display text-[#c9b99a] text-sm font-medium tracking-widest uppercase mb-3">
+          <p className="font-display text-sm font-medium tracking-widest uppercase mb-3"
+            style={{ color: 'var(--t-accent)' }}>
             Royal Quads Mambrui
           </p>
-          <p className="text-xs font-mono">
+          <p className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>
             Yusuf Taib{' '}
-            <a href="tel:0784589999" className="text-[#c9972a] hover:text-[#e8b84b] transition-colors">0784 589 999</a>
+            <a href="tel:0784589999" style={{ color: 'var(--t-accent)' }}>0784 589 999</a>
           </p>
-          <p className="text-xs font-mono">
+          <p className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>
             Abubakar Bajaber{' '}
-            <a href="tel:0784993996" className="text-[#c9972a] hover:text-[#e8b84b] transition-colors">0784 993 996</a>
+            <a href="tel:0784993996" style={{ color: 'var(--t-accent)' }}>0784 993 996</a>
           </p>
         </div>
       </footer>

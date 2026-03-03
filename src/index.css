@@ -2,17 +2,20 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Design tokens ─────────────────────────────────────────────────────── */
+/* ── Theme CSS variables (set by JS) ───────────────────────────────────── */
 :root {
-  --sand:      #f5f0e8;
-  --sand-mid:  #e8dfc9;
-  --sand-deep: #c9b99a;
-  --gold:      #c9972a;
-  --gold-light:#e8b84b;
-  --charcoal:  #1a1612;
-  --ink:       #0d0b09;
-  --bark:      #2d2318;
-  --mist:      #7a6e60;
+  --t-bg:        #f5f0e8;
+  --t-bg2:       #e8dfc9;
+  --t-card:      rgba(255,255,255,0.70);
+  --t-border:    rgba(201,185,154,0.30);
+  --t-text:      #1a1612;
+  --t-muted:     #7a6e60;
+  --t-accent:    #c9972a;
+  --t-accent2:   #e8b84b;
+  --t-hero-from: #2d2318;
+  --t-hero-to:   #0d0b09;
+  --t-btn-bg:    #1a1612;
+  --t-btn-text:  #ffffff;
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body:    'DM Sans', sans-serif;
@@ -21,109 +24,93 @@
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-body);
+  background-color: var(--t-bg);
+  color: var(--t-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  /* Subtle grain texture */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ── Typography helpers ─────────────────────────────────────────────────── */
+/* ── Typography ─────────────────────────────────────────────────────────── */
 .font-display { font-family: var(--font-display); }
 .font-body    { font-family: var(--font-body); }
 .font-mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
-/* ── Gold gradient ──────────────────────────────────────────────────────── */
-.text-gold {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ── Themed utilities ───────────────────────────────────────────────────── */
+.t-bg        { background-color: var(--t-bg); }
+.t-bg2       { background-color: var(--t-bg2); }
+.t-card      { background: var(--t-card); }
+.t-border    { border-color: var(--t-border); }
+.t-text      { color: var(--t-text); }
+.t-muted     { color: var(--t-muted); }
+.t-accent    { color: var(--t-accent); }
 
-/* ── Glass card ─────────────────────────────────────────────────────────── */
-.glass {
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-}
-
-/* ── Input base ─────────────────────────────────────────────────────────── */
+/* ── Input ──────────────────────────────────────────────────────────────── */
 .input {
   width: 100%;
   padding: 1rem 1.25rem;
   border-radius: 0.875rem;
-  border: 1.5px solid rgba(201, 185, 154, 0.4);
-  background: rgba(245, 240, 232, 0.6);
-  color: var(--charcoal);
+  border: 1.5px solid var(--t-border);
+  background: color-mix(in srgb, var(--t-bg) 70%, transparent);
+  color: var(--t-text);
   font-family: var(--font-body);
   font-size: 0.9375rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
-.input::placeholder { color: var(--mist); }
+.input::placeholder { color: var(--t-muted); opacity: 0.7; }
 .input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 151, 42, 0.15);
+  border-color: var(--t-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 20%, transparent);
 }
 
-.dark .input {
-  background: rgba(29, 22, 13, 0.7);
-  border-color: rgba(201, 185, 154, 0.15);
-  color: var(--sand);
-}
-.dark .input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 151, 42, 0.2);
-}
-
-/* ── Btn primary ────────────────────────────────────────────────────────── */
+/* ── Button primary ─────────────────────────────────────────────────────── */
 .btn-primary {
   width: 100%;
   padding: 1rem 1.5rem;
   border-radius: 0.875rem;
-  background: linear-gradient(135deg, #2d2318, #1a1612);
-  color: #fff;
+  background: var(--t-btn-bg);
+  color: var(--t-btn-text);
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.9375rem;
   letter-spacing: 0.03em;
-  border: 1px solid rgba(201, 151, 42, 0.3);
+  border: 1px solid color-mix(in srgb, var(--t-accent) 30%, transparent);
   transition: all 0.2s;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #3d3020, #2d2318);
-  border-color: var(--gold);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  opacity: 0.9;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--t-accent) 25%, transparent);
   transform: translateY(-1px);
 }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-primary:active  { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-.dark .btn-primary {
-  background: linear-gradient(135deg, var(--sand), var(--sand-mid));
-  color: var(--charcoal);
-  border-color: transparent;
-}
-.dark .btn-primary:hover {
-  background: linear-gradient(135deg, #fff, var(--sand));
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+/* ── Card ───────────────────────────────────────────────────────────────── */
+.t-card-solid {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--sand-deep); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--t-border); border-radius: 2px; }
 
-/* ── Focus ring ─────────────────────────────────────────────────────────── */
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* ── Focus ──────────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
 
 /* ── Number input ───────────────────────────────────────────────────────── */
 input[type=number]::-webkit-inner-spin-button,
@@ -137,18 +124,21 @@ input[type=number] { -moz-appearance: textfield; }
 }
 
 /* ── Animations ─────────────────────────────────────────────────────────── */
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
-}
-.shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(201,151,42,0.1) 50%, transparent 75%);
-  background-size: 200% 100%;
-  animation: shimmer 2.5s infinite;
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-6px); }
 }
 .float { animation: float 3s ease-in-out infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Theme transition ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+/* Don't animate transforms or other props */
+button, a, input, [class*="animate"] {
+  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
+}
