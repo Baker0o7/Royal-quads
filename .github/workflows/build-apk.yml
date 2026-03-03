@@ -26,6 +26,8 @@ jobs:
 
       - name: Build Web App
         run: npm run build
+        env:
+          GOOGLE_CLIENT_ID: 979880974098-uvtfo8sokk6bemv38h9dm89gfl84raj7.apps.googleusercontent.com
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
