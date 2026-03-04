@@ -114,6 +114,7 @@ export default function Admin() {
   const [waitlist, setWait]     = useState<WaitlistEntry[]>([]);
   const [prebookings, setPrebooks] = useState<Prebooking[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [firstLoad,  setFirstLoad]  = useState(true);
 
   // Fleet
   const [newName, setNewName]   = useState('');
@@ -155,9 +156,17 @@ export default function Admin() {
       setSales(s); setActive(active); setHistory(hist); setPromos(promos);
       setQuads(qs); setMaintLogs(ml); setDmgReports(dr); setStaff(sf); setWait(wl); setPrebooks(pb);
     } catch (err) { console.error('Admin fetch error', err); }
+    finally { setFirstLoad(false); }
   }, []);
 
   const handleUnlock = () => { sessionStorage.setItem('rq:admin_unlocked', '1'); setUnlocked(true); };
+
+  // Tick every second so live countdown re-renders
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick(n => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (!unlocked) return;
@@ -219,6 +228,20 @@ export default function Admin() {
           OVERVIEW
       ══════════════════════════════════════════════════════════════════ */}
       {tab === 'overview' && (<>
+        {firstLoad ? (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              {[0,1,2,3,4].map(i => (
+                <div key={i} className="t-card rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="skeleton h-4 w-1/2 rounded" />
+                  <div className="skeleton h-7 w-3/4 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="skeleton h-32 w-full rounded-2xl" />
+            <div className="skeleton h-24 w-full rounded-2xl" />
+          </div>
+        ) : (<>
         <div className="grid grid-cols-2 gap-3">
           <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Today's Revenue"  value={`${sales.today.toLocaleString()} KES`} accent />
           <StatCard icon={<Calendar   className="w-4 h-4" />} label="This Week"        value={`${sales.thisWeek.toLocaleString()} KES`} />
@@ -239,24 +262,48 @@ export default function Admin() {
             : (
               <div className="flex flex-col gap-3">
                 {activeBookings.map(b => {
-                  const end     = new Date(b.startTime).getTime() + b.duration * 60_000;
+                  const end      = new Date(b.startTime).getTime() + b.duration * 60_000;
                   const overtime = Date.now() > end;
-                  const minsLeft = Math.max(0, Math.floor((end - Date.now()) / 60_000));
+                  const secsLeft = Math.floor((end - Date.now()) / 1000);
+                  const minsLeft = Math.max(0, Math.floor(secsLeft / 60));
+                  const secsPart = Math.abs(secsLeft) % 60;
+                  const overtimeMins = overtime ? Math.ceil(-secsLeft / 60) : 0;
+                  const overtimeKES  = overtimeMins * 100;
+                  const progress     = Math.min(1, Math.max(0, (b.duration * 60 - secsLeft) / (b.duration * 60)));
                   return (
                     <div key={b.id} className="t-card rounded-2xl p-4"
-                      style={{ borderColor: overtime ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.25)' }}>
+                      style={{ borderColor: overtime ? 'rgba(239,68,68,0.35)' : 'rgba(34,197,94,0.25)' }}>
                       <div className="flex justify-between items-start mb-2">
-                        <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
-                        <span className="pill"
+                        <div>
+                          <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
+                          <p className="font-mono text-[11px]" style={{ color: 'var(--t-muted)' }}>{b.customerName} · {b.customerPhone}</p>
+                        </div>
+                        {/* Live countdown badge */}
+                        <span className="pill font-mono tabular-nums"
                           style={overtime
                             ? { background: 'rgba(239,68,68,0.12)', color: '#ef4444' }
                             : { background: 'rgba(34,197,94,0.12)', color: '#16a34a' }}>
-                          {overtime ? 'Overtime' : `${minsLeft}m left`}
+                          {overtime
+                            ? `+${overtimeMins}m ${String(secsPart).padStart(2,'0')}s OT`
+                            : `${minsLeft}m ${String(secsPart).padStart(2,'0')}s`}
                         </span>
                       </div>
-                      <p className="font-mono text-[11px]" style={{ color: 'var(--t-muted)' }}>
-                        {b.customerName} · {b.customerPhone}
-                      </p>
+
+                      {/* Progress bar */}
+                      <div className="h-1.5 rounded-full overflow-hidden mb-2"
+                        style={{ background: 'var(--t-border)' }}>
+                        <div className="h-full rounded-full transition-all duration-1000"
+                          style={{
+                            width: `${overtime ? 100 : progress * 100}%`,
+                            background: overtime ? '#ef4444' : 'var(--t-accent)',
+                          }} />
+                      </div>
+
+                      {overtime && overtimeKES > 0 && (
+                        <p className="font-mono text-[11px] mb-1" style={{ color: '#ef4444' }}>
+                          ⏰ {overtimeKES.toLocaleString()} KES overtime accrued
+                        </p>
+                      )}
                       {(b.depositAmount ?? 0) > 0 && (
                         <p className="font-mono text-[10px] mt-1" style={{ color: '#b45309' }}>
                           Deposit: {(b.depositAmount ?? 0).toLocaleString()} KES {b.depositReturned ? '(returned)' : '(held)'}
@@ -351,6 +398,7 @@ export default function Admin() {
             </div>
           </section>
         )}
+        </>)}
       </>)}
 
       {/* ══════════════════════════════════════════════════════════════════

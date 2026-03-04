@@ -185,7 +185,15 @@ export default function Home() {
         <section>
           <StepHeader step={1} title="Choose Your Quad" />
           {loadingQuads ? (
-            <div className="flex justify-center py-8"><Spinner /></div>
+            <div className="grid grid-cols-2 gap-3">
+              {[0,1,2,3].map(i => (
+                <div key={i} className="tile flex-col gap-2 pointer-events-none">
+                  <div className="skeleton w-full h-20 rounded-xl" />
+                  <div className="skeleton h-4 w-3/4 rounded" />
+                  <div className="skeleton h-3 w-1/2 rounded" />
+                </div>
+              ))}
+            </div>
           ) : available.length === 0 ? (
             <p className="text-sm text-center py-4" style={{ color: 'var(--t-muted)' }}>No quads available right now.</p>
           ) : (
