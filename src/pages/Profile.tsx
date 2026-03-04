@@ -3,38 +3,57 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LogOut, History, Clock, Star, TrendingUp, Calendar, Mail } from 'lucide-react';
 import { api } from '../lib/api';
 import { ErrorMessage, Spinner } from '../lib/components/ui';
-import { renderGoogleButton, googleSignOut, GOOGLE_ENABLED } from '../lib/googleAuth';
+import { renderGoogleButton, googleSignOut, isGoogleEnabled, waitForGSI } from '../lib/googleAuth';
 import type { User, Booking } from '../types';
 
 type FullUser = User & { googleId?: string; avatarUrl?: string; email?: string };
 
-// ── Google sign-in button (custom styled, theme-aware) ────────────────────
+// ── Google sign-in button ────────────────────────────────────────────────────
+// Uses waitForGSI() so we never poll — we await the SDK's own onGoogleLibraryLoad
+// callback (fired from index.html).
 function GoogleButton({ onSuccess }: { onSuccess: (u: FullUser) => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
+  const containerRef  = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
 
   useEffect(() => {
-    let attempts = 0;
-    const tryMount = () => {
-      if (ref.current) {
+    let cancelled = false;
+
+    waitForGSI(8000).then(loaded => {
+      if (cancelled) return;
+      if (!loaded) { setStatus('unavailable'); return; }
+
+      // Give the DOM one frame to lay out so offsetWidth is correct
+      requestAnimationFrame(() => {
+        if (cancelled) return;
         const ok = renderGoogleButton('gsi-btn', onSuccess as Parameters<typeof renderGoogleButton>[1]);
-        if (ok) { setReady(true); return; }
-      }
-      if (attempts++ < 8) setTimeout(tryMount, 400);
-    };
-    tryMount();
-  }, [onSuccess]);
+        setStatus(ok ? 'ready' : 'unavailable');
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // onSuccess intentionally excluded — it's a stable callback; adding it would
+  // re-render the button every keystroke while the user types their phone number.
+
+  if (status === 'unavailable') {
+    return (
+      <div className="p-3 rounded-xl text-xs font-mono text-center"
+        style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444' }}>
+        Google Sign-In unavailable. Please use phone/password below.
+      </div>
+    );
+  }
 
   return (
-    <div className="relative">
-      {/* Official GSI button — always renders white */}
-      <div id="gsi-btn" ref={ref}
-        className="flex justify-center transition-opacity duration-300"
-        style={{ opacity: ready ? 1 : 0, minHeight: 44 }} />
+    <div className="relative" style={{ minHeight: 44 }}>
+      {/* Official GSI button — hidden until ready to avoid layout flash */}
+      <div id="gsi-btn" ref={containerRef}
+        className="flex justify-center"
+        style={{ opacity: status === 'ready' ? 1 : 0, transition: 'opacity 0.25s', minHeight: 44 }} />
 
-      {/* Skeleton shown while GSI loads */}
-      {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-full border h-11"
+      {/* Loading skeleton */}
+      {status === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2.5 rounded-full border"
           style={{ borderColor: 'var(--t-border)', background: 'var(--t-card)' }}>
           <Spinner />
           <span className="text-sm font-medium" style={{ color: 'var(--t-muted)' }}>
@@ -134,7 +153,7 @@ export default function Profile() {
         <div className="p-6 flex flex-col gap-4">
 
           {/* ── Google Sign-In ── */}
-          {GOOGLE_ENABLED ? (
+          {isGoogleEnabled() ? (
             <GoogleButton onSuccess={signIn} />
           ) : (
             <div className="p-3.5 rounded-xl text-xs font-mono flex items-start gap-2"
