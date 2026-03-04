@@ -4,6 +4,8 @@ import { LayoutDashboard, User, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ThemePicker } from './ThemePicker';
 import { NotificationBell } from './NotificationBell';
+import { OfflineBanner } from './OfflineBanner';
+import { WhatsNew } from './WhatsNew';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -27,6 +29,8 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--t-bg)', color: 'var(--t-text)' }}>
+      <OfflineBanner />
+      <WhatsNew />
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b"
