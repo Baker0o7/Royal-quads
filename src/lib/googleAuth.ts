@@ -67,24 +67,37 @@ export function googleProfileToUser(
 export type GoogleCallback = (user: User & { googleId: string; avatarUrl: string; email: string }) => void;
 
 // ── Wait for the GSI SDK to be ready ────────────────────────────────────────
-// index.html sets window._gsiReady = true and fires 'gsi-ready' event
-// via the onGoogleLibraryLoad callback that GSI calls itself.
-export function waitForGSI(timeoutMs = 10_000): Promise<boolean> {
-  // Already loaded
-  if (window._gsiReady && window.google?.accounts?.id) return Promise.resolve(true);
+// Uses THREE mechanisms so it works in every environment:
+//  1. Immediate check — resolves instantly if SDK already loaded (cached)
+//  2. onGoogleLibraryLoad event — fires when SDK loads fresh
+//  3. Polling fallback — catches cases where the event doesn't fire (some WebViews)
+export function waitForGSI(timeoutMs = 12_000): Promise<boolean> {
+  // Already available — return immediately
+  if (window.google?.accounts?.id) return Promise.resolve(true);
 
   return new Promise(resolve => {
-    const timer = setTimeout(() => {
-      window.removeEventListener('gsi-ready', handler);
-      resolve(false); // timed out — GSI unavailable
-    }, timeoutMs);
+    let resolved = false;
 
-    const handler = () => {
-      clearTimeout(timer);
-      resolve(true);
+    const done = (result: boolean) => {
+      if (resolved) return;
+      resolved = true;
+      clearInterval(pollId);
+      clearTimeout(timerId);
+      window.removeEventListener('gsi-ready', onReady);
+      resolve(result);
     };
 
-    window.addEventListener('gsi-ready', handler, { once: true });
+    // Fallback: poll every 150ms in case the event never fires
+    const pollId = setInterval(() => {
+      if (window.google?.accounts?.id) done(true);
+    }, 150);
+
+    // Primary: listen for our index.html onGoogleLibraryLoad event
+    const onReady = () => done(true);
+    window.addEventListener('gsi-ready', onReady, { once: true });
+
+    // Timeout
+    const timerId = setTimeout(() => done(false), timeoutMs);
   });
 }
 
