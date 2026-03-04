@@ -255,7 +255,7 @@ export default function Admin() {
                       </p>
                       {(b.depositAmount ?? 0) > 0 && (
                         <p className="font-mono text-[10px] mt-1" style={{ color: '#b45309' }}>
-                          Deposit: {b.depositAmount!.toLocaleString()} KES {b.depositReturned ? '(returned)' : '(held)'}
+                          Deposit: {(b.depositAmount ?? 0).toLocaleString()} KES {b.depositReturned ? '(returned)' : '(held)'}
                         </p>
                       )}
                       <div className="flex justify-between items-center mt-3 pt-2 border-t"
@@ -310,7 +310,7 @@ export default function Admin() {
                       </p>
                       {(b.overtimeCharge ?? 0) > 0 && (
                         <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
-                          +{b.overtimeCharge!.toLocaleString()} overtime
+                          +{(b.overtimeCharge ?? 0).toLocaleString()} overtime
                         </p>
                       )}
                     </div>
@@ -334,7 +334,7 @@ export default function Admin() {
                   <div>
                     <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.customerName}</p>
                     <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
-                      {b.depositAmount!.toLocaleString()} KES deposit
+                      {(b.depositAmount ?? 0).toLocaleString()} KES deposit
                     </p>
                   </div>
                   <button onClick={() => api.returnDeposit(b.id).then(fetchAll)}

@@ -62,11 +62,11 @@ export default function Receipt() {
     { label: 'Time',     value: new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }) },
     { label: 'Customer', value: b.customerName },
     { label: 'Phone',    value: b.customerPhone },
-    ...(b.groupSize! > 1    ? [{ label: 'Group',  value: `${b.groupSize} riders` }] : []),
+    ...((b.groupSize ?? 1) > 1    ? [{ label: 'Group',  value: `${b.groupSize} riders` }] : []),
     ...(b.promoCode         ? [{ label: 'Promo',  value: `${b.promoCode} ✓` }] : []),
     ...(b.waiverSigned      ? [{ label: 'Waiver', value: 'Signed ✓' }] : []),
-    ...(b.depositAmount! > 0
-      ? [{ label: 'Deposit', value: `${b.depositAmount!.toLocaleString()} KES ${b.depositReturned ? '(returned)' : '(held)'}` }]
+    ...((b.depositAmount ?? 0) > 0
+      ? [{ label: 'Deposit', value: `${(b.depositAmount ?? 0).toLocaleString()} KES ${b.depositReturned ? '(returned)' : '(held)'}` }]
       : []),
   ];
 
@@ -118,7 +118,7 @@ export default function Receipt() {
                 </span>
               </div>
               <span className="font-mono font-bold text-sm" style={{ color: '#ef4444' }}>
-                +{b.overtimeCharge!.toLocaleString()} KES
+                +{(b.overtimeCharge ?? 0).toLocaleString()} KES
               </span>
             </div>
           )}
@@ -140,12 +140,12 @@ export default function Receipt() {
             </div>
           </div>
 
-          {b.depositAmount! > 0 && !b.depositReturned && (
+          {(b.depositAmount ?? 0) > 0 && !b.depositReturned && (
             <div className="p-3 rounded-xl flex items-center gap-2"
               style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
               <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#b45309' }} />
               <p className="text-xs" style={{ color: '#b45309' }}>
-                Deposit of <strong>{b.depositAmount!.toLocaleString()} KES</strong> is held — returned when quad is back.
+                Deposit of <strong>{(b.depositAmount ?? 0).toLocaleString()} KES</strong> is held — returned when quad is back.
               </p>
             </div>
           )}

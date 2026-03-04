@@ -138,6 +138,13 @@ export const api = {
     return { success: true };
   },
 
+  signWaiver: async (id: number) => {
+    setBookings(getBookings().map(b =>
+      b.id === id ? { ...b, waiverSigned: true, waiverSignedAt: new Date().toISOString() } : b
+    ));
+    return { success: true };
+  },
+
   submitFeedback: async (id: number, rating: number, feedback: string) => {
     setBookings(getBookings().map(b => b.id === id ? { ...b, rating, feedback } : b));
     return { success: true };

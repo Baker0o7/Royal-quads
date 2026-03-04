@@ -111,9 +111,9 @@ export default function ActiveRide() {
               ['Rider',    booking.customerName],
               ['Duration', `${booking.duration} min`],
               ['Paid',     `${booking.price.toLocaleString()} KES`],
-              ...(booking.depositAmount! > 0
-                ? [['Deposit', `${booking.depositAmount!.toLocaleString()} KES held`]] : []),
-              ...(booking.groupSize! > 1
+              ...((booking.depositAmount ?? 0) > 0
+                ? [['Deposit', `${(booking.depositAmount ?? 0).toLocaleString()} KES held`]] : []),
+              ...((booking.groupSize ?? 1) > 1
                 ? [['Group', `${booking.groupSize} riders`]] : []),
             ].map(([l, v]) => (
               <div key={l} className="flex justify-between items-center">
