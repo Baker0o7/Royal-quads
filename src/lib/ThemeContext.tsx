@@ -1,21 +1,20 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export type ThemeId =
-  | 'desert'      // warm sand + gold (original light)
-  | 'midnight'    // deep charcoal (original dark)
-  | 'ocean'       // cool teal + navy
-  | 'forest'      // deep green + earth
-  | 'sunset'      // coral + amber + deep plum
-  | 'arctic'      // crisp white + ice blue + slate
-  | 'volcanic'    // obsidian + magma orange
-  | 'rose'        // blush pink + warm cream + rose gold;
+  | 'desert'
+  | 'midnight'
+  | 'ocean'
+  | 'forest'
+  | 'sunset'
+  | 'arctic'
+  | 'volcanic'
+  | 'rose';
 
 export interface ThemeDef {
   id: ThemeId;
   label: string;
   emoji: string;
   dark: boolean;
-  // CSS var values applied to :root
   vars: {
     '--t-bg':        string;
     '--t-bg2':       string;
@@ -38,8 +37,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#f5f0e8',
       '--t-bg2':       '#e8dfc9',
-      '--t-card':      'rgba(255,255,255,0.70)',
-      '--t-border':    'rgba(201,185,154,0.30)',
+      '--t-card':      'rgba(255,255,255,0.75)',
+      '--t-border':    'rgba(201,185,154,0.35)',
       '--t-text':      '#1a1612',
       '--t-muted':     '#7a6e60',
       '--t-accent':    '#c9972a',
@@ -55,8 +54,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#0d0b09',
       '--t-bg2':       '#1a1612',
-      '--t-card':      'rgba(26,22,18,0.75)',
-      '--t-border':    'rgba(201,185,154,0.12)',
+      '--t-card':      'rgba(30,25,18,0.85)',
+      '--t-border':    'rgba(201,185,154,0.14)',
       '--t-text':      '#f5f0e8',
       '--t-muted':     '#a09070',
       '--t-accent':    '#c9972a',
@@ -72,8 +71,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#eef6fb',
       '--t-bg2':       '#d4ecf7',
-      '--t-card':      'rgba(255,255,255,0.75)',
-      '--t-border':    'rgba(56,152,190,0.20)',
+      '--t-card':      'rgba(255,255,255,0.80)',
+      '--t-border':    'rgba(56,152,190,0.25)',
       '--t-text':      '#0c2d3f',
       '--t-muted':     '#4a7a95',
       '--t-accent':    '#0ea5e9',
@@ -89,8 +88,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#0d1a0f',
       '--t-bg2':       '#142018',
-      '--t-card':      'rgba(20,32,24,0.80)',
-      '--t-border':    'rgba(74,163,94,0.18)',
+      '--t-card':      'rgba(22,34,26,0.85)',
+      '--t-border':    'rgba(74,163,94,0.20)',
       '--t-text':      '#e8f5eb',
       '--t-muted':     '#6b9b78',
       '--t-accent':    '#4ade80',
@@ -106,8 +105,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#1a0a1a',
       '--t-bg2':       '#2d1030',
-      '--t-card':      'rgba(45,16,48,0.75)',
-      '--t-border':    'rgba(251,113,133,0.18)',
+      '--t-card':      'rgba(50,18,52,0.80)',
+      '--t-border':    'rgba(251,113,133,0.20)',
       '--t-text':      '#fde8ec',
       '--t-muted':     '#c084a0',
       '--t-accent':    '#fb7185',
@@ -123,8 +122,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#f0f7ff',
       '--t-bg2':       '#dbeeff',
-      '--t-card':      'rgba(255,255,255,0.85)',
-      '--t-border':    'rgba(96,165,250,0.22)',
+      '--t-card':      'rgba(255,255,255,0.88)',
+      '--t-border':    'rgba(96,165,250,0.25)',
       '--t-text':      '#0f2444',
       '--t-muted':     '#5585a8',
       '--t-accent':    '#3b82f6',
@@ -140,8 +139,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#0f0a08',
       '--t-bg2':       '#1c1008',
-      '--t-card':      'rgba(28,16,8,0.80)',
-      '--t-border':    'rgba(251,87,34,0.18)',
+      '--t-card':      'rgba(32,18,10,0.85)',
+      '--t-border':    'rgba(251,87,34,0.20)',
       '--t-text':      '#fff1ec',
       '--t-muted':     '#a06050',
       '--t-accent':    '#fb5722',
@@ -157,8 +156,8 @@ export const THEMES: ThemeDef[] = [
     vars: {
       '--t-bg':        '#fff5f7',
       '--t-bg2':       '#ffe4ea',
-      '--t-card':      'rgba(255,255,255,0.80)',
-      '--t-border':    'rgba(244,114,182,0.22)',
+      '--t-card':      'rgba(255,255,255,0.85)',
+      '--t-border':    'rgba(244,114,182,0.25)',
       '--t-text':      '#3b0a1f',
       '--t-muted':     '#9d6070',
       '--t-accent':    '#f43f8e',
@@ -172,42 +171,42 @@ export const THEMES: ThemeDef[] = [
 ];
 
 interface ThemeContextType {
-  theme: ThemeId;
+  theme:    ThemeId;
   themeDef: ThemeDef;
   setTheme: (id: ThemeId) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'desert',
+  theme:    'desert',
   themeDef: THEMES[0],
   setTheme: () => {},
 });
 
 function applyTheme(def: ThemeDef) {
   const root = document.documentElement;
-  // dark class
   if (def.dark) root.classList.add('dark');
-  else root.classList.remove('dark');
-  // CSS vars
+  else          root.classList.remove('dark');
   Object.entries(def.vars).forEach(([k, v]) => root.style.setProperty(k, v));
-  // data-theme for any future CSS selectors
   root.setAttribute('data-theme', def.id);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeId, setThemeId] = useState<ThemeId>(() => {
     try {
-      const stored = localStorage.getItem('rq:theme') as ThemeId;
-      if (THEMES.find(t => t.id === stored)) return stored;
+      const saved = localStorage.getItem('rq:theme') as ThemeId;
+      if (THEMES.find(t => t.id === saved)) return saved;
     } catch {}
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'desert';
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches
+      ? 'midnight'
+      : 'desert';
   });
 
   const themeDef = THEMES.find(t => t.id === themeId) ?? THEMES[0];
 
+  // Apply on mount and every change
   useEffect(() => {
     applyTheme(themeDef);
-    localStorage.setItem('rq:theme', themeId);
+    try { localStorage.setItem('rq:theme', themeId); } catch {}
   }, [themeId, themeDef]);
 
   return (
