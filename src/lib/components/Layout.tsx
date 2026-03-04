@@ -42,12 +42,13 @@ export default function Layout() {
         }}>
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg accent-gradient flex items-center justify-center shadow-md">
-              <span className="text-sm">🏍️</span>
+            <div className="w-9 h-9 rounded-full overflow-hidden shadow-md shrink-0"
+              style={{ border: '1.5px solid var(--t-border)' }}>
+              <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="font-display font-bold text-base tracking-tight" style={{ color: 'var(--t-text)' }}>
-                Royal Quads
+                Royal Quad Bikes
               </span>
               <span className="block text-[9px] font-mono leading-none tracking-[0.15em] uppercase -mt-0.5"
                 style={{ color: 'var(--t-muted)' }}>
@@ -83,8 +84,14 @@ export default function Layout() {
       <footer className="py-8 mt-auto border-t print:hidden"
         style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)' }}>
         <div className="max-w-md mx-auto px-4 text-center space-y-1.5">
-          <p className="font-display text-sm font-semibold tracking-widest uppercase mb-3"
-            style={{ color: 'var(--t-accent)' }}>Royal Quads Mambrui</p>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-full overflow-hidden shadow"
+              style={{ border: '1px solid var(--t-border)' }}>
+              <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
+            </div>
+            <p className="font-display text-sm font-semibold tracking-widest uppercase"
+              style={{ color: 'var(--t-accent)' }}>Royal Quad Bikes Mambrui</p>
+          </div>
           <p className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>
             Yusuf Taib &nbsp;·&nbsp;
             <a href="tel:0784589999" style={{ color: 'var(--t-accent)' }}>0784 589 999</a>

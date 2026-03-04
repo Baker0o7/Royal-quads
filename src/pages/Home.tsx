@@ -126,6 +126,11 @@ export default function Home() {
       <div className="hero-card relative rounded-3xl overflow-hidden min-h-[176px] flex flex-col justify-end p-6">
         <div className="absolute inset-0 opacity-25"
           style={{ backgroundImage: 'radial-gradient(ellipse 80% 60% at 70% 15%, var(--t-accent2) 0%, transparent 70%)' }} />
+        {/* Logo watermark */}
+        <div className="absolute top-4 right-4 w-20 h-20 rounded-full overflow-hidden opacity-80 shadow-lg"
+          style={{ border: '2px solid rgba(255,255,255,0.2)' }}>
+          <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
+        </div>
         <svg className="absolute bottom-0 left-0 right-0 opacity-10" viewBox="0 0 400 80" preserveAspectRatio="none">
           <path d="M0,80 Q100,20 200,50 Q300,80 400,30 L400,80 Z" fill="white"/>
         </svg>
@@ -205,9 +210,11 @@ export default function Home() {
                   {quad.imageUrl
                     ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl" />
                     : (
-                      <div className="w-full h-20 rounded-xl flex items-center justify-center text-3xl"
+                      <div className="w-full h-20 rounded-xl overflow-hidden relative flex items-center justify-center"
                         style={{ background: 'color-mix(in srgb, var(--t-accent) 10%, var(--t-bg))' }}>
-                        🏍️
+                        <img src="/logo.png" alt={quad.name}
+                          className="w-16 h-16 object-cover rounded-full opacity-70"
+                          style={{ border: '1px solid var(--t-border)' }} />
                       </div>
                     )
                   }

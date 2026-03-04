@@ -184,10 +184,11 @@ function RoleChooser({ onSelect }: { onSelect: (r: Role) => void }) {
       className="flex flex-col gap-4 max-w-sm mx-auto w-full">
 
       <div className="hero-card rounded-3xl px-6 py-8 text-center">
-        <div className="w-16 h-16 rounded-2xl accent-gradient flex items-center justify-center mx-auto mb-4 shadow-lg text-3xl">
-          🏍️
+        <div className="w-24 h-24 rounded-full mx-auto mb-4 shadow-2xl overflow-hidden"
+          style={{ border: '3px solid rgba(255,255,255,0.2)' }}>
+          <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
         </div>
-        <h1 className="font-display text-2xl font-bold text-white">Royal Quads</h1>
+        <h1 className="font-display text-2xl font-bold text-white">Royal Quad Bikes</h1>
         <p className="text-sm text-white/50 mt-1 font-mono tracking-wide">Mambrui Sand Dunes</p>
       </div>
 
@@ -432,14 +433,15 @@ export default function Profile() {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="text-center pt-2">
-            <div className="w-12 h-12 rounded-xl accent-gradient flex items-center justify-center mx-auto mb-3 shadow-lg">
-              <User className="w-6 h-6 text-white" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-3 shadow-lg overflow-hidden"
+              style={{ border: '2px solid rgba(255,255,255,0.2)' }}>
+              <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
             </div>
             <h1 className="font-display text-xl font-bold text-white">
               {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
             </h1>
             <p className="text-sm text-white/50 mt-0.5 font-mono">
-              {mode === 'signin' ? 'Sign in to your account' : 'Join Royal Quads'}
+              {mode === 'signin' ? 'Sign in to your account' : 'Join Royal Quad Bikes'}
             </p>
           </div>
         </div>

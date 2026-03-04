@@ -52,8 +52,9 @@ export function WhatsNew() {
             <div className="px-6 py-4 shrink-0">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl accent-gradient flex items-center justify-center shadow">
-                    <Sparkles className="w-4 h-4 text-white" />
+                  <div className="w-10 h-10 rounded-full overflow-hidden shadow"
+                    style={{ border: '1.5px solid var(--t-border)' }}>
+                    <img src="/logo.png" alt="Royal Quad Bikes" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h2 className="font-display font-bold text-lg leading-tight" style={{ color: 'var(--t-text)' }}>

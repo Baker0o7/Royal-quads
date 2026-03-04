@@ -38,8 +38,10 @@ export default function QuadDetails() {
           ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-52 object-cover" />
           : (
             <div className="w-full h-52 hero-card flex flex-col items-center justify-center gap-2">
-              <span className="text-6xl float">🏍️</span>
-              <p className="font-mono text-[10px] text-white/30 tracking-widest uppercase">Royal Quads Fleet</p>
+              <img src="/logo.png" alt="Royal Quad Bikes"
+                className="w-24 h-24 object-cover rounded-full shadow-2xl float"
+                style={{ border: '3px solid rgba(255,255,255,0.15)' }} />
+              <p className="font-mono text-[10px] text-white/30 tracking-widest uppercase">Royal Quad Bikes Fleet</p>
             </div>
           )
         }
