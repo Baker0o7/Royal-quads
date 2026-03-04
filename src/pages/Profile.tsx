@@ -1,14 +1,63 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
-import { LogOut, History, Clock, Star, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { LogOut, History, Clock, Star, TrendingUp, Calendar, Mail } from 'lucide-react';
 import { api } from '../lib/api';
 import { ErrorMessage, Spinner } from '../lib/components/ui';
-import { renderGoogleButton } from '../lib/googleAuth';
+import { renderGoogleButton, googleSignOut, GOOGLE_ENABLED } from '../lib/googleAuth';
 import type { User, Booking } from '../types';
 
-type FullUser = User & { googleId?: string; avatarUrl?: string };
-const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID as string) || '';
+type FullUser = User & { googleId?: string; avatarUrl?: string; email?: string };
 
+// ── Google sign-in button (custom styled, theme-aware) ────────────────────
+function GoogleButton({ onSuccess }: { onSuccess: (u: FullUser) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let attempts = 0;
+    const tryMount = () => {
+      if (ref.current) {
+        const ok = renderGoogleButton('gsi-btn', onSuccess as Parameters<typeof renderGoogleButton>[1]);
+        if (ok) { setReady(true); return; }
+      }
+      if (attempts++ < 8) setTimeout(tryMount, 400);
+    };
+    tryMount();
+  }, [onSuccess]);
+
+  return (
+    <div className="relative">
+      {/* Official GSI button — always renders white */}
+      <div id="gsi-btn" ref={ref}
+        className="flex justify-center transition-opacity duration-300"
+        style={{ opacity: ready ? 1 : 0, minHeight: 44 }} />
+
+      {/* Skeleton shown while GSI loads */}
+      {!ready && (
+        <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-full border h-11"
+          style={{ borderColor: 'var(--t-border)', background: 'var(--t-card)' }}>
+          <Spinner />
+          <span className="text-sm font-medium" style={{ color: 'var(--t-muted)' }}>
+            Loading Google Sign-In…
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Divider ────────────────────────────────────────────────────────────────
+function OrDivider() {
+  return (
+    <div className="flex items-center gap-3 my-1">
+      <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
+      <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>or</span>
+      <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 export default function Profile() {
   const [user, setUser]         = useState<FullUser | null>(null);
   const [history, setHistory]   = useState<Booking[]>([]);
@@ -18,7 +67,6 @@ export default function Profile() {
   const [name, setName]         = useState('');
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
-  const googleBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -31,18 +79,12 @@ export default function Profile() {
     }
   }, []);
 
-  useEffect(() => {
-    if (user || !GOOGLE_CLIENT_ID) return;
-    const mount = () => {
-      renderGoogleButton('google-btn', (googleUser) => {
-        localStorage.setItem('user', JSON.stringify(googleUser));
-        setUser(googleUser);
-        api.getUserHistory(googleUser.id).then(setHistory).catch(() => {});
-      });
-    };
-    const t = setTimeout(mount, 600);
-    return () => clearTimeout(t);
-  }, [user]);
+  const signIn = (u: FullUser) => {
+    localStorage.setItem('user', JSON.stringify(u));
+    setUser(u);
+    setError('');
+    api.getUserHistory(u.id).then(setHistory).catch(() => {});
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,127 +93,172 @@ export default function Profile() {
       const u = isLogin
         ? await api.login(phone, password)
         : await api.register(name, phone, password);
-      localStorage.setItem('user', JSON.stringify(u));
-      setUser(u);
-      api.getUserHistory(u.id).then(setHistory).catch(() => {});
+      signIn(u);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Authentication failed');
     } finally { setLoading(false); }
   };
 
   const handleLogout = () => {
+    googleSignOut();
     localStorage.removeItem('user');
     setUser(null); setHistory([]);
-    try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch {}
   };
 
-  const totalSpent = history.reduce((s, b) => s + b.price + (b.overtimeCharge || 0), 0);
+  const totalSpent = history.reduce((s, b) => s + b.price + (b.overtimeCharge ?? 0), 0);
+  const isGoogleUser = !!user?.googleId;
 
-  /* ── Not logged in ── */
+  /* ════════════════════════════════════════════════════════════
+     NOT LOGGED IN
+  ════════════════════════════════════════════════════════════ */
   if (!user) return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-5">
-      <div className="t-card rounded-2xl p-6">
-        <div className="mb-6 text-center">
-          <div className="w-12 h-12 rounded-2xl accent-gradient flex items-center justify-center mx-auto mb-3 shadow-md">
-            <span className="text-xl">🏍️</span>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-4 max-w-sm mx-auto w-full">
+
+      {/* Card */}
+      <div className="t-card rounded-2xl overflow-hidden">
+
+        {/* Header strip */}
+        <div className="hero-card px-6 py-8 text-center">
+          <div className="w-14 h-14 rounded-2xl accent-gradient flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-2xl">🏍️</span>
           </div>
-          <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--t-text)' }}>
+          <h1 className="font-display text-2xl font-bold text-white">
             {isLogin ? 'Welcome Back' : 'Join Us'}
           </h1>
-          <p className="text-xs font-mono mt-1" style={{ color: 'var(--t-muted)' }}>
+          <p className="text-sm text-white/50 mt-1 font-mono">
             {isLogin ? 'Sign in to your account' : 'Create your rider profile'}
           </p>
         </div>
 
-        {/* Google button */}
-        {GOOGLE_CLIENT_ID ? (
-          <>
-            <div id="google-btn" ref={googleBtnRef} className="w-full mb-4 flex justify-center min-h-[44px]" />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
-              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>or</span>
-              <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
-            </div>
-          </>
-        ) : (
-          <div className="mb-4 p-3 rounded-xl flex items-start gap-2"
-            style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#b45309' }} />
-            <div>
-              <p className="text-xs font-semibold" style={{ color: '#b45309' }}>Google Sign-In not configured</p>
-              <p className="text-[10px] font-mono mt-0.5" style={{ color: '#b45309' }}>
-                Set <code>GOOGLE_CLIENT_ID</code> in your .env file to enable.
-              </p>
-            </div>
-          </div>
-        )}
+        <div className="p-6 flex flex-col gap-4">
 
-        <form onSubmit={handleAuth} className="flex flex-col gap-3">
-          {!isLogin && (
-            <input type="text" placeholder="Full Name" value={name}
-              onChange={e => setName(e.target.value)} className="input" required autoComplete="name" />
+          {/* ── Google Sign-In ── */}
+          {GOOGLE_ENABLED ? (
+            <GoogleButton onSuccess={signIn} />
+          ) : (
+            <div className="p-3.5 rounded-xl text-xs font-mono flex items-start gap-2"
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#b45309' }}>
+              <span className="text-base shrink-0">ℹ️</span>
+              <span>
+                Google Sign-In is not configured. Set{' '}
+                <code className="font-bold">GOOGLE_CLIENT_ID</code> in your{' '}
+                <code className="font-bold">.env</code> file to enable it.
+              </span>
+            </div>
           )}
-          <input type="tel" placeholder="Phone Number" value={phone}
-            onChange={e => setPhone(e.target.value)} className="input" required autoComplete="tel" />
-          <input type="password" placeholder="Password" value={password}
-            onChange={e => setPassword(e.target.value)} className="input" required autoComplete="current-password" />
-          <ErrorMessage message={error} />
-          <button type="submit" disabled={loading} className="btn-primary mt-1">
-            {loading ? <><Spinner /> Please wait…</> : isLogin ? 'Sign In' : 'Create Account'}
-          </button>
-        </form>
 
-        <div className="mt-4 text-center">
-          <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
-            className="text-sm font-medium transition-opacity hover:opacity-70"
-            style={{ color: 'var(--t-accent)' }}>
-            {isLogin ? "Don't have an account? Register" : 'Already registered? Sign In'}
-          </button>
+          <OrDivider />
+
+          {/* ── Phone / password form ── */}
+          <form onSubmit={handleAuth} className="flex flex-col gap-3">
+            <AnimatePresence>
+              {!isLogin && (
+                <motion.div key="name-field" initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                  <input type="text" placeholder="Full Name" value={name}
+                    onChange={e => setName(e.target.value)} className="input" required autoComplete="name" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <input type="tel" placeholder="Phone Number" value={phone}
+              onChange={e => setPhone(e.target.value)} className="input" required autoComplete="tel" />
+
+            <input type="password" placeholder="Password" value={password}
+              onChange={e => setPassword(e.target.value)} className="input" required autoComplete="current-password" />
+
+            <ErrorMessage message={error} />
+
+            <button type="submit" disabled={loading} className="btn-primary">
+              {loading
+                ? <><Spinner /> Please wait…</>
+                : isLogin ? 'Sign In' : 'Create Account'}
+            </button>
+          </form>
+
+          {/* Toggle login/register */}
+          <p className="text-center text-sm" style={{ color: 'var(--t-muted)' }}>
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
+              className="font-semibold transition-opacity hover:opacity-70"
+              style={{ color: 'var(--t-accent)' }}>
+              {isLogin ? 'Register' : 'Sign In'}
+            </button>
+          </p>
+
         </div>
       </div>
     </motion.div>
   );
 
-  /* ── Logged in ── */
-  const isGoogleUser = !!(user as FullUser).googleId;
-
+  /* ════════════════════════════════════════════════════════════
+     LOGGED IN
+  ════════════════════════════════════════════════════════════ */
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-5">
 
-      {/* Banner */}
-      <div className="hero-card relative rounded-3xl p-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-10"
+      {/* ── Profile banner ── */}
+      <div className="hero-card relative rounded-3xl overflow-hidden">
+        {/* Glow */}
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-15"
           style={{ background: 'var(--t-accent2)' }} />
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {(user as FullUser).avatarUrl ? (
-              <img src={(user as FullUser).avatarUrl} alt={user.name}
-                className="w-12 h-12 rounded-2xl object-cover shadow-lg"
-                style={{ border: `2px solid color-mix(in srgb, var(--t-accent) 50%, transparent)` }} />
-            ) : (
-              <div className="w-12 h-12 rounded-2xl accent-gradient flex items-center justify-center text-xl shadow-lg">
-                👤
+
+        <div className="relative z-10 p-6">
+          <div className="flex items-start justify-between">
+            {/* Avatar + name */}
+            <div className="flex items-center gap-4">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name}
+                  className="w-14 h-14 rounded-2xl object-cover shadow-lg"
+                  style={{ border: '2px solid rgba(255,255,255,0.25)' }} />
+              ) : (
+                <div className="w-14 h-14 rounded-2xl accent-gradient flex items-center justify-center text-2xl shadow-lg">
+                  👤
+                </div>
+              )}
+              <div>
+                <h1 className="font-display text-xl font-bold text-white leading-tight">{user.name}</h1>
+                {user.email && (
+                  <p className="flex items-center gap-1 text-white/50 text-[11px] font-mono mt-0.5">
+                    <Mail className="w-3 h-3" /> {user.email}
+                  </p>
+                )}
+                {!user.email && user.phone && (
+                  <p className="text-white/50 text-[11px] font-mono mt-0.5">{user.phone}</p>
+                )}
+                {/* Google badge */}
+                {isGoogleUser && (
+                  <div className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                    style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}>
+                    {/* Google "G" logo */}
+                    <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google Account
+                  </div>
+                )}
               </div>
-            )}
-            <div>
-              <h1 className="font-display text-lg font-bold text-white">{user.name}</h1>
-              <p className="font-mono text-[11px] text-white/50">
-                {isGoogleUser ? '● Google Account' : user.phone}
-              </p>
             </div>
+
+            {/* Sign out button */}
+            <button onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80 active:scale-95"
+              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <LogOut className="w-3.5 h-3.5" />
+              Sign Out
+            </button>
           </div>
-          <button onClick={handleLogout}
-            className="p-2 rounded-xl text-white/60 hover:text-white transition-colors"
-            style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* ── Stats ── */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { icon: <History className="w-4 h-4" />,  value: history.length, label: 'Total Rides' },
+          { icon: <History className="w-4 h-4" />,   value: history.length,              label: 'Total Rides' },
           { icon: <TrendingUp className="w-4 h-4" />, value: `${totalSpent.toLocaleString()} KES`, label: 'Total Spent' },
         ].map(({ icon, value, label }) => (
           <div key={label} className="t-card rounded-2xl p-4 text-center">
@@ -184,15 +271,17 @@ export default function Profile() {
         ))}
       </div>
 
-      {/* Ride history */}
+      {/* ── Ride history ── */}
       <section>
         <h2 className="section-heading" style={{ color: 'var(--t-text)' }}>
           <History className="w-4 h-4" style={{ color: 'var(--t-accent)' }} /> Ride History
         </h2>
+
         {history.length === 0 ? (
           <div className="text-center py-12 rounded-2xl t-card">
-            <p className="text-2xl mb-2">🏜️</p>
-            <p className="text-sm" style={{ color: 'var(--t-muted)' }}>No rides yet — hit the dunes!</p>
+            <p className="text-3xl mb-2">🏜️</p>
+            <p className="font-display font-semibold" style={{ color: 'var(--t-text)' }}>No rides yet</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--t-muted)' }}>Hit the dunes!</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -203,12 +292,13 @@ export default function Profile() {
                     <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
                     <div className="flex items-center gap-1 mt-0.5 font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
                       <Calendar className="w-3 h-3" />
-                      {new Date(b.startTime).toLocaleDateString()}
+                      {new Date(b.startTime).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-display font-bold" style={{ color: 'var(--t-accent)' }}>
-                      {(b.price + (b.overtimeCharge || 0)).toLocaleString()} <span className="text-xs font-sans">KES</span>
+                      {(b.price + (b.overtimeCharge ?? 0)).toLocaleString()}{' '}
+                      <span className="text-xs font-sans">KES</span>
                     </p>
                     {b.promoCode && (
                       <p className="font-mono text-[9px] line-through" style={{ color: 'var(--t-muted)' }}>
@@ -234,6 +324,7 @@ export default function Profile() {
           </div>
         )}
       </section>
+
     </motion.div>
   );
 }
