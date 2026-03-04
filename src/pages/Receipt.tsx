@@ -7,6 +7,7 @@ import { LoadingScreen, Spinner } from '../lib/components/ui';
 import { notifications } from '../lib/notifications';
 import { sendWhatsApp, smsTemplates } from '../lib/sms';
 import { exportReceiptPDF } from '../lib/pdfExport';
+import { useToast } from '../lib/components/Toast';
 import type { Booking } from '../types';
 import { OVERTIME_RATE } from '../types';
 
@@ -20,6 +21,8 @@ export default function Receipt() {
   const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+
+  const toast = useToast();
 
   useEffect(() => {
     const numId = Number(id);
@@ -41,15 +44,21 @@ export default function Receipt() {
   const handleFeedback = async () => {
     if (!rating || !booking || submitting) return;
     setSubmitting(true);
-    try { await api.submitFeedback(booking.id, rating, feedback); setSubmitted(true); }
-    catch {} finally { setSubmitting(false); }
+    try {
+      await api.submitFeedback(booking.id, rating, feedback);
+      setSubmitted(true);
+      toast.success('Thanks for your feedback!');
+    } catch { toast.error('Failed to submit — please try again'); }
+    finally { setSubmitting(false); }
   };
 
   const handlePDF = async () => {
     if (!booking || pdfLoading) return;
     setPdfLoading(true);
-    try { await exportReceiptPDF(booking); }
-    catch (e) { console.error('PDF error', e); }
+    try {
+      await exportReceiptPDF(booking);
+      toast.success('Receipt saved as PDF!');
+    } catch { toast.error('PDF export failed — try again'); }
     finally { setPdfLoading(false); }
   };
 
@@ -60,6 +69,7 @@ export default function Receipt() {
       smsTemplates.rideComplete(booking.customerName, total, booking.receiptId));
     notifications.add('ride_complete', 'Receipt sent via WhatsApp',
       `Sent receipt to ${booking.customerName} (${booking.customerPhone})`, `/receipt/${id}`);
+    toast.success('WhatsApp opened!');
   };
 
   if (!booking && !notFound) return <LoadingScreen text="Loading receipt…" />;

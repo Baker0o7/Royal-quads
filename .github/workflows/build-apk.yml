@@ -81,12 +81,26 @@ jobs:
 
             > ⚠️ Enable *Install from unknown sources* in Android Settings before installing.
 
-            ### Features
-            - Quad bike booking with M-Pesa payment
-            - Live ride countdown timer
-            - Admin dashboard (sales, inventory, promos)
-            - User profiles & ride history
-            - Mambrui Sand Dunes — Royal Quads
+            ### ✨ What's in this build
+            - 🔔 **In-app notifications** — ride alerts, overtime warnings, 2-min countdown, badge counter
+            - 📲 **WhatsApp alerts** — one-tap send to customer on overtime, waitlist, prebooking confirm
+            - 📄 **PDF receipt export** — branded, saveable receipt for every ride
+            - 🎨 **8 colour themes** — Desert, Midnight, Ocean, Forest, Sunset, Arctic, Volcanic, Rose
+            - 👤 **Role chooser** — Admin / Customer / Guest sign-in flow
+            - 🔐 **Google Sign-In** — OAuth via popup (WebView-compatible)
+            - 🛡️ **Digital waiver** — signature pad, skip if already signed
+            - ⏱️ **Live ride countdown** — ring timer, overtime billing at 100 KES/min
+            - 📋 **Admin dashboard** — 9 tabs: fleet, promos, maintenance, damage, staff, waitlist, pre-bookings, analytics
+            - 📊 **Analytics** — 7-day revenue chart, peak hours, quad utilisation, customer stats
+            - 🗺️ **GPS tracking** — live map per quad IMEI
+            - 📅 **Pre-booking** — schedule rides in advance with date picker
+            - 🧾 **Receipt history** — star ratings, feedback, print/save
+            - 📦 **Packages & promos** — discount codes, multi-ride packages
+
+            ### Install steps
+            1. Download `Royal-Quads.apk`
+            2. Open Settings → Security → *Install unknown apps* → enable for your file manager
+            3. Open the downloaded APK and tap Install
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false

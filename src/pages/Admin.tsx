@@ -12,6 +12,7 @@ import { EmptyState, ErrorMessage, StatusBadge, Spinner } from '../lib/component
 import { ImagePicker } from '../lib/components/ImagePicker';
 import { notifications } from '../lib/notifications';
 import { sendWhatsApp, smsTemplates } from '../lib/sms';
+import { useToast } from '../lib/components/Toast';
 import type {
   Quad, Booking, Promotion, SalesData, MaintenanceLog,
   DamageReport, Staff, WaitlistEntry, Prebooking,
@@ -99,6 +100,7 @@ function StatCard({ icon, label, value, accent = false }: {
 
 // ─────────────────────────────────────────────────────────────────────────
 export default function Admin() {
+  const toast = useToast();
   const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('rq:admin_unlocked') === '1');
   const [tab, setTab]           = useState<Tab>('overview');
   const [sales, setSales]       = useState<SalesData>({ total: 0, today: 0, thisWeek: 0, thisMonth: 0, overtimeRevenue: 0 });
@@ -828,10 +830,9 @@ export default function Admin() {
             <PanelHeading icon={<Lock className="w-4 h-4" />}>Change Admin PIN</PanelHeading>
             <form onSubmit={e => {
               e.preventDefault();
-              if (newPin.length < 4) { setPinMsg('PIN must be at least 4 digits'); return; }
+              if (newPin.length < 4) { toast.error('PIN must be at least 4 digits'); return; }
               api.setAdminPin(newPin); setNewPin('');
-              setPinMsg('PIN updated ✓');
-              setTimeout(() => setPinMsg(''), 3000);
+              toast.success('Admin PIN updated!');
             }} className="flex flex-col gap-3">
               <input type="password" inputMode="numeric" maxLength={6} placeholder="New PIN (4–6 digits)"
                 value={newPin} onChange={e => setNewPin(e.target.value)}
@@ -847,7 +848,7 @@ export default function Admin() {
           <Panel>
             <PanelHeading icon={<Wallet className="w-4 h-4" />}>Data Management</PanelHeading>
             <div className="flex flex-col gap-3">
-              <button onClick={() => api.exportBookings()}
+              <button onClick={() => { api.exportBookings(); toast.success('CSV export started!'); }}
                 className="w-full flex items-center justify-between p-3 rounded-xl border transition-opacity hover:opacity-75"
                 style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)', color: 'var(--t-text)' }}>
                 <span className="text-sm font-medium">Export Bookings CSV</span>

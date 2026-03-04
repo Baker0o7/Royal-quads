@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, TrendingUp, Users, Clock, Download, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';

@@ -4,6 +4,8 @@ import { Calendar, Clock, Phone, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { ErrorMessage, LoadingScreen, Spinner } from '../lib/components/ui';
+import { notifications } from '../lib/notifications';
+import { useToast } from '../lib/components/Toast';
 import type { Prebooking, Quad } from '../types';
 import { PRICING } from '../types';
 
@@ -15,6 +17,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
 };
 
 export default function Prebook() {
+  const toast = useToast();
   const [quads, setQuads]           = useState<Quad[]>([]);
   const [prebookings, setPrebookings] = useState<Prebooking[]>([]);
   const [name, setName]             = useState('');
@@ -53,9 +56,13 @@ export default function Prebook() {
         price,
         scheduledFor: new Date(scheduledFor).toISOString(),
       });
+      notifications.add('prebook_reminder', 'Pre-booking Requested 📅',
+        `${name.trim()} requested a ${duration}min ride for ${new Date(scheduledFor).toLocaleString()}`);
+      toast.success('Pre-booking request sent!');
       setSuccess(true);
       api.getPrebookings().then(setPrebookings);
     } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to send request');
       setError(e instanceof Error ? e.message : 'Failed to send request');
     } finally { setLoading(false); }
   };

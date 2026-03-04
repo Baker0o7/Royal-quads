@@ -5,6 +5,7 @@ import { Clock, MapPin, CreditCard, ChevronRight, AlertCircle, Phone, Tag, Copy,
 import { api } from '../lib/api';
 import { notifications } from '../lib/notifications';
 import { haptic } from '../lib/utils';
+import { useToast } from '../lib/components/Toast';
 import { Spinner, StepHeader, ErrorMessage } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
 import type { Quad } from '../types';
@@ -13,6 +14,7 @@ import { PRICING } from '../types';
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast    = useToast();
   const [quads, setQuads]                     = useState<Quad[]>([]);
   const [selectedQuad, setSelectedQuad]       = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
@@ -72,11 +74,11 @@ export default function Home() {
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedQuad)    { setError('Please choose a quad'); return; }
-    if (!selectedDuration) { setError('Please select a duration'); return; }
-    if (!customerName.trim()) { setError('Please enter your name'); return; }
-    if (!customerPhone.trim()) { setError('Please enter your M-Pesa number'); return; }
-    if (customerPhone.replace(/\D/g,'').length < 9) { setError('Please enter a valid phone number'); return; }
+    if (!selectedQuad)    { toast.error('Please choose a quad'); return; }
+    if (!selectedDuration) { toast.error('Please select a duration'); return; }
+    if (!customerName.trim()) { toast.error('Please enter your name'); return; }
+    if (!customerPhone.trim()) { toast.error('Please enter your M-Pesa number'); return; }
+    if (customerPhone.replace(/\D/g,'').length < 9) { toast.error('Please enter a valid phone number'); return; }
 
     setLoading(true); setError('');
     try {
@@ -99,15 +101,18 @@ export default function Home() {
       notifications.add('ride_started', 'Booking Created 🏍️',
         `${customerName.trim()} booked ${quads.find(q => q.id === selectedQuad)?.name} for ${selectedDuration} min — ${finalPrice.toLocaleString()} KES`,
         `/ride/${booking.id}`);
+      haptic('success');
       navigate(`/waiver/${booking.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Booking failed — please try again');
+      toast.error(e instanceof Error ? e.message : 'Booking failed — please try again');
+      haptic('error');
       setLoading(false);
     }
   };
 
   const copyTill = () => {
     navigator.clipboard.writeText('6685024').catch(() => {}).then(() => {
+      toast.success('Till number copied!');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
