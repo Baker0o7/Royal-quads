@@ -1,86 +1,93 @@
+/**
+ * Google Sign-In
+ *
+ *  WEB  — google.accounts.id.renderButton()
+ *         Google renders their own button; OAuth is handled entirely by
+ *         Google's servers. Credential arrives via callback.
+ *         No redirect URI registration needed.
+ *
+ *  NATIVE (Capacitor Android) — @codetrix-studio/capacitor-google-auth
+ *         Calls the native Google Sign-In SDK — no WebView restrictions.
+ */
+
 import type { User } from '../types';
 
 declare global {
   interface Window {
-    _gsiReady?: boolean;
+    _gsiCb?:          ((r: { credential: string }) => void) | null;
     _gsiInitialized?: boolean;
     onGoogleLibraryLoad?: () => void;
     google?: {
       accounts: {
         id: {
-          initialize:        (config: object) => void;
-          prompt:            (cb?: (n: PromptNotification) => void) => void;
-          renderButton:      (el: HTMLElement, config: object) => void;
+          initialize:        (cfg: object) => void;
+          renderButton:      (el: HTMLElement, cfg: object) => void;
           disableAutoSelect: () => void;
-          cancel:            () => void;
         };
       };
+    };
+    Capacitor?: {
+      isNativePlatform?: () => boolean;
+      getPlatform?:      () => string;
     };
   }
 }
 
-interface PromptNotification {
-  isNotDisplayed:    () => boolean;
-  isSkippedMoment:   () => boolean;
-  isDismissedMoment: () => boolean;
-  getNotDisplayedReason: () => string;
-  getSkippedReason:      () => string;
-  getDismissedReason:    () => string;
-}
-
+// ── Types ────────────────────────────────────────────────────────────────────
 export interface GoogleProfile {
-  sub:     string;
-  name:    string;
-  email:   string;
-  picture: string;
+  sub: string; name: string; email: string; picture: string;
 }
 
-// ── Decode Google JWT ────────────────────────────────────────────────────────
+export type GoogleCallback = (
+  user: User & { googleId: string; avatarUrl: string; email: string }
+) => void;
+
+// ── JWT decode ───────────────────────────────────────────────────────────────
 export function decodeGoogleJwt(token: string): GoogleProfile {
-  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const b64  = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const pad  = b64 + '=='.slice(0, (4 - b64.length % 4) % 4);
   const json = decodeURIComponent(
-    atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+    atob(pad).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
   );
   return JSON.parse(json) as GoogleProfile;
 }
 
-// ── Upsert user from Google profile ─────────────────────────────────────────
+// ── Upsert user ──────────────────────────────────────────────────────────────
 export function googleProfileToUser(
-  profile: GoogleProfile
+  p: GoogleProfile
 ): User & { googleId: string; avatarUrl: string; email: string } {
-  type StoredUser = User & { googleId?: string; password?: string; avatarUrl?: string; email?: string };
-  const stored = JSON.parse(localStorage.getItem('rq:users') || '[]') as StoredUser[];
-
-  let user = stored.find(u => u.googleId === profile.sub);
-  if (user) {
-    user.name = profile.name; user.avatarUrl = profile.picture; user.email = profile.email;
-    localStorage.setItem('rq:users', JSON.stringify(stored));
-    return { ...user, googleId: profile.sub, avatarUrl: profile.picture, email: profile.email };
+  type SU = User & { googleId?: string; password?: string; avatarUrl?: string; email?: string };
+  const users = JSON.parse(localStorage.getItem('rq:users') || '[]') as SU[];
+  let u = users.find(u => u.googleId === p.sub);
+  if (u) {
+    u.name = p.name; u.avatarUrl = p.picture; u.email = p.email;
+    localStorage.setItem('rq:users', JSON.stringify(users));
+  } else {
+    const seq = Number(localStorage.getItem('rq:user_seq') || '0') + 1;
+    localStorage.setItem('rq:user_seq', String(seq));
+    u = { id: seq, name: p.name, phone: '', role: 'user', password: '',
+          googleId: p.sub, avatarUrl: p.picture, email: p.email };
+    localStorage.setItem('rq:users', JSON.stringify([...users, u]));
   }
-
-  const seq = JSON.parse(localStorage.getItem('rq:user_seq') || '0') + 1;
-  localStorage.setItem('rq:user_seq', String(seq));
-  const newUser: StoredUser = {
-    id: seq, name: profile.name, phone: '', role: 'user',
-    password: '', googleId: profile.sub, avatarUrl: profile.picture, email: profile.email,
-  };
-  localStorage.setItem('rq:users', JSON.stringify([...stored, newUser]));
-  return { ...newUser, googleId: profile.sub, avatarUrl: profile.picture, email: profile.email };
+  return { ...u, googleId: p.sub, avatarUrl: p.picture, email: p.email };
 }
 
-export type GoogleCallback = (user: User & { googleId: string; avatarUrl: string; email: string }) => void;
-
-// ── Client ID (baked in by Vite at build time) ───────────────────────────────
+// ── Config ───────────────────────────────────────────────────────────────────
 export function getClientId(): string {
-  const id: string = process.env.GOOGLE_CLIENT_ID as string;
-  return typeof id === 'string' ? id : '';
+  const id = process.env.GOOGLE_CLIENT_ID as string;
+  return typeof id === 'string' && id.length > 10 ? id : '';
 }
 export function isGoogleEnabled(): boolean { return getClientId().length > 0; }
 
-// ── Wait for GSI SDK — event + poll + immediate ───────────────────────────────
-export function waitForGSI(timeoutMs = 12_000): Promise<boolean> {
-  if (window.google?.accounts?.id) return Promise.resolve(true);
+export function isCapacitorNative(): boolean {
+  return typeof window !== 'undefined'
+    && typeof window.Capacitor !== 'undefined'
+    && window.Capacitor.isNativePlatform?.() === true;
+}
 
+// ── Wait for GSI SDK ─────────────────────────────────────────────────────────
+export function waitForGSI(ms = 12_000): Promise<boolean> {
+  if (window.google?.accounts?.id) return Promise.resolve(true);
   return new Promise(resolve => {
     let done = false;
     const finish = (v: boolean) => {
@@ -89,111 +96,100 @@ export function waitForGSI(timeoutMs = 12_000): Promise<boolean> {
       window.removeEventListener('gsi-ready', onEvent);
       resolve(v);
     };
-    const poll  = setInterval(() => { if (window.google?.accounts?.id) finish(true); }, 200);
-    const timer = setTimeout(() => finish(false), timeoutMs);
+    const poll    = setInterval(() => { if (window.google?.accounts?.id) finish(true); }, 250);
+    const timer   = setTimeout(() => finish(false), ms);
     const onEvent = () => finish(true);
     window.addEventListener('gsi-ready', onEvent, { once: true });
   });
 }
 
-// ── Initialize GSI (idempotent) ───────────────────────────────────────────────
-let _cb: GoogleCallback | null = null;
-
-export function initGoogleSignIn(onSuccess: GoogleCallback): boolean {
+// ── WEB: initialise GSI with a callback, then render button ──────────────────
+// Called every time the button component mounts so the callback is always fresh.
+// GSI's initialize() updates the stored callback on repeated calls.
+export function initAndRenderButton(el: HTMLElement, onSuccess: GoogleCallback): void {
   const clientId = getClientId();
-  if (!clientId || !window.google?.accounts?.id) return false;
-  _cb = onSuccess;
-
-  if (!window._gsiInitialized) {
-    window._gsiInitialized = true;
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (response: { credential: string }) => {
-        if (_cb) _cb(googleProfileToUser(decodeGoogleJwt(response.credential)));
-      },
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      use_fedcm_for_prompt: false, // force classic popup, not FedCM
-      itp_support: true,
-    });
-  } else {
-    // Re-use existing init but update callback
-    _cb = onSuccess;
+  if (!clientId || !window.google?.accounts?.id) {
+    throw new Error('GSI SDK not loaded');
   }
-  return true;
-}
 
-// ── Trigger Google sign-in popup (no iframe — works in WebViews) ─────────────
-// Uses google.accounts.id.prompt() which opens a full popup/redirect
-// instead of renderButton which injects a blocked iframe.
-export function triggerGoogleSignIn(onSuccess: GoogleCallback): boolean {
-  if (!initGoogleSignIn(onSuccess)) return false;
-  _cb = onSuccess;
-  window.google!.accounts.id.prompt((notification: PromptNotification) => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // One-Tap was suppressed (e.g. WebView, browser policy, user dismissed before)
-      // Fall back to the OAuth popup flow
-      openOAuthPopup(onSuccess);
+  // Store callback globally so we can update it without re-rendering
+  window._gsiCb = (r: { credential: string }) => {
+    try {
+      const profile = decodeGoogleJwt(r.credential);
+      onSuccess(googleProfileToUser(profile));
+    } catch (err) {
+      console.error('[GoogleAuth] JWT decode error', err);
+      throw err;
     }
+  };
+
+  // (Re-)initialize with current callback — safe to call multiple times
+  window.google.accounts.id.initialize({
+    client_id:             clientId,
+    callback:              (r: { credential: string }) => window._gsiCb?.(r),
+    auto_select:           false,
+    cancel_on_tap_outside: true,
+    use_fedcm_for_prompt:  false,
+    itp_support:           true,
   });
-  return true;
+
+  // Render (or re-render) the button — GSI replaces the div's children
+  const width = Math.min(Math.max(el.getBoundingClientRect().width || el.offsetWidth || 320, 200), 400);
+  window.google.accounts.id.renderButton(el, {
+    type:           'standard',
+    theme:          'outline',
+    size:           'large',
+    shape:          'pill',
+    width,
+    text:           'continue_with',
+    logo_alignment: 'left',
+  });
 }
 
-// ── OAuth popup fallback ─────────────────────────────────────────────────────
-// Opens a real browser window to Google OAuth.
-// Works even when One-Tap is blocked (WebViews, Firefox, Safari ITP).
-function openOAuthPopup(onSuccess: GoogleCallback) {
-  const clientId = getClientId();
-  if (!clientId) return;
+// ── NATIVE: Capacitor Android native sign-in ─────────────────────────────────
+export async function nativeGoogleSignIn(onSuccess: GoogleCallback): Promise<void> {
+  const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
 
-  const nonce = Math.random().toString(36).slice(2);
-  const params = new URLSearchParams({
-    client_id:     clientId,
-    redirect_uri:  `${window.location.origin}/oauth-callback.html`,
-    response_type: 'id_token',
-    scope:         'openid email profile',
-    nonce,
-    prompt:        'select_account',
+  await GoogleAuth.initialize({
+    clientId:           getClientId(),
+    scopes:             ['profile', 'email'],
+    grantOfflineAccess: false,
   });
 
-  const w = 480, h = 600;
-  const left = Math.max(0, (screen.width  - w) / 2);
-  const top  = Math.max(0, (screen.height - h) / 2);
-  const popup = window.open(
-    `https://accounts.google.com/o/oauth2/v2/auth?${params}`,
-    'google-signin',
-    `width=${w},height=${h},left=${left},top=${top},toolbar=no,menubar=no`
-  );
+  const result = await GoogleAuth.signIn();
 
-  if (!popup) {
-    // Popup blocked — fall back to same-tab redirect
-    sessionStorage.setItem('rq:oauth_nonce', nonce);
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}&redirect_uri=${encodeURIComponent(window.location.href)}`;
+  const idToken: string | undefined =
+    (result as any).idToken ||
+    (result as any).authentication?.idToken;
+
+  if (idToken) {
+    onSuccess(googleProfileToUser(decodeGoogleJwt(idToken)));
     return;
   }
 
-  // Listen for postMessage from the popup callback page
-  const handler = (e: MessageEvent) => {
-    if (e.origin !== window.location.origin) return;
-    if (e.data?.type === 'google-oauth' && e.data?.credential) {
-      window.removeEventListener('message', handler);
-      popup.close();
-      try {
-        const profile = decodeGoogleJwt(e.data.credential);
-        onSuccess(googleProfileToUser(profile));
-      } catch {}
-    }
-  };
-  window.addEventListener('message', handler);
+  // Plugin returned profile object directly (some versions)
+  if (result.email && result.name) {
+    onSuccess(googleProfileToUser({
+      sub:     result.id || result.email,
+      name:    result.name,
+      email:   result.email,
+      picture: (result as any).imageUrl || (result as any).image?.url || '',
+    }));
+    return;
+  }
 
-  // Clean up if popup closed without completing
-  const checkClosed = setInterval(() => {
-    if (popup.closed) { clearInterval(checkClosed); window.removeEventListener('message', handler); }
-  }, 1000);
+  throw new Error('Google Sign-In did not return a usable credential');
 }
 
-// ── Sign out ──────────────────────────────────────────────────────────────────
-export function googleSignOut(): void {
+// ── Sign out ─────────────────────────────────────────────────────────────────
+export async function googleSignOut(): Promise<void> {
+  window._gsiCb = null;
   try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch {}
-  window._gsiInitialized = false;
+
+  if (isCapacitorNative()) {
+    try {
+      const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+      await GoogleAuth.signOut();
+    } catch {}
+  }
 }

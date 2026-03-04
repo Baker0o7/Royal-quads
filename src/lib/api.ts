@@ -224,16 +224,19 @@ export const api = {
 
   // ── Auth ──
   login: async (phone: string, password: string): Promise<User> => {
-    const user = getUsers().find(u => u.phone === phone && u.password === password);
+    const norm = phone.replace(/[\s\-().]/g, '');
+    const user = getUsers().find(u => u.phone.replace(/[\s\-().]/g, '') === norm && u.password === password);
     if (!user) throw new Error('Invalid phone number or password');
     const { password: _, ...safe } = user; void _; return safe;
   },
   register: async (name: string, phone: string, password: string): Promise<User> => {
     if (!name?.trim()) throw new Error('Name is required');
-    if (!phone?.trim()) throw new Error('Phone is required');
+    if (!phone?.trim()) throw new Error('Phone number is required');
     if (!password || password.length < 4) throw new Error('Password must be at least 4 characters');
-    if (getUsers().find(u => u.phone === phone)) throw new Error('Phone number already registered');
-    const user: StoredUser = { id: nextId('rq:user_seq'), name: name.trim(), phone, role: 'user', password };
+    const norm = phone.replace(/[\s\-().]/g, '');
+    if (norm.length < 9) throw new Error('Enter a valid phone number');
+    if (getUsers().find(u => u.phone.replace(/[\s\-().]/g, '') === norm)) throw new Error('Phone number already registered');
+    const user: StoredUser = { id: nextId('rq:user_seq'), name: name.trim(), phone: norm, role: 'user', password };
     setUsers([...getUsers(), user]);
     const { password: _, ...safe } = user; void _; return safe;
   },

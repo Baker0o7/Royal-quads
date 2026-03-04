@@ -1,79 +1,161 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import {
   LogOut, History, Clock, Star, TrendingUp, Calendar, Mail,
-  Shield, User, Users, ChevronRight, ArrowLeft,
+  User, ChevronRight, ArrowLeft, Eye, EyeOff,
 } from 'lucide-react';
 import { api } from '../lib/api';
-import { ErrorMessage, Spinner } from '../lib/components/ui';
-import { triggerGoogleSignIn, googleSignOut, isGoogleEnabled, waitForGSI } from '../lib/googleAuth';
+import { Spinner } from '../lib/components/ui';
+import { useToast } from '../lib/components/Toast';
+import {
+  initAndRenderButton, nativeGoogleSignIn, googleSignOut,
+  isGoogleEnabled, isCapacitorNative, waitForGSI,
+} from '../lib/googleAuth';
 import type { User as UserType, Booking } from '../types';
 
 type FullUser = UserType & { googleId?: string; avatarUrl?: string; email?: string };
 type Role = 'admin' | 'customer' | 'guest';
+type AuthMode = 'signin' | 'signup';
 
-// ── Google button ────────────────────────────────────────────────────────────
-// Uses our own styled button + triggerGoogleSignIn() instead of renderButton().
-// renderButton injects a cross-origin iframe which is blocked in Android WebViews.
-// triggerGoogleSignIn uses google.accounts.id.prompt() → falls back to OAuth popup.
-function GoogleButton({ onSuccess }: { onSuccess: (u: FullUser) => void }) {
-  const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [ready, setReady] = useState(false);
+// ─────────────────────────────────────────────────────────────────────────────
+// Google SVG
+// ─────────────────────────────────────────────────────────────────────────────
+const GoogleLogo = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
-  // Pre-load the GSI SDK so the button is instant when clicked
+// ─────────────────────────────────────────────────────────────────────────────
+// Web Google button — renders GSI's official button into a div.
+// Each mount gets its own abort controller so there are no stale-callback races.
+// ─────────────────────────────────────────────────────────────────────────────
+function WebGoogleButton({ onSuccess, onError }: {
+  onSuccess: (u: FullUser) => void;
+  onError:   (msg: string) => void;
+}) {
+  const divRef   = useRef<HTMLDivElement>(null);
+  const abortRef = useRef(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
   useEffect(() => {
-    waitForGSI(12_000).then(ok => setReady(ok));
-  }, []);
+    abortRef.current = false;
 
-  const handleClick = async () => {
-    setState('loading');
-    const loaded = ready || await waitForGSI(8_000);
-    if (!loaded) { setState('error'); return; }
-    setState('idle');
-    const ok = triggerGoogleSignIn(onSuccess as Parameters<typeof triggerGoogleSignIn>[0]);
-    if (!ok) setState('error');
-  };
+    (async () => {
+      const loaded = await waitForGSI(12_000);
 
-  if (state === 'error') return (
-    <div className="flex flex-col gap-2">
-      <div className="p-3 rounded-xl text-xs font-mono text-center"
-        style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#b45309' }}>
-        Google Sign-In didn't load.{' '}
-        <button onClick={() => setState('idle')} className="underline font-bold">Try again</button>
-      </div>
+      if (abortRef.current) return; // component unmounted while waiting
+
+      if (!loaded) {
+        setStatus('error');
+        return;
+      }
+
+      // rAF so the div has a real layout width
+      requestAnimationFrame(() => {
+        if (abortRef.current || !divRef.current) return;
+        try {
+          initAndRenderButton(divRef.current, (u) => {
+            if (!abortRef.current) onSuccess(u as FullUser);
+          });
+          setStatus('ready');
+        } catch (err) {
+          setStatus('error');
+          onError(err instanceof Error ? err.message : 'Google Sign-In failed to load');
+        }
+      });
+    })();
+
+    return () => { abortRef.current = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (status === 'error') return (
+    <div className="p-3 rounded-xl text-xs text-center"
+      style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#b45309' }}>
+      Google Sign-In couldn't load.{' '}
+      <button onClick={() => { setStatus('loading'); abortRef.current = false; }}
+        className="underline font-bold">
+        Retry
+      </button>
     </div>
   );
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={state === 'loading'}
-      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border transition-all active:scale-[0.98] hover:opacity-90"
-      style={{ background: '#ffffff', borderColor: '#dadce0', color: '#3c4043' }}
-    >
-      {state === 'loading' ? (
-        <Spinner />
-      ) : (
-        /* Google colour logo */
-        <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0" fill="none">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
+    <div className="relative" style={{ minHeight: 44 }}>
+      {/* GSI renders its button here */}
+      <div ref={divRef}
+        className="flex justify-center"
+        style={{ opacity: status === 'ready' ? 1 : 0, transition: 'opacity 0.2s', minHeight: 44 }} />
+
+      {/* Loading skeleton */}
+      {status === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center gap-3 rounded-full border"
+          style={{ borderColor: '#dadce0', background: '#ffffff' }}>
+          <Spinner />
+          <span className="text-sm font-medium" style={{ color: '#5f6368' }}>Loading Google…</span>
+        </div>
       )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Native (Capacitor Android) button
+// ─────────────────────────────────────────────────────────────────────────────
+function NativeGoogleButton({ onSuccess, onError }: {
+  onSuccess: (u: FullUser) => void;
+  onError:   (msg: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      await nativeGoogleSignIn((u) => onSuccess(u as FullUser));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Sign-in failed';
+      const cancelled = msg.toLowerCase().includes('cancel')
+        || msg.includes('12501') || msg.includes('dismiss');
+      if (!cancelled) onError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button type="button" onClick={handleClick} disabled={loading}
+      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border transition-all active:scale-[0.98]"
+      style={{ background: '#ffffff', borderColor: '#dadce0' }}>
+      {loading ? <Spinner /> : <GoogleLogo />}
       <span className="font-medium text-sm" style={{ color: '#3c4043' }}>
-        {state === 'loading' ? 'Signing in…' : 'Continue with Google'}
+        {loading ? 'Signing in…' : 'Continue with Google'}
       </span>
     </button>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Unified Google button — picks web vs native automatically
+// ─────────────────────────────────────────────────────────────────────────────
+function GoogleButton({ onSuccess, onError }: {
+  onSuccess: (u: FullUser) => void;
+  onError:   (msg: string) => void;
+}) {
+  return isCapacitorNative()
+    ? <NativeGoogleButton onSuccess={onSuccess} onError={onError} />
+    : <WebGoogleButton    onSuccess={onSuccess} onError={onError} />;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Divider
+// ─────────────────────────────────────────────────────────────────────────────
 function OrDivider() {
   return (
-    <div className="flex items-center gap-3 my-1">
+    <div className="flex items-center gap-3">
       <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
       <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>or</span>
       <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
@@ -81,39 +163,19 @@ function OrDivider() {
   );
 }
 
-// ── Role chooser card ────────────────────────────────────────────────────────
-const ROLES: {
-  id: Role;
-  emoji: string;
-  label: string;
-  desc: string;
-  accent: string;
-  bg: string;
-}[] = [
-  {
-    id: 'customer',
-    emoji: '🏍️',
-    label: 'Customer',
+// ─────────────────────────────────────────────────────────────────────────────
+// Role chooser
+// ─────────────────────────────────────────────────────────────────────────────
+const ROLES: { id: Role; emoji: string; label: string; desc: string; accent: string; bg: string }[] = [
+  { id: 'customer', emoji: '🏍️', label: 'Customer',
     desc: 'Book rides, view history & manage your account',
-    accent: 'var(--t-accent)',
-    bg: 'color-mix(in srgb, var(--t-accent) 10%, transparent)',
-  },
-  {
-    id: 'admin',
-    emoji: '🛡️',
-    label: 'Admin',
+    accent: 'var(--t-accent)', bg: 'color-mix(in srgb, var(--t-accent) 10%, transparent)' },
+  { id: 'admin', emoji: '🛡️', label: 'Admin',
     desc: 'Manage fleet, bookings, staff & analytics',
-    accent: '#6366f1',
-    bg: 'rgba(99,102,241,0.10)',
-  },
-  {
-    id: 'guest',
-    emoji: '👤',
-    label: 'Continue as Guest',
+    accent: '#6366f1', bg: 'rgba(99,102,241,0.10)' },
+  { id: 'guest', emoji: '👤', label: 'Continue as Guest',
     desc: 'Browse & book without creating an account',
-    accent: 'var(--t-muted)',
-    bg: 'var(--t-bg2)',
-  },
+    accent: 'var(--t-muted)', bg: 'var(--t-bg2)' },
 ];
 
 function RoleChooser({ onSelect }: { onSelect: (r: Role) => void }) {
@@ -121,7 +183,6 @@ function RoleChooser({ onSelect }: { onSelect: (r: Role) => void }) {
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-4 max-w-sm mx-auto w-full">
 
-      {/* Hero */}
       <div className="hero-card rounded-3xl px-6 py-8 text-center">
         <div className="w-16 h-16 rounded-2xl accent-gradient flex items-center justify-center mx-auto mb-4 shadow-lg text-3xl">
           🏍️
@@ -130,22 +191,17 @@ function RoleChooser({ onSelect }: { onSelect: (r: Role) => void }) {
         <p className="text-sm text-white/50 mt-1 font-mono tracking-wide">Mambrui Sand Dunes</p>
       </div>
 
-      {/* Role cards */}
       <div className="flex flex-col gap-3">
         <p className="text-xs font-mono uppercase tracking-widest text-center" style={{ color: 'var(--t-muted)' }}>
           How are you using the app?
         </p>
-
         {ROLES.map((r, i) => (
-          <motion.button
-            key={r.id}
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
+          <motion.button key={r.id}
+            initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.07 }}
             onClick={() => onSelect(r.id)}
             className="w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all active:scale-[0.98] hover:opacity-90"
-            style={{ background: r.bg, borderColor: `color-mix(in srgb, ${r.accent} 30%, transparent)` }}
-          >
+            style={{ background: r.bg, borderColor: `color-mix(in srgb, ${r.accent} 30%, transparent)` }}>
             <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
               style={{ background: `color-mix(in srgb, ${r.accent} 15%, transparent)` }}>
               {r.emoji}
@@ -162,67 +218,89 @@ function RoleChooser({ onSelect }: { onSelect: (r: Role) => void }) {
   );
 }
 
-// ── Main export ──────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Profile component
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Profile() {
-  const navigate = useNavigate();
-  const [user, setUser]         = useState<FullUser | null>(null);
-  const [history, setHistory]   = useState<Booking[]>([]);
-  const [role, setRole]         = useState<Role | null>(null);
-  const [isLogin, setIsLogin]   = useState(true);
+  const navigate   = useNavigate();
+  const toast      = useToast();
+
+  const [user, setUser]       = useState<FullUser | null>(null);
+  const [history, setHistory] = useState<Booking[]>([]);
+  const [role, setRole]       = useState<Role | null>(null);
+  const [mode, setMode]       = useState<AuthMode>('signin');
+
+  // form fields
+  const [name, setName]         = useState('');
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName]         = useState('');
-  const [error, setError]       = useState('');
+  const [showPw, setShowPw]     = useState(false);
   const [loading, setLoading]   = useState(false);
 
+  // Restore session
   useEffect(() => {
     const stored = localStorage.getItem('user');
-    if (stored) {
-      try {
-        const u: FullUser = JSON.parse(stored);
-        setUser(u);
-        api.getUserHistory(u.id).then(setHistory).catch(() => {});
-      } catch {}
-    }
+    if (!stored) return;
+    try {
+      const u: FullUser = JSON.parse(stored);
+      setUser(u);
+      api.getUserHistory(u.id).then(setHistory).catch(() => {});
+    } catch {}
   }, []);
 
   const signIn = (u: FullUser) => {
     localStorage.setItem('user', JSON.stringify(u));
-    setUser(u); setError('');
+    setUser(u);
     api.getUserHistory(u.id).then(setHistory).catch(() => {});
+    toast.success(`Welcome${u.name ? `, ${u.name.split(' ')[0]}` : ''}! 🏍️`);
   };
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleGoogleError = (msg: string) => {
+    toast.error(msg || 'Google Sign-In failed — please try again');
+  };
+
+  const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); setLoading(true);
+    const trimName  = name.trim();
+    const trimPhone = phone.trim();
+
+    // Client-side validation
+    if (mode === 'signup' && !trimName) { toast.error('Please enter your name'); return; }
+    if (!trimPhone)                      { toast.error('Please enter your phone number'); return; }
+    if (!password)                       { toast.error('Please enter a password'); return; }
+    if (mode === 'signup' && password.length < 4) {
+      toast.error('Password must be at least 4 characters'); return;
+    }
+
+    setLoading(true);
     try {
-      const u = isLogin
-        ? await api.login(phone, password)
-        : await api.register(name, phone, password);
+      const u = mode === 'signin'
+        ? await api.login(trimPhone, password)
+        : await api.register(trimName, trimPhone, password);
       signIn(u as FullUser);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Authentication failed');
-    } finally { setLoading(false); }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = () => {
     googleSignOut();
     localStorage.removeItem('user');
     setUser(null); setHistory([]); setRole(null);
+    setName(''); setPhone(''); setPassword('');
   };
 
   const handleRoleSelect = (r: Role) => {
-    if (r === 'admin') { navigate('/admin'); return; }
-    if (r === 'guest') { navigate('/'); return; }
-    setRole(r); // 'customer' → show sign-in form
+    if (r === 'admin')  { navigate('/admin'); return; }
+    if (r === 'guest')  { navigate('/');      return; }
+    setRole(r);
   };
 
   const totalSpent = history.reduce((s, b) => s + b.price + (b.overtimeCharge ?? 0), 0);
-  const isGoogleUser = !!user?.googleId;
 
-  /* ════════════════════════════════════════
-     LOGGED IN — profile view
-  ════════════════════════════════════════ */
+  // ── LOGGED IN ──────────────────────────────────────────────────────────────
   if (user) return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-5">
 
@@ -250,15 +328,10 @@ export default function Profile() {
                 {!user.email && user.phone && (
                   <p className="text-white/50 text-[11px] font-mono mt-0.5">{user.phone}</p>
                 )}
-                {isGoogleUser && (
+                {user.googleId && (
                   <div className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
                     style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}>
-                    <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
+                    <GoogleLogo />
                     Google Account
                   </div>
                 )}
@@ -276,8 +349,8 @@ export default function Profile() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { icon: <History className="w-4 h-4" />,    value: history.length,                           label: 'Total Rides' },
-          { icon: <TrendingUp className="w-4 h-4" />, value: `${totalSpent.toLocaleString()} KES`,     label: 'Total Spent' },
+          { icon: <History className="w-4 h-4" />,    value: history.length,                         label: 'Total Rides' },
+          { icon: <TrendingUp className="w-4 h-4" />, value: `${totalSpent.toLocaleString()} KES`,   label: 'Total Spent' },
         ].map(({ icon, value, label }) => (
           <div key={label} className="t-card rounded-2xl p-4 text-center">
             <div className="flex justify-center mb-2" style={{ color: 'var(--t-accent)' }}>{icon}</div>
@@ -341,78 +414,109 @@ export default function Profile() {
     </motion.div>
   );
 
-  /* ════════════════════════════════════════
-     ROLE CHOOSER
-  ════════════════════════════════════════ */
+  // ── ROLE CHOOSER ──────────────────────────────────────────────────────────
   if (!role) return <RoleChooser onSelect={handleRoleSelect} />;
 
-  /* ════════════════════════════════════════
-     CUSTOMER SIGN-IN / REGISTER
-  ════════════════════════════════════════ */
+  // ── SIGN IN / SIGN UP ─────────────────────────────────────────────────────
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-4 max-w-sm mx-auto w-full">
 
       <div className="t-card rounded-2xl overflow-hidden">
 
-        {/* Header strip */}
+        {/* Header */}
         <div className="hero-card px-6 py-7 relative">
-          {/* Back button */}
-          <button onClick={() => { setRole(null); setError(''); }}
+          <button onClick={() => { setRole(null); setName(''); setPhone(''); setPassword(''); }}
             className="absolute top-4 left-4 p-2 rounded-xl transition-opacity hover:opacity-70"
             style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>
             <ArrowLeft className="w-4 h-4" />
           </button>
-
           <div className="text-center pt-2">
             <div className="w-12 h-12 rounded-xl accent-gradient flex items-center justify-center mx-auto mb-3 shadow-lg">
               <User className="w-6 h-6 text-white" />
             </div>
             <h1 className="font-display text-xl font-bold text-white">
-              {isLogin ? 'Welcome Back' : 'Create Account'}
+              {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
             </h1>
             <p className="text-sm text-white/50 mt-0.5 font-mono">
-              {isLogin ? 'Sign in to your account' : 'Join as a customer'}
+              {mode === 'signin' ? 'Sign in to your account' : 'Join Royal Quads'}
             </p>
           </div>
         </div>
 
         <div className="p-6 flex flex-col gap-4">
 
-          {/* Google */}
-          {isGoogleEnabled() ? (
-            <GoogleButton onSuccess={signIn} />
-          ) : null}
+          {/* Google button */}
+          {isGoogleEnabled() && (
+            <GoogleButton onSuccess={signIn} onError={handleGoogleError} />
+          )}
 
           {isGoogleEnabled() && <OrDivider />}
 
-          {/* Phone form */}
-          <form onSubmit={handleAuth} className="flex flex-col gap-3">
-            <AnimatePresence>
-              {!isLogin && (
-                <motion.div key="name" initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                  <input type="text" placeholder="Full Name" value={name}
-                    onChange={e => setName(e.target.value)} className="input" required />
+          {/* Phone / password form */}
+          <form onSubmit={handlePhoneAuth} className="flex flex-col gap-3">
+
+            <AnimatePresence initial={false}>
+              {mode === 'signup' && (
+                <motion.div key="name-field"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{ overflow: 'hidden' }}>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="input"
+                    autoComplete="name"
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
-            <input type="tel" placeholder="Phone Number" value={phone}
-              onChange={e => setPhone(e.target.value)} className="input" required />
-            <input type="password" placeholder="Password" value={password}
-              onChange={e => setPassword(e.target.value)} className="input" required />
-            <ErrorMessage message={error} />
+
+            <input
+              type="tel"
+              placeholder="Phone Number (e.g. 0712 345 678)"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              className="input"
+              autoComplete="tel"
+            />
+
+            {/* Password with show/hide toggle */}
+            <div className="relative">
+              <input
+                type={showPw ? 'text' : 'password'}
+                placeholder={mode === 'signup' ? 'Password (min 4 chars)' : 'Password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="input pr-12"
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+              />
+              <button type="button" tabIndex={-1}
+                onClick={() => setShowPw(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 opacity-50 hover:opacity-80 transition-opacity"
+                style={{ color: 'var(--t-text)' }}>
+                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? <><Spinner /> Please wait…</> : isLogin ? 'Sign In' : 'Create Account'}
+              {loading
+                ? <><Spinner /> Please wait…</>
+                : mode === 'signin' ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
+          {/* Toggle signin ↔ signup */}
           <p className="text-center text-sm" style={{ color: 'var(--t-muted)' }}>
-            {isLogin ? "Don't have an account? " : 'Already registered? '}
-            <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
+            {mode === 'signin' ? "Don't have an account? " : 'Already registered? '}
+            <button
+              onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setPassword(''); }}
               className="font-semibold transition-opacity hover:opacity-70"
               style={{ color: 'var(--t-accent)' }}>
-              {isLogin ? 'Register' : 'Sign In'}
+              {mode === 'signin' ? 'Register' : 'Sign In'}
             </button>
           </p>
 
