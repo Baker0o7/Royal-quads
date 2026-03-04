@@ -1,32 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { CheckCircle2, Home, Printer, Star, MapPin, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { CheckCircle2, Home, Download, Star, MapPin, AlertTriangle, MessageCircle, Phone } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
+import { notifications } from '../lib/notifications';
+import { sendWhatsApp, smsTemplates } from '../lib/sms';
+import { exportReceiptPDF } from '../lib/pdfExport';
 import type { Booking } from '../types';
 import { OVERTIME_RATE } from '../types';
 
 export default function Receipt() {
   const { id } = useParams<{ id: string }>();
-  const [booking, setBooking]     = useState<Booking | null>(null);
-  const [notFound, setNotFound]   = useState(false);
-  const [rating, setRating]       = useState(0);
-  const [hovered, setHovered]     = useState(0);
-  const [feedback, setFeedback]   = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [booking, setBooking]       = useState<Booking | null>(null);
+  const [notFound, setNotFound]     = useState(false);
+  const [rating, setRating]         = useState(0);
+  const [hovered, setHovered]       = useState(0);
+  const [feedback, setFeedback]     = useState('');
+  const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     const numId = Number(id);
-    // Check completed history first, fall back to active bookings
     api.getBookingHistory().then(history => {
       const b = history.find(b => b.id === numId);
       if (b) {
         setBooking(b);
         if (b.rating != null) { setRating(b.rating); setFeedback(b.feedback ?? ''); setSubmitted(true); }
       } else {
-        // Might still be active (race condition)
         return api.getActiveBookings().then(active => {
           const ab = active.find(b => b.id === numId);
           if (ab) setBooking(ab);
@@ -41,6 +43,23 @@ export default function Receipt() {
     setSubmitting(true);
     try { await api.submitFeedback(booking.id, rating, feedback); setSubmitted(true); }
     catch {} finally { setSubmitting(false); }
+  };
+
+  const handlePDF = async () => {
+    if (!booking || pdfLoading) return;
+    setPdfLoading(true);
+    try { await exportReceiptPDF(booking); }
+    catch (e) { console.error('PDF error', e); }
+    finally { setPdfLoading(false); }
+  };
+
+  const handleWhatsApp = () => {
+    if (!booking) return;
+    const total = booking.price + (booking.overtimeCharge ?? 0);
+    sendWhatsApp(booking.customerPhone,
+      smsTemplates.rideComplete(booking.customerName, total, booking.receiptId));
+    notifications.add('ride_complete', 'Receipt sent via WhatsApp',
+      `Sent receipt to ${booking.customerName} (${booking.customerPhone})`, `/receipt/${id}`);
   };
 
   if (!booking && !notFound) return <LoadingScreen text="Loading receipt…" />;
@@ -62,9 +81,9 @@ export default function Receipt() {
     { label: 'Time',     value: new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }) },
     { label: 'Customer', value: b.customerName },
     { label: 'Phone',    value: b.customerPhone },
-    ...((b.groupSize ?? 1) > 1    ? [{ label: 'Group',  value: `${b.groupSize} riders` }] : []),
-    ...(b.promoCode         ? [{ label: 'Promo',  value: `${b.promoCode} ✓` }] : []),
-    ...(b.waiverSigned      ? [{ label: 'Waiver', value: 'Signed ✓' }] : []),
+    ...((b.groupSize ?? 1) > 1 ? [{ label: 'Group',   value: `${b.groupSize} riders` }] : []),
+    ...(b.promoCode            ? [{ label: 'Promo',   value: `${b.promoCode} ✓` }]       : []),
+    ...(b.waiverSigned         ? [{ label: 'Waiver',  value: 'Signed ✓' }]               : []),
     ...((b.depositAmount ?? 0) > 0
       ? [{ label: 'Deposit', value: `${(b.depositAmount ?? 0).toLocaleString()} KES ${b.depositReturned ? '(returned)' : '(held)'}` }]
       : []),
@@ -78,12 +97,14 @@ export default function Receipt() {
       <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-lg"
         style={{ background: 'var(--t-bg)', border: '1px solid var(--t-border)' }}>
 
-        {/* Header strip */}
+        {/* Header */}
         <div className="p-6 flex flex-col items-center"
           style={{ background: 'linear-gradient(135deg, var(--t-hero-from), var(--t-hero-to))' }}>
-          <div className="w-14 h-14 rounded-2xl accent-gradient flex items-center justify-center mb-3 shadow-lg">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
+            transition={{ type: 'spring', damping: 14, delay: 0.1 }}
+            className="w-14 h-14 rounded-2xl accent-gradient flex items-center justify-center mb-3 shadow-lg">
             <CheckCircle2 className="w-7 h-7 text-white" />
-          </div>
+          </motion.div>
           <h1 className="font-display text-xl font-bold text-white">Payment Received</h1>
           <p className="font-mono text-[10px] tracking-[0.15em] mt-1 text-white/40">#{b.receiptId}</p>
         </div>
@@ -97,16 +118,19 @@ export default function Receipt() {
 
         {/* Line items */}
         <div className="px-6 py-3">
-          {rows.map(({ label, value }) => (
-            <div key={label} className="flex justify-between items-center py-2.5 border-b last:border-b-0"
+          {rows.map(({ label, value }, i) => (
+            <motion.div key={label}
+              initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.05 * i }}
+              className="flex justify-between items-center py-2.5 border-b last:border-b-0"
               style={{ borderColor: 'var(--t-border)' }}>
               <span className="font-mono text-[11px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>{label}</span>
               <span className="text-sm font-medium text-right max-w-[55%]" style={{ color: 'var(--t-text)' }}>{value}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Price section */}
+        {/* Pricing */}
         <div className="px-6 pb-5 space-y-2">
           {(b.overtimeCharge || 0) > 0 && (
             <div className="p-3 rounded-xl flex justify-between items-center"
@@ -125,9 +149,7 @@ export default function Receipt() {
 
           <div className="p-4 rounded-2xl flex justify-between items-center"
             style={{ background: 'var(--t-bg2)' }}>
-            <span className="font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>
-              Total Paid
-            </span>
+            <span className="font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>Total Paid</span>
             <div className="text-right">
               <p className="font-display font-bold text-2xl" style={{ color: 'var(--t-accent)' }}>
                 {totalPaid.toLocaleString()} <span className="text-sm font-sans">KES</span>
@@ -145,7 +167,7 @@ export default function Receipt() {
               style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
               <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#b45309' }} />
               <p className="text-xs" style={{ color: '#b45309' }}>
-                Deposit of <strong>{(b.depositAmount ?? 0).toLocaleString()} KES</strong> is held — returned when quad is back.
+                Deposit of <strong>{(b.depositAmount ?? 0).toLocaleString()} KES</strong> held — returned when quad is back.
               </p>
             </div>
           )}
@@ -158,6 +180,23 @@ export default function Receipt() {
             className="inline-flex items-center gap-1 mt-1.5 font-mono text-[10px] transition-opacity hover:opacity-70"
             style={{ color: 'var(--t-accent)' }}>
             <MapPin className="w-2.5 h-2.5" /> Mambrui Sand Dunes
+          </a>
+        </div>
+      </div>
+
+      {/* ── Send receipt ── */}
+      <div className="w-full max-w-sm rounded-2xl p-5 t-card">
+        <h2 className="font-semibold text-sm mb-3" style={{ color: 'var(--t-text)' }}>Send Receipt to Customer</h2>
+        <div className="flex gap-2">
+          <button onClick={handleWhatsApp}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 hover:opacity-90"
+            style={{ background: '#22c55e', color: 'white' }}>
+            <MessageCircle className="w-4 h-4" /> WhatsApp
+          </button>
+          <a href={`tel:${b.customerPhone}`}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all active:scale-95 hover:opacity-90"
+            style={{ borderColor: 'var(--t-border)', color: 'var(--t-text)', background: 'var(--t-card)' }}>
+            <Phone className="w-4 h-4" /> Call
           </a>
         </div>
       </div>
@@ -189,41 +228,45 @@ export default function Receipt() {
                   className="p-0.5 transition-transform hover:scale-110">
                   <Star className="w-8 h-8 transition-all"
                     style={{
-                      fill: s <= (hovered || rating) ? 'var(--t-accent)' : 'transparent',
+                      fill:  s <= (hovered || rating) ? 'var(--t-accent)' : 'transparent',
                       color: s <= (hovered || rating) ? 'var(--t-accent)' : 'var(--t-border)',
                       transform: s <= (hovered || rating) ? 'scale(1.05)' : 'scale(1)',
                     }} />
                 </button>
               ))}
             </div>
-            {rating > 0 && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                className="flex flex-col gap-3 overflow-hidden">
-                <textarea placeholder="Tell us about your ride (optional)"
-                  value={feedback} onChange={e => setFeedback(e.target.value)}
-                  className="input resize-none h-20 text-sm" />
-                <button onClick={handleFeedback} disabled={submitting} className="btn-primary">
-                  {submitting ? <><Spinner /> Submitting…</> : 'Submit Feedback'}
-                </button>
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {rating > 0 && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }} className="flex flex-col gap-3 overflow-hidden">
+                  <textarea placeholder="Tell us about your ride (optional)"
+                    value={feedback} onChange={e => setFeedback(e.target.value)}
+                    className="input resize-none h-20 text-sm" />
+                  <button onClick={handleFeedback} disabled={submitting} className="btn-primary">
+                    {submitting ? <><Spinner /> Submitting…</> : 'Submit Feedback'}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
 
       {/* ── Actions ── */}
       <div className="flex gap-3 w-full max-w-sm">
-        <button onClick={() => window.print()}
-          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-opacity hover:opacity-75 no-print"
+        <button onClick={handlePDF} disabled={pdfLoading}
+          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all active:scale-95 hover:opacity-80"
           style={{ borderColor: 'var(--t-border)', color: 'var(--t-text)', background: 'var(--t-card)' }}>
-          <Printer className="w-4 h-4" /> Print
+          {pdfLoading ? <Spinner /> : <Download className="w-4 h-4" />}
+          {pdfLoading ? 'Generating…' : 'Save PDF'}
         </button>
         <Link to="/"
-          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
+          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-semibold transition-all active:scale-95 hover:opacity-80"
           style={{ background: 'var(--t-btn-bg)', color: 'var(--t-btn-text)' }}>
           <Home className="w-4 h-4" /> Home
         </Link>
       </div>
+
     </motion.div>
   );
 }

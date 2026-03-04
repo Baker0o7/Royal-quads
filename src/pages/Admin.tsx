@@ -10,6 +10,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/api';
 import { EmptyState, ErrorMessage, StatusBadge, Spinner } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
+import { notifications } from '../lib/notifications';
+import { sendWhatsApp, smsTemplates } from '../lib/sms';
 import type {
   Quad, Booking, Promotion, SalesData, MaintenanceLog,
   DamageReport, Staff, WaitlistEntry, Prebooking,
@@ -732,10 +734,15 @@ export default function Admin() {
                 <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{w.customerName}</p>
                 {w.notified
                   ? <span className="text-[10px] font-mono" style={{ color: '#16a34a' }}>✓ Notified</span>
-                  : <button onClick={() => api.notifyWaitlist(w.id).then(fetchAll)}
-                      className="text-[10px] font-semibold px-2 py-1 rounded-lg"
-                      style={{ background: 'color-mix(in srgb, var(--t-accent) 12%, transparent)', color: 'var(--t-accent)' }}>
-                      Mark Notified
+                  : <button onClick={() => {
+                      api.notifyWaitlist(w.id).then(fetchAll);
+                      sendWhatsApp(w.customerPhone, smsTemplates.waitlistReady(w.customerName));
+                      notifications.add('info', 'Waitlist notified',
+                        `WhatsApp sent to ${w.customerName} — quad available`);
+                    }}
+                      className="text-[10px] font-semibold px-2 py-1 rounded-lg flex items-center gap-1"
+                      style={{ background: '#22c55e', color: 'white' }}>
+                      📲 Notify via WhatsApp
                     </button>
                 }
               </div>
@@ -788,10 +795,16 @@ export default function Admin() {
                 </p>
                 {pb.status === 'pending' && (
                   <div className="flex gap-2 mt-3">
-                    <button onClick={() => api.confirmPrebooking(pb.id).then(fetchAll)}
+                    <button onClick={() => {
+                        api.confirmPrebooking(pb.id).then(fetchAll);
+                        const dt = new Date(pb.scheduledFor).toLocaleString('en-KE', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+                        sendWhatsApp(pb.customerPhone, smsTemplates.prebookConfirmed(pb.customerName, pb.quadName || 'a quad', dt));
+                        notifications.add('prebook_confirmed', 'Pre-booking confirmed',
+                          `${pb.customerName} confirmed for ${dt}`);
+                      }}
                       className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1"
                       style={{ background: 'rgba(34,197,94,0.1)', color: '#16a34a' }}>
-                      <CheckCircle2 className="w-3 h-3" /> Confirm
+                      <CheckCircle2 className="w-3 h-3" /> Confirm + WhatsApp
                     </button>
                     <button onClick={() => api.cancelPrebooking(pb.id).then(fetchAll)}
                       className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1"

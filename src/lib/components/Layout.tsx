@@ -1,7 +1,9 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, User, Home } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ThemePicker } from './ThemePicker';
+import { NotificationBell } from './NotificationBell';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -15,7 +17,8 @@ export default function Layout() {
         style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }}>
         {icon}
         {active && (
-          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+          <motion.span layoutId="nav-dot"
+            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
             style={{ background: 'var(--t-accent)' }} />
         )}
       </Link>
@@ -50,16 +53,27 @@ export default function Layout() {
           </Link>
 
           <nav className="flex items-center gap-0.5">
-            <NavLink to="/"        icon={<Home          style={{ width: 18, height: 18 }} />} label="Home"    />
-            <NavLink to="/profile" icon={<User          style={{ width: 18, height: 18 }} />} label="Profile" />
-            <NavLink to="/admin"   icon={<LayoutDashboard style={{ width: 18, height: 18 }} />} label="Admin"   />
+            <NavLink to="/"        icon={<Home             style={{ width: 18, height: 18 }} />} label="Home"    />
+            <NavLink to="/profile" icon={<User             style={{ width: 18, height: 18 }} />} label="Profile" />
+            <NavLink to="/admin"   icon={<LayoutDashboard  style={{ width: 18, height: 18 }} />} label="Admin"   />
+            <NotificationBell />
             <ThemePicker />
           </nav>
         </div>
       </header>
 
+      {/* Page with enter animation */}
       <main className="flex-1 max-w-md w-full mx-auto px-4 py-6 flex flex-col">
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="flex flex-col flex-1">
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <footer className="py-8 mt-auto border-t print:hidden"

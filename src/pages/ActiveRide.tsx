@@ -1,21 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, AlertTriangle, CheckCircle2, Navigation, Shield } from 'lucide-react';
+import { MapPin, AlertTriangle, CheckCircle2, Navigation, Shield, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
+import { notifications } from '../lib/notifications';
+import { sendWhatsApp, smsTemplates } from '../lib/sms';
+import { haptic } from '../lib/utils';
 import type { Booking } from '../types';
 import { OVERTIME_RATE } from '../types';
 
 function pad(n: number) { return String(Math.abs(n)).padStart(2, '0'); }
 
 export default function ActiveRide() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [booking, setBooking]     = useState<Booking | null>(null);
-  const [secondsLeft, setSeconds] = useState(0);
-  const [loading, setLoading]     = useState(true);
+  const { id }    = useParams<{ id: string }>();
+  const navigate  = useNavigate();
+  const [booking, setBooking]       = useState<Booking | null>(null);
+  const [secondsLeft, setSeconds]   = useState(0);
+  const [loading, setLoading]       = useState(true);
   const [completing, setCompleting] = useState(false);
+
+  // Track whether we've fired each one-time notification
+  const firedOvertime = useRef(false);
+  const firedWarning  = useRef(false); // 2-min warning
 
   const calcSecs = useCallback((b: Booking) =>
     Math.floor((new Date(b.startTime).getTime() + b.duration * 60_000 - Date.now()) / 1000), []);
@@ -23,24 +30,61 @@ export default function ActiveRide() {
   useEffect(() => {
     api.getActiveBookings().then(data => {
       const cur = data.find(b => b.id === Number(id));
-      if (cur) { setBooking(cur); setSeconds(calcSecs(cur)); }
-      else navigate(`/receipt/${id}`, { replace: true });
+      if (cur) {
+        setBooking(cur);
+        setSeconds(calcSecs(cur));
+        // Ride started notification (only once — check if already fired)
+        const firedKey = `rq:notif_started_${cur.id}`;
+        if (!localStorage.getItem(firedKey)) {
+          localStorage.setItem(firedKey, '1');
+          notifications.add('ride_started', 'Ride Started! 🏍️',
+            `${cur.customerName} is riding ${cur.quadName} for ${cur.duration} min.`,
+            `/ride/${cur.id}`);
+        }
+      } else {
+        navigate(`/receipt/${id}`, { replace: true });
+      }
     }).catch(() => navigate(`/receipt/${id}`, { replace: true }))
       .finally(() => setLoading(false));
   }, [id, navigate, calcSecs]);
 
   useEffect(() => {
     if (!booking) return;
-    const t = setInterval(() => setSeconds(calcSecs(booking)), 1000);
+    const t = setInterval(() => {
+      const secs = calcSecs(booking);
+      setSeconds(secs);
+
+      // 2-minute warning
+      if (secs > 0 && secs <= 120 && !firedWarning.current) {
+        firedWarning.current = true;
+        notifications.add('info', '2 Minutes Remaining ⏱️',
+          `${booking.customerName}'s ride on ${booking.quadName} ends in 2 minutes.`,
+          `/ride/${booking.id}`);
+      }
+
+      // Overtime notification
+      if (secs < 0 && !firedOvertime.current) {
+        firedOvertime.current = true;
+        const mins = Math.ceil(-secs / 60);
+        notifications.add('overtime', 'Overtime! ⏰',
+          `${booking.customerName} is ${mins} min overtime on ${booking.quadName}. ${mins * OVERTIME_RATE} KES extra.`,
+          `/ride/${booking.id}`);
+      }
+    }, 1000);
     return () => clearInterval(t);
   }, [booking, calcSecs]);
 
   const handleComplete = async () => {
     if (completing || !booking) return;
+    haptic('medium');
     setCompleting(true);
     try {
       const overtimeMins = Math.max(0, Math.ceil(-Math.min(0, secondsLeft) / 60));
       await api.completeBooking(booking.id, overtimeMins);
+      const total = booking.price + overtimeMins * OVERTIME_RATE;
+      notifications.add('ride_complete', 'Ride Complete ✅',
+        `${booking.customerName} finished riding ${booking.quadName}. Total: ${total.toLocaleString()} KES.`,
+        `/receipt/${id}`);
       navigate(`/receipt/${id}`);
     } catch { setCompleting(false); }
   };
@@ -48,13 +92,13 @@ export default function ActiveRide() {
   if (loading) return <LoadingScreen text="Loading ride…" />;
   if (!booking) return null;
 
-  const isOvertime      = secondsLeft < 0;
-  const overtimeMins    = Math.ceil(-Math.min(0, secondsLeft) / 60);
-  const overtimeCharge  = overtimeMins * OVERTIME_RATE;
-  const totalSecs       = booking.duration * 60;
-  const elapsed         = totalSecs - secondsLeft;
-  const progress        = Math.min(1, elapsed / totalSecs);
-  const C               = 2 * Math.PI * 54;
+  const isOvertime     = secondsLeft < 0;
+  const overtimeMins   = Math.ceil(-Math.min(0, secondsLeft) / 60);
+  const overtimeCharge = overtimeMins * OVERTIME_RATE;
+  const totalSecs      = booking.duration * 60;
+  const elapsed        = totalSecs - secondsLeft;
+  const progress       = Math.min(1, elapsed / totalSecs);
+  const C              = 2 * Math.PI * 54;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -111,17 +155,14 @@ export default function ActiveRide() {
               ['Rider',    booking.customerName],
               ['Duration', `${booking.duration} min`],
               ['Paid',     `${booking.price.toLocaleString()} KES`],
-              ...((booking.depositAmount ?? 0) > 0
-                ? [['Deposit', `${(booking.depositAmount ?? 0).toLocaleString()} KES held`]] : []),
-              ...((booking.groupSize ?? 1) > 1
-                ? [['Group', `${booking.groupSize} riders`]] : []),
+              ...((booking.depositAmount ?? 0) > 0 ? [['Deposit', `${(booking.depositAmount ?? 0).toLocaleString()} KES held`]] : []),
+              ...((booking.groupSize ?? 1) > 1 ? [['Group', `${booking.groupSize} riders`]] : []),
             ].map(([l, v]) => (
               <div key={l} className="flex justify-between items-center">
                 <span className="font-mono text-[11px] text-white/40 uppercase tracking-wider">{l}</span>
                 <span className="font-medium text-sm text-white">{v}</span>
               </div>
             ))}
-
             <div className="flex justify-between items-center border-t border-white/5 pt-2.5 mt-0.5">
               <span className="font-mono text-[11px] text-white/40 uppercase tracking-wider">Location</span>
               <a href="https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6" target="_blank" rel="noopener noreferrer"
@@ -130,7 +171,6 @@ export default function ActiveRide() {
                 <MapPin className="w-3 h-3" /> Mambrui
               </a>
             </div>
-
             {booking.quadImei && (
               <div className="flex justify-between items-center">
                 <span className="font-mono text-[11px] text-white/40 uppercase tracking-wider">GPS</span>
@@ -149,17 +189,24 @@ export default function ActiveRide() {
       <AnimatePresence>
         {isOvertime && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="w-full max-w-sm p-4 rounded-2xl flex flex-col gap-1"
-            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444' }}>
-            <div className="flex items-center gap-2">
+            className="w-full max-w-sm p-4 rounded-2xl flex flex-col gap-2"
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <div className="flex items-center gap-2" style={{ color: '#ef4444' }}>
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <p className="font-semibold text-sm">Overtime — Please return the quad now</p>
             </div>
-            <p className="text-xs pl-6 opacity-80">
-              {overtimeMins} min overtime ·{' '}
-              <span className="font-mono font-bold">{overtimeCharge.toLocaleString()} KES</span>
-              {' '}extra ({OVERTIME_RATE} KES/min)
+            <p className="text-xs pl-6 opacity-80" style={{ color: '#ef4444' }}>
+              {overtimeMins} min · <span className="font-mono font-bold">{overtimeCharge.toLocaleString()} KES</span> extra
             </p>
+            {/* WhatsApp alert button */}
+            <button
+              onClick={() => sendWhatsApp(booking.customerPhone,
+                smsTemplates.overtime(booking.customerName, overtimeMins, overtimeCharge))}
+              className="mt-1 ml-6 flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-70"
+              style={{ color: '#22c55e' }}>
+              <MessageCircle className="w-3.5 h-3.5" />
+              WhatsApp {booking.customerName}
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

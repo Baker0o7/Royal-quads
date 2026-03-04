@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, MapPin, CreditCard, ChevronRight, AlertCircle, Phone, Tag, Copy, Check, Users, Shield, Wallet, Calendar } from 'lucide-react';
 import { api } from '../lib/api';
+import { notifications } from '../lib/notifications';
+import { haptic } from '../lib/utils';
 import { Spinner, StepHeader, ErrorMessage } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
 import type { Quad } from '../types';
@@ -94,6 +96,9 @@ export default function Home() {
         depositAmount: depositAmount || 0,
         waiverSigned: false,
       });
+      notifications.add('ride_started', 'Booking Created 🏍️',
+        `${customerName.trim()} booked ${quads.find(q => q.id === selectedQuad)?.name} for ${selectedDuration} min — ${finalPrice.toLocaleString()} KES`,
+        `/ride/${booking.id}`);
       navigate(`/waiver/${booking.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Booking failed — please try again');
@@ -182,7 +187,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-3">
               {available.map(quad => (
                 <button key={quad.id} type="button"
-                  onClick={() => setSelectedQuad(quad.id)}
+                  onClick={() => { setSelectedQuad(quad.id); haptic('light'); }}
                   className={`tile ${selectedQuad === quad.id ? 'selected' : ''}`}>
                   {quad.imageUrl
                     ? <img src={quad.imageUrl} alt={quad.name} className="w-full h-20 object-cover rounded-xl" />
@@ -215,7 +220,7 @@ export default function Home() {
               const active = selectedDuration === p.duration;
               return (
                 <button key={p.duration} type="button"
-                  onClick={() => setSelectedDuration(p.duration)}
+                  onClick={() => { setSelectedDuration(p.duration); haptic('light'); }}
                   className={`tile items-center ${active ? 'selected' : ''}`}>
                   <Clock className="w-4 h-4" style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }} />
                   <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{p.label}</span>
