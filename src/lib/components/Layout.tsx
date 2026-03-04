@@ -1,3 +1,4 @@
+import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, User, Home } from 'lucide-react';
 import { ThemePicker } from './ThemePicker';
@@ -6,17 +7,15 @@ export default function Layout() {
   const { pathname } = useLocation();
   const isAdmin = pathname.startsWith('/admin');
 
-  const navLink = (to: string, icon: React.ReactNode, label: string) => {
+  const NavLink = ({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) => {
     const active = pathname === to || (to === '/admin' && isAdmin);
     return (
       <Link to={to} title={label}
-        className="p-2.5 rounded-xl transition-all duration-200 relative"
+        className="relative p-2.5 rounded-xl transition-all duration-200"
         style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }}>
-        <span style={active ? { filter: 'drop-shadow(0 0 6px var(--t-accent))' } : undefined}>
-          {icon}
-        </span>
+        {icon}
         {active && (
-          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
             style={{ background: 'var(--t-accent)' }} />
         )}
       </Link>
@@ -24,16 +23,19 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-300"
-      style={{ background: 'var(--t-bg)', color: 'var(--t-text)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--t-bg)', color: 'var(--t-text)' }}>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-md border-b"
-        style={{ background: 'color-mix(in srgb, var(--t-bg) 90%, transparent)', borderColor: 'var(--t-border)' }}>
+      <header className="sticky top-0 z-30 border-b"
+        style={{
+          background: 'color-mix(in srgb, var(--t-bg) 88%, transparent)',
+          borderColor: 'var(--t-border)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+        }}>
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md transition-all"
-              style={{ background: `linear-gradient(135deg, var(--t-accent2), var(--t-accent))` }}>
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg accent-gradient flex items-center justify-center shadow-md">
               <span className="text-sm">🏍️</span>
             </div>
             <div>
@@ -48,9 +50,9 @@ export default function Layout() {
           </Link>
 
           <nav className="flex items-center gap-0.5">
-            {navLink('/', <Home style={{ width: 18, height: 18 }} />, 'Home')}
-            {navLink('/profile', <User style={{ width: 18, height: 18 }} />, 'Profile')}
-            {navLink(isAdmin ? '/' : '/admin', <LayoutDashboard style={{ width: 18, height: 18 }} />, 'Admin')}
+            <NavLink to="/"        icon={<Home          style={{ width: 18, height: 18 }} />} label="Home"    />
+            <NavLink to="/profile" icon={<User          style={{ width: 18, height: 18 }} />} label="Profile" />
+            <NavLink to="/admin"   icon={<LayoutDashboard style={{ width: 18, height: 18 }} />} label="Admin"   />
             <ThemePicker />
           </nav>
         </div>
@@ -62,17 +64,15 @@ export default function Layout() {
 
       <footer className="py-8 mt-auto border-t print:hidden"
         style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)' }}>
-        <div className="max-w-md mx-auto px-4 text-center space-y-2">
-          <p className="font-display text-sm font-medium tracking-widest uppercase mb-3"
-            style={{ color: 'var(--t-accent)' }}>
-            Royal Quads Mambrui
-          </p>
+        <div className="max-w-md mx-auto px-4 text-center space-y-1.5">
+          <p className="font-display text-sm font-semibold tracking-widest uppercase mb-3"
+            style={{ color: 'var(--t-accent)' }}>Royal Quads Mambrui</p>
           <p className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>
-            Yusuf Taib{' '}
+            Yusuf Taib &nbsp;·&nbsp;
             <a href="tel:0784589999" style={{ color: 'var(--t-accent)' }}>0784 589 999</a>
           </p>
           <p className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>
-            Abubakar Bajaber{' '}
+            Abubakar Bajaber &nbsp;·&nbsp;
             <a href="tel:0784993996" style={{ color: 'var(--t-accent)' }}>0784 993 996</a>
           </p>
         </div>

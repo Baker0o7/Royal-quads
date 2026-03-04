@@ -1,133 +1,226 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { CheckCircle2, Home, Printer, Star, MapPin, Shield, AlertTriangle } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { CheckCircle2, Home, Printer, Star, MapPin, AlertTriangle } from 'lucide-react';
 import { api } from '../lib/api';
-import { LoadingScreen } from '../lib/components/ui';
+import { LoadingScreen, Spinner } from '../lib/components/ui';
 import type { Booking } from '../types';
 import { OVERTIME_RATE } from '../types';
 
 export default function Receipt() {
   const { id } = useParams<{ id: string }>();
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
-  const [feedbackText, setFeedbackText] = useState('');
+  const [booking, setBooking]     = useState<Booking | null>(null);
+  const [notFound, setNotFound]   = useState(false);
+  const [rating, setRating]       = useState(0);
+  const [hovered, setHovered]     = useState(0);
+  const [feedback, setFeedback]   = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.getBookingHistory().then(data => {
-      const b = data.find(b => b.id === Number(id));
-      if (b) { setBooking(b); if (b.rating) { setRating(b.rating); setFeedbackText(b.feedback ?? ''); setSubmitted(true); } }
-    });
+    const numId = Number(id);
+    // Check completed history first, fall back to active bookings
+    api.getBookingHistory().then(history => {
+      const b = history.find(b => b.id === numId);
+      if (b) {
+        setBooking(b);
+        if (b.rating != null) { setRating(b.rating); setFeedback(b.feedback ?? ''); setSubmitted(true); }
+      } else {
+        // Might still be active (race condition)
+        return api.getActiveBookings().then(active => {
+          const ab = active.find(b => b.id === numId);
+          if (ab) setBooking(ab);
+          else setNotFound(true);
+        });
+      }
+    }).catch(() => setNotFound(true));
   }, [id]);
 
   const handleFeedback = async () => {
-    if (!rating || !booking) return; setSubmitting(true);
-    try { await api.submitFeedback(booking.id, rating, feedbackText); setSubmitted(true); }
-    catch { } finally { setSubmitting(false); }
+    if (!rating || !booking || submitting) return;
+    setSubmitting(true);
+    try { await api.submitFeedback(booking.id, rating, feedback); setSubmitted(true); }
+    catch {} finally { setSubmitting(false); }
   };
 
-  if (!booking) return <LoadingScreen text="Loading receipt..." />;
+  if (!booking && !notFound) return <LoadingScreen text="Loading receipt…" />;
+  if (notFound) return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 text-center">
+      <p className="text-4xl">🔍</p>
+      <p className="font-display text-xl font-bold" style={{ color: 'var(--t-text)' }}>Receipt not found</p>
+      <Link to="/" className="btn-primary max-w-xs">Go Home</Link>
+    </div>
+  );
 
-  const totalPaid = booking.price + (booking.overtimeCharge || 0);
+  const b = booking!;
+  const totalPaid = b.price + (b.overtimeCharge || 0);
 
-  const rows = [
-    { label: 'Quad',     value: booking.quadName },
-    { label: 'Duration', value: `${booking.duration} min` },
-    { label: 'Date',     value: new Date(booking.startTime).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) },
-    { label: 'Time',     value: new Date(booking.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }) },
-    { label: 'Customer', value: booking.customerName },
-    { label: 'M-Pesa',  value: booking.customerPhone },
-    ...(booking.groupSize! > 1 ? [{ label: 'Group', value: `${booking.groupSize} riders` }] : []),
-    ...(booking.promoCode ? [{ label: 'Promo', value: `${booking.promoCode} ✓` }] : []),
-    ...(booking.waiverSigned ? [{ label: 'Waiver', value: 'Signed ✓' }] : []),
-    ...(booking.depositAmount! > 0 ? [{ label: 'Deposit', value: `${booking.depositAmount!.toLocaleString()} KES ${booking.depositReturned ? '(returned)' : '(held)'}` }] : []),
+  const rows: { label: string; value: string }[] = [
+    { label: 'Quad',     value: b.quadName },
+    { label: 'Duration', value: `${b.duration} min` },
+    { label: 'Date',     value: new Date(b.startTime).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) },
+    { label: 'Time',     value: new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Customer', value: b.customerName },
+    { label: 'Phone',    value: b.customerPhone },
+    ...(b.groupSize! > 1    ? [{ label: 'Group',  value: `${b.groupSize} riders` }] : []),
+    ...(b.promoCode         ? [{ label: 'Promo',  value: `${b.promoCode} ✓` }] : []),
+    ...(b.waiverSigned      ? [{ label: 'Waiver', value: 'Signed ✓' }] : []),
+    ...(b.depositAmount! > 0
+      ? [{ label: 'Deposit', value: `${b.depositAmount!.toLocaleString()} KES ${b.depositReturned ? '(returned)' : '(held)'}` }]
+      : []),
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex flex-col gap-5 items-center">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-5 items-center">
 
-      <div className="w-full max-w-sm bg-white dark:bg-[#1a1612] rounded-3xl overflow-hidden shadow-[0_4px_32px_rgba(26,22,18,0.12)] dark:shadow-[0_4px_32px_rgba(0,0,0,0.4)] border border-[#c9b99a]/20 dark:border-[#c9b99a]/8">
-        <div className="bg-gradient-to-br from-[#2d2318] to-[#1a1612] p-6 flex flex-col items-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#c9972a] to-[#8a6010] flex items-center justify-center mb-3 shadow-lg"><CheckCircle2 className="w-7 h-7 text-white" /></div>
+      {/* ── Receipt card ── */}
+      <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-lg"
+        style={{ background: 'var(--t-bg)', border: '1px solid var(--t-border)' }}>
+
+        {/* Header strip */}
+        <div className="p-6 flex flex-col items-center"
+          style={{ background: 'linear-gradient(135deg, var(--t-hero-from), var(--t-hero-to))' }}>
+          <div className="w-14 h-14 rounded-2xl accent-gradient flex items-center justify-center mb-3 shadow-lg">
+            <CheckCircle2 className="w-7 h-7 text-white" />
+          </div>
           <h1 className="font-display text-xl font-bold text-white">Payment Received</h1>
-          <p className="font-mono text-[10px] tracking-[0.15em] text-[#c9b99a]/60 mt-1">#{booking.receiptId}</p>
+          <p className="font-mono text-[10px] tracking-[0.15em] mt-1 text-white/40">#{b.receiptId}</p>
         </div>
-        <div className="flex items-center"><div className="w-5 h-5 rounded-full bg-[#f5f0e8] dark:bg-[#0d0b09] -ml-2.5 shrink-0" /><div className="flex-1 border-t-2 border-dashed border-[#c9b99a]/20 dark:border-[#c9b99a]/10 mx-1" /><div className="w-5 h-5 rounded-full bg-[#f5f0e8] dark:bg-[#0d0b09] -mr-2.5 shrink-0" /></div>
-        <div className="px-6 py-4 flex flex-col gap-0">
+
+        {/* Tear line */}
+        <div className="flex items-center" style={{ background: 'var(--t-bg)' }}>
+          <div className="w-5 h-5 rounded-full -ml-2.5 shrink-0" style={{ background: 'var(--t-bg2)' }} />
+          <div className="flex-1 border-t-2 border-dashed mx-1" style={{ borderColor: 'var(--t-border)' }} />
+          <div className="w-5 h-5 rounded-full -mr-2.5 shrink-0" style={{ background: 'var(--t-bg2)' }} />
+        </div>
+
+        {/* Line items */}
+        <div className="px-6 py-3">
           {rows.map(({ label, value }) => (
-            <div key={label} className="flex justify-between items-center py-2.5 border-b border-[#c9b99a]/10 dark:border-[#c9b99a]/5 last:border-0">
-              <span className="font-mono text-[11px] text-[#7a6e60] dark:text-[#a09070] uppercase tracking-wider">{label}</span>
-              <span className="text-sm font-medium text-[#1a1612] dark:text-[#f5f0e8] text-right max-w-[55%]">{value}</span>
+            <div key={label} className="flex justify-between items-center py-2.5 border-b last:border-b-0"
+              style={{ borderColor: 'var(--t-border)' }}>
+              <span className="font-mono text-[11px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>{label}</span>
+              <span className="text-sm font-medium text-right max-w-[55%]" style={{ color: 'var(--t-text)' }}>{value}</span>
             </div>
           ))}
         </div>
-        {/* Price breakdown */}
-        <div className="mx-6 mb-5 space-y-2">
-          {booking.overtimeCharge! > 0 && (
-            <div className="bg-red-50/70 dark:bg-red-900/10 p-3 rounded-xl border border-red-200/40 dark:border-red-800/30 flex justify-between items-center">
+
+        {/* Price section */}
+        <div className="px-6 pb-5 space-y-2">
+          {(b.overtimeCharge || 0) > 0 && (
+            <div className="p-3 rounded-xl flex justify-between items-center"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
               <div className="flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                <span className="font-mono text-[11px] text-red-600 dark:text-red-400">Overtime ({booking.overtimeMinutes}min × {OVERTIME_RATE} KES)</span>
+                <AlertTriangle className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+                <span className="font-mono text-[11px]" style={{ color: '#ef4444' }}>
+                  Overtime {b.overtimeMinutes}min × {OVERTIME_RATE} KES
+                </span>
               </div>
-              <span className="font-mono font-bold text-sm text-red-600 dark:text-red-400">+{booking.overtimeCharge!.toLocaleString()} KES</span>
+              <span className="font-mono font-bold text-sm" style={{ color: '#ef4444' }}>
+                +{b.overtimeCharge!.toLocaleString()} KES
+              </span>
             </div>
           )}
-          <div className="bg-[#f5f0e8] dark:bg-[#2d2318]/60 rounded-2xl p-4 flex justify-between items-center">
-            <span className="font-mono text-xs text-[#7a6e60] dark:text-[#a09070] uppercase tracking-wider">Total Paid</span>
+
+          <div className="p-4 rounded-2xl flex justify-between items-center"
+            style={{ background: 'var(--t-bg2)' }}>
+            <span className="font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>
+              Total Paid
+            </span>
             <div className="text-right">
-              <p className="font-display font-bold text-2xl text-[#c9972a]">{totalPaid.toLocaleString()} <span className="text-sm font-sans font-semibold">KES</span></p>
-              {booking.promoCode && booking.originalPrice > booking.price && <p className="font-mono text-[10px] text-[#7a6e60] line-through">{booking.originalPrice.toLocaleString()} KES</p>}
+              <p className="font-display font-bold text-2xl" style={{ color: 'var(--t-accent)' }}>
+                {totalPaid.toLocaleString()} <span className="text-sm font-sans">KES</span>
+              </p>
+              {b.promoCode && b.originalPrice > b.price && (
+                <p className="font-mono text-[10px] line-through" style={{ color: 'var(--t-muted)' }}>
+                  {b.originalPrice.toLocaleString()} KES
+                </p>
+              )}
             </div>
           </div>
+
+          {b.depositAmount! > 0 && !b.depositReturned && (
+            <div className="p-3 rounded-xl flex items-center gap-2"
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+              <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#b45309' }} />
+              <p className="text-xs" style={{ color: '#b45309' }}>
+                Deposit of <strong>{b.depositAmount!.toLocaleString()} KES</strong> is held — returned when quad is back.
+              </p>
+            </div>
+          )}
         </div>
-        {booking.depositAmount! > 0 && !booking.depositReturned && (
-          <div className="mx-6 mb-5 bg-amber-50/70 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-200/40 dark:border-amber-800/30 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-            <p className="text-xs text-amber-700 dark:text-amber-400">Deposit of <strong>{booking.depositAmount!.toLocaleString()} KES</strong> held pending quad return.</p>
-          </div>
-        )}
-        <div className="px-6 pb-6 text-center">
-          <p className="font-display text-xs italic text-[#7a6e60] dark:text-[#a09070]">Thank you for riding with Royal Quads</p>
-          <a href="https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 font-mono text-[10px] text-[#c9972a] hover:text-[#e8b84b] transition-colors"><MapPin className="w-2.5 h-2.5" />Mambrui Sand Dunes</a>
+
+        {/* Footer */}
+        <div className="px-6 pb-6 text-center border-t" style={{ borderColor: 'var(--t-border)', paddingTop: '1rem' }}>
+          <p className="font-display text-xs italic" style={{ color: 'var(--t-muted)' }}>Thank you for riding with Royal Quads</p>
+          <a href="https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-1.5 font-mono text-[10px] transition-opacity hover:opacity-70"
+            style={{ color: 'var(--t-accent)' }}>
+            <MapPin className="w-2.5 h-2.5" /> Mambrui Sand Dunes
+          </a>
         </div>
       </div>
 
-      {/* Feedback */}
-      <div className="w-full max-w-sm bg-white/70 dark:bg-[#1a1612]/70 rounded-2xl border border-[#c9b99a]/20 dark:border-[#c9b99a]/8 p-5 backdrop-blur-sm">
-        <h2 className="font-display text-base font-bold text-center mb-4 text-[#1a1612] dark:text-[#f5f0e8]">Rate Your Experience</h2>
+      {/* ── Feedback ── */}
+      <div className="w-full max-w-sm rounded-2xl p-5 t-card">
+        <h2 className="font-display text-base font-bold text-center mb-4" style={{ color: 'var(--t-text)' }}>
+          Rate Your Experience
+        </h2>
         {submitted ? (
-          <div className="text-center p-4 rounded-2xl bg-[#f5f0e8] dark:bg-[#2d2318]/50">
-            <div className="flex justify-center gap-1.5 mb-2">{[1,2,3,4,5].map(s => <Star key={s} className={cn('w-6 h-6', s <= rating ? 'fill-[#c9972a] text-[#c9972a]' : 'text-[#c9b99a]/30')} />)}</div>
-            <p className="text-sm font-medium text-[#7a6e60] dark:text-[#a09070]">Thank you for your feedback!</p>
+          <div className="text-center p-4 rounded-2xl" style={{ background: 'var(--t-bg2)' }}>
+            <div className="flex justify-center gap-1.5 mb-2">
+              {[1,2,3,4,5].map(s => (
+                <Star key={s} className="w-6 h-6"
+                  style={{ fill: s <= rating ? 'var(--t-accent)' : 'transparent',
+                            color: s <= rating ? 'var(--t-accent)' : 'var(--t-border)' }} />
+              ))}
+            </div>
+            <p className="text-sm font-medium" style={{ color: 'var(--t-muted)' }}>Thanks for your feedback!</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex justify-center gap-2">
               {[1,2,3,4,5].map(s => (
-                <button key={s} type="button" onClick={() => setRating(s)} onMouseEnter={() => setHover(s)} onMouseLeave={() => setHover(0)} className="p-0.5 transition-transform hover:scale-110">
-                  <Star className={cn('w-8 h-8 transition-all', s <= (hover || rating) ? 'fill-[#c9972a] text-[#c9972a] scale-105' : 'text-[#c9b99a]/30')} />
+                <button key={s} type="button"
+                  onClick={() => setRating(s)}
+                  onMouseEnter={() => setHovered(s)}
+                  onMouseLeave={() => setHovered(0)}
+                  className="p-0.5 transition-transform hover:scale-110">
+                  <Star className="w-8 h-8 transition-all"
+                    style={{
+                      fill: s <= (hovered || rating) ? 'var(--t-accent)' : 'transparent',
+                      color: s <= (hovered || rating) ? 'var(--t-accent)' : 'var(--t-border)',
+                      transform: s <= (hovered || rating) ? 'scale(1.05)' : 'scale(1)',
+                    }} />
                 </button>
               ))}
             </div>
             {rating > 0 && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex flex-col gap-3 overflow-hidden">
-                <textarea placeholder="Tell us about your ride (optional)" value={feedbackText} onChange={e => setFeedbackText(e.target.value)} className="input resize-none h-20 text-sm" />
-                <button onClick={handleFeedback} disabled={submitting} className="btn-primary">{submitting ? 'Submitting...' : 'Submit Feedback'}</button>
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                className="flex flex-col gap-3 overflow-hidden">
+                <textarea placeholder="Tell us about your ride (optional)"
+                  value={feedback} onChange={e => setFeedback(e.target.value)}
+                  className="input resize-none h-20 text-sm" />
+                <button onClick={handleFeedback} disabled={submitting} className="btn-primary">
+                  {submitting ? <><Spinner /> Submitting…</> : 'Submit Feedback'}
+                </button>
               </motion.div>
             )}
           </div>
         )}
       </div>
 
+      {/* ── Actions ── */}
       <div className="flex gap-3 w-full max-w-sm">
-        <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border border-[#c9b99a]/30 dark:border-[#c9b99a]/10 bg-white/60 dark:bg-[#1a1612]/60 text-sm font-semibold text-[#1a1612] dark:text-[#f5f0e8] hover:border-[#c9972a]/50 transition-colors">
+        <button onClick={() => window.print()}
+          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-opacity hover:opacity-75 no-print"
+          style={{ borderColor: 'var(--t-border)', color: 'var(--t-text)', background: 'var(--t-card)' }}>
           <Printer className="w-4 h-4" /> Print
         </button>
-        <Link to="/" className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl bg-[#1a1612] dark:bg-[#f5f0e8]/10 text-white dark:text-[#f5f0e8] text-sm font-semibold hover:bg-[#2d2318] dark:hover:bg-[#f5f0e8]/15 transition-colors">
+        <Link to="/"
+          className="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
+          style={{ background: 'var(--t-btn-bg)', color: 'var(--t-btn-text)' }}>
           <Home className="w-4 h-4" /> Home
         </Link>
       </div>

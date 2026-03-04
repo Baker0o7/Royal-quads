@@ -8,55 +8,93 @@ export default function TrackQuad() {
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
 
-  useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-      className="flex flex-col h-[80vh] bg-[#f5f0e8] dark:bg-[#0d0b09] rounded-3xl overflow-hidden border border-[#c9b99a]/20 dark:border-[#c9b99a]/8 shadow-sm">
-      <div className="bg-white/80 dark:bg-[#1a1612]/80 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-[#c9b99a]/15 dark:border-[#c9b99a]/8">
+      className="flex flex-col rounded-3xl overflow-hidden shadow-sm"
+      style={{ height: '80vh', border: '1px solid var(--t-border)' }}>
+
+      {/* Header */}
+      <div className="px-4 py-3 flex items-center gap-3 border-b"
+        style={{
+          background: 'color-mix(in srgb, var(--t-bg) 90%, transparent)',
+          borderColor: 'var(--t-border)',
+          backdropFilter: 'blur(12px)',
+        }}>
         <button onClick={() => navigate(-1)}
-          className="p-2 rounded-xl bg-[#f5f0e8] dark:bg-[#2d2318] text-[#7a6e60] hover:text-[#c9972a] transition-colors">
+          className="p-2 rounded-xl transition-colors hover:opacity-70"
+          style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1">
-          <p className="font-semibold text-sm text-[#1a1612] dark:text-[#f5f0e8]">Live Tracking</p>
-          <p className="font-mono text-[10px] text-[#7a6e60] dark:text-[#a09070]">IMEI: {imei}</p>
+          <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>Live Tracking</p>
+          <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>IMEI: {imei}</p>
         </div>
-        <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full">
-          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400">LIVE</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+          style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)' }}>
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full" style={{ animation: 'pulse 2s infinite' }} />
+          <span className="font-mono text-[10px] font-bold" style={{ color: '#16a34a' }}>LIVE</span>
         </div>
       </div>
 
-      <div className="flex-1 relative bg-[#e8dfc9] dark:bg-[#131009] flex items-center justify-center overflow-hidden">
+      {/* Map area */}
+      <div className="flex-1 relative flex items-center justify-center overflow-hidden"
+        style={{ background: 'var(--t-bg2)' }}>
+        {/* Grid pattern */}
         <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,1) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,1) 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
+          style={{
+            backgroundImage: 'linear-gradient(var(--t-text) 1px,transparent 1px),linear-gradient(90deg,var(--t-text) 1px,transparent 1px)',
+            backgroundSize: '32px 32px',
+          }} />
+
+        {/* Status indicators */}
         <div className="absolute top-3 right-3 flex flex-col gap-2">
-          {[<Signal className="w-3.5 h-3.5" />, <Battery className="w-3.5 h-3.5" />, <Wifi className="w-3.5 h-3.5" />].map((icon, i) => (
-            <div key={i} className="bg-white/80 dark:bg-[#1a1612]/80 p-2 rounded-xl shadow-sm text-[#c9972a] backdrop-blur-sm border border-[#c9b99a]/20 dark:border-[#c9b99a]/10">{icon}</div>
+          {[<Signal key="s" className="w-3.5 h-3.5" />, <Battery key="b" className="w-3.5 h-3.5" />, <Wifi key="w" className="w-3.5 h-3.5" />].map((icon, i) => (
+            <div key={i} className="p-2 rounded-xl shadow-sm t-card"
+              style={{ color: 'var(--t-accent)' }}>
+              {icon}
+            </div>
           ))}
         </div>
+
+        {/* Quad marker */}
         <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           className="relative z-10 flex flex-col items-center">
-          <div className="bg-gradient-to-br from-[#c9972a] to-[#8a6010] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg mb-2 flex items-center gap-1 font-mono">
+          <div className="accent-gradient text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg mb-2 flex items-center gap-1 font-mono">
             <Navigation className="w-3 h-3" /> MOVING
           </div>
-          <div className="w-14 h-14 bg-gradient-to-br from-[#2d2318] to-[#1a1612] rounded-full flex items-center justify-center shadow-2xl border-4 border-white dark:border-[#2d2318] text-2xl">🏍️</div>
-          <div className="absolute top-8 w-14 h-14 bg-[#c9972a] rounded-full animate-ping opacity-10 pointer-events-none" />
+          <div className="w-14 h-14 hero-card rounded-full flex items-center justify-center shadow-2xl text-2xl"
+            style={{ border: '3px solid var(--t-bg)' }}>
+            🏍️
+          </div>
+          <div className="absolute top-8 w-14 h-14 rounded-full animate-ping opacity-10 pointer-events-none"
+            style={{ background: 'var(--t-accent)' }} />
         </motion.div>
       </div>
 
-      <div className="bg-white/80 dark:bg-[#1a1612]/80 backdrop-blur-md px-5 py-4 border-t border-[#c9b99a]/15 dark:border-[#c9b99a]/8">
+      {/* Stats bar */}
+      <div className="px-5 py-4 border-t"
+        style={{
+          background: 'color-mix(in srgb, var(--t-bg) 90%, transparent)',
+          borderColor: 'var(--t-border)',
+          backdropFilter: 'blur(12px)',
+        }}>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Speed', value: '24', unit: 'km/h', emoji: '⚡' },
-            { label: 'Satellites', value: '12', unit: 'GPS', emoji: '📡' },
-            { label: 'Updated', value: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), unit: '', emoji: '⏱' },
+            { label: 'Speed',      value: '24',  unit: 'km/h', emoji: '⚡' },
+            { label: 'Satellites', value: '12',  unit: 'GPS',  emoji: '📡' },
+            { label: 'Updated',    value: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), unit: '', emoji: '⏱' },
           ].map(({ label, value, unit, emoji }) => (
-            <div key={label} className="bg-[#f5f0e8]/80 dark:bg-[#2d2318]/60 p-3 rounded-2xl border border-[#c9b99a]/15 dark:border-[#c9b99a]/8 text-center">
+            <div key={label} className="p-3 rounded-2xl text-center t-card">
               <span className="text-base">{emoji}</span>
-              <p className="font-mono font-bold text-sm text-[#1a1612] dark:text-[#f5f0e8] mt-1 tabular-nums">{value}</p>
-              <p className="font-mono text-[9px] text-[#7a6e60] dark:text-[#a09070] uppercase tracking-wider">{unit || label}</p>
+              <p className="font-mono font-bold text-sm mt-1 tabular-nums" style={{ color: 'var(--t-text)' }}>{value}</p>
+              <p className="font-mono text-[9px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>
+                {unit || label}
+              </p>
             </div>
           ))}
         </div>

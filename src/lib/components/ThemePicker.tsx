@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Palette, Check, X } from 'lucide-react';
+import { useState } from 'react';import { Palette, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme, THEMES } from '../ThemeContext';
 
