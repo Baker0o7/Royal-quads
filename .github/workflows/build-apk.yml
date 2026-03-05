@@ -2,7 +2,7 @@ name: Build & Release Android APK
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -15,13 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 22
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: npm
 
-      - name: Install JS dependencies
+      - name: Install dependencies
         run: npm install --legacy-peer-deps
 
       - name: Build web app
@@ -32,35 +32,18 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
+          java-version: 21
           distribution: temurin
           cache: gradle
 
       - name: Add Android platform
-        run: npx cap add android || echo "Android platform already exists, continuing"
+        run: npx cap add android || true
+
+      - name: Install Pillow
+        run: pip install Pillow --break-system-packages --quiet
 
       - name: Inject app icons
-        run: |
-          pip install Pillow --break-system-packages --quiet
-          python3 - <<'PYEOF'
-from PIL import Image
-import os
-
-img = Image.open("public/logo.png").convert("RGBA")
-configs = [
-  ("android/app/src/main/res/mipmap-mdpi",    48),
-  ("android/app/src/main/res/mipmap-hdpi",    72),
-  ("android/app/src/main/res/mipmap-xhdpi",   96),
-  ("android/app/src/main/res/mipmap-xxhdpi", 144),
-  ("android/app/src/main/res/mipmap-xxxhdpi",192),
-]
-for folder, size in configs:
-  os.makedirs(folder, exist_ok=True)
-  resized = img.resize((size, size), Image.LANCZOS)
-  resized.save(f"{folder}/ic_launcher.png",       "PNG")
-  resized.save(f"{folder}/ic_launcher_round.png", "PNG")
-  print(f"  ✓ {size}px → {folder}")
-PYEOF
+        run: python3 scripts/inject-icons.py
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -68,65 +51,52 @@ PYEOF
       - name: Build debug APK
         run: |
           chmod +x android/gradlew
-          cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          cd android && ./gradlew assembleDebug --no-daemon
 
-      - name: Stage APK
+      - name: Stage APK for release
         run: |
           mkdir -p output
           cp android/app/build/outputs/apk/debug/app-debug.apk output/Royal-Quads.apk
-          echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
-      - name: Upload artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Royal-Quads-APK
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      - name: Generate version tag
+      - name: Generate release tag
         id: version
         run: |
-          echo "tag=v$(date +'%Y.%m.%d')-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+          SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+          echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "Royal Quad Bikes ${{ steps.version.outputs.tag }}"
+          name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
           body: |
-            ## 🏍️ Royal Quad Bikes — Android APK
+            ## Royal Quad Bikes — Android APK
 
-            **Download `Royal-Quads.apk` below and install on your Android device.**
+            Download `Royal-Quads.apk` below and install on your device.
 
-            > ⚠️ Enable *Install from unknown sources* in Android Settings → Security before installing.
+            > Enable **Install from unknown sources** in Android Settings before installing.
 
-            ### ✨ What's new in v2.7.0
-            - 🆕 **New logo** — updated Royal Quad Bikes badge across all surfaces
-            - 🔐 **Google Sign-In fixed** — reliable on all Android devices & browsers
-            - 🎨 **Auth portal redesigned** — beautiful animated sign-in / sign-up
-            - ⚡ **Quick-Start booking** — admins start a ride in seconds from the dashboard
-            - 🔍 **History search & date filter** — find any past ride instantly
-            - 📊 **Daily cash report** — printable revenue breakdown by day & quad
-            - 💚 **M-Pesa UX** — step-by-step payment guide + confirmation code
-            - 📱 **PWA** — install from Chrome as a home screen app
+            ### New in v2.7
+            - New logo on all surfaces and app icon
+            - Google Sign-In fixed on all devices
+            - Auth portal redesigned with animated form
+            - Quick-Start booking from admin dashboard
+            - History search and date filter
+            - Daily cash report (printable)
+            - M-Pesa step-by-step guide with confirmation code
+            - PWA — installable from Chrome
 
-            ### Core features
-            - 🔔 In-app notifications (overtime, 2-min warning, ride complete)
-            - 📲 WhatsApp alerts to customers
-            - 📄 PDF receipt export
-            - 🎨 8 colour themes (Desert, Midnight, Ocean, Forest, Sunset, Arctic, Volcanic, Rose)
-            - ⏱️ Live countdown timer with overtime billing at 100 KES/min
-            - 📋 Full admin dashboard — fleet, promos, maintenance, damage, staff, waitlist, pre-bookings
-            - 📊 Revenue analytics & charts
-            - 🛡️ Digital waiver with signature pad
-            - 📅 Pre-booking & waitlist management
-
-            ### Install steps
-            1. Download **`Royal-Quads.apk`** below
-            2. On your phone: **Settings → Security → Install unknown apps** → enable for Files
-            3. Open the APK and tap **Install**
-            4. Launch **Royal Quad Bikes** 🏍️
+            ### Install
+            1. Download Royal-Quads.apk
+            2. Settings > Security > Install unknown apps > enable
+            3. Open APK and tap Install
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
