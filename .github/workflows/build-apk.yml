@@ -1,0 +1,96 @@
+name: Build & Release Flutter APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.4
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Inject app icons
+        run: |
+          pip install Pillow --break-system-packages --quiet
+          python3 scripts/inject-icons.py
+
+      - name: Build debug APK
+        run: flutter build apk --debug --no-tree-shake-icons
+
+      - name: Rename APK
+        run: |
+          mkdir -p output
+          cp build/app/outputs/flutter-apk/app-debug.apk output/Royal-Quads.apk
+          echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Royal-Quads-APK
+          path: output/Royal-Quads.apk
+          retention-days: 30
+
+      - name: Generate tag
+        id: version
+        run: |
+          SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+          echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Royal Quad Bikes ${{ steps.version.outputs.tag }} (Flutter)
+          body: |
+            ## Royal Quad Bikes — Flutter Android APK
+
+            Rebuilt from TypeScript/React to Flutter/Dart.
+            Download Royal-Quads.apk and install on Android.
+
+            > Enable Install from unknown sources in Settings before installing.
+
+            ### Features
+            - Book quad rides with live countdown timer
+            - Overtime billing at 100 KES/min
+            - M-Pesa payment with confirmation code
+            - Admin dashboard with PIN lock
+            - Quick-Start booking for admins
+            - History search and daily cash report
+            - Pre-bookings with date/time scheduler
+            - Safety waiver screen
+            - PDF receipt export
+            - WhatsApp receipt sharing
+            - Google Sign-In
+            - Staff management
+            - Maintenance logs
+            - Promo codes
+
+            ### Install
+            1. Download Royal-Quads.apk
+            2. Settings > Security > Install unknown apps > enable
+            3. Open APK and tap Install
+          files: output/Royal-Quads.apk
+          draft: false
+          prerelease: false
