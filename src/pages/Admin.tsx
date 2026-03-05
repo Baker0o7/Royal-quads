@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   TrendingUp, Calendar, Tag, Plus, Power, Edit2, X, Save, QrCode,
   Navigation, Trash2, RefreshCw, Users, Activity, Wrench, AlertOctagon,
   UserCheck, Clock, BarChart3, List, Wallet, CheckCircle2, XCircle, Lock,
+  FileText, Search, CreditCard, Copy, Check,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -17,6 +18,7 @@ import type {
   Quad, Booking, Promotion, SalesData, MaintenanceLog,
   DamageReport, Staff, WaitlistEntry, Prebooking,
 } from '../types';
+import { PRICING, OVERTIME_RATE } from '../types';
 
 type Tab = 'overview' | 'fleet' | 'promos' | 'maintenance' | 'damage' | 'staff' | 'waitlist' | 'prebookings' | 'settings';
 
@@ -98,11 +100,312 @@ function StatCard({ icon, label, value, accent = false }: {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Quick-Start Booking Modal
+// ─────────────────────────────────────────────────────────────────────────────
+function QuickBookModal({ quads, onClose, onBooked }: {
+  quads: Quad[];
+  onClose: () => void;
+  onBooked: () => void;
+}) {
+  const toast = useToast();
+  const [quadId,   setQuadId]   = useState<number | ''>('');
+  const [duration, setDuration] = useState<number | ''>('');
+  const [name,     setName]     = useState('');
+  const [phone,    setPhone]    = useState('');
+  const [mpesaRef, setMpesaRef] = useState('');
+  const [copied,   setCopied]   = useState(false);
+  const [loading,  setLoading]  = useState(false);
+
+  const available = quads.filter(q => q.status === 'available');
+  const pricing   = PRICING.find(p => p.duration === duration);
+  const price     = pricing?.price ?? 0;
+
+  const copyTill = () => {
+    navigator.clipboard.writeText('6685024').then(() => {
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quadId || !duration || !name.trim() || !phone.trim()) {
+      toast.error('Please fill in all required fields'); return;
+    }
+    setLoading(true);
+    try {
+      const b = await api.createBooking({
+        quadId: quadId as number,
+        customerName: name.trim(),
+        customerPhone: phone.replace(/\s/g, ''),
+        duration: duration as number,
+        price,
+        originalPrice: price,
+        mpesaRef: mpesaRef.trim().toUpperCase() || null,
+      });
+      toast.success(`Ride started! Receipt #${b.receiptId}`);
+      onBooked();
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Booking failed');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <motion.div className="fixed inset-0 z-[9998] flex items-end justify-center"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      onClick={onClose}
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+      <motion.div
+        initial={{ y: '100%' }} animate={{ y: 0 }}
+        transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+        onClick={e => e.stopPropagation()}
+        className="w-full max-w-md rounded-t-3xl overflow-y-auto"
+        style={{ background: 'var(--t-bg)', maxHeight: '92vh' }}>
+
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--t-border)' }} />
+        </div>
+
+        <div className="px-5 pb-8 pt-2">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display text-lg font-bold" style={{ color: 'var(--t-text)' }}>
+              ⚡ Quick Start Ride
+            </h2>
+            <button onClick={onClose} className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Quad */}
+            <div>
+              <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Quad *</label>
+              <select value={quadId} onChange={e => setQuadId(Number(e.target.value) || '')} className="input">
+                <option value="">Select a quad…</option>
+                {available.map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
+              </select>
+              {available.length === 0 && (
+                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>All quads are currently rented</p>
+              )}
+            </div>
+
+            {/* Duration grid */}
+            <div>
+              <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Duration *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {PRICING.map(p => (
+                  <button key={p.duration} type="button"
+                    onClick={() => setDuration(p.duration)}
+                    className="py-2.5 rounded-xl text-xs font-semibold border transition-all"
+                    style={{
+                      background:   duration === p.duration ? 'var(--t-accent)' : 'var(--t-bg2)',
+                      color:        duration === p.duration ? 'white' : 'var(--t-text)',
+                      borderColor:  duration === p.duration ? 'var(--t-accent)' : 'var(--t-border)',
+                    }}>
+                    <div>{p.label}</div>
+                    <div className="font-mono text-[10px] opacity-70">{p.price.toLocaleString()} KES</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Customer details */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Name *</label>
+                <input type="text" placeholder="Full name" value={name} onChange={e => setName(e.target.value)} className="input" />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Phone *</label>
+                <input type="tel" placeholder="07xx xxx xxx" value={phone} onChange={e => setPhone(e.target.value)} className="input" />
+              </div>
+            </div>
+
+            {/* M-Pesa block */}
+            {price > 0 && (
+              <div className="p-4 rounded-2xl" style={{ background: 'var(--t-bg2)', border: '1px solid var(--t-border)' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" style={{ color: 'var(--t-accent)' }} />
+                    <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>M-Pesa</span>
+                  </div>
+                  <span className="font-display font-bold text-lg" style={{ color: 'var(--t-accent)' }}>
+                    {price.toLocaleString()} KES
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-mono text-xs" style={{ color: 'var(--t-muted)' }}>
+                    Till: <strong style={{ color: 'var(--t-text)' }}>6685024</strong>
+                  </span>
+                  <button type="button" onClick={copyTill}
+                    className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg"
+                    style={{ background: 'var(--t-bg)', color: copied ? '#16a34a' : 'var(--t-muted)' }}>
+                    {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                  </button>
+                </div>
+                <input type="text" placeholder="Confirmation code (optional)"
+                  value={mpesaRef} onChange={e => setMpesaRef(e.target.value.toUpperCase())}
+                  className="input font-mono text-sm" maxLength={12}
+                  style={{ letterSpacing: '0.08em' }} />
+              </div>
+            )}
+
+            <button type="submit" disabled={loading || available.length === 0} className="btn-primary">
+              {loading ? <><Spinner /> Starting…</> : <><CheckCircle2 className="w-4 h-4" /> Start Ride</>}
+            </button>
+          </form>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Daily Cash Report Modal
+// ─────────────────────────────────────────────────────────────────────────────
+function DailyReportModal({ history, onClose }: {
+  history: Booking[];
+  onClose: () => void;
+}) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [reportDate, setReportDate] = useState(today);
+
+  const rides       = history.filter(b => b.startTime.startsWith(reportDate));
+  const baseRevenue = rides.reduce((s, b) => s + b.price, 0);
+  const otRevenue   = rides.reduce((s, b) => s + (b.overtimeCharge ?? 0), 0);
+  const totalRev    = baseRevenue + otRevenue;
+  const avgRev      = rides.length > 0 ? Math.round(totalRev / rides.length) : 0;
+  const byQuad      = rides.reduce<Record<string, { count: number; revenue: number }>>((acc, b) => {
+    const k = b.quadName;
+    acc[k] = acc[k] || { count: 0, revenue: 0 };
+    acc[k].count++;
+    acc[k].revenue += b.price + (b.overtimeCharge ?? 0);
+    return acc;
+  }, {});
+
+  return (
+    <motion.div className="fixed inset-0 z-[9998] flex items-end justify-center"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      onClick={onClose}
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+      <motion.div
+        initial={{ y: '100%' }} animate={{ y: 0 }}
+        transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+        onClick={e => e.stopPropagation()}
+        className="w-full max-w-md rounded-t-3xl overflow-y-auto"
+        style={{ background: 'var(--t-bg)', maxHeight: '92vh' }}>
+
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--t-border)' }} />
+        </div>
+
+        <div className="px-5 pb-8 pt-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg font-bold" style={{ color: 'var(--t-text)' }}>
+              📊 Daily Cash Report
+            </h2>
+            <button onClick={onClose} className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <input type="date" value={reportDate}
+            onChange={e => setReportDate(e.target.value)} max={today}
+            className="input mb-4" />
+
+          {/* Summary */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {[
+              { label: 'Total Rides',   value: rides.length,                  accent: false },
+              { label: 'Total Revenue', value: `${totalRev.toLocaleString()} KES`, accent: true  },
+              { label: 'Overtime Rev',  value: `${otRevenue.toLocaleString()} KES`, accent: false },
+              { label: 'Avg Per Ride',  value: `${avgRev.toLocaleString()} KES`,    accent: false },
+            ].map(({ label, value, accent }) => (
+              <div key={label} className="p-3 rounded-2xl text-center"
+                style={{
+                  background:   accent ? 'color-mix(in srgb, var(--t-accent) 12%, var(--t-bg2))' : 'var(--t-bg2)',
+                  border:       accent ? '1px solid color-mix(in srgb, var(--t-accent) 30%, transparent)' : '1px solid var(--t-border)',
+                }}>
+                <p className="font-display font-bold text-lg" style={{ color: accent ? 'var(--t-accent)' : 'var(--t-text)' }}>{value}</p>
+                <p className="font-mono text-[10px] uppercase tracking-wider mt-0.5" style={{ color: 'var(--t-muted)' }}>{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* By quad */}
+          {Object.keys(byQuad).length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: 'var(--t-muted)' }}>By Quad</p>
+              <div className="flex flex-col gap-2">
+                {Object.entries(byQuad).map(([qName, d]) => (
+                  <div key={qName} className="flex justify-between items-center p-3 rounded-xl"
+                    style={{ background: 'var(--t-bg2)' }}>
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{qName}</p>
+                      <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>{d.count} ride{d.count !== 1 ? 's' : ''}</p>
+                    </div>
+                    <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>
+                      {d.revenue.toLocaleString()} KES
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ride list */}
+          {rides.length > 0 ? (
+            <div className="mb-4">
+              <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: 'var(--t-muted)' }}>
+                All Rides ({rides.length})
+              </p>
+              <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-1">
+                {rides.map(b => (
+                  <div key={b.id} className="flex justify-between items-center px-3 py-2 rounded-xl text-xs"
+                    style={{ background: 'var(--t-bg2)' }}>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium truncate block" style={{ color: 'var(--t-text)' }}>{b.customerName}</span>
+                      <span className="font-mono" style={{ color: 'var(--t-muted)' }}>
+                        {b.quadName} · {b.duration}min · {new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <span className="font-bold" style={{ color: 'var(--t-accent)' }}>
+                        {(b.price + (b.overtimeCharge ?? 0)).toLocaleString()} KES
+                      </span>
+                      {b.mpesaRef && (
+                        <div className="font-mono text-[9px]" style={{ color: 'var(--t-muted)' }}>{b.mpesaRef}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-center py-8 font-mono text-sm" style={{ color: 'var(--t-muted)' }}>
+              No rides on {reportDate}
+            </p>
+          )}
+
+          <button onClick={() => window.print()} className="btn-primary w-full">
+            <FileText className="w-4 h-4" /> Print / Save as PDF
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Admin() {
   const toast = useToast();
   const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('rq:admin_unlocked') === '1');
   const [tab, setTab]           = useState<Tab>('overview');
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyDate,   setHistoryDate]   = useState('');
+  const [showQuickBook,    setShowQuickBook]    = useState(false);
+  const [showDailyReport,  setShowDailyReport]  = useState(false);
   const [sales, setSales]       = useState<SalesData>({ total: 0, today: 0, thisWeek: 0, thisMonth: 0, overtimeRevenue: 0 });
   const [activeBookings, setActive] = useState<Booking[]>([]);
   const [history, setHistory]   = useState<Booking[]>([]);
@@ -190,6 +493,23 @@ export default function Admin() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-5">
 
+      {/* Modals */}
+      <AnimatePresence>
+        {showQuickBook && (
+          <QuickBookModal
+            quads={quads}
+            onClose={() => setShowQuickBook(false)}
+            onBooked={fetchAll}
+          />
+        )}
+        {showDailyReport && (
+          <DailyReportModal
+            history={history}
+            onClose={() => setShowDailyReport(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -253,10 +573,17 @@ export default function Admin() {
 
         {/* Live rides */}
         <section>
-          <h2 className="section-heading" style={{ color: 'var(--t-text)' }}>
-            <span className="w-2 h-2 bg-green-500 rounded-full" style={{ animation: 'pulse 2s infinite' }} />
-            Live Rides ({activeBookings.length})
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="section-heading mb-0" style={{ color: 'var(--t-text)' }}>
+              <span className="w-2 h-2 bg-green-500 rounded-full" style={{ animation: 'pulse 2s infinite' }} />
+              Live Rides ({activeBookings.length})
+            </h2>
+            <button onClick={() => setShowQuickBook(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+              style={{ background: 'var(--t-accent)', color: 'white' }}>
+              <Plus className="w-3.5 h-3.5" /> Quick Start
+            </button>
+          </div>
           {activeBookings.length === 0
             ? <EmptyState message="No active rides right now." />
             : (
@@ -343,33 +670,87 @@ export default function Admin() {
         {/* Recent rides */}
         <section>
           <h2 className="section-heading" style={{ color: 'var(--t-text)' }}>Recent Rides</h2>
-          {history.length === 0
-            ? <EmptyState message="No completed rides yet." />
-            : (
-              <div className="flex flex-col gap-2">
-                {history.slice(0, 15).map(b => (
-                  <div key={b.id} className="t-card rounded-xl px-4 py-3 flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
-                      <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
-                        {b.customerName} · {b.duration}min
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>
-                        +{(b.price + (b.overtimeCharge ?? 0)).toLocaleString()} KES
-                      </p>
-                      {(b.overtimeCharge ?? 0) > 0 && (
-                        <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
-                          +{(b.overtimeCharge ?? 0).toLocaleString()} overtime
-                        </p>
-                      )}
-                    </div>
+
+          {/* Search + date filter */}
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Search name, phone, quad…"
+              value={historySearch}
+              onChange={e => setHistorySearch(e.target.value)}
+              className="input flex-1 text-xs py-2"
+              style={{ minWidth: 0 }}
+            />
+            <input
+              type="date"
+              value={historyDate}
+              onChange={e => setHistoryDate(e.target.value)}
+              className="input text-xs py-2"
+              style={{ width: 130 }}
+            />
+            {(historySearch || historyDate) && (
+              <button onClick={() => { setHistorySearch(''); setHistoryDate(''); }}
+                className="px-3 rounded-xl border text-xs font-semibold"
+                style={{ borderColor: 'var(--t-border)', color: 'var(--t-muted)', background: 'var(--t-bg2)' }}>
+                Clear
+              </button>
+            )}
+          </div>
+
+          {(() => {
+            const q = historySearch.toLowerCase();
+            const filtered = history.filter(b => {
+              const matchText = !q || [b.customerName, b.customerPhone, b.quadName, b.receiptId, b.mpesaRef ?? '']
+                .some(v => v.toLowerCase().includes(q));
+              const matchDate = !historyDate || b.startTime.startsWith(historyDate);
+              return matchText && matchDate;
+            });
+            const shown = filtered.slice(0, historySearch || historyDate ? 50 : 20);
+            return filtered.length === 0
+              ? <EmptyState message={historySearch || historyDate ? 'No rides match this filter.' : 'No completed rides yet.'} />
+              : (
+                <>
+                  {(historySearch || historyDate) && (
+                    <p className="text-[10px] font-mono mb-2" style={{ color: 'var(--t-muted)' }}>
+                      {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                      {' · '}
+                      {filtered.reduce((s,b) => s + b.price + (b.overtimeCharge ?? 0), 0).toLocaleString()} KES total
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-2">
+                    {shown.map(b => (
+                      <Link to={`/receipt/${b.id}`} key={b.id}
+                        className="t-card rounded-xl px-4 py-3 flex justify-between items-center hover:opacity-80 transition-opacity">
+                        <div>
+                          <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
+                          <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
+                            {b.customerName} · {b.duration}min
+                          </p>
+                          {b.mpesaRef && (
+                            <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-accent)' }}>
+                              📱 {b.mpesaRef}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>
+                            +{(b.price + (b.overtimeCharge ?? 0)).toLocaleString()} KES
+                          </p>
+                          {(b.overtimeCharge ?? 0) > 0 && (
+                            <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
+                              +{(b.overtimeCharge ?? 0).toLocaleString()} overtime
+                            </p>
+                          )}
+                          <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-muted)' }}>
+                            {new Date(b.startTime).toLocaleDateString('en-KE', { day:'numeric', month:'short' })}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )
-          }
+                </>
+              );
+          })()}
         </section>
 
         {/* Deposits to return */}
@@ -896,6 +1277,15 @@ export default function Admin() {
           <Panel>
             <PanelHeading icon={<Wallet className="w-4 h-4" />}>Data Management</PanelHeading>
             <div className="flex flex-col gap-3">
+              <button onClick={() => setShowDailyReport(true)}
+                className="w-full flex items-center justify-between p-3 rounded-xl border transition-opacity hover:opacity-75"
+                style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)', color: 'var(--t-text)' }}>
+                <span className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="w-4 h-4" style={{ color: 'var(--t-accent)' }} />
+                  Daily Cash Report
+                </span>
+                <span className="text-xs font-mono" style={{ color: 'var(--t-accent)' }}>Open →</span>
+              </button>
               <button onClick={() => { api.exportBookings(); toast.success('CSV export started!'); }}
                 className="w-full flex items-center justify-between p-3 rounded-xl border transition-opacity hover:opacity-75"
                 style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)', color: 'var(--t-text)' }}>

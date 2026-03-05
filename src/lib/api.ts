@@ -88,7 +88,7 @@ export const api = {
     duration: number; price: number; originalPrice: number; promoCode?: string | null;
     isPrebooked?: boolean; prebookTime?: string; groupSize?: number;
     idPhotoUrl?: string | null; waiverSigned?: boolean; depositAmount?: number;
-    operatorId?: number | null;
+    operatorId?: number | null; mpesaRef?: string | null;
   }): Promise<{ id: number; receiptId: string; startTime: string }> => {
     const quads = getQuads();
     const quad = quads.find(q => q.id === body.quadId);
@@ -110,6 +110,7 @@ export const api = {
       waiverSignedAt: body.waiverSigned ? new Date().toISOString() : null,
       depositAmount: body.depositAmount ?? 0, depositReturned: false,
       operatorId: body.operatorId ?? null,
+      mpesaRef: body.mpesaRef ?? null,
       overtimeMinutes: 0, overtimeCharge: 0,
     };
     setBookings([...getBookings(), booking]);

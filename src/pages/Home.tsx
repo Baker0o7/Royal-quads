@@ -32,6 +32,7 @@ export default function Home() {
   const [copied, setCopied]                   = useState(false);
   const [showAdvanced, setShowAdvanced]       = useState(false);
   const [loadingQuads, setLoadingQuads]       = useState(true);
+  const [mpesaRef, setMpesaRef]               = useState('');
 
   useEffect(() => {
     setLoadingQuads(true);
@@ -97,6 +98,7 @@ export default function Home() {
         idPhotoUrl: idPhoto || null,
         depositAmount: depositAmount || 0,
         waiverSigned: false,
+        mpesaRef: mpesaRef.trim().toUpperCase() || null,
       });
       notifications.add('ride_started', 'Booking Created 🏍️',
         `${customerName.trim()} booked ${quads.find(q => q.id === selectedQuad)?.name} for ${selectedDuration} min — ${finalPrice.toLocaleString()} KES`,
@@ -354,59 +356,68 @@ export default function Home() {
 
         {/* Step 5 — M-Pesa */}
         <section>
-          <StepHeader step={5} title="Payment via M-Pesa" />
-          <div className="rounded-2xl overflow-hidden t-card shadow-sm">
+          <StepHeader step={5} title="Pay via M-Pesa" />
+
+          {/* STK push steps */}
+          <div className="rounded-2xl overflow-hidden t-card shadow-sm mb-3">
             <div className="p-4 flex items-start gap-3 border-b" style={{ borderColor: 'var(--t-border)' }}>
               <div className="w-9 h-9 rounded-xl accent-gradient flex items-center justify-center shrink-0 shadow-sm">
                 <CreditCard className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>Buy Goods & Services</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--t-muted)' }}>Pay before confirming your booking</p>
+                <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>Lipa na M-Pesa — Buy Goods</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--t-muted)' }}>Follow these steps on your phone</p>
               </div>
             </div>
+
+            {/* How-to steps */}
             <div className="p-4 flex flex-col gap-3">
-              <div className="info-row">
-                <span className="text-xs" style={{ color: 'var(--t-muted)' }}>Till Number</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-lg tracking-widest" style={{ color: 'var(--t-text)' }}>6685024</span>
-                  <button type="button" onClick={copyTill}
-                    className="p-1.5 rounded-lg transition-colors"
-                    style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
-                    {copied
-                      ? <Check className="w-3.5 h-3.5" style={{ color: '#16a34a' }} />
-                      : <Copy className="w-3.5 h-3.5" />}
-                  </button>
+              {[
+                { n: 1, text: 'Open M-Pesa on your phone' },
+                { n: 2, text: 'Select Lipa na M-Pesa → Buy Goods' },
+                { n: 3, text: <>Enter Till: <strong className="font-mono tracking-widest" style={{ color: 'var(--t-text)' }}>6685024</strong></> },
+                { n: 4, text: <>Amount: <strong className="font-mono" style={{ color: 'var(--t-accent)' }}>{finalPrice ? `${finalPrice.toLocaleString()} KES` : '—'}{depositAmount > 0 ? ` + ${depositAmount.toLocaleString()} deposit` : ''}</strong></> },
+              ].map(({ n, text }) => (
+                <div key={n} className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold font-mono"
+                    style={{ background: 'var(--t-accent)', color: 'white' }}>{n}</div>
+                  <p className="text-sm" style={{ color: 'var(--t-muted)' }}>{text}</p>
                 </div>
+              ))}
+
+              {/* Copy till */}
+              <div className="flex items-center justify-between pt-2 border-t mt-1" style={{ borderColor: 'var(--t-border)' }}>
+                <span className="text-xs font-mono" style={{ color: 'var(--t-muted)' }}>Business Name</span>
+                <span className="font-semibold text-xs text-right" style={{ color: 'var(--t-text)' }}>YUSUF OMAR SHEIKH AHMED TAIB</span>
               </div>
-              <div className="info-row">
-                <span className="text-xs" style={{ color: 'var(--t-muted)' }}>Business Name</span>
-                <span className="font-semibold text-xs text-right" style={{ color: 'var(--t-text)' }}>
-                  YUSUF OMAR SHEIKH<br />AHMED TAIB
-                </span>
-              </div>
-              <div className="info-row" style={{ borderBottom: 'none', paddingTop: '0.75rem', borderTop: `1px solid var(--t-border)` }}>
-                <span className="text-xs" style={{ color: 'var(--t-muted)' }}>Amount to Pay</span>
-                <div className="text-right">
-                  <p className="font-display font-bold text-xl" style={{ color: 'var(--t-accent)' }}>
-                    {finalPrice ? `${finalPrice.toLocaleString()} KES` : '—'}
-                  </p>
-                  {promoDiscount > 0 && originalPrice > 0 && (
-                    <p className="text-[10px] font-mono line-through" style={{ color: 'var(--t-muted)' }}>
-                      {originalPrice.toLocaleString()} KES
-                    </p>
-                  )}
-                </div>
-              </div>
-              {depositAmount > 0 && (
-                <div className="flex justify-between items-center pt-3 border-t" style={{ borderColor: 'var(--t-border)' }}>
-                  <span className="text-xs" style={{ color: 'var(--t-muted)' }}>+ Deposit (refundable)</span>
-                  <span className="font-mono font-bold text-sm" style={{ color: 'var(--t-muted)' }}>
-                    {depositAmount.toLocaleString()} KES
-                  </span>
-                </div>
-              )}
+
+              <button type="button" onClick={copyTill}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-all active:scale-[0.98]"
+                style={{ borderColor: 'var(--t-border)', background: 'var(--t-bg2)', color: 'var(--t-text)' }}>
+                {copied
+                  ? <><Check className="w-4 h-4" style={{ color: '#16a34a' }} /> Till Number Copied!</>
+                  : <><Copy className="w-4 h-4" /> Copy Till Number (6685024)</>}
+              </button>
             </div>
+          </div>
+
+          {/* M-Pesa reference input */}
+          <div className="rounded-2xl p-4 t-card">
+            <label className="block text-xs font-mono uppercase tracking-wider mb-2" style={{ color: 'var(--t-muted)' }}>
+              M-Pesa Confirmation Code
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. QHL2X3P8KA (optional)"
+              value={mpesaRef}
+              onChange={e => setMpesaRef(e.target.value.toUpperCase())}
+              className="input font-mono tracking-wider"
+              maxLength={12}
+              style={{ letterSpacing: '0.1em' }}
+            />
+            <p className="text-[10px] font-mono mt-2" style={{ color: 'var(--t-muted)' }}>
+              Found in your M-Pesa SMS confirmation message
+            </p>
           </div>
         </section>
 

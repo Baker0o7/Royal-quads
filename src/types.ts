@@ -37,6 +37,7 @@ export interface Booking {
   overtimeMinutes?: number;
   overtimeCharge?: number;
   depositAmount?: number;
+  mpesaRef?: string | null;
   depositReturned?: boolean;
   operatorId?: number | null;
 }

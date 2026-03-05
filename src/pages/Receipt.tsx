@@ -94,6 +94,7 @@ export default function Receipt() {
     ...((b.groupSize ?? 1) > 1 ? [{ label: 'Group',   value: `${b.groupSize} riders` }] : []),
     ...(b.promoCode            ? [{ label: 'Promo',   value: `${b.promoCode} ✓` }]       : []),
     ...(b.waiverSigned         ? [{ label: 'Waiver',  value: 'Signed ✓' }]               : []),
+    ...(b.mpesaRef             ? [{ label: 'M-Pesa',  value: b.mpesaRef }]               : []),
     ...((b.depositAmount ?? 0) > 0
       ? [{ label: 'Deposit', value: `${(b.depositAmount ?? 0).toLocaleString()} KES ${b.depositReturned ? '(returned)' : '(held)'}` }]
       : []),
