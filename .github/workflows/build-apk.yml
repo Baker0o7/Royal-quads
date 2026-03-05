@@ -21,8 +21,8 @@ jobs:
           node-version: 22.x
           cache: 'npm'
 
-      - name: Install dependencies (skip native modules)
-        run: npm install --ignore-scripts
+      - name: Install dependencies
+        run: npm install --ignore-scripts --legacy-peer-deps
 
       - name: Build Web App
         run: npm run build
@@ -45,31 +45,28 @@ jobs:
       - name: Copy App Icons into Android project
         run: |
           pip install Pillow --quiet
-          python3 - << 'PYEOF'
-          from PIL import Image
-          import os, shutil
+          python3 -c "
+from PIL import Image
+import os
 
-          src = 'public/logo.png'
-          img = Image.open(src)
-
-          sizes = {
-            'android/app/src/main/res/mipmap-mdpi/ic_launcher.png':         48,
-            'android/app/src/main/res/mipmap-hdpi/ic_launcher.png':         72,
-            'android/app/src/main/res/mipmap-xhdpi/ic_launcher.png':        96,
-            'android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png':      144,
-            'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png':     192,
-            'android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png':   48,
-            'android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png':   72,
-            'android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png':  96,
-            'android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png':144,
-            'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png':192,
-          }
-
-          for path, size in sizes.items():
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            img.resize((size, size), Image.LANCZOS).save(path, 'PNG')
-            print(f'  ✓ {path}')
-          PYEOF
+img = Image.open('public/logo.png')
+sizes = {
+  'android/app/src/main/res/mipmap-mdpi/ic_launcher.png':          48,
+  'android/app/src/main/res/mipmap-hdpi/ic_launcher.png':          72,
+  'android/app/src/main/res/mipmap-xhdpi/ic_launcher.png':         96,
+  'android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png':       144,
+  'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png':      192,
+  'android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png':    48,
+  'android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png':    72,
+  'android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png':   96,
+  'android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png': 144,
+  'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png':192,
+}
+for path, size in sizes.items():
+  os.makedirs(os.path.dirname(path), exist_ok=True)
+  img.resize((size, size), Image.LANCZOS).save(path, 'PNG')
+  print('OK', path)
+"
 
       - name: Sync Capacitor
         run: npx cap sync android

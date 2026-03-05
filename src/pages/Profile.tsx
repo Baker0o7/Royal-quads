@@ -9,8 +9,8 @@ import { api } from '../lib/api';
 import { Spinner } from '../lib/components/ui';
 import { useToast } from '../lib/components/Toast';
 import {
-  initAndRenderButton, nativeGoogleSignIn, googleSignOut,
-  isGoogleEnabled, isCapacitorNative, waitForGSI,
+  initAndRenderButton, googleSignOut,
+  isGoogleEnabled, waitForGSI,
 } from '../lib/googleAuth';
 import type { User as UserType, Booking } from '../types';
 
@@ -31,10 +31,10 @@ const GoogleLogo = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Web Google button — renders GSI's official button into a div.
+// Google button — renders GSI's official button into a div.
 // Each mount gets its own abort controller so there are no stale-callback races.
 // ─────────────────────────────────────────────────────────────────────────────
-function WebGoogleButton({ onSuccess, onError }: {
+function GoogleButton({ onSuccess, onError }: {
   onSuccess: (u: FullUser) => void;
   onError:   (msg: string) => void;
 }) {
@@ -101,53 +101,6 @@ function WebGoogleButton({ onSuccess, onError }: {
       )}
     </div>
   );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Native (Capacitor Android) button
-// ─────────────────────────────────────────────────────────────────────────────
-function NativeGoogleButton({ onSuccess, onError }: {
-  onSuccess: (u: FullUser) => void;
-  onError:   (msg: string) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      await nativeGoogleSignIn((u) => onSuccess(u as FullUser));
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Sign-in failed';
-      const cancelled = msg.toLowerCase().includes('cancel')
-        || msg.includes('12501') || msg.includes('dismiss');
-      if (!cancelled) onError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <button type="button" onClick={handleClick} disabled={loading}
-      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border transition-all active:scale-[0.98]"
-      style={{ background: '#ffffff', borderColor: '#dadce0' }}>
-      {loading ? <Spinner /> : <GoogleLogo />}
-      <span className="font-medium text-sm" style={{ color: '#3c4043' }}>
-        {loading ? 'Signing in…' : 'Continue with Google'}
-      </span>
-    </button>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Unified Google button — picks web vs native automatically
-// ─────────────────────────────────────────────────────────────────────────────
-function GoogleButton({ onSuccess, onError }: {
-  onSuccess: (u: FullUser) => void;
-  onError:   (msg: string) => void;
-}) {
-  return isCapacitorNative()
-    ? <NativeGoogleButton onSuccess={onSuccess} onError={onError} />
-    : <WebGoogleButton    onSuccess={onSuccess} onError={onError} />;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
