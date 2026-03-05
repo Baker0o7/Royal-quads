@@ -2,7 +2,7 @@ name: Build & Release Flutter APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, flutter]
   workflow_dispatch:
 
 jobs:
