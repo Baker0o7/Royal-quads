@@ -99,29 +99,28 @@ for path, size in sizes.items():
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "Royal Quads ${{ steps.version.outputs.tag }}"
+          name: "Royal Quad Bikes ${{ steps.version.outputs.tag }}"
           body: |
-            ## 🏍️ Royal Quads — Android APK
+            ## 🏍️ Royal Quad Bikes — Android APK
 
             **Download `Royal-Quads.apk` below and install on your Android device.**
 
-            > ⚠️ Enable *Install from unknown sources* in Android Settings before installing.
+            > ⚠️ Enable *Install from unknown sources* in Android Settings → Security before installing.
 
-            ### ✨ What's in this build
-            - 🔔 **In-app notifications** — ride alerts, overtime warnings, 2-min countdown, badge counter
-            - 📲 **WhatsApp alerts** — one-tap send to customer on overtime, waitlist, prebooking confirm
+            ### ✨ What's in v2.6.0
+            - 🏍️ **Official Royal Quad Bikes logo** — app icon, home screen, sign-in & header
+            - ⚡ **Quick-Start booking** — start a ride from Admin in seconds
+            - 🔍 **History search & date filter** — find any ride instantly
+            - 📊 **Daily cash report** — printable revenue breakdown by day & quad
+            - 💚 **M-Pesa UX** — step-by-step payment guide + confirmation code tracking
+            - 🔐 **Google Sign-In fixed** — works in all browsers & Android WebView
+            - 📱 **PWA support** — installable from Chrome, appears on home screen
+            - 🔔 **In-app notifications** — ride alerts, overtime warnings, 2-min countdown
+            - 📲 **WhatsApp alerts** — one-tap send receipts & overtime alerts to customers
             - 📄 **PDF receipt export** — branded, saveable receipt for every ride
             - 🎨 **8 colour themes** — Desert, Midnight, Ocean, Forest, Sunset, Arctic, Volcanic, Rose
-            - 👤 **Role chooser** — Admin / Customer / Guest sign-in flow
-            - 🔐 **Google Sign-In** — OAuth via popup (WebView-compatible)
-            - 🛡️ **Digital waiver** — signature pad, skip if already signed
             - ⏱️ **Live ride countdown** — ring timer, overtime billing at 100 KES/min
-            - 📋 **Admin dashboard** — 9 tabs: fleet, promos, maintenance, damage, staff, waitlist, pre-bookings, analytics
-            - 📊 **Analytics** — 7-day revenue chart, peak hours, quad utilisation, customer stats
-            - 🗺️ **GPS tracking** — live map per quad IMEI
-            - 📅 **Pre-booking** — schedule rides in advance with date picker
-            - 🧾 **Receipt history** — star ratings, feedback, print/save
-            - 📦 **Packages & promos** — discount codes, multi-ride packages
+            - 📋 **Full Admin dashboard** — fleet, promos, maintenance, damage, staff, waitlist, pre-bookings
 
             ### Install steps
             1. Download `Royal-Quads.apk`
