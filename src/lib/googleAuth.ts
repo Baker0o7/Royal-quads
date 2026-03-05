@@ -1,19 +1,11 @@
 /**
- * Google Sign-In — web GSI on all platforms.
- *
- * Uses google.accounts.id.renderButton() which works in both browsers
- * and Capacitor Android WebViews (the GSI iframe is allowlisted via
- * capacitor.config.ts allowNavigation).
- *
- * The previous @codetrix-studio/capacitor-google-auth approach was removed
- * because that package only supports Capacitor ≤6 and the project uses Cap 8.
+ * Google Sign-In — web GSI for all platforms (browser + Capacitor WebView).
  */
-
 import type { User } from '../types';
 
 declare global {
   interface Window {
-    _gsiCb?:          ((r: { credential: string }) => void) | null;
+    _gsiCallback?: ((r: { credential: string }) => void) | null;
     onGoogleLibraryLoad?: () => void;
     google?: {
       accounts: {
@@ -27,37 +19,25 @@ declare global {
   }
 }
 
-// ── Types ────────────────────────────────────────────────────────────────────
-export interface GoogleProfile {
-  sub: string; name: string; email: string; picture: string;
-}
+export interface GoogleProfile { sub: string; name: string; email: string; picture: string; }
+export type GoogleUser = User & { googleId: string; avatarUrl: string; email: string };
 
-export type GoogleCallback = (
-  user: User & { googleId: string; avatarUrl: string; email: string }
-) => void;
-
-// ── JWT decode ───────────────────────────────────────────────────────────────
 export function decodeGoogleJwt(token: string): GoogleProfile {
   const b64  = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-  const pad  = b64 + '=='.slice(0, (4 - (b64.length % 4)) % 4);
-  const json = decodeURIComponent(
-    atob(pad).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
-  );
+  const pad  = b64 + '=='.slice((b64.length % 4) === 0 ? 4 : b64.length % 4);
+  const json = decodeURIComponent(atob(pad).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
   return JSON.parse(json) as GoogleProfile;
 }
 
-// ── Upsert user from Google profile ──────────────────────────────────────────
-export function googleProfileToUser(
-  p: GoogleProfile
-): User & { googleId: string; avatarUrl: string; email: string } {
+export function upsertGoogleUser(p: GoogleProfile): GoogleUser {
   type SU = User & { googleId?: string; password?: string; avatarUrl?: string; email?: string };
-  const users = JSON.parse(localStorage.getItem('rq:users') || '[]') as SU[];
-  let u = users.find(u => u.googleId === p.sub);
+  const users = JSON.parse(localStorage.getItem('rq:users') ?? '[]') as SU[];
+  let u = users.find(x => x.googleId === p.sub);
   if (u) {
     u.name = p.name; u.avatarUrl = p.picture; u.email = p.email;
     localStorage.setItem('rq:users', JSON.stringify(users));
   } else {
-    const seq = Number(localStorage.getItem('rq:user_seq') || '0') + 1;
+    const seq = Number(localStorage.getItem('rq:user_seq') ?? '0') + 1;
     localStorage.setItem('rq:user_seq', String(seq));
     u = { id: seq, name: p.name, phone: '', role: 'user', password: '',
           googleId: p.sub, avatarUrl: p.picture, email: p.email };
@@ -66,63 +46,47 @@ export function googleProfileToUser(
   return { ...u, googleId: p.sub, avatarUrl: p.picture, email: p.email };
 }
 
-// ── Config ───────────────────────────────────────────────────────────────────
 export function getClientId(): string {
   const id = process.env.GOOGLE_CLIENT_ID as string;
   return typeof id === 'string' && id.length > 10 ? id : '';
 }
-export function isGoogleEnabled(): boolean { return getClientId().length > 0; }
+export const isGoogleEnabled = (): boolean => getClientId().length > 0;
 
-// ── Wait for GSI SDK ─────────────────────────────────────────────────────────
-export function waitForGSI(ms = 12_000): Promise<boolean> {
+export function waitForGSI(ms = 15_000): Promise<boolean> {
   if (window.google?.accounts?.id) return Promise.resolve(true);
   return new Promise(resolve => {
     let done = false;
-    const finish = (v: boolean) => {
-      if (done) return; done = true;
-      clearInterval(poll); clearTimeout(timer);
-      window.removeEventListener('gsi-ready', onEvent);
-      resolve(v);
-    };
-    const poll    = setInterval(() => { if (window.google?.accounts?.id) finish(true); }, 250);
-    const timer   = setTimeout(() => finish(false), ms);
-    const onEvent = () => finish(true);
-    window.addEventListener('gsi-ready', onEvent, { once: true });
+    const ok = (v: boolean) => { if (done) return; done = true; clearInterval(t); clearTimeout(d); resolve(v); };
+    const t = setInterval(() => { if (window.google?.accounts?.id) ok(true); }, 200);
+    const d = setTimeout(() => ok(false), ms);
+    window.addEventListener('gsi-ready', () => ok(true), { once: true });
   });
 }
 
-// ── Initialise + render Google's button ──────────────────────────────────────
-// Stores callback in window._gsiCb so re-mounts always use the fresh closure.
-// initialize() is safe to call multiple times.
-export function initAndRenderButton(el: HTMLElement, onSuccess: GoogleCallback): void {
+export function renderGoogleButton(el: HTMLElement, onSuccess: (u: GoogleUser) => void): void {
   const clientId = getClientId();
-  if (!clientId || !window.google?.accounts?.id) {
-    throw new Error('Google Sign-In SDK not loaded');
-  }
-
-  window._gsiCb = (r: { credential: string }) => {
-    try { onSuccess(googleProfileToUser(decodeGoogleJwt(r.credential))); }
-    catch (err) { console.error('[GoogleAuth]', err); throw err; }
+  if (!clientId) throw new Error('GOOGLE_CLIENT_ID not configured');
+  if (!window.google?.accounts?.id) throw new Error('GSI SDK not loaded');
+  window._gsiCallback = (r: { credential: string }) => {
+    try { onSuccess(upsertGoogleUser(decodeGoogleJwt(r.credential))); }
+    catch (err) { console.error('[GSI]', err); }
   };
-
   window.google.accounts.id.initialize({
-    client_id:             clientId,
-    callback:              (r: { credential: string }) => window._gsiCb?.(r),
-    auto_select:           false,
-    cancel_on_tap_outside: true,
-    use_fedcm_for_prompt:  false,
-    itp_support:           true,
+    client_id: clientId,
+    callback: (r: { credential: string }) => window._gsiCallback?.(r),
+    auto_select: false, cancel_on_tap_outside: true, itp_support: true,
   });
-
-  const width = Math.min(Math.max(el.getBoundingClientRect().width || el.offsetWidth || 320, 200), 400);
+  const w = Math.min(400, Math.max(240, el.getBoundingClientRect().width || el.offsetWidth || 320));
   window.google.accounts.id.renderButton(el, {
     type: 'standard', theme: 'outline', size: 'large',
-    shape: 'pill', width, text: 'continue_with', logo_alignment: 'left',
+    shape: 'pill', width: w, text: 'continue_with', logo_alignment: 'left',
   });
 }
 
-// ── Sign out ─────────────────────────────────────────────────────────────────
+// Keep old export name for backward compat
+export const initAndRenderButton = (el: HTMLElement, cb: (u: GoogleUser) => void) => renderGoogleButton(el, cb);
+
 export async function googleSignOut(): Promise<void> {
-  window._gsiCb = null;
-  try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch {}
+  window._gsiCallback = null;
+  try { window.google?.accounts?.id?.disableAutoSelect(); } catch { /* noop */ }
 }
