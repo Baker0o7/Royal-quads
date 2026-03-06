@@ -1,0 +1,13 @@
+version:
+  revision: "a14f74ff3a1cbd521163c5f03d68113acde351c2"
+  channel: "stable"
+
+project_type: app
+migration:
+  platforms:
+    - platform: root
+      create_revision: a14f74ff3a1cbd521163c5f03d68113acde351c2
+      base_revision: a14f74ff3a1cbd521163c5f03d68113acde351c2
+    - platform: android
+      create_revision: a14f74ff3a1cbd521163c5f03d68113acde351c2
+      base_revision: a14f74ff3a1cbd521163c5f03d68113acde351c2

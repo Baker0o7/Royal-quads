@@ -28,6 +28,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Write local.properties
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -39,7 +44,7 @@ jobs:
       - name: Build debug APK
         run: flutter build apk --debug --no-tree-shake-icons
 
-      - name: Rename APK
+      - name: Stage APK
         run: |
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-debug.apk output/Royal-Quads.apk
@@ -66,31 +71,27 @@ jobs:
           body: |
             ## Royal Quad Bikes — Flutter Android APK
 
-            Rebuilt from TypeScript/React to Flutter/Dart.
-            Download Royal-Quads.apk and install on Android.
+            Full Flutter rewrite — download Royal-Quads.apk and install on Android.
 
             > Enable Install from unknown sources in Settings before installing.
 
+            ### What is this
+            Complete rewrite from TypeScript/React/Capacitor/WebView to native
+            Flutter/Dart. Same features, better performance, no WebView overhead.
+
             ### Features
-            - Book quad rides with live countdown timer
-            - Overtime billing at 100 KES/min
-            - M-Pesa payment with confirmation code
-            - Admin dashboard with PIN lock
-            - Quick-Start booking for admins
+            - Live countdown timer with overtime billing (100 KES/min)
+            - M-Pesa payment flow with confirmation code
+            - Admin dashboard with PIN lock and Quick-Start booking
             - History search and daily cash report
             - Pre-bookings with date/time scheduler
-            - Safety waiver screen
-            - PDF receipt export
-            - WhatsApp receipt sharing
-            - Google Sign-In
-            - Staff management
-            - Maintenance logs
-            - Promo codes
+            - Safety waiver, PDF receipts, WhatsApp sharing
+            - Google Sign-In, promo codes, staff management
 
             ### Install
-            1. Download Royal-Quads.apk
+            1. Download Royal-Quads.apk below
             2. Settings > Security > Install unknown apps > enable
-            3. Open APK and tap Install
+            3. Open the APK and tap Install
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
