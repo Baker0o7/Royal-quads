@@ -34,39 +34,45 @@ jobs:
 
       - name: Build Android scaffold
         run: |
-          # Generate a clean Flutter project in /tmp to get a working
-          # android/ folder (gradlew, Gradle wrapper JAR, build.gradle files).
-          # We cannot commit binary files like gradle-wrapper.jar to git.
+          # Create scaffold in /tmp to get gradlew + gradle-wrapper.jar
+          # (binary files we cannot commit to git).
+          # org+name here only affect the SCAFFOLD's package, not ours.
           flutter create \
             --platforms=android \
             --org=com.royalquadbikes \
             --project-name=royal_quad_bikes \
+            --no-pub \
             /tmp/scaffold
 
-          # Wipe our hand-written android/ and replace with the working scaffold.
-          # This gives us: gradlew, gradlew.bat, gradle-wrapper.jar,
-          # settings.gradle, build.gradle — all matching Flutter 3.27 exactly.
+          # Replace android/ with the working scaffold
           rm -rf android
           cp -r /tmp/scaffold/android android
 
-          # Overlay only our app-specific files:
-          #   AndroidManifest.xml  — permissions, activity config, app label
-          #   MainActivity.kt      — package declaration
-          #   res/                 — styles, drawables, string resources
+          # ── Restore our app-specific files ──────────────────────────────
+
+          # 1. build.gradle — sets applicationId = com.royalquadbikes.app
+          cp .github/app/app_build.gradle android/app/build.gradle
+
+          # 2. AndroidManifest.xml
           cp .github/app/AndroidManifest.xml \
              android/app/src/main/AndroidManifest.xml
+
+          # 3. MainActivity.kt — remove scaffold package dir, create ours
+          rm -rf android/app/src/main/kotlin/com/royalquadbikes/royal_quad_bikes
+          mkdir -p android/app/src/main/kotlin/com/royalquadbikes/app
           cp .github/app/MainActivity.kt \
              android/app/src/main/kotlin/com/royalquadbikes/app/MainActivity.kt
-          cp -r .github/app/res/. \
-             android/app/src/main/res/
 
-          # Write local.properties so Gradle can locate the SDKs
+          # 4. res/ — styles, drawables, strings
+          cp -r .github/app/res/. android/app/src/main/res/
+
+          # 5. local.properties — SDK paths
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
             "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
 
           echo "Scaffold ready"
-          ls android/
+          find android/app/src/main/kotlin -name "*.kt"
 
       - name: Inject app icons
         run: |
