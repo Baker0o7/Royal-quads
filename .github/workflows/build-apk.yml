@@ -29,13 +29,41 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Write local.properties
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Regenerate Android platform
         run: |
+          # Back up our custom Android source files
+          cp -r android /tmp/android-custom
+
+          # Delete the incomplete android folder and let Flutter recreate it.
+          # This generates gradlew, gradle-wrapper.jar, and all Gradle boilerplate
+          # that we cannot manually commit as binary files.
+          rm -rf android
+          flutter create \
+            --platforms=android \
+            --org=com.royalquadbikes \
+            --project-name=royal_quad_bikes \
+            --no-pub \
+            .
+
+          # Restore our custom app files over the generated scaffold
+          cp /tmp/android-custom/app/build.gradle \
+             android/app/build.gradle
+          cp /tmp/android-custom/app/src/main/AndroidManifest.xml \
+             android/app/src/main/AndroidManifest.xml
+          cp -r /tmp/android-custom/app/src/main/kotlin \
+             android/app/src/main/
+          cp -r /tmp/android-custom/app/src/main/res \
+             android/app/src/main/
+
+          # Write local.properties so Gradle can find the SDK paths
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
 
-      - name: Get dependencies
-        run: flutter pub get
+          echo "Android platform ready"
+          ls android/
 
       - name: Inject app icons
         run: |
@@ -74,21 +102,19 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
           body: |
-            ## Royal Quad Bikes v2.8.0 — Flutter Android APK
+            ## Royal Quad Bikes v2.8.0 — Flutter APK
 
-            Complete rewrite from TypeScript/React/Capacitor to native Flutter/Dart.
+            Native Flutter/Dart rewrite. Download and install on Android.
 
-            > Enable **Install from unknown sources** in Android Settings before installing.
+            > Enable **Install from unknown sources** in Android Settings first.
 
-            ### New in v2.8.0
-            - Rebuilt in Flutter — native performance, no WebView
-            - Live countdown timer with overtime billing (100 KES/min)
-            - M-Pesa payment with step-by-step guide and confirmation code
-            - Admin dashboard with PIN lock and Quick-Start booking
-            - History search and daily cash report
-            - Pre-bookings with date/time scheduler
-            - Safety waiver, PDF receipts, WhatsApp sharing
-            - Google Sign-In, promo codes, staff management, maintenance logs
+            ### Features
+            - Live countdown timer + overtime billing (100 KES/min)
+            - M-Pesa payment with confirmation code
+            - Admin dashboard with PIN lock + Quick-Start booking
+            - History search + daily cash report
+            - Pre-bookings, safety waiver, PDF receipts
+            - WhatsApp sharing, Google Sign-In, promo codes
 
             ### Install
             1. Download **Royal-Quads.apk** below
