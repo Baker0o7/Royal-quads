@@ -32,31 +32,41 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Bootstrap Android Gradle wrapper
+      - name: Build Android scaffold
         run: |
-          # Create a throwaway Flutter project in /tmp purely to get:
-          #   - android/gradlew  (shell script)
-          #   - android/gradle/wrapper/gradle-wrapper.jar  (binary)
-          # These files cannot be hand-written or committed to the repo.
+          # Generate a clean Flutter project in /tmp to get a working
+          # android/ folder (gradlew, Gradle wrapper JAR, build.gradle files).
+          # We cannot commit binary files like gradle-wrapper.jar to git.
           flutter create \
             --platforms=android \
             --org=com.royalquadbikes \
-            --project-name=bootstrap \
-            /tmp/bootstrap
+            --project-name=royal_quad_bikes \
+            /tmp/scaffold
 
-          # Copy only the Gradle wrapper files into our android/ dir
-          cp    /tmp/bootstrap/android/gradlew              android/gradlew
-          cp    /tmp/bootstrap/android/gradlew.bat          android/gradlew.bat
-          cp -r /tmp/bootstrap/android/gradle/wrapper       android/gradle/wrapper
-          chmod +x android/gradlew
+          # Wipe our hand-written android/ and replace with the working scaffold.
+          # This gives us: gradlew, gradlew.bat, gradle-wrapper.jar,
+          # settings.gradle, build.gradle — all matching Flutter 3.27 exactly.
+          rm -rf android
+          cp -r /tmp/scaffold/android android
 
-          # Tell Gradle where Flutter SDK and Android SDK live
+          # Overlay only our app-specific files:
+          #   AndroidManifest.xml  — permissions, activity config, app label
+          #   MainActivity.kt      — package declaration
+          #   res/                 — styles, drawables, string resources
+          cp .github/app/AndroidManifest.xml \
+             android/app/src/main/AndroidManifest.xml
+          cp .github/app/MainActivity.kt \
+             android/app/src/main/kotlin/com/royalquadbikes/app/MainActivity.kt
+          cp -r .github/app/res/. \
+             android/app/src/main/res/
+
+          # Write local.properties so Gradle can locate the SDKs
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
             "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
 
-          echo "Gradle wrapper bootstrapped"
-          ls android/gradle/wrapper/
+          echo "Scaffold ready"
+          ls android/
 
       - name: Inject app icons
         run: |
@@ -97,17 +107,16 @@ jobs:
           body: |
             ## Royal Quad Bikes v2.8.0 — Flutter Android APK
 
-            Native Flutter/Dart rewrite — download and install on Android.
+            Native Flutter rewrite — download and install on Android.
 
-            > Enable **Install from unknown sources** in Settings before installing.
+            > Enable **Install from unknown sources** in Settings first.
 
             ### Features
             - Live countdown timer + overtime billing (100 KES/min)
             - M-Pesa payment with confirmation code
-            - Admin dashboard with PIN lock + Quick-Start booking
+            - Admin dashboard + Quick-Start booking
             - History search + daily cash report
-            - Pre-bookings, safety waiver, PDF receipts
-            - WhatsApp sharing, Google Sign-In, promo codes
+            - Pre-bookings, safety waiver, PDF receipts, WhatsApp
 
             ### Install
             1. Download **Royal-Quads.apk** below
