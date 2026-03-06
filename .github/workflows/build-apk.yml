@@ -29,34 +29,12 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Get Gradle wrapper from Flutter SDK
+      - name: Write local.properties
         run: |
-          # gradlew and gradle-wrapper.jar cannot be committed to git (binary).
-          # Flutter ships a template project with these files pre-generated.
-          # We copy them from the Flutter SDK's template directly.
-          TMPL="$FLUTTER_ROOT/packages/flutter_tools/templates/app_shared/android.tmpl"
-          if [ -d "$TMPL" ]; then
-            cp "$TMPL/gradlew.tmpl" android/gradlew 2>/dev/null || true
-            cp "$TMPL/gradle/wrapper/gradle-wrapper.jar" \
-               android/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
-          fi
-
-          # Fallback: create a throwaway project and copy from it
-          if [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
-            flutter create --platforms=android --no-pub /tmp/gw_seed
-            cp /tmp/gw_seed/android/gradlew              android/gradlew
-            cp /tmp/gw_seed/android/gradle/wrapper/gradle-wrapper.jar \
-               android/gradle/wrapper/gradle-wrapper.jar
-          fi
-
-          chmod +x android/gradlew
-
-          # Write SDK paths
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
-            "$FLUTTER_ROOT" "$ANDROID_HOME" > android/local.properties
-
-          echo "Wrapper ready:"
-          ls -lh android/gradlew android/gradle/wrapper/gradle-wrapper.jar
+            "$FLUTTER_ROOT" "$ANDROID_HOME" \
+            > android/local.properties
+          chmod +x android/gradlew
 
       - name: Get dependencies
         run: flutter pub get
@@ -110,6 +88,7 @@ jobs:
             - Admin dashboard with PIN lock + Quick-Start booking
             - History search + daily cash report
             - Pre-bookings, safety waiver, PDF receipts, WhatsApp
+            - Google Sign-In
 
             ### Install
             1. Download **Royal-Quads.apk** below
