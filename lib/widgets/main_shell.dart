@@ -6,58 +6,72 @@ class MainShell extends StatelessWidget {
   final Widget child;
   const MainShell({super.key, required this.child});
 
+  static const _tabs = [
+    (path: '/',         icon: Icons.directions_bike_rounded,  label: 'Book'),
+    (path: '/profile',  icon: Icons.person_rounded,           label: 'Profile'),
+    (path: '/prebook',  icon: Icons.calendar_month_rounded,   label: 'Pre-book'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    final idx = location == '/' ? 0 : location.startsWith('/profile') ? 1 : location.startsWith('/prebook') ? 2 : 0;
+    final loc = GoRouterState.of(context).uri.toString();
+    final idx = _tabs.indexWhere((t) => t.path == loc).clamp(0, 2);
 
     return Scaffold(
       body: child,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: kHeroTo,
-          border: Border(top: BorderSide(color: kBorder)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(60),
+                blurRadius: 20, offset: const Offset(0, -4)),
+          ],
         ),
         child: SafeArea(
+          top: false,
           child: SizedBox(
             height: 64,
-            child: Row(children: [
-              _NavItem(icon: Icons.home_rounded, label: 'Book', active: idx == 0,
-                  onTap: () => context.go('/')),
-              _NavItem(icon: Icons.person_rounded, label: 'Profile', active: idx == 1,
-                  onTap: () => context.go('/profile')),
-              _NavItem(icon: Icons.bookmark_rounded, label: 'Pre-book', active: idx == 2,
-                  onTap: () => context.go('/prebook')),
-            ]),
+            child: Row(
+              children: List.generate(_tabs.length, (i) {
+                final t = _tabs[i];
+                final active = i == idx;
+                return Expanded(child: GestureDetector(
+                  onTap: () => context.go(t.path),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: active
+                                ? kAccent.withAlpha(25)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(t.icon,
+                            color: active ? kAccent : Colors.white38,
+                            size: 22),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(t.label, style: TextStyle(
+                            color: active ? kAccent : Colors.white30,
+                            fontSize: 10,
+                            fontWeight: active
+                                ? FontWeight.w700 : FontWeight.w400)),
+                      ],
+                    ),
+                  ),
+                ));
+              }),
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _NavItem({required this.icon, required this.label,
-    required this.active, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, color: active ? kAccent : Colors.white38, size: 24),
-        const SizedBox(height: 3),
-        Text(label, style: TextStyle(
-          color: active ? kAccent : Colors.white38,
-          fontSize: 11, fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-        )),
-      ]),
-    ),
-  );
 }
