@@ -1,3 +1,4 @@
+import '../../models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -287,7 +288,7 @@ class _Tab extends StatelessWidget {
 
 // ─── Logged In View ───────────────────────────────────────────────────────────
 class _LoggedIn extends StatelessWidget {
-  final user;
+  final AppUser user;
   const _LoggedIn({required this.user});
 
   @override

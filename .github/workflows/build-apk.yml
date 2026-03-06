@@ -29,50 +29,37 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Get Gradle wrapper from Flutter SDK
+        run: |
+          # gradlew and gradle-wrapper.jar cannot be committed to git (binary).
+          # Flutter ships a template project with these files pre-generated.
+          # We copy them from the Flutter SDK's template directly.
+          TMPL="$FLUTTER_ROOT/packages/flutter_tools/templates/app_shared/android.tmpl"
+          if [ -d "$TMPL" ]; then
+            cp "$TMPL/gradlew.tmpl" android/gradlew 2>/dev/null || true
+            cp "$TMPL/gradle/wrapper/gradle-wrapper.jar" \
+               android/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
+          fi
+
+          # Fallback: create a throwaway project and copy from it
+          if [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
+            flutter create --platforms=android --no-pub /tmp/gw_seed
+            cp /tmp/gw_seed/android/gradlew              android/gradlew
+            cp /tmp/gw_seed/android/gradle/wrapper/gradle-wrapper.jar \
+               android/gradle/wrapper/gradle-wrapper.jar
+          fi
+
+          chmod +x android/gradlew
+
+          # Write SDK paths
+          printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
+            "$FLUTTER_ROOT" "$ANDROID_HOME" > android/local.properties
+
+          echo "Wrapper ready:"
+          ls -lh android/gradlew android/gradle/wrapper/gradle-wrapper.jar
+
       - name: Get dependencies
         run: flutter pub get
-
-      - name: Build Android scaffold
-        run: |
-          # Create scaffold in /tmp to get gradlew + gradle-wrapper.jar
-          # (binary files we cannot commit to git).
-          # org+name here only affect the SCAFFOLD's package, not ours.
-          flutter create \
-            --platforms=android \
-            --org=com.royalquadbikes \
-            --project-name=royal_quad_bikes \
-            --no-pub \
-            /tmp/scaffold
-
-          # Replace android/ with the working scaffold
-          rm -rf android
-          cp -r /tmp/scaffold/android android
-
-          # ── Restore our app-specific files ──────────────────────────────
-
-          # 1. build.gradle — sets applicationId = com.royalquadbikes.app
-          cp .github/app/app_build.gradle android/app/build.gradle
-
-          # 2. AndroidManifest.xml
-          cp .github/app/AndroidManifest.xml \
-             android/app/src/main/AndroidManifest.xml
-
-          # 3. MainActivity.kt — remove scaffold package dir, create ours
-          rm -rf android/app/src/main/kotlin/com/royalquadbikes/royal_quad_bikes
-          mkdir -p android/app/src/main/kotlin/com/royalquadbikes/app
-          cp .github/app/MainActivity.kt \
-             android/app/src/main/kotlin/com/royalquadbikes/app/MainActivity.kt
-
-          # 4. res/ — styles, drawables, strings
-          cp -r .github/app/res/. android/app/src/main/res/
-
-          # 5. local.properties — SDK paths
-          printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
-            "$FLUTTER_ROOT" "$ANDROID_HOME" \
-            > android/local.properties
-
-          echo "Scaffold ready"
-          find android/app/src/main/kotlin -name "*.kt"
 
       - name: Inject app icons
         run: |
@@ -120,7 +107,7 @@ jobs:
             ### Features
             - Live countdown timer + overtime billing (100 KES/min)
             - M-Pesa payment with confirmation code
-            - Admin dashboard + Quick-Start booking
+            - Admin dashboard with PIN lock + Quick-Start booking
             - History search + daily cash report
             - Pre-bookings, safety waiver, PDF receipts, WhatsApp
 
