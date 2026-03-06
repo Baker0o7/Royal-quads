@@ -32,38 +32,31 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Regenerate Android platform
+      - name: Bootstrap Android Gradle wrapper
         run: |
-          # Back up our custom Android source files
-          cp -r android /tmp/android-custom
-
-          # Delete the incomplete android folder and let Flutter recreate it.
-          # This generates gradlew, gradle-wrapper.jar, and all Gradle boilerplate
-          # that we cannot manually commit as binary files.
-          rm -rf android
+          # Create a throwaway Flutter project in /tmp purely to get:
+          #   - android/gradlew  (shell script)
+          #   - android/gradle/wrapper/gradle-wrapper.jar  (binary)
+          # These files cannot be hand-written or committed to the repo.
           flutter create \
             --platforms=android \
             --org=com.royalquadbikes \
-            --project-name=royal_quad_bikes \
-            --no-pub \
-            .
+            --project-name=bootstrap \
+            /tmp/bootstrap
 
-          # Restore our custom app files over the generated scaffold
-          cp /tmp/android-custom/app/build.gradle \
-             android/app/build.gradle
-          cp /tmp/android-custom/app/src/main/AndroidManifest.xml \
-             android/app/src/main/AndroidManifest.xml
-          cp -r /tmp/android-custom/app/src/main/kotlin \
-             android/app/src/main/
-          cp -r /tmp/android-custom/app/src/main/res \
-             android/app/src/main/
+          # Copy only the Gradle wrapper files into our android/ dir
+          cp    /tmp/bootstrap/android/gradlew              android/gradlew
+          cp    /tmp/bootstrap/android/gradlew.bat          android/gradlew.bat
+          cp -r /tmp/bootstrap/android/gradle/wrapper       android/gradle/wrapper
+          chmod +x android/gradlew
 
-          # Write local.properties so Gradle can find the SDK paths
-          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-          echo "sdk.dir=$ANDROID_HOME"    >> android/local.properties
+          # Tell Gradle where Flutter SDK and Android SDK live
+          printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
+            "$FLUTTER_ROOT" "$ANDROID_HOME" \
+            > android/local.properties
 
-          echo "Android platform ready"
-          ls android/
+          echo "Gradle wrapper bootstrapped"
+          ls android/gradle/wrapper/
 
       - name: Inject app icons
         run: |
@@ -86,7 +79,7 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      - name: Generate tag
+      - name: Generate release tag
         id: version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
@@ -96,17 +89,17 @@ jobs:
             echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
           body: |
-            ## Royal Quad Bikes v2.8.0 — Flutter APK
+            ## Royal Quad Bikes v2.8.0 — Flutter Android APK
 
-            Native Flutter/Dart rewrite. Download and install on Android.
+            Native Flutter/Dart rewrite — download and install on Android.
 
-            > Enable **Install from unknown sources** in Android Settings first.
+            > Enable **Install from unknown sources** in Settings before installing.
 
             ### Features
             - Live countdown timer + overtime billing (100 KES/min)
