@@ -3,6 +3,7 @@ name: Build & Release Flutter APK
 on:
   push:
     branches: [main, master, flutter]
+    tags: ["v*"]
   workflow_dispatch:
 
 jobs:
@@ -60,38 +61,39 @@ jobs:
       - name: Generate tag
         id: version
         run: |
-          SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+            echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: Royal Quad Bikes ${{ steps.version.outputs.tag }} (Flutter)
+          name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
           body: |
-            ## Royal Quad Bikes — Flutter Android APK
+            ## Royal Quad Bikes v2.8.0 — Flutter Android APK
 
-            Full Flutter rewrite — download Royal-Quads.apk and install on Android.
+            Complete rewrite from TypeScript/React/Capacitor to native Flutter/Dart.
 
-            > Enable Install from unknown sources in Settings before installing.
+            > Enable **Install from unknown sources** in Android Settings before installing.
 
-            ### What is this
-            Complete rewrite from TypeScript/React/Capacitor/WebView to native
-            Flutter/Dart. Same features, better performance, no WebView overhead.
-
-            ### Features
+            ### New in v2.8.0
+            - Rebuilt in Flutter — native performance, no WebView
             - Live countdown timer with overtime billing (100 KES/min)
-            - M-Pesa payment flow with confirmation code
+            - M-Pesa payment with step-by-step guide and confirmation code
             - Admin dashboard with PIN lock and Quick-Start booking
             - History search and daily cash report
             - Pre-bookings with date/time scheduler
             - Safety waiver, PDF receipts, WhatsApp sharing
-            - Google Sign-In, promo codes, staff management
+            - Google Sign-In, promo codes, staff management, maintenance logs
 
             ### Install
-            1. Download Royal-Quads.apk below
+            1. Download **Royal-Quads.apk** below
             2. Settings > Security > Install unknown apps > enable
-            3. Open the APK and tap Install
+            3. Open APK and tap **Install**
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
