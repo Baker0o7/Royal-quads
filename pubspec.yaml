@@ -20,6 +20,9 @@ dependencies:
   # Storage
   shared_preferences: ^2.3.2
 
+  # Google Sign-In
+  google_sign_in: ^6.2.1
+
   # PDF receipt
   pdf: ^3.11.1
   printing: ^5.13.2
