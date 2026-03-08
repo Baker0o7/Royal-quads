@@ -469,6 +469,7 @@ body{background:var(--cream);color:var(--ink);font-family:'Instrument Sans',sans
 /* FOOTER */
 footer{background:var(--ink2);padding:24px;text-align:center;border-top:1px solid rgba(255,255,255,.05);font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.2);letter-spacing:.5px}
 footer a{color:rgba(196,136,12,.5)}
+.fab{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 </style>
 </head>
 <body>
@@ -966,5 +967,6 @@ window.toast=(m,t)=>showToast(m,t);
 renderQuads();
 renderDurations();
 </script>
+<div class="fab"><a href="https://wa.me/254700000000?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui" target="_blank" style="background:#25D366;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s" title="Chat on WhatsApp" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a></div>
 </body>
 </html>
