@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Ride — Royal Quad Bikes · Mambrui</title>
+<meta name="description" content="Book your quad bike adventure at Mambrui Sand Dunes. Select your quad, pick a duration, pay via M-Pesa.">
+<link rel="icon" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12100D;--ink2:#1E1A14;--ink3:#2C261C;
+  --cream:#FAF6EE;--cream2:#F3EDE0;--cream3:#EAE0CC;
+  --gold:#C4880C;--goldL:#E8A820;--goldXL:#F5C842;--goldDim:#8A5F08;
+  --goldBg:rgba(196,136,12,.09);--goldBr:rgba(196,136,12,.22);
+  --green:#166534;--greenL:#16A34A;--greenBg:rgba(22,101,52,.08);--greenBr:rgba(22,163,74,.28);
+  --red:#9F1239;--redBg:rgba(159,18,57,.07);
+  --muted:#9A8F7E;--border:rgba(18,16,13,.10);--borderGold:rgba(196,136,12,.18);
+  --card:#FFFFFF;--shadow:0 1px 3px rgba(18,16,13,.06),0 4px 16px rgba(18,16,13,.07);
+  --shadowLg:0 8px 40px rgba(18,16,13,.13);
+  --r:16px;--rLg:24px;--rXl:32px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--cream);color:var(--ink);font-family:'Instrument Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+::selection{background:var(--goldL);color:#fff}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(250,246,238,.95);backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  height:62px;display:flex;align-items:center;
+  padding:0 clamp(16px,4vw,48px);gap:16px;
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo img{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--goldBr)}
+.nav-logo-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.nav-tag{
+  margin-left:auto;display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:600;color:var(--green);letter-spacing:.8px;
+}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--greenL);box-shadow:0 0 0 2px rgba(22,163,74,.2);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(22,163,74,.2)}50%{box-shadow:0 0 0 5px rgba(22,163,74,.08)}}
+
+/* HERO */
+.hero{
+  background:var(--ink);
+  padding:clamp(52px,8vw,88px) clamp(16px,5vw,60px) 0;
+  text-align:center;position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(196,136,12,.14) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%,rgba(196,136,12,.06) 0%,transparent 60%);
+}
+.hero-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--goldDim),var(--goldXL),var(--goldDim),transparent)}
+.hero-wave{position:absolute;bottom:-1px;left:0;right:0;line-height:0}
+.hero-wave svg{width:100%;height:auto;display:block}
+.hero-inner{position:relative;z-index:1;max-width:660px;margin:0 auto;padding-bottom:clamp(56px,10vw,96px)}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(196,136,12,.12);border:1px solid rgba(196,136,12,.25);
+  border-radius:100px;padding:6px 16px;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
+  color:var(--goldXL);letter-spacing:2.5px;text-transform:uppercase;
+  margin-bottom:22px;animation:fadeUp .5s ease both;
+}
+.hero h1{
+  font-family:'Fraunces',serif;
+  font-size:clamp(44px,7.5vw,88px);font-weight:900;
+  color:#fff;line-height:.95;letter-spacing:-1.5px;
+  margin-bottom:18px;animation:fadeUp .5s .08s ease both;
+}
+.hero h1 i{font-style:italic;font-weight:300;color:var(--goldXL)}
+.hero-sub{
+  font-size:clamp(14px,1.6vw,17px);font-weight:400;
+  color:rgba(255,255,255,.45);line-height:1.75;
+  max-width:440px;margin:0 auto;
+  animation:fadeUp .5s .16s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* WIZARD SHELL */
+.wizard{
+  max-width:1080px;margin:0 auto;
+  padding:clamp(24px,4vw,48px) clamp(16px,4vw,40px) 80px;
+  display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;
+}
+@media(max-width:860px){.wizard{grid-template-columns:1fr}}
+
+/* STEP INDICATOR */
+.step-bar{
+  display:flex;align-items:center;gap:0;
+  margin-bottom:28px;
+}
+.step-item{display:flex;align-items:center;gap:0;flex:1}
+.step-item:last-child{flex:0 0 auto}
+.step-dot{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:12px;font-weight:500;
+  color:var(--muted);background:var(--card);
+  transition:all .35s ease;flex-shrink:0;position:relative;z-index:1;
+}
+.step-dot.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px var(--goldBg)}
+.step-dot.done{background:var(--gold);border-color:var(--gold);color:#fff}
+.step-dot.done::after{content:'✓';font-size:13px}
+.step-dot.done .dot-num{display:none}
+.step-line{flex:1;height:2px;background:var(--border);transition:background .4s ease;margin:0 -1px}
+.step-line.done{background:var(--gold)}
+.step-label-row{display:flex;justify-content:space-between;margin-bottom:24px;padding:0 4px}
+.sl{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:center;transition:color .3s}
+.sl.active{color:var(--gold)}
+.sl.done{color:var(--goldDim)}
+
+/* PANELS */
+.panels{position:relative;overflow:hidden}
+.panel{display:none;animation:slideIn .35s cubic-bezier(.4,0,.2,1) both}
+.panel.active{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-24px)}}
+
+.panel-title{
+  font-family:'Fraunces',serif;
+  font-size:clamp(22px,3.5vw,32px);font-weight:700;
+  color:var(--ink);letter-spacing:-.3px;margin-bottom:6px;
+}
+.panel-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+
+/* QUAD CARDS */
+.quad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:8px}
+.quad-card{
+  background:var(--card);border:2px solid var(--border);
+  border-radius:var(--r);padding:20px 14px;text-align:center;
+  cursor:pointer;transition:all .2s ease;position:relative;
+  box-shadow:var(--shadow);
+}
+.quad-card:hover:not(.na){border-color:var(--goldBr);transform:translateY(-3px);box-shadow:var(--shadowLg)}
+.quad-card.sel{border-color:var(--gold);background:var(--goldBg);box-shadow:0 0 0 4px var(--goldBg),var(--shadowLg);transform:translateY(-3px)}
+.quad-card.na{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
+.quad-check{
+  position:absolute;top:10px;right:10px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--gold);color:#fff;
+  font-size:11px;display:none;align-items:center;justify-content:center;
+}
+.quad-card.sel .quad-check{display:flex}
+.quad-emoji{font-size:32px;margin-bottom:10px}
+.quad-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.q-badge{
+  display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:3px 8px;border-radius:20px;
+}
+.q-avail{background:var(--greenBg);color:var(--green);border:1px solid var(--greenBr)}
+.q-busy{background:var(--redBg);color:var(--red);border:1px solid rgba(159,18,57,.15)}
+.quad-card.sel .quad-name{color:var(--gold)}
+
+/* DURATION CARDS */
+.dur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+@media(max-width:480px){.dur-grid{grid-template-columns:repeat(2,1fr)}}
+.dur-card{
+  background:var(--card);border:2px solid var(--border);
+  border-radius:var(--r);padding:22px 14px 18px;text-align:center;
+  cursor:pointer;transition:all .2s ease;position:relative;
+  box-shadow:var(--shadow);
+}
+.dur-card:hover{border-color:var(--goldBr);transform:translateY(-3px);box-shadow:var(--shadowLg)}
+.dur-card.sel{border-color:var(--gold);background:var(--goldBg);box-shadow:0 0 0 4px var(--goldBg),var(--shadowLg);transform:translateY(-3px)}
+.dur-pop{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--gold),var(--goldL));color:#fff;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  padding:3px 12px;border-radius:100px;white-space:nowrap;
+}
+.dur-time{font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1}
+.dur-price{font-size:16px;font-weight:700;color:var(--gold)}
+.dur-kes{font-size:10px;color:var(--muted);margin-top:2px}
+.dur-card.sel .dur-time,.dur-card.sel .dur-price{color:var(--goldDim)}
+
+/* PROMO */
+.promo-section{
+  background:var(--cream2);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:18px;margin-top:20px;
+}
+.promo-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.promo-row{display:flex;gap:8px}
+.promo-input{
+  flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 14px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  color:var(--ink);letter-spacing:2px;text-transform:uppercase;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.promo-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldBg)}
+.promo-input::placeholder{letter-spacing:1px;font-family:'Instrument Sans',sans-serif;font-size:12px;color:var(--muted);text-transform:none}
+.promo-apply{
+  background:var(--ink);color:#fff;border:none;border-radius:10px;
+  padding:0 20px;font-family:'Instrument Sans',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap;
+}
+.promo-apply:hover{background:var(--gold)}
+.promo-feedback{
+  margin-top:10px;font-size:12px;font-weight:600;padding:8px 12px;
+  border-radius:8px;display:none;
+}
+.pf-ok{background:var(--greenBg);color:var(--green);border:1px solid var(--greenBr);display:block}
+.pf-err{background:var(--redBg);color:var(--red);border:1px solid rgba(159,18,57,.18);display:block}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{
+  background:var(--card);border:1.5px solid var(--border);border-radius:12px;
+  padding:12px 15px;font-family:'Instrument Sans',sans-serif;
+  font-size:14px;font-weight:500;color:var(--ink);outline:none;
+  transition:border-color .2s,box-shadow .2s;width:100%;
+}
+.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldBg)}
+.field input::placeholder{color:var(--muted);font-weight:400}
+.field-full{grid-column:1/-1}
+.field-hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* WAIVER */
+.waiver-box{
+  background:var(--cream2);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:20px;max-height:220px;overflow-y:auto;margin-bottom:16px;
+}
+.waiver-box::-webkit-scrollbar{width:3px}
+.waiver-box::-webkit-scrollbar-thumb{background:var(--goldBr)}
+.waiver-clause{display:flex;gap:12px;margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.6}
+.waiver-num{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:var(--goldBg);border:1px solid var(--goldBr);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--gold);
+  margin-top:1px;
+}
+.waiver-agree{
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  background:var(--card);border:2px solid var(--border);
+  border-radius:12px;padding:14px 16px;transition:all .2s;
+}
+.waiver-agree:hover{border-color:var(--goldBr)}
+.waiver-agree.agreed{border-color:var(--green);background:var(--greenBg)}
+.wa-box{
+  width:22px;height:22px;border-radius:6px;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:all .25s;background:var(--cream2);
+}
+.waiver-agree.agreed .wa-box{background:var(--green);border-color:var(--green);color:#fff}
+.wa-text{font-size:13px;font-weight:600;color:var(--ink)}
+
+/* PAYMENT */
+.pay-amount-card{
+  background:linear-gradient(135deg,var(--ink2),var(--ink));
+  border-radius:var(--r);padding:22px 24px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(255,255,255,.06);
+}
+.pac-left{}
+.pac-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px}
+.pac-amount{font-family:'Fraunces',serif;font-size:38px;font-weight:700;color:var(--goldXL);line-height:1}
+.pac-detail{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}
+.pac-right{font-size:36px}
+
+.till-card{
+  background:var(--greenBg);border:1.5px solid var(--greenBr);
+  border-radius:var(--r);padding:18px 20px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:background .2s;
+}
+.till-card:hover{background:rgba(22,101,52,.13)}
+.tc-left{}
+.tc-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+.tc-num{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--ink);letter-spacing:5px}
+.tc-copy{
+  background:var(--greenBg);border:1.5px solid var(--greenBr);
+  color:var(--green);border-radius:100px;
+  padding:9px 18px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  font-family:'Instrument Sans',sans-serif;flex-shrink:0;
+}
+.tc-copy:hover,.tc-copy.ok{background:var(--greenL);border-color:var(--greenL);color:#fff}
+
+.pay-steps{
+  background:var(--cream2);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:18px 20px;margin-bottom:18px;
+}
+.pay-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;font-size:13px;color:var(--muted)}
+.pay-step:last-child{margin-bottom:0}
+.ps-n{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  background:var(--goldBg);border:1px solid var(--goldBr);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--gold);
+}
+.ps-bold{font-weight:700;color:var(--ink)}
+
+.ref-input{
+  width:100%;background:var(--card);border:2px solid var(--border);border-radius:12px;
+  padding:14px 16px;font-family:'DM Mono',monospace;
+  font-size:16px;font-weight:500;color:var(--ink);
+  letter-spacing:3px;text-transform:uppercase;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.ref-input:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--goldBg)}
+.ref-input::placeholder{font-family:'Instrument Sans',sans-serif;letter-spacing:0;font-size:13px;color:var(--muted);text-transform:none}
+
+/* NAVIGATION BUTTONS */
+.btn-row{display:flex;gap:12px;margin-top:28px}
+.btn-back{
+  background:transparent;border:2px solid var(--border);
+  border-radius:12px;padding:14px 24px;
+  font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:700;
+  color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.btn-back:hover{border-color:var(--ink);color:var(--ink)}
+.btn-next{
+  flex:1;background:var(--ink);color:#fff;border:none;border-radius:12px;
+  padding:15px;font-family:'Instrument Sans',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-next:hover{background:var(--ink2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(18,16,13,.2)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-confirm{
+  flex:1;background:linear-gradient(135deg,var(--gold),var(--goldL));
+  color:var(--ink);border:none;border-radius:12px;
+  padding:16px;font-family:'Instrument Sans',sans-serif;
+  font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 20px rgba(196,136,12,.4);
+  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-confirm:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 32px rgba(196,136,12,.5)}
+.btn-confirm:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* Spinner */
+.btn-spin{width:18px;height:18px;border:2.5px solid rgba(18,16,13,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading .btn-spin{display:block}
+.loading .btn-txt{display:none}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:80px;display:flex;flex-direction:column;gap:16px}
+
+.summary-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rLg);padding:24px;box-shadow:var(--shadow);
+}
+.sum-brand{text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sum-brand img{width:52px;height:52px;border-radius:50%;margin:0 auto 10px;border:2px solid var(--goldBr)}
+.sum-brand-name{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--ink)}
+.sum-brand-sub{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-top:2px}
+
+.sum-progress{margin-bottom:20px}
+.sp-track{height:4px;background:var(--cream3);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--goldL));border-radius:100px;transition:width .5s ease}
+.sp-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px}
+
+.sum-rows{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.sum-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.sr-k{font-size:12px;color:var(--muted)}
+.sr-v{font-size:12px;font-weight:700;color:var(--ink);text-align:right;max-width:160px}
+.sr-v.gold{color:var(--gold)}
+.sr-v.green{color:var(--green);font-size:11px}
+
+.sum-divider{height:1px;background:var(--border);margin:4px 0 16px}
+.sum-total-box{
+  background:linear-gradient(135deg,var(--goldBg),rgba(196,136,12,.04));
+  border:1.5px solid var(--goldBr);border-radius:14px;
+  padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+}
+.stb-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.stb-amount{font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--gold)}
+
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rLg);padding:20px;box-shadow:var(--shadow)}
+.ic-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.ic-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ic-item:last-child{border-bottom:none;padding-bottom:0}
+.ic-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ic-text h4{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.ic-text p{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* SUCCESS OVERLAY */
+.success-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(18,16,13,.8);backdrop-filter:blur(16px);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.success-overlay.show{display:flex}
+.success-sheet{
+  background:var(--card);border-radius:28px;max-width:500px;width:100%;
+  padding:clamp(28px,5vw,52px) clamp(24px,5vw,44px);
+  box-shadow:0 32px 80px rgba(18,16,13,.4);
+  animation:sheetUp .5s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes sheetUp{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ss-check{
+  width:72px;height:72px;border-radius:50%;
+  background:var(--greenBg);border:3px solid var(--greenBr);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;font-size:30px;
+  animation:checkPop .5s .25s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes checkPop{from{transform:scale(0)}to{transform:scale(1)}}
+.ss-title{font-family:'Fraunces',serif;font-size:clamp(26px,4vw,36px);font-weight:900;color:var(--ink);text-align:center;margin-bottom:6px}
+.ss-sub{font-size:14px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:24px}
+
+.ticket{
+  background:var(--cream2);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;margin-bottom:22px;
+}
+.ticket-head{
+  background:var(--ink);padding:14px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.th-brand{font-family:'Fraunces',serif;font-size:13px;font-weight:700;color:#fff}
+.th-id{font-family:'DM Mono',monospace;font-size:10px;color:var(--goldXL);background:rgba(196,136,12,.15);padding:3px 9px;border-radius:6px;border:1px solid rgba(196,136,12,.25)}
+.ticket-perf{height:2px;background:repeating-linear-gradient(90deg,var(--border) 0,var(--border) 8px,transparent 8px,transparent 16px)}
+.ticket-body{padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.tr{display:flex;justify-content:space-between;align-items:center}
+.tr-k{font-size:11px;color:var(--muted)}
+.tr-v{font-size:11px;font-weight:700;color:var(--ink)}
+.ticket-total{
+  background:linear-gradient(90deg,var(--goldBg),rgba(196,136,12,.04));
+  padding:12px 18px;display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--goldBr);
+}
+.tt-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.tt-val{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--gold)}
+
+.ss-actions{display:flex;gap:10px}
+.ss-wa{
+  flex:1;background:#25D366;color:#fff;border:none;border-radius:12px;
+  padding:14px;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;
+}
+.ss-wa:hover{background:#1a9e4d}
+.ss-new{
+  flex:1;background:var(--cream2);color:var(--ink);border:1.5px solid var(--border);
+  border-radius:12px;padding:14px;font-family:'Instrument Sans',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.ss-new:hover{border-color:var(--ink)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;
+  padding:12px 22px;border-radius:100px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 8px 32px rgba(18,16,13,.3);
+  z-index:1000;white-space:nowrap;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+
+/* FOOTER */
+footer{background:var(--ink2);padding:24px;text-align:center;border-top:1px solid rgba(255,255,255,.05);font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.2);letter-spacing:.5px}
+footer a{color:rgba(196,136,12,.5)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
+    <span class="nav-logo-name">Royal Quad Bikes</span>
+  </a>
+  <div class="nav-tag">
+    <div class="nav-dot"></div>
+    Open · Mambrui Dunes
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-topline"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span>⚡</span> Instant M-Pesa Booking</div>
+    <h1>Book Your<br><i>Adventure</i></h1>
+    <p class="hero-sub">Four easy steps — choose your quad, pick your duration, share your details, and pay via M-Pesa. Done in under 2 minutes.</p>
+  </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path fill="#FAF6EE" d="M0,80 L0,40 Q180,0 360,25 Q540,50 720,20 Q900,-10 1080,28 Q1260,60 1440,30 L1440,80 Z"/>
+    </svg>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<div class="wizard">
+  <div>
+    <!-- Step indicator -->
+    <div class="step-bar">
+      <div class="step-item">
+        <div class="step-dot active" id="sd1"><span class="dot-num">1</span></div>
+        <div class="step-line" id="sl1"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot" id="sd2"><span class="dot-num">2</span></div>
+        <div class="step-line" id="sl2"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot" id="sd3"><span class="dot-num">3</span></div>
+        <div class="step-line" id="sl3"></div>
+      </div>
+      <div class="step-dot" id="sd4"><span class="dot-num">4</span></div>
+    </div>
+    <div class="step-label-row">
+      <span class="sl active" id="sl-lbl1">Quad</span>
+      <span class="sl" id="sl-lbl2">Duration</span>
+      <span class="sl" id="sl-lbl3">Details</span>
+      <span class="sl" id="sl-lbl4">Pay</span>
+    </div>
+
+    <!-- PANELS -->
+    <div class="panels">
+
+      <!-- PANEL 1: Quad -->
+      <div class="panel active" id="panel1">
+        <div class="panel-title">Choose your quad</div>
+        <p class="panel-sub">All quads are maintained daily. Pick one that's available — the green badge means ready to ride.</p>
+        <div class="quad-grid" id="quadGrid"></div>
+        <div class="btn-row">
+          <button class="btn-next" id="next1" onclick="goTo(2)" disabled>
+            Continue → Duration <span style="opacity:.5;font-weight:400;font-size:12px;margin-left:4px" id="quad-selected-name"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL 2: Duration -->
+      <div class="panel" id="panel2">
+        <div class="panel-title">Pick your duration</div>
+        <p class="panel-sub">Choose how long you want to ride. Overtime is charged at 100 KES/min automatically after your session ends.</p>
+        <div class="dur-grid" id="durGrid"></div>
+        <div class="promo-section">
+          <div class="promo-label">🎟️ &nbsp;Promo Code (Optional)</div>
+          <div class="promo-row">
+            <input class="promo-input" id="promoInp" placeholder="Enter code e.g. DUNES20" maxlength="20">
+            <button class="promo-apply" onclick="applyPromo()">Apply</button>
+          </div>
+          <div class="promo-feedback" id="promoFB"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-back" onclick="goTo(1)">← Back</button>
+          <button class="btn-next" id="next2" onclick="goTo(3)" disabled>Continue → Your Details</button>
+        </div>
+      </div>
+
+      <!-- PANEL 3: Details + Waiver -->
+      <div class="panel" id="panel3">
+        <div class="panel-title">Your details</div>
+        <p class="panel-sub">We need your name and phone so we can send your receipt via WhatsApp after the ride.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>First Name *</label>
+            <input type="text" id="fName" placeholder="John" oninput="checkDetails()">
+          </div>
+          <div class="field">
+            <label>Last Name *</label>
+            <input type="text" id="lName" placeholder="Kamau" oninput="checkDetails()">
+          </div>
+          <div class="field">
+            <label>Phone Number *</label>
+            <input type="tel" id="phone" placeholder="0712 345 678" oninput="checkDetails()">
+          </div>
+          <div class="field">
+            <label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="email" id="email" placeholder="john@gmail.com">
+          </div>
+          <div class="field field-full">
+            <label>Special Requests <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="text" id="notes" placeholder="e.g. First time rider, need extra guidance">
+          </div>
+        </div>
+
+        <!-- Safety Waiver -->
+        <div style="margin-top:8px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">📋 &nbsp;Safety Waiver</div>
+          <div class="waiver-box" id="waiverBox">
+            <div class="waiver-clause"><div class="waiver-num">1</div><div>I confirm I am physically fit and capable of operating a quad bike safely.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">2</div><div>I will wear all provided safety gear including helmet and protective clothing at all times.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">3</div><div>I acknowledge that quad biking carries inherent risks and I accept full responsibility for my safety.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">4</div><div>I will not operate the quad under the influence of alcohol, drugs or any impairing substance.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">5</div><div>I will follow all operator instructions and stay within designated riding areas at all times.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">6</div><div>I understand that overtime beyond my booked session is billed at 100 KES per minute automatically.</div></div>
+            <div class="waiver-clause"><div class="waiver-num">7</div><div>I agree that Royal Quad Bikes is not liable for any personal injury or property damage arising from my ride.</div></div>
+            <div class="waiver-clause" style="margin-bottom:0"><div class="waiver-num">8</div><div>I confirm all information provided is accurate and I am at least 16 years of age.</div></div>
+          </div>
+          <div class="waiver-agree" id="waiverAgree" onclick="toggleWaiver()">
+            <div class="wa-box" id="waBox"></div>
+            <span class="wa-text">I have read and agree to the safety waiver</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-back" onclick="goTo(2)">← Back</button>
+          <button class="btn-next" id="next3" onclick="goTo(4)" disabled>Continue → Payment</button>
+        </div>
+      </div>
+
+      <!-- PANEL 4: Pay -->
+      <div class="panel" id="panel4">
+        <div class="panel-title">Pay via M-Pesa</div>
+        <p class="panel-sub">Send the exact amount to our till number, then paste your M-Pesa confirmation code below to confirm your booking.</p>
+
+        <div class="pay-amount-card">
+          <div class="pac-left">
+            <div class="pac-label">Amount to Send</div>
+            <div class="pac-amount" id="pacAmt">KES —</div>
+            <div class="pac-detail" id="pacDetail">Complete previous steps first</div>
+          </div>
+          <div class="pac-right">📲</div>
+        </div>
+
+        <div class="till-card" onclick="copyTill()">
+          <div class="tc-left">
+            <div class="tc-tag">M-Pesa Buy Goods — Till Number</div>
+            <div class="tc-num">6685024</div>
+          </div>
+          <div class="tc-copy" id="tcCopy">⧉ Copy</div>
+        </div>
+
+        <div class="pay-steps">
+          <div class="pay-step"><div class="ps-n">1</div><span>Open M-Pesa → <span class="ps-bold">Lipa na M-Pesa</span></span></div>
+          <div class="pay-step"><div class="ps-n">2</div><span>Select <span class="ps-bold">Buy Goods & Services</span></span></div>
+          <div class="pay-step"><div class="ps-n">3</div><span>Enter till number: <span class="ps-bold" style="font-family:'DM Mono',monospace;color:var(--green)">6685024</span></span></div>
+          <div class="pay-step"><div class="ps-n">4</div><span>Enter <span class="ps-bold" id="amtInline">the exact amount</span> and complete with your PIN</span></div>
+          <div class="pay-step"><div class="ps-n">5</div><span>Copy the <span class="ps-bold">confirmation code</span> from the M-Pesa SMS</span></div>
+          <div class="pay-step" style="margin-bottom:0"><div class="ps-n">6</div><span>Paste the code in the field below and confirm</span></div>
+        </div>
+
+        <div class="field" style="margin-bottom:8px">
+          <label>M-Pesa Confirmation Code *</label>
+          <input class="ref-input" id="mpesaRef" placeholder="e.g.  QHL2X3P8KA" maxlength="12" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');checkRef()">
+          <div class="field-hint">The 10-character alphanumeric code from your M-Pesa SMS</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-back" onclick="goTo(3)">← Back</button>
+          <button class="btn-confirm" id="confirmBtn" onclick="confirmBooking()" disabled>
+            <div class="btn-spin"></div>
+            <span class="btn-txt">🏍️ &nbsp;Confirm My Booking</span>
+          </button>
+        </div>
+        <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
+          By confirming you agree to our safety waiver.<br>
+          Overtime is billed at 100 KES/min after your session ends.
+        </p>
+      </div>
+
+    </div><!-- /panels -->
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="summary-card">
+      <div class="sum-brand">
+        <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
+        <div class="sum-brand-name">Royal Quad Bikes</div>
+        <div class="sum-brand-sub">Mambrui · Kilifi · Kenya</div>
+      </div>
+
+      <div class="sum-progress">
+        <div class="sp-track"><div class="sp-fill" id="spFill" style="width:0%"></div></div>
+        <div class="sp-label" id="spLabel">Step 1 of 4</div>
+      </div>
+
+      <div class="sum-rows">
+        <div class="sum-row"><span class="sr-k">Quad</span><span class="sr-v" id="sv-quad">—</span></div>
+        <div class="sum-row"><span class="sr-k">Duration</span><span class="sr-v" id="sv-dur">—</span></div>
+        <div class="sum-row"><span class="sr-k">Base price</span><span class="sr-v" id="sv-base">—</span></div>
+        <div class="sum-row" id="sv-promo-row" style="display:none">
+          <span class="sr-k">Promo discount</span>
+          <span class="sr-v green" id="sv-promo">—</span>
+        </div>
+        <div class="sum-row"><span class="sr-k">Name</span><span class="sr-v" id="sv-name">—</span></div>
+      </div>
+
+      <div class="sum-divider"></div>
+      <div class="sum-total-box">
+        <div class="stb-label">Total</div>
+        <div class="stb-amount" id="sv-total">KES —</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Good to know</div>
+      <div class="ic-item">
+        <span class="ic-icon">⏱️</span>
+        <div class="ic-text"><h4>Overtime Policy</h4><p>100 KES/min charged automatically after your session ends.</p></div>
+      </div>
+      <div class="ic-item">
+        <span class="ic-icon">🛡️</span>
+        <div class="ic-text"><h4>Safety Gear</h4><p>Helmet + protective clothing provided. Briefing before every ride.</p></div>
+      </div>
+      <div class="ic-item">
+        <span class="ic-icon">🧾</span>
+        <div class="ic-text"><h4>WhatsApp Receipt</h4><p>PDF receipt sent to your phone immediately after the ride.</p></div>
+      </div>
+      <div class="ic-item">
+        <span class="ic-icon">📍</span>
+        <div class="ic-text"><h4>Location</h4><p>Mambrui Sand Dunes, Kilifi County, Kenya — near Malindi.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wizard -->
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-sheet">
+    <div class="ss-check">✓</div>
+    <div class="ss-title">You're booked!</div>
+    <div class="ss-sub" id="ssSub">Your quad adventure is confirmed. Show this ticket when you arrive.</div>
+    <div class="ticket">
+      <div class="ticket-head">
+        <span class="th-brand">Royal Quad Bikes</span>
+        <span class="th-id" id="ticketId">RQ-XXXXXX</span>
+      </div>
+      <div class="ticket-perf"></div>
+      <div class="ticket-body">
+        <div class="tr"><span class="tr-k">Quad</span><span class="tr-v" id="tk-quad">—</span></div>
+        <div class="tr"><span class="tr-k">Customer</span><span class="tr-v" id="tk-name">—</span></div>
+        <div class="tr"><span class="tr-k">Phone</span><span class="tr-v" id="tk-phone">—</span></div>
+        <div class="tr"><span class="tr-k">Duration</span><span class="tr-v" id="tk-dur">—</span></div>
+        <div class="tr"><span class="tr-k">Date</span><span class="tr-v" id="tk-date">—</span></div>
+        <div class="tr"><span class="tr-k">M-Pesa Ref</span><span class="tr-v" id="tk-ref" style="font-family:'DM Mono',monospace;color:var(--green)">—</span></div>
+      </div>
+      <div class="ticket-total">
+        <span class="tt-label">Total Paid</span>
+        <span class="tt-val" id="tk-total">—</span>
+      </div>
+    </div>
+    <div class="ss-actions">
+      <button class="ss-wa" onclick="shareWA()">💬 Share on WhatsApp</button>
+      <button class="ss-new" onclick="reset()">Book Another</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  © 2025 Royal Quad Bikes · Mambrui, Kenya · M-Pesa Till 6685024 &nbsp;·&nbsp;
+  <a href="index.html">← Homepage</a>
+</footer>
+
+<script>
+/* ── DATA ─────────────────────────────────────────────────────────── */
+const QUADS=[
+  {id:1,name:'Raptor 1',status:'available',emoji:'🏍️'},
+  {id:2,name:'Raptor 2',status:'available',emoji:'🏍️'},
+  {id:3,name:'Viper 1', status:'available',emoji:'🏍️'},
+  {id:4,name:'Viper 2', status:'rented',   emoji:'🔒'},
+  {id:5,name:'Storm 1', status:'available',emoji:'🏍️'},
+  {id:6,name:'Storm 2', status:'available',emoji:'🏍️'},
+];
+const PRICING=[
+  {dur:5,  price:1000,label:'5 min'},
+  {dur:10, price:1800,label:'10 min'},
+  {dur:15, price:2200,label:'15 min'},
+  {dur:20, price:2500,label:'20 min',popular:true},
+  {dur:30, price:3500,label:'30 min'},
+  {dur:60, price:6000,label:'1 hr'},
+];
+const PROMOS={DUNES20:20,MAMBRUI10:10,QUAD15:15,WELCOME25:25,KENYA10:10,RIDE30:30};
+
+/* ── STATE ─────────────────────────────────────────────────────────── */
+const S={quad:null,dur:null,price:null,finalPrice:null,discount:0,promoCode:null,name:'',phone:'',waiverOk:false,step:1};
+
+/* ── RENDER ─────────────────────────────────────────────────────────── */
+function renderQuads(){
+  document.getElementById('quadGrid').innerHTML=QUADS.map(q=>`
+    <div class="quad-card${q.status==='rented'?' na':''}" id="qc${q.id}" onclick="${q.status==='rented'?'toast("This quad is currently in use","err")':('pickQuad('+q.id+')')}">
+      <div class="quad-check">✓</div>
+      <div class="quad-emoji">${q.emoji}</div>
+      <div class="quad-name">${q.name}</div>
+      <div class="q-badge ${q.status==='available'?'q-avail':'q-busy'}">${q.status==='available'?'Available':'In Use'}</div>
+    </div>`).join('');
+}
+function renderDurations(){
+  document.getElementById('durGrid').innerHTML=PRICING.map(p=>`
+    <div class="dur-card${p.popular?' ':''}${p.popular?'':''}${p.popular?'pop':''}" id="dc${p.dur}" onclick="pickDur(${p.dur},${p.price},'${p.label}')">
+      ${p.popular?'<div class="dur-pop">Most Popular</div>':''}
+      <div class="dur-time">${p.label}</div>
+      <div class="dur-price">${fmt(p.price)}</div>
+      <div class="dur-kes">KES</div>
+    </div>`).join('');
+}
+
+/* ── SELECTION ─────────────────────────────────────────────────────── */
+function pickQuad(id){
+  S.quad=QUADS.find(q=>q.id===id);
+  document.querySelectorAll('.quad-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('qc'+id).classList.add('sel');
+  document.getElementById('next1').disabled=false;
+  document.getElementById('quad-selected-name').textContent='· '+S.quad.name;
+  refreshSummary();
+}
+function pickDur(dur,price,label){
+  S.dur=dur;S.price=price;S.finalPrice=applyD(price);
+  document.querySelectorAll('.dur-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('dc'+dur).classList.add('sel');
+  document.getElementById('next2').disabled=false;
+  refreshSummary();updatePayDisplay();
+}
+function applyD(p){return S.discount?Math.round(p*(1-S.discount/100)):p}
+
+/* ── PROMO ─────────────────────────────────────────────────────────── */
+function applyPromo(){
+  const code=document.getElementById('promoInp').value.trim().toUpperCase();
+  const fb=document.getElementById('promoFB');
+  if(!code){showFB(fb,'err','Please enter a promo code');return}
+  if(PROMOS[code]){
+    S.promoCode=code;S.discount=PROMOS[code];
+    if(S.price)S.finalPrice=applyD(S.price);
+    showFB(fb,'ok',`✓ Code "${code}" applied — ${S.discount}% discount!`);
+    refreshSummary();updatePayDisplay();
+  } else {
+    S.promoCode=null;S.discount=0;
+    showFB(fb,'err','✗ Invalid or expired promo code');
+  }
+}
+function showFB(el,type,msg){el.className='promo-feedback pf-'+type;el.textContent=msg}
+
+/* ── DETAILS + WAIVER ──────────────────────────────────────────────── */
+function checkDetails(){
+  S.name=(document.getElementById('fName').value.trim()+' '+document.getElementById('lName').value.trim()).trim();
+  S.phone=document.getElementById('phone').value.trim();
+  refreshSummary();tryNext3();
+}
+function toggleWaiver(){
+  S.waiverOk=!S.waiverOk;
+  document.getElementById('waiverAgree').classList.toggle('agreed',S.waiverOk);
+  document.getElementById('waBox').textContent=S.waiverOk?'✓':'';
+  tryNext3();
+}
+function tryNext3(){
+  const ok=S.name.length>2&&S.phone.length>=9&&S.waiverOk;
+  document.getElementById('next3').disabled=!ok;
+}
+
+/* ── PAY ───────────────────────────────────────────────────────────── */
+function checkRef(){
+  const ref=document.getElementById('mpesaRef').value;
+  document.getElementById('confirmBtn').disabled=ref.length<8;
+}
+function updatePayDisplay(){
+  if(!S.finalPrice)return;
+  document.getElementById('pacAmt').textContent='KES '+fmt(S.finalPrice);
+  document.getElementById('pacDetail').textContent=(S.quad?S.quad.name:'')+' · '+(S.dur?S.dur+' min':'');
+  document.getElementById('amtInline').textContent='KES '+fmt(S.finalPrice);
+}
+function copyTill(){
+  navigator.clipboard.writeText('6685024').catch(()=>{});
+  const btn=document.getElementById('tcCopy');
+  btn.textContent='✓ Copied!';btn.classList.add('ok');
+  showToast('Till number copied!');
+  setTimeout(()=>{btn.textContent='⧉ Copy';btn.classList.remove('ok')},2500);
+}
+
+/* ── CONFIRM ───────────────────────────────────────────────────────── */
+function confirmBooking(){
+  const ref=document.getElementById('mpesaRef').value.trim();
+  if(!S.quad||!S.dur||!S.name||!S.phone){showToast('Please complete all steps first','err');return}
+  if(ref.length<8){showToast('Enter a valid M-Pesa code','err');return}
+  const btn=document.getElementById('confirmBtn');
+  btn.classList.add('loading');btn.disabled=true;
+  setTimeout(()=>{btn.classList.remove('loading');showSuccess(ref)},2000);
+}
+function showSuccess(ref){
+  const id='RQ-'+Math.random().toString(36).substr(2,6).toUpperCase();
+  const now=new Date();
+  document.getElementById('ticketId').textContent=id;
+  document.getElementById('ssSub').textContent=`Hi ${S.name.split(' ')[0]}! Your ${S.dur}-minute ride on ${S.quad.name} is confirmed. Show this ticket at Mambrui Sand Dunes.`;
+  document.getElementById('tk-quad').textContent=S.quad.name;
+  document.getElementById('tk-name').textContent=S.name;
+  document.getElementById('tk-phone').textContent=S.phone;
+  document.getElementById('tk-dur').textContent=S.dur+' min';
+  document.getElementById('tk-date').textContent=now.toLocaleDateString('en-KE',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('tk-ref').textContent=ref;
+  document.getElementById('tk-total').textContent='KES '+fmt(S.finalPrice);
+  document.getElementById('successOverlay').classList.add('show');
+  // Save to local storage
+  const b=JSON.parse(localStorage.getItem('rq_bookings')||'[]');
+  b.push({id,quad:S.quad.name,name:S.name,phone:S.phone,dur:S.dur,total:S.finalPrice,ref,date:now.toISOString()});
+  localStorage.setItem('rq_bookings',JSON.stringify(b));
+}
+function shareWA(){
+  const id=document.getElementById('ticketId').textContent;
+  const msg=encodeURIComponent(
+    `🏍️ *Royal Quad Bikes — Booking Confirmed!*\n\n`+
+    `📋 Receipt: ${id}\n`+
+    `🏍️ Quad: ${S.quad.name}\n`+
+    `⏱️ Duration: ${S.dur} min\n`+
+    `💰 Total: KES ${fmt(S.finalPrice)}\n`+
+    `📱 M-Pesa: ${document.getElementById('tk-ref').textContent}\n\n`+
+    `📍 Mambrui Sand Dunes, Kilifi County, Kenya\n`+
+    `🌐 book.royalquadbikes.ke`
+  );
+  window.open('https://wa.me/?text='+msg,'_blank');
+}
+function reset(){document.getElementById('successOverlay').classList.remove('show');location.reload()}
+
+/* ── NAVIGATION ────────────────────────────────────────────────────── */
+function goTo(n){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+  S.step=n;
+  [1,2,3,4].forEach(i=>{
+    const d=document.getElementById('sd'+i);
+    d.classList.toggle('active',i===n);
+    d.classList.toggle('done',i<n);
+    document.getElementById('sl-lbl'+i).className='sl'+(i===n?' active':i<n?' done':'');
+    if(i<4)document.getElementById('sl'+i).classList.toggle('done',i<n);
+  });
+  document.getElementById('spFill').style.width=((n-1)/3*100)+'%';
+  document.getElementById('spLabel').textContent='Step '+n+' of 4'+(n===4?' — Ready to pay!':'');
+  if(n===4)updatePayDisplay();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── SUMMARY ───────────────────────────────────────────────────────── */
+function refreshSummary(){
+  set('sv-quad',S.quad?S.quad.name:'—');
+  set('sv-dur',S.dur?S.dur+' min':'—');
+  set('sv-base',S.price?fmt(S.price)+' KES':'—');
+  set('sv-name',S.name||'—');
+  set('sv-total',S.finalPrice?'KES '+fmt(S.finalPrice):'KES —');
+  const pr=document.getElementById('sv-promo-row');
+  if(S.discount&&S.price){
+    document.getElementById('sv-promo').textContent='−'+fmt(S.price-S.finalPrice)+' KES ('+S.discount+'%)';
+    pr.style.display='flex';
+  } else { pr.style.display='none'; }
+}
+function set(id,val){document.getElementById(id).textContent=val}
+
+/* ── UTILS ─────────────────────────────────────────────────────────── */
+function fmt(n){return Number(n).toLocaleString()}
+let toastT;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type==='err'?' err':'');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);
+}
+// expose for inline usage
+window.toast=(m,t)=>showToast(m,t);
+
+/* ── BOOT ──────────────────────────────────────────────────────────── */
+renderQuads();
+renderDurations();
+</script>
+</body>
+</html>
