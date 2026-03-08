@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Ride — Royal Quad Bikes</title>
+<meta name="description" content="Book your quad bike ride at Mambrui Sand Dunes. Choose your duration, pay via M-Pesa, and ride.">
+<link rel="icon" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;0,900;1,300;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF6EE;--cream2:#F2EAD8;--cream3:#E8DCCA;
+  --ink:#1A120A;--ink2:#2E1F0F;--ink3:#3D2910;
+  --gold:#B8821E;--gL:#D4A030;--gP:#E8C060;--gD:#8A6010;
+  --sand:#C4A878;--sand2:#A08050;
+  --green:#1A6A38;--greenL:#28A050;--greenBg:#EDF7F1;--greenBdr:rgba(26,106,56,.2);
+  --red:#B83020;--redBg:#FDF2F0;--redBdr:rgba(184,48,32,.18);
+  --white:#FFFFFF;
+  --shadow:0 2px 16px rgba(26,18,10,.08);
+  --shadow2:0 8px 40px rgba(26,18,10,.12);
+  --shadow3:0 24px 80px rgba(26,18,10,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden}
+::selection{background:var(--gL);color:#fff}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+input,select,textarea{font-family:'Jost',sans-serif}
+button{font-family:'Jost',sans-serif;cursor:pointer;border:none;outline:none}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--sand);border-radius:3px}
+
+/* ── BACKGROUND TEXTURE ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Ccircle cx='30' cy='30' r='.6' fill='%23C4A878' opacity='.25'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+
+/* ── TOP BAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:62px;background:rgba(250,246,238,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(184,130,30,.12);display:flex;align-items:center;padding:0 clamp(16px,5vw,48px);gap:14px}
+.topbar-logo{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(184,130,30,.3)}
+.topbar-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--ink)}
+.topbar-sep{width:1px;height:20px;background:var(--cream3);margin:0 4px}
+.topbar-page{font-size:12px;font-weight:500;color:var(--sand2);letter-spacing:.5px}
+.topbar-back{margin-left:auto;font-size:12px;font-weight:600;color:var(--gold);letter-spacing:.5px;display:flex;align-items:center;gap:5px;opacity:.7;transition:opacity .2s}
+.topbar-back:hover{opacity:1}
+
+/* ── HERO BAND ── */
+.hero-band{
+  margin-top:62px;
+  background:linear-gradient(135deg,var(--ink2) 0%,var(--ink3) 50%,#4A3418 100%);
+  padding:52px clamp(16px,5vw,48px) 48px;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.hero-band::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 200' preserveAspectRatio='none'%3E%3Cpath fill='rgba(184,130,30,.06)' d='M0,200 L0,100 Q200,40 400,80 Q600,120 800,60 Q1000,0 1200,50 Q1360,90 1440,60 L1440,200Z'/%3E%3C/svg%3E") no-repeat bottom/100% auto;pointer-events:none}
+.hero-band::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gD),var(--gL),var(--gD),transparent)}
+.hero-logo{width:68px;height:68px;border-radius:50%;border:2px solid rgba(212,160,48,.4);box-shadow:0 0 40px rgba(212,160,48,.25),0 0 0 8px rgba(212,160,48,.06);margin:0 auto 18px;position:relative;z-index:1}
+.hero-band h1{font-family:'Fraunces',serif;font-size:clamp(28px,5vw,44px);font-weight:900;color:#fff;line-height:1.05;margin-bottom:8px;position:relative;z-index:1}
+.hero-band h1 em{font-style:italic;font-weight:300;color:var(--gP)}
+.hero-band p{font-size:14px;font-weight:300;color:rgba(255,255,255,.5);letter-spacing:.5px;position:relative;z-index:1}
+
+/* ── PROGRESS STEPS ── */
+.progress-wrap{background:var(--white);border-bottom:1px solid rgba(184,130,30,.1);padding:0 clamp(16px,5vw,48px);position:sticky;top:62px;z-index:90;box-shadow:0 2px 12px rgba(26,18,10,.06)}
+.progress{display:flex;max-width:640px;margin:0 auto}
+.prog-step{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px 8px;position:relative;cursor:pointer}
+.prog-step+.prog-step::before{content:'';position:absolute;left:0;top:26px;width:1px;height:14px;background:var(--cream3);transform:translateX(-50%)}
+.prog-dot{width:28px;height:28px;border-radius:50%;background:var(--cream2);border:2px solid var(--cream3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--sand2);margin-bottom:5px;transition:all .35s ease;flex-shrink:0}
+.prog-step.active .prog-dot{background:var(--gold);border-color:var(--gold);color:#fff;box-shadow:0 0 0 4px rgba(184,130,30,.15)}
+.prog-step.done .prog-dot{background:var(--green);border-color:var(--green);color:#fff}
+.prog-step.done .prog-dot::before{content:'✓';font-size:12px}
+.prog-label{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--sand2);text-align:center;line-height:1.3}
+.prog-step.active .prog-label{color:var(--gold)}
+.prog-step.done .prog-label{color:var(--green)}
+
+/* ── MAIN LAYOUT ── */
+main{max-width:680px;margin:0 auto;padding:40px clamp(16px,5vw,32px) 80px;position:relative;z-index:1}
+
+/* ── STEP PANELS ── */
+.step-panel{display:none;animation:stepIn .4s ease}
+.step-panel.active{display:block}
+@keyframes stepIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.step-heading{margin-bottom:28px}
+.step-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.step-label::before{content:'';display:block;width:20px;height:1.5px;background:var(--gold)}
+.step-title{font-family:'Fraunces',serif;font-size:clamp(22px,4vw,32px);font-weight:700;color:var(--ink);line-height:1.15}
+.step-title em{font-style:italic;font-weight:300;color:var(--gold)}
+.step-sub{font-size:14px;font-weight:300;color:var(--sand2);margin-top:8px;line-height:1.6}
+
+/* ── CARD ── */
+.card{background:var(--white);border:1px solid rgba(184,130,30,.1);border-radius:20px;padding:clamp(20px,4vw,32px);box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sand2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--cream2)}
+
+/* ── DURATION GRID ── */
+.duration-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:400px){.duration-grid{grid-template-columns:repeat(2,1fr)}}
+.dur-option{background:var(--cream);border:1.5px solid var(--cream3);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden}
+.dur-option::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(184,130,30,.06),transparent);opacity:0;transition:opacity .25s}
+.dur-option:hover{border-color:var(--sand);transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,18,10,.08)}
+.dur-option:hover::before{opacity:1}
+.dur-option.selected{background:var(--ink);border-color:var(--ink);transform:translateY(-3px);box-shadow:0 8px 28px rgba(26,18,10,.2)}
+.dur-option.selected .dur-time{color:#fff}
+.dur-option.selected .dur-price{color:var(--gP)}
+.dur-option.selected .dur-unit{color:rgba(255,255,255,.4)}
+.dur-option.selected::after{content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:var(--gL);font-weight:700}
+.dur-time{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);display:block;line-height:1;margin-bottom:6px}
+.dur-price{font-size:15px;font-weight:700;color:var(--gold);display:block;margin-bottom:2px}
+.dur-unit{font-size:10px;font-weight:500;color:var(--sand2);letter-spacing:.5px}
+
+/* ── PROMO ── */
+.promo-row{display:flex;gap:10px;margin-top:16px}
+.promo-input{flex:1;height:46px;background:var(--cream);border:1.5px solid var(--cream3);border-radius:12px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);transition:border-color .2s,box-shadow .2s;outline:none}
+.promo-input::placeholder{color:var(--sand);letter-spacing:1px;font-weight:400;text-transform:none}
+.promo-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,130,30,.1)}
+.promo-input.valid{border-color:var(--green);background:var(--greenBg)}
+.promo-btn{height:46px;padding:0 20px;background:var(--cream2);border:1.5px solid var(--cream3);border-radius:12px;font-size:13px;font-weight:700;color:var(--ink);transition:all .2s}
+.promo-btn:hover{background:var(--cream3);border-color:var(--sand)}
+.promo-msg{font-size:12px;font-weight:500;margin-top:8px}
+.promo-msg.ok{color:var(--green)}
+.promo-msg.err{color:var(--red)}
+
+/* ── SUMMARY PILL ── */
+.summary-pill{background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:14px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-top:20px;flex-wrap:wrap;gap:12px}
+.summary-info{display:flex;align-items:center;gap:14px}
+.summary-icon{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.summary-text{}
+.summary-dur{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#fff;line-height:1}
+.summary-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:3px}
+.summary-price-wrap{}
+.summary-original{font-size:12px;color:rgba(255,255,255,.3);text-decoration:line-through;text-align:right}
+.summary-price{font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--gP);line-height:1}
+.summary-kes{font-size:13px;color:rgba(255,255,255,.5);font-weight:500}
+
+/* ── FORM FIELDS ── */
+.field-group{display:flex;flex-direction:column;gap:16px;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sand2)}
+.field input{height:52px;background:var(--cream);border:1.5px solid var(--cream3);border-radius:14px;padding:0 18px;font-size:15px;font-weight:500;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+.field input::placeholder{color:var(--sand);font-weight:300}
+.field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,130,30,.1);background:var(--white)}
+.field input.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(184,48,32,.08)}
+.field-error{font-size:12px;color:var(--red);font-weight:500;margin-top:2px}
+.field-hint{font-size:12px;color:var(--sand2);font-weight:300;line-height:1.5}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.field-row{grid-template-columns:1fr}}
+
+/* ── WAIVER ── */
+.waiver-box{background:var(--cream);border:1.5px solid var(--cream3);border-radius:14px;padding:18px;margin-top:8px}
+.waiver-check{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.waiver-box-checkbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--cream3);background:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .2s}
+.waiver-check:hover .waiver-box-checkbox{border-color:var(--gold)}
+.waiver-check.checked .waiver-box-checkbox{background:var(--green);border-color:var(--green);color:#fff;font-size:12px}
+.waiver-text{font-size:13px;font-weight:300;color:var(--ink2);line-height:1.6}
+.waiver-text strong{font-weight:600}
+
+/* ── MPESA CARD ── */
+.mpesa-card{background:var(--white);border:1.5px solid var(--greenBdr);border-radius:20px;overflow:hidden;margin-bottom:16px}
+.mpesa-header{background:linear-gradient(135deg,var(--green),#1E8040);padding:18px 24px;display:flex;align-items:center;gap:12px}
+.mpesa-header-icon{font-size:24px}
+.mpesa-header-text{}
+.mpesa-header-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#fff}
+.mpesa-header-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.mpesa-body{padding:24px}
+
+.till-box{background:var(--greenBg);border:1.5px solid var(--greenBdr);border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;cursor:pointer;transition:all .2s}
+.till-box:hover{background:#E0F2E8;border-color:rgba(26,106,56,.35)}
+.till-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+.till-number{font-family:'Fraunces',serif;font-size:32px;font-weight:900;color:var(--ink);letter-spacing:4px}
+.till-copy-btn{display:flex;align-items:center;gap:6px;background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:10px 18px;border-radius:100px;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.till-copy-btn:hover{background:#1E8040;transform:scale(1.03)}
+.till-copy-btn.copied{background:#15803d}
+
+.mpesa-steps-list{display:flex;flex-direction:column;gap:10px}
+.mpesa-step-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--cream);border-radius:12px;border:1px solid var(--cream3)}
+.mpesa-step-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mpesa-step-text{font-size:13px;font-weight:400;color:var(--ink);line-height:1.4}
+.mpesa-step-text strong{font-weight:700;color:var(--green)}
+
+.amount-pill{background:linear-gradient(90deg,rgba(26,106,56,.08),rgba(26,106,56,.04));border:1px solid var(--greenBdr);border-radius:12px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:4px}
+.amount-label{font-size:12px;font-weight:600;color:var(--green)}
+.amount-val{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--ink)}
+.amount-val span{font-size:13px;font-weight:400;color:var(--sand2);margin-left:4px}
+
+/* ── MPESA REF INPUT ── */
+.ref-field{margin-top:20px}
+.ref-field label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sand2);margin-bottom:8px;display:block}
+.ref-input-wrap{position:relative}
+.ref-input{width:100%;height:56px;background:var(--cream);border:2px solid var(--cream3);border-radius:14px;padding:0 18px;font-size:16px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink);outline:none;transition:all .2s}
+.ref-input::placeholder{letter-spacing:1px;font-weight:300;text-transform:none;font-size:14px}
+.ref-input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--greenBdr);background:var(--white)}
+.ref-input.valid{border-color:var(--green);background:var(--greenBg)}
+.ref-check-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:18px;opacity:0;transition:opacity .2s}
+.ref-input.valid+.ref-check-icon{opacity:1}
+
+/* ── BUTTONS ── */
+.btn-primary{width:100%;height:58px;background:var(--ink);color:#fff;border-radius:16px;font-size:16px;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;border:none;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);pointer-events:none}
+.btn-primary:hover{background:var(--ink2);transform:translateY(-2px);box-shadow:0 12px 36px rgba(26,18,10,.2)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary.gold{background:linear-gradient(135deg,var(--gold),var(--gD));box-shadow:0 8px 28px rgba(184,130,30,.3)}
+.btn-primary.gold:hover{box-shadow:0 14px 40px rgba(184,130,30,.45)}
+.btn-primary.green{background:linear-gradient(135deg,var(--green),#155E30);box-shadow:0 8px 28px rgba(26,106,56,.3)}
+.btn-primary.green:hover{box-shadow:0 14px 40px rgba(26,106,56,.45)}
+
+.btn-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sand2);background:none;border:none;cursor:pointer;padding:10px 0;margin-bottom:20px;transition:color .2s}
+.btn-back:hover{color:var(--gold)}
+
+/* ── CONFIRMATION ── */
+.confirm-top{text-align:center;padding:40px 20px 28px}
+.confirm-check{width:80px;height:80px;border-radius:50%;background:var(--greenBg);border:2px solid var(--greenBdr);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.confirm-title{font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--ink);margin-bottom:8px}
+.confirm-sub{font-size:14px;font-weight:300;color:var(--sand2);line-height:1.6;max-width:380px;margin:0 auto}
+
+.booking-summary-card{background:var(--white);border:1px solid var(--cream3);border-radius:20px;overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.bsc-header{background:linear-gradient(135deg,var(--ink),var(--ink2));padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.bsc-brand{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:#fff}
+.bsc-ref{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gP);background:rgba(255,255,255,.08);padding:5px 10px;border-radius:6px}
+.bsc-perf{height:12px;background:var(--cream);position:relative;overflow:hidden}
+.bsc-perf::before{content:'';position:absolute;top:50%;left:0;right:0;border-top:1.5px dashed var(--cream3)}
+.bsc-body{padding:18px 22px;display:flex;flex-direction:column;gap:10px}
+.bsc-row{display:flex;justify-content:space-between;align-items:center}
+.bsc-row-label{font-size:12px;color:var(--sand2)}
+.bsc-row-value{font-size:13px;font-weight:600;color:var(--ink)}
+.bsc-total{background:linear-gradient(90deg,rgba(184,130,30,.08),rgba(212,160,48,.04));border-top:1px solid rgba(184,130,30,.15);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}
+.bsc-total-label{font-size:13px;font-weight:700;color:var(--sand2)}
+.bsc-total-amount{font-family:'Fraunces',serif;font-size:24px;font-weight:900;color:var(--gold)}
+
+.confirm-actions{display:flex;flex-direction:column;gap:10px}
+.btn-wa{width:100%;height:54px;background:#25D366;color:#fff;border-radius:16px;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .25s;border:none}
+.btn-wa:hover{background:#1EBF59;transform:translateY(-2px);box-shadow:0 10px 32px rgba(37,211,102,.3)}
+.btn-new{width:100%;height:54px;background:var(--cream);border:1.5px solid var(--cream3);color:var(--ink);border-radius:16px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .25s}
+.btn-new:hover{background:var(--cream2);border-color:var(--sand)}
+
+/* ── FLOATING PRICE BADGE ── */
+.float-price{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;border-radius:100px;padding:12px 20px;font-family:'Fraunces',serif;font-size:18px;font-weight:700;box-shadow:0 8px 32px rgba(26,18,10,.25);z-index:80;transition:all .3s;display:none;align-items:center;gap:8px}
+.float-price span{font-size:11px;font-weight:400;color:rgba(255,255,255,.5);font-family:'Jost',sans-serif}
+.float-price .fp-kes{font-size:12px;color:var(--gP)}
+
+/* ── TRUST BADGES ── */
+.trust-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;margin-bottom:0}
+.trust-badge{display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--cream3);border-radius:100px;padding:7px 14px;font-size:11px;font-weight:600;color:var(--sand2)}
+.trust-badge .tb-icon{font-size:13px}
+
+/* ── INFO BANNER ── */
+.info-banner{display:flex;gap:12px;align-items:flex-start;background:rgba(184,130,30,.06);border:1.5px solid rgba(184,130,30,.15);border-radius:14px;padding:14px 16px;margin-bottom:20px}
+.info-banner-icon{font-size:18px;flex-shrink:0}
+.info-banner-text{font-size:13px;font-weight:300;color:var(--ink2);line-height:1.6}
+.info-banner-text strong{font-weight:600}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .hero-band{padding:40px 16px 36px}
+  .float-price{bottom:16px;right:16px;padding:10px 16px;font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <img class="topbar-logo" src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
+  <span class="topbar-name">Royal Quad Bikes</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-page">Booking</span>
+  <a href="index.html" class="topbar-back">← Back to site</a>
+</div>
+
+<!-- HERO -->
+<div class="hero-band">
+  <img class="hero-logo" src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Royal Quad Bikes">
+  <h1>Book Your <em>Ride</em></h1>
+  <p>Mambrui Sand Dunes · Kilifi County · Kenya</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress">
+    <div class="prog-step active" id="prog-1" onclick="goToStep(1)">
+      <div class="prog-dot">1</div>
+      <div class="prog-label">Choose Ride</div>
+    </div>
+    <div class="prog-step" id="prog-2" onclick="goToStep(2)">
+      <div class="prog-dot">2</div>
+      <div class="prog-label">Your Details</div>
+    </div>
+    <div class="prog-step" id="prog-3" onclick="goToStep(3)">
+      <div class="prog-dot">3</div>
+      <div class="prog-label">Pay M-Pesa</div>
+    </div>
+    <div class="prog-step" id="prog-4" onclick="goToStep(4)">
+      <div class="prog-dot">4</div>
+      <div class="prog-label">Confirm</div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ════════ STEP 1: CHOOSE RIDE ════════ -->
+<div class="step-panel active" id="step-1">
+  <div class="step-heading">
+    <div class="step-label">Step 1</div>
+    <h2 class="step-title">How long do you want<br>to <em>ride the dunes?</em></h2>
+    <p class="step-sub">All rides include one quad bike. Pick the duration that suits you.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Select Duration</div>
+    <div class="duration-grid" id="durationGrid">
+      <div class="dur-option" data-mins="5" data-price="1000" onclick="selectDuration(this)">
+        <span class="dur-time">5 min</span>
+        <span class="dur-price">1,000</span>
+        <span class="dur-unit">KES</span>
+      </div>
+      <div class="dur-option" data-mins="10" data-price="1800" onclick="selectDuration(this)">
+        <span class="dur-time">10 min</span>
+        <span class="dur-price">1,800</span>
+        <span class="dur-unit">KES</span>
+      </div>
+      <div class="dur-option" data-mins="15" data-price="2200" onclick="selectDuration(this)">
+        <span class="dur-time">15 min</span>
+        <span class="dur-price">2,200</span>
+        <span class="dur-unit">KES</span>
+      </div>
+      <div class="dur-option" data-mins="20" data-price="2500" onclick="selectDuration(this)">
+        <span class="dur-time">20 min</span>
+        <span class="dur-price">2,500</span>
+        <span class="dur-unit">KES</span>
+      </div>
+      <div class="dur-option" data-mins="30" data-price="3500" onclick="selectDuration(this)">
+        <span class="dur-time">30 min</span>
+        <span class="dur-price">3,500</span>
+        <span class="dur-unit">KES</span>
+      </div>
+      <div class="dur-option" data-mins="60" data-price="6000" onclick="selectDuration(this)">
+        <span class="dur-time">1 hour</span>
+        <span class="dur-price">6,000</span>
+        <span class="dur-unit">KES</span>
+      </div>
+    </div>
+
+    <div class="promo-row">
+      <input class="promo-input" id="promoInput" type="text" placeholder="Promo code (optional)" maxlength="20" oninput="handlePromo()">
+      <button class="promo-btn" onclick="applyPromo()">Apply</button>
+    </div>
+    <div class="promo-msg" id="promoMsg"></div>
+  </div>
+
+  <div class="summary-pill" id="summaryPill" style="display:none">
+    <div class="summary-info">
+      <div class="summary-icon">🏍️</div>
+      <div class="summary-text">
+        <div class="summary-dur" id="summaryDur">—</div>
+        <div class="summary-sub">Quad bike ride</div>
+      </div>
+    </div>
+    <div class="summary-price-wrap">
+      <div class="summary-original" id="summaryOriginal" style="display:none"></div>
+      <div>
+        <span class="summary-price" id="summaryPrice">—</span>
+        <span class="summary-kes">KES</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-banner" style="margin-top:16px">
+    <span class="info-banner-icon">⚠️</span>
+    <div class="info-banner-text"><strong>Overtime note:</strong> If you ride past your booked time, additional charges of <strong>100 KES per minute</strong> apply automatically.</div>
+  </div>
+
+  <div class="trust-strip">
+    <div class="trust-badge"><span class="tb-icon">🔒</span> Secure M-Pesa payment</div>
+    <div class="trust-badge"><span class="tb-icon">🧾</span> Receipt via WhatsApp</div>
+    <div class="trust-badge"><span class="tb-icon">⚡</span> Instant confirmation</div>
+  </div>
+
+  <br>
+  <button class="btn-primary gold" id="step1Next" onclick="goToStep(2)" disabled>
+    Continue to Details <span>→</span>
+  </button>
+</div>
+
+<!-- ════════ STEP 2: YOUR DETAILS ════════ -->
+<div class="step-panel" id="step-2">
+  <button class="btn-back" onclick="goToStep(1)">← Back</button>
+  <div class="step-heading">
+    <div class="step-label">Step 2</div>
+    <h2 class="step-title">Tell us <em>who you are</em></h2>
+    <p class="step-sub">Your details are used for your booking record and WhatsApp receipt.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Personal Information</div>
+    <div class="field-group">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="fieldName" placeholder="e.g. Jane Mwangi" oninput="validateStep2()">
+        <div class="field-error" id="errName"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="fieldPhone" placeholder="07XXXXXXXX" maxlength="13" oninput="validateStep2()">
+          <div class="field-error" id="errPhone"></div>
+        </div>
+        <div class="field">
+          <label>Email (optional)</label>
+          <input type="email" id="fieldEmail" placeholder="you@example.com">
+        </div>
+      </div>
+    </div>
+
+    <div class="waiver-box">
+      <div class="waiver-check" id="waiverCheck" onclick="toggleWaiver()">
+        <div class="waiver-box-checkbox" id="waiverCheckbox"></div>
+        <div class="waiver-text">I agree to the <strong>safety waiver</strong> — I understand quad biking carries risks, I will wear provided safety gear, and I am physically fit to ride. I accept full responsibility for my actions during the ride.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary repeat -->
+  <div class="summary-pill" id="summaryPill2">
+    <div class="summary-info">
+      <div class="summary-icon">🏍️</div>
+      <div class="summary-text">
+        <div class="summary-dur" id="summaryDur2">—</div>
+        <div class="summary-sub">Quad bike ride</div>
+      </div>
+    </div>
+    <div class="summary-price-wrap">
+      <div>
+        <span class="summary-price" id="summaryPrice2">—</span>
+        <span class="summary-kes">KES</span>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <button class="btn-primary gold" id="step2Next" onclick="goToStep(3)" disabled>
+    Proceed to Payment <span>→</span>
+  </button>
+</div>
+
+<!-- ════════ STEP 3: PAY M-PESA ════════ -->
+<div class="step-panel" id="step-3">
+  <button class="btn-back" onclick="goToStep(2)">← Back</button>
+  <div class="step-heading">
+    <div class="step-label">Step 3</div>
+    <h2 class="step-title">Pay via <em>M-Pesa</em></h2>
+    <p class="step-sub">Send the exact amount to our till number, then enter your M-Pesa confirmation code below.</p>
+  </div>
+
+  <div class="mpesa-card">
+    <div class="mpesa-header">
+      <div class="mpesa-header-icon">📱</div>
+      <div class="mpesa-header-text">
+        <div class="mpesa-header-title">M-Pesa Buy Goods & Services</div>
+        <div class="mpesa-header-sub">Safaricom · Instant payment</div>
+      </div>
+    </div>
+    <div class="mpesa-body">
+      <div class="till-box" onclick="copyTill()">
+        <div>
+          <div class="till-label">Till Number</div>
+          <div class="till-number">6685024</div>
+        </div>
+        <button class="till-copy-btn" id="tillCopyBtn">📋 Copy</button>
+      </div>
+
+      <div class="amount-pill">
+        <div class="amount-label">Amount to Send</div>
+        <div class="amount-val" id="mpesaAmount">—<span>KES</span></div>
+      </div>
+
+      <div class="mpesa-steps-list">
+        <div class="mpesa-step-item"><div class="mpesa-step-num">1</div><div class="mpesa-step-text">Open <strong>M-Pesa</strong> on your phone</div></div>
+        <div class="mpesa-step-item"><div class="mpesa-step-num">2</div><div class="mpesa-step-text">Select <strong>Lipa na M-Pesa</strong></div></div>
+        <div class="mpesa-step-item"><div class="mpesa-step-num">3</div><div class="mpesa-step-text">Select <strong>Buy Goods and Services</strong></div></div>
+        <div class="mpesa-step-item"><div class="mpesa-step-num">4</div><div class="mpesa-step-text">Enter Till Number: <strong>6685024</strong></div></div>
+        <div class="mpesa-step-item"><div class="mpesa-step-num">5</div><div class="mpesa-step-text">Enter amount: <strong id="stepAmount">—</strong> KES and confirm with your PIN</div></div>
+        <div class="mpesa-step-item"><div class="mpesa-step-num">6</div><div class="mpesa-step-text">You'll receive an SMS with a <strong>confirmation code</strong> — paste it below</div></div>
+      </div>
+
+      <div class="ref-field">
+        <label>M-Pesa Confirmation Code</label>
+        <div class="ref-input-wrap">
+          <input class="ref-input" id="mpesaRef" type="text" placeholder="e.g. QHL2X3P8KA" maxlength="12" oninput="handleRefInput(this)">
+          <span class="ref-check-icon">✅</span>
+        </div>
+        <div class="field-error" id="errRef" style="margin-top:6px"></div>
+        <div class="field-hint" style="margin-top:6px">Found in the SMS from <strong>MPESA</strong>. Usually 10 characters e.g. QHL2X3P8KA</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary green" id="step3Next" onclick="submitBooking()" disabled>
+    Confirm My Booking ✓
+  </button>
+</div>
+
+<!-- ════════ STEP 4: CONFIRMED ════════ -->
+<div class="step-panel" id="step-4">
+  <div class="confirm-top">
+    <div class="confirm-check">✓</div>
+    <div class="confirm-title">Booking Confirmed!</div>
+    <div class="confirm-sub">Your ride has been booked. Show this confirmation to the operator when you arrive at the dunes.</div>
+  </div>
+
+  <div class="booking-summary-card">
+    <div class="bsc-header">
+      <div class="bsc-brand">Royal Quad Bikes</div>
+      <div class="bsc-ref" id="confirmRef">RQ-——</div>
+    </div>
+    <div class="bsc-perf"></div>
+    <div class="bsc-body">
+      <div class="bsc-row"><span class="bsc-row-label">Name</span><span class="bsc-row-value" id="confirmName">—</span></div>
+      <div class="bsc-row"><span class="bsc-row-label">Phone</span><span class="bsc-row-value" id="confirmPhone">—</span></div>
+      <div class="bsc-row"><span class="bsc-row-label">Duration</span><span class="bsc-row-value" id="confirmDur">—</span></div>
+      <div class="bsc-row"><span class="bsc-row-label">M-Pesa Ref</span><span class="bsc-row-value" id="confirmMpesa" style="color:var(--green);font-family:monospace;letter-spacing:1px">—</span></div>
+      <div class="bsc-row"><span class="bsc-row-label">Location</span><span class="bsc-row-value">Mambrui Sand Dunes, Kilifi</span></div>
+      <div class="bsc-row"><span class="bsc-row-label">Date</span><span class="bsc-row-value" id="confirmDate">—</span></div>
+    </div>
+    <div class="bsc-total">
+      <div class="bsc-total-label">TOTAL PAID</div>
+      <div class="bsc-total-amount" id="confirmTotal">— KES</div>
+    </div>
+  </div>
+
+  <div class="info-banner">
+    <span class="info-banner-icon">🏜️</span>
+    <div class="info-banner-text"><strong>See you at the dunes!</strong> Please arrive on time. Overtime is charged at 100 KES/min if you exceed your booked duration. Wear your safety gear at all times.</div>
+  </div>
+
+  <div class="confirm-actions">
+    <button class="btn-wa" onclick="sendWhatsApp()">
+      💬 &nbsp;Share via WhatsApp
+    </button>
+    <button class="btn-new" onclick="newBooking()">
+      🏍️ &nbsp;Book Another Ride
+    </button>
+  </div>
+</div>
+
+</main>
+
+<!-- Floating price badge -->
+<div class="float-price" id="floatPrice">
+  <span>Amount:</span>
+  <span id="floatAmount">—</span>
+  <span class="fp-kes">KES</span>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  step: 1,
+  duration: null,
+  durationLabel: null,
+  basePrice: null,
+  finalPrice: null,
+  promoCode: null,
+  promoDiscount: 0,
+  name: '',
+  phone: '',
+  email: '',
+  waiverAgreed: false,
+  mpesaRef: '',
+  bookingRef: null
+};
+
+// Promo codes (mirrors app data - add yours here)
+const PROMOS = {
+  'DUNE10': 10,
+  'RIDE20': 20,
+  'VIP30': 30,
+};
+
+// ── DURATION SELECT ──
+function selectDuration(el) {
+  document.querySelectorAll('.dur-option').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  state.duration = parseInt(el.dataset.mins);
+  state.basePrice = parseInt(el.dataset.price);
+  state.durationLabel = el.querySelector('.dur-time').textContent;
+  recalcPrice();
+  updateSummary();
+  document.getElementById('step1Next').disabled = false;
+  // Show float badge after step 1
+  const fp = document.getElementById('floatPrice');
+  if (state.step > 1) { fp.style.display = 'flex'; updateFloatBadge(); }
+}
+
+function recalcPrice() {
+  if (!state.basePrice) return;
+  const disc = state.promoDiscount;
+  state.finalPrice = Math.round(state.basePrice * (1 - disc / 100));
+}
+
+function updateSummary() {
+  if (!state.duration) return;
+  const price = state.finalPrice || state.basePrice;
+  // Step 1 summary
+  document.getElementById('summaryPill').style.display = 'flex';
+  document.getElementById('summaryDur').textContent = state.durationLabel + ' Ride';
+  document.getElementById('summaryPrice').textContent = price.toLocaleString();
+  const origEl = document.getElementById('summaryOriginal');
+  if (state.promoDiscount > 0) {
+    origEl.style.display = 'block';
+    origEl.textContent = state.basePrice.toLocaleString() + ' KES';
+  } else { origEl.style.display = 'none'; }
+
+  // Step 2 summary
+  document.getElementById('summaryDur2').textContent = state.durationLabel + ' Ride';
+  document.getElementById('summaryPrice2').textContent = price.toLocaleString();
+
+  // Step 3 mpesa
+  document.getElementById('mpesaAmount').innerHTML = price.toLocaleString() + '<span>KES</span>';
+  document.getElementById('stepAmount').textContent = price.toLocaleString();
+
+  updateFloatBadge();
+}
+
+function updateFloatBadge() {
+  const price = state.finalPrice || state.basePrice;
+  if (price) document.getElementById('floatAmount').textContent = price.toLocaleString();
+}
+
+// ── PROMO ──
+function handlePromo() {
+  document.getElementById('promoMsg').textContent = '';
+  document.getElementById('promoInput').classList.remove('valid');
+}
+function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  const msg = document.getElementById('promoMsg');
+  if (!code) { msg.textContent = 'Enter a promo code.'; msg.className = 'promo-msg err'; return; }
+  if (PROMOS[code]) {
+    state.promoCode = code;
+    state.promoDiscount = PROMOS[code];
+    recalcPrice();
+    updateSummary();
+    msg.textContent = `✓ "${code}" applied — ${PROMOS[code]}% off!`;
+    msg.className = 'promo-msg ok';
+    document.getElementById('promoInput').classList.add('valid');
+  } else {
+    state.promoCode = null;
+    state.promoDiscount = 0;
+    recalcPrice();
+    updateSummary();
+    msg.textContent = 'Invalid promo code.';
+    msg.className = 'promo-msg err';
+  }
+}
+
+// ── WAIVER ──
+function toggleWaiver() {
+  state.waiverAgreed = !state.waiverAgreed;
+  const check = document.getElementById('waiverCheck');
+  const box = document.getElementById('waiverCheckbox');
+  check.classList.toggle('checked', state.waiverAgreed);
+  box.textContent = state.waiverAgreed ? '✓' : '';
+  validateStep2();
+}
+
+// ── STEP 2 VALIDATION ──
+function validateStep2() {
+  state.name = document.getElementById('fieldName').value.trim();
+  state.phone = document.getElementById('fieldPhone').value.trim();
+
+  let ok = true;
+  // Name
+  if (state.name.length < 2 && state.name.length > 0) {
+    document.getElementById('errName').textContent = 'Enter your full name';
+    ok = false;
+  } else { document.getElementById('errName').textContent = ''; }
+
+  // Phone
+  const ph = state.phone.replace(/\s+/g,'');
+  const validPhone = /^(\+254|254|07|01)\d{8,9}$/.test(ph);
+  if (state.phone.length > 0 && !validPhone) {
+    document.getElementById('errPhone').textContent = 'Enter a valid Kenyan phone number';
+    ok = false;
+  } else { document.getElementById('errPhone').textContent = ''; }
+
+  const canContinue = state.name.length >= 2 && validPhone && state.waiverAgreed;
+  document.getElementById('step2Next').disabled = !canContinue;
+}
+
+// ── MPESA REF ──
+function handleRefInput(el) {
+  const val = el.value.trim().toUpperCase();
+  el.value = val;
+  state.mpesaRef = val;
+  const valid = val.length >= 8 && val.length <= 12 && /^[A-Z0-9]+$/.test(val);
+  el.classList.toggle('valid', valid);
+  document.getElementById('step3Next').disabled = !valid;
+  document.getElementById('errRef').textContent = '';
+}
+
+// ── COPY TILL ──
+function copyTill() {
+  navigator.clipboard.writeText('6685024').catch(()=>{});
+  const btn = document.getElementById('tillCopyBtn');
+  btn.textContent = '✅ Copied!';
+  btn.classList.add('copied');
+  setTimeout(()=>{ btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2500);
+}
+
+// ── STEP NAVIGATION ──
+function goToStep(n) {
+  // Guard: can't skip ahead past completed
+  if (n === 2 && !state.duration) return;
+  if (n === 3 && (!state.name || !state.waiverAgreed)) return;
+  if (n === 4) return; // only accessible via submitBooking
+
+  state.step = n;
+
+  // Panels
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i+1 === n));
+
+  // Progress dots
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('prog-' + i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+    // Remove number text for done steps (show check via CSS)
+    const dot = el.querySelector('.prog-dot');
+    dot.textContent = i < n ? '' : String(i);
+  }
+
+  // Float badge
+  const fp = document.getElementById('floatPrice');
+  fp.style.display = (n >= 2 && n < 4 && state.duration) ? 'flex' : 'none';
+  updateFloatBadge();
+
+  // Scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── SUBMIT ──
+function generateRef() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = 'RQ-';
+  for (let i=0;i<8;i++) r += chars[Math.floor(Math.random()*chars.length)];
+  return r;
+}
+function formatDate(d) {
+  return d.toLocaleDateString('en-KE',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+}
+
+function submitBooking() {
+  const ref = generateRef();
+  state.bookingRef = ref;
+  state.email = document.getElementById('fieldEmail').value.trim();
+  const finalPrice = state.finalPrice || state.basePrice;
+
+  // Populate confirmation card
+  document.getElementById('confirmRef').textContent = ref;
+  document.getElementById('confirmName').textContent = state.name;
+  document.getElementById('confirmPhone').textContent = state.phone;
+  document.getElementById('confirmDur').textContent = state.durationLabel + ' Ride';
+  document.getElementById('confirmMpesa').textContent = state.mpesaRef.toUpperCase();
+  document.getElementById('confirmDate').textContent = formatDate(new Date());
+  document.getElementById('confirmTotal').textContent = finalPrice.toLocaleString() + ' KES';
+
+  // Go to step 4
+  state.step = 4;
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i+1 === 4));
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('prog-' + i);
+    el.classList.remove('active','done');
+    if (i < 4) el.classList.add('done');
+    if (i === 4) el.classList.add('active');
+    const dot = el.querySelector('.prog-dot');
+    dot.textContent = i < 4 ? '' : '4';
+  }
+  document.getElementById('floatPrice').style.display = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── WHATSAPP ──
+function sendWhatsApp() {
+  const price = (state.finalPrice || state.basePrice).toLocaleString();
+  const msg = encodeURIComponent(
+    `🏍️ *Royal Quad Bikes — Booking Confirmation*\n\n` +
+    `Ref: ${state.bookingRef}\n` +
+    `Name: ${state.name}\n` +
+    `Phone: ${state.phone}\n` +
+    `Duration: ${state.durationLabel} ride\n` +
+    `M-Pesa Ref: ${state.mpesaRef.toUpperCase()}\n` +
+    `Total: KES ${price}\n` +
+    `Date: ${formatDate(new Date())}\n\n` +
+    `📍 Mambrui Sand Dunes, Kilifi County, Kenya\n` +
+    `⚠️ Overtime: 100 KES/min after session ends`
+  );
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ── NEW BOOKING ──
+function newBooking() {
+  // Reset state
+  Object.assign(state, {step:1,duration:null,durationLabel:null,basePrice:null,finalPrice:null,promoCode:null,promoDiscount:0,name:'',phone:'',email:'',waiverAgreed:false,mpesaRef:'',bookingRef:null});
+  document.querySelectorAll('.dur-option').forEach(d=>d.classList.remove('selected'));
+  document.getElementById('promoInput').value='';
+  document.getElementById('promoMsg').textContent='';
+  document.getElementById('promoInput').classList.remove('valid');
+  document.getElementById('fieldName').value='';
+  document.getElementById('fieldPhone').value='';
+  document.getElementById('fieldEmail').value='';
+  document.getElementById('errName').textContent='';
+  document.getElementById('errPhone').textContent='';
+  document.getElementById('waiverCheck').classList.remove('checked');
+  document.getElementById('waiverCheckbox').textContent='';
+  document.getElementById('mpesaRef').value='';
+  document.getElementById('mpesaRef').classList.remove('valid');
+  document.getElementById('errRef').textContent='';
+  document.getElementById('summaryPill').style.display='none';
+  document.getElementById('step1Next').disabled=true;
+  document.getElementById('step2Next').disabled=true;
+  document.getElementById('step3Next').disabled=true;
+  goToStep(1);
+}
+</script>
+</body>
+</html>
