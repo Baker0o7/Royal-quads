@@ -36,6 +36,20 @@ jobs:
             > android/local.properties
           chmod +x android/gradlew
 
+
+      - name: "🔑 Print SHA-1 fingerprint (Google Sign-In setup)"
+        run: |
+          echo "======================================================="
+          echo "  GOOGLE SIGN-IN — Register this SHA-1 in GCP Console"
+          echo "======================================================="
+          cd android
+          chmod +x gradlew
+          ./gradlew signingReport 2>/dev/null | grep -A5 "Variant: debug" | grep -E "SHA1:|SHA-256:" ||             keytool -list -v -keystore ~/.android/debug.keystore               -alias androiddebugkey -storepass android -keypass android 2>/dev/null               | grep -E "SHA1:|SHA-256:"
+          echo "  Package name : com.royalquadbikes.app"
+          echo "  Register at  : console.cloud.google.com"
+          echo "  Path         : APIs & Services → Credentials → Android OAuth Client"
+          echo "======================================================="
+
       - name: Get dependencies
         run: flutter pub get
 
