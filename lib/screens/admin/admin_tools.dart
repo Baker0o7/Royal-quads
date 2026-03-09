@@ -1,6 +1,7 @@
-import '../../models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../models/models.dart';
 import '../../providers/app_provider.dart';
 import '../../services/storage.dart';
 import '../../theme/theme.dart';
@@ -17,157 +18,95 @@ class _AdminToolsTabState extends State<AdminToolsTab> {
     final pin    = StorageService.getAdminPin();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-        // ── Promo codes ──────────────────────────────────────────────────────
-        SectionHeading('Promo Codes', icon: Icons.local_offer_rounded,
-          trailing: GestureDetector(
-            onTap: () => _addPromo(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: kAccent.withAlpha(12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: kAccent.withAlpha(40))),
-              child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.add_rounded, color: kAccent, size: 14),
-                SizedBox(width: 4),
-                Text('Add', style: TextStyle(
-                    color: kAccent, fontSize: 12, fontWeight: FontWeight.w700)),
-              ])),
-          ),
+        // ── Promo codes ───────────────────────────────────────────────────
+        _ToolHeader(
+          icon: Icons.local_offer_rounded, label: 'Promo Codes',
+          color: kAccent,
+          action: _AddButton('New Code', () => _addPromo(context)),
+        ),
+        const SizedBox(height: 10),
+        _PromoSection(
+          promos: promos,
+          onChanged: () => setState(() {}),
         ),
 
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: promos.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Center(child: Text('No promo codes yet',
-                      style: TextStyle(color: kMuted))))
-              : Column(children: promos.asMap().entries.map((e) {
-                  final i = e.key;
-                  final p = e.value;
-                  return Column(children: [
-                    if (i > 0) const Divider(height: 1, color: kBorder),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      child: Row(children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: p.isActive
-                                ? kGreen.withAlpha(12) : kBg2,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: p.isActive
-                                    ? kGreen.withAlpha(40) : kBorder)),
-                          child: Text(p.code, style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14,
-                              color: p.isActive ? kGreen : kMuted))),
-                        const SizedBox(width: 10),
-                        Expanded(child: Text(
-                            '${p.discountPercentage}% discount',
-                            style: const TextStyle(
-                                color: kMuted, fontSize: 13))),
-                        Switch(
-                          value: p.isActive, activeColor: kGreen,
-                          onChanged: (v) async {
-                            final updated = promos.map((x) =>
-                                x.id == p.id ? x.copyWith(isActive: v) : x
-                            ).toList();
-                            await StorageService.savePromotions(updated);
-                            setState(() {});
-                          }),
-                      ]),
-                    ),
-                  ]);
-                }).toList()),
+        const SizedBox(height: 24),
+
+        // ── Admin PIN ─────────────────────────────────────────────────────
+        _ToolHeader(
+          icon: Icons.lock_rounded, label: 'Admin PIN',
+          color: kIndigo,
         ),
+        const SizedBox(height: 10),
+        _PinCard(pin: pin, onChange: () => _changePin(context)),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
 
-        // ── Admin PIN ────────────────────────────────────────────────────────
-        SectionHeading('Admin PIN', icon: Icons.lock_rounded),
-        AppCard(child: Row(children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: kIndigo.withAlpha(12),
-              borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.lock_open_rounded,
-                color: kIndigo, size: 22)),
-          const SizedBox(width: 12),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Current PIN', style: TextStyle(
-                  color: kMuted, fontSize: 11)),
-              Text('• ' * pin.length, style: const TextStyle(
-                  fontSize: 20, letterSpacing: 4, color: kText)),
-            ],
-          )),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: kIndigo,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10)),
-            onPressed: () => _changePin(context),
-            child: const Text('Change'),
-          ),
-        ])),
+        // ── Staff ─────────────────────────────────────────────────────────
+        _ToolHeader(
+          icon: Icons.people_rounded, label: 'Staff Members',
+          color: kGreen,
+          action: _AddButton('Add Staff', () => _addStaff(context)),
+        ),
+        const SizedBox(height: 10),
+        _StaffSection(onChanged: () => setState(() {})),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
 
-        // ── Staff ────────────────────────────────────────────────────────────
-        SectionHeading('Staff', icon: Icons.people_rounded),
-        _StaffPanel(onChanged: () => setState(() {})),
-
-        const SizedBox(height: 20),
-
-        // ── Maintenance ──────────────────────────────────────────────────────
-        SectionHeading('Maintenance Logs', icon: Icons.build_rounded),
-        _MaintenancePanel(onChanged: () => setState(() {})),
-
-        const SizedBox(height: 40),
+        // ── Maintenance logs ──────────────────────────────────────────────
+        _ToolHeader(
+          icon: Icons.build_rounded, label: 'Maintenance Logs',
+          color: kOrange,
+          action: _AddButton('Log Entry', () => _logMaintenance(context)),
+        ),
+        const SizedBox(height: 10),
+        _MaintenanceSection(onChanged: () => setState(() {})),
       ]),
     );
   }
 
+  // ── Dialog launchers ─────────────────────────────────────────────────────
+
   void _addPromo(BuildContext context) {
-    String code = ''; int pct = 10;
-    showDialog(context: context, builder: (_) => _StyledDialog(
+    final codeCtrl = TextEditingController();
+    final pctCtrl  = TextEditingController(text: '10');
+    showDialog(context: context, builder: (_) => _ToolDialog(
       title: 'New Promo Code',
       icon: Icons.local_offer_rounded,
       color: kAccent,
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextFormField(
+        TextField(
+          controller: codeCtrl,
+          textCapitalization: TextCapitalization.characters,
+          inputFormatters: [FilteringTextInputFormatter.allow(
+              RegExp(r'[A-Za-z0-9]'))],
           decoration: const InputDecoration(
               labelText: 'Code (e.g. DUNES20)',
+              hintText: 'SUMMER15',
               prefixIcon: Icon(Icons.confirmation_number_outlined, size: 18)),
-          textCapitalization: TextCapitalization.characters,
-          onChanged: (v) => code = v),
-        const SizedBox(height: 12),
-        TextFormField(
-          initialValue: '10',
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: pctCtrl,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: const InputDecoration(
               labelText: 'Discount %',
               prefixIcon: Icon(Icons.percent_rounded, size: 18),
               suffixText: '%'),
-          keyboardType: TextInputType.number,
-          onChanged: (v) => pct = int.tryParse(v) ?? 10),
+        ),
       ]),
       onConfirm: () async {
-        if (code.trim().isEmpty) return false;
+        final code = codeCtrl.text.trim().toUpperCase();
+        final pct  = int.tryParse(pctCtrl.text) ?? 10;
+        if (code.isEmpty) return false;
         final promos = StorageService.getPromotions();
         final newPromo = Promotion(
           id: promos.isEmpty ? 1 : promos.last.id + 1,
-          code: code.trim().toUpperCase(),
+          code: code,
           discountPercentage: pct.clamp(1, 100),
           isActive: true,
         );
@@ -179,228 +118,408 @@ class _AdminToolsTabState extends State<AdminToolsTab> {
   }
 
   void _changePin(BuildContext context) {
-    String pin = '';
-    showDialog(context: context, builder: (_) => _StyledDialog(
+    final ctrl = TextEditingController();
+    showDialog(context: context, builder: (_) => _ToolDialog(
       title: 'Change Admin PIN',
       icon: Icons.lock_rounded,
       color: kIndigo,
-      content: TextFormField(
+      content: TextField(
+        controller: ctrl,
+        keyboardType: TextInputType.number,
+        obscureText: true,
+        maxLength: 4,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: const InputDecoration(
             labelText: 'New 4-digit PIN',
             prefixIcon: Icon(Icons.lock_outline_rounded, size: 18),
             counterText: ''),
-        keyboardType: TextInputType.number,
-        obscureText: true,
-        maxLength: 4,
-        onChanged: (v) => pin = v,
       ),
       onConfirm: () async {
-        if (pin.length != 4) return false;
-        await StorageService.setAdminPin(pin);
+        if (ctrl.text.length != 4) return false;
+        await StorageService.setAdminPin(ctrl.text);
         setState(() {});
         return true;
       },
     ));
   }
-}
 
-// ── Staff Panel ────────────────────────────────────────────────────────────────
-class _StaffPanel extends StatefulWidget {
-  final VoidCallback onChanged;
-  const _StaffPanel({required this.onChanged});
-  @override State<_StaffPanel> createState() => _StaffPanelState();
-}
-
-class _StaffPanelState extends State<_StaffPanel> {
-  @override
-  Widget build(BuildContext context) {
-    final staff = StorageService.getStaff();
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(children: [
-        if (staff.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: Text('No staff members',
-                style: TextStyle(color: kMuted))))
-        else
-          ...staff.asMap().entries.map((e) {
-            final i = e.key;
-            final s = e.value;
-            return Column(children: [
-              if (i > 0) const Divider(height: 1, color: kBorder),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
-                child: Row(children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: kAccent.withAlpha(20),
-                    child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                            color: kAccent, fontWeight: FontWeight.w700))),
-                  const SizedBox(width: 10),
-                  Expanded(child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.name, style: const TextStyle(
-                          fontWeight: FontWeight.w700)),
-                      Text('${s.role} · ${s.phone}',
-                          style: const TextStyle(
-                              color: kMuted, fontSize: 11)),
-                    ],
-                  )),
-                  Switch(
-                    value: s.isActive, activeColor: kGreen,
-                    onChanged: (v) async {
-                      final all = staff.map((x) =>
-                          x.id == s.id ? x.copyWith(isActive: v) : x
-                      ).toList();
-                      await StorageService.saveStaff(all);
-                      setState(() {});
-                      widget.onChanged();
-                    }),
-                ]),
-              ),
-            ]);
-          }),
-        const Divider(height: 1, color: kBorder),
-        TextButton.icon(
-          icon: const Icon(Icons.person_add_rounded, size: 16),
-          label: const Text('Add Staff Member'),
-          style: TextButton.styleFrom(foregroundColor: kAccent),
-          onPressed: () => _add(context, staff),
-        ),
-      ]),
-    );
-  }
-
-  void _add(BuildContext context, List<Staff> existing) {
-    String name = '', phone = '', pin = '';
-    showDialog(context: context, builder: (_) => _StyledDialog(
+  void _addStaff(BuildContext context) {
+    final nameCtrl  = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    final pinCtrl   = TextEditingController();
+    showDialog(context: context, builder: (_) => _ToolDialog(
       title: 'Add Staff Member',
       icon: Icons.person_add_rounded,
-      color: kAccent,
+      color: kGreen,
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextFormField(
+        TextField(
+          controller: nameCtrl,
+          textCapitalization: TextCapitalization.words,
           decoration: const InputDecoration(
               labelText: 'Full Name',
               prefixIcon: Icon(Icons.person_outline, size: 18)),
-          textCapitalization: TextCapitalization.words,
-          onChanged: (v) => name = v),
-        const SizedBox(height: 12),
-        TextFormField(
-          decoration: const InputDecoration(
-              labelText: 'Phone',
-              prefixIcon: Icon(Icons.phone_outlined, size: 18)),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: phoneCtrl,
           keyboardType: TextInputType.phone,
-          onChanged: (v) => phone = v),
-        const SizedBox(height: 12),
-        TextFormField(
+          decoration: const InputDecoration(
+              labelText: 'Phone', hintText: '0712 345 678',
+              prefixIcon: Icon(Icons.phone_outlined, size: 18)),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: pinCtrl,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          maxLength: 4,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: const InputDecoration(
               labelText: '4-digit PIN',
               prefixIcon: Icon(Icons.lock_outline_rounded, size: 18),
               counterText: ''),
-          keyboardType: TextInputType.number,
-          obscureText: true,
-          maxLength: 4,
-          onChanged: (v) => pin = v),
+        ),
       ]),
       onConfirm: () async {
-        if (name.trim().isEmpty || pin.length < 4) return false;
+        final name = nameCtrl.text.trim();
+        final pin  = pinCtrl.text;
+        if (name.isEmpty || pin.length < 4) return false;
+        final existing = StorageService.getStaff();
         final s = Staff(
           id: existing.isEmpty ? 1 : existing.last.id + 1,
-          name: name.trim(), phone: phone.trim(),
+          name: name,
+          phone: phoneCtrl.text.trim(),
           pin: pin, role: 'operator', isActive: true);
         await StorageService.saveStaff([...existing, s]);
         setState(() {});
-        widget.onChanged();
         return true;
       },
     ));
   }
-}
 
-// ── Maintenance Panel ──────────────────────────────────────────────────────────
-class _MaintenancePanel extends StatefulWidget {
-  final VoidCallback onChanged;
-  const _MaintenancePanel({required this.onChanged});
-  @override State<_MaintenancePanel> createState() => _MaintenancePanelState();
-}
-
-class _MaintenancePanelState extends State<_MaintenancePanel> {
-  @override
-  Widget build(BuildContext context) {
-    final logs = StorageService.getMaintenance().reversed.take(15).toList();
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(children: [
-        if (logs.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: Text('No maintenance logs',
-                style: TextStyle(color: kMuted))))
-        else
-          ...logs.asMap().entries.map((e) {
-            final i = e.key;
-            final l = e.value;
-            final typeColor = _typeColor(l.type);
-            return Column(children: [
-              if (i > 0) const Divider(height: 1, color: kBorder),
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(children: [
-                  Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(
-                      color: typeColor.withAlpha(15),
-                      borderRadius: BorderRadius.circular(12)),
-                    child: Icon(_typeIcon(l.type),
-                        color: typeColor, size: 18)),
-                  const SizedBox(width: 10),
-                  Expanded(child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        Text(l.quadName, style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13)),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: typeColor.withAlpha(15),
-                            borderRadius: BorderRadius.circular(6)),
-                          child: Text(l.type, style: TextStyle(
-                              color: typeColor, fontSize: 9,
-                              fontWeight: FontWeight.w700))),
-                      ]),
-                      Text(l.description, style: const TextStyle(
-                          color: kMuted, fontSize: 12, height: 1.3)),
-                      Text(l.date.dateOnly,
-                          style: const TextStyle(
-                              color: kMuted, fontSize: 10)),
-                    ],
-                  )),
-                  Text('${l.cost.kes} KES', style: const TextStyle(
-                      color: kAccent, fontWeight: FontWeight.w700,
-                      fontSize: 13)),
-                ]),
-              ),
-            ]);
-          }),
-        const Divider(height: 1, color: kBorder),
-        TextButton.icon(
-          icon: const Icon(Icons.add_rounded, size: 16),
-          label: const Text('Log Maintenance'),
-          style: TextButton.styleFrom(foregroundColor: kAccent),
-          onPressed: () => _add(context),
-        ),
-      ]),
-    );
+  void _logMaintenance(BuildContext context) {
+    final quads   = StorageService.getQuads();
+    final descCtrl = TextEditingController();
+    final costCtrl = TextEditingController();
+    int? quadId;
+    String type = 'service';
+    showDialog(context: context, builder: (_) => _ToolDialog(
+      title: 'Log Maintenance',
+      icon: Icons.build_rounded,
+      color: kOrange,
+      content: StatefulBuilder(builder: (ctx, setS) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButtonFormField<int>(
+            decoration: const InputDecoration(
+                labelText: 'Quad',
+                prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
+            items: quads.map((q) => DropdownMenuItem(
+                value: q.id, child: Text(q.name))).toList(),
+            onChanged: (v) => quadId = v,
+          ),
+          const SizedBox(height: 14),
+          DropdownButtonFormField<String>(
+            value: type,
+            decoration: const InputDecoration(
+                labelText: 'Type',
+                prefixIcon: Icon(Icons.category_rounded, size: 18)),
+            items: [
+              _typeItem('service',    'Service',    Icons.settings_rounded,     kIndigo),
+              _typeItem('fuel',       'Fuel',       Icons.local_gas_station_rounded, kGreen),
+              _typeItem('repair',     'Repair',     Icons.build_rounded,        kRed),
+              _typeItem('inspection', 'Inspection', Icons.check_circle_outline_rounded, kAccent),
+            ],
+            onChanged: (v) { if (v != null) setS(() => type = v); },
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: descCtrl,
+            decoration: const InputDecoration(
+                labelText: 'Description',
+                prefixIcon: Icon(Icons.notes_rounded, size: 18)),
+            maxLines: 2,
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: costCtrl,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(
+                labelText: 'Cost (KES)',
+                prefixIcon: Icon(Icons.payments_outlined, size: 18),
+                suffixText: 'KES'),
+          ),
+        ],
+      )),
+      onConfirm: () async {
+        if (quadId == null || descCtrl.text.trim().isEmpty) return false;
+        final quad = quads.firstWhere((q) => q.id == quadId);
+        final log = MaintenanceLog(
+          id: DateTime.now().millisecondsSinceEpoch,
+          quadId: quadId!, quadName: quad.name, type: type,
+          description: descCtrl.text.trim(),
+          cost: int.tryParse(costCtrl.text) ?? 0,
+          date: DateTime.now(),
+        );
+        await StorageService.saveMaintenance(
+            [...StorageService.getMaintenance(), log]);
+        setState(() {});
+        return true;
+      },
+    ));
   }
 
-  Color _typeColor(String t) => switch (t) {
+  DropdownMenuItem<String> _typeItem(
+      String v, String label, IconData icon, Color c) =>
+    DropdownMenuItem(value: v,
+      child: Row(children: [
+        Icon(icon, color: c, size: 15),
+        const SizedBox(width: 8),
+        Text(label),
+      ]),
+    );
+}
+
+// ── Tool section header ───────────────────────────────────────────────────────
+class _ToolHeader extends StatelessWidget {
+  final IconData icon; final String label; final Color color;
+  final Widget? action;
+  const _ToolHeader({required this.icon, required this.label,
+      required this.color, this.action});
+  @override
+  Widget build(BuildContext context) => Row(children: [
+    Container(
+      width: 32, height: 32,
+      decoration: BoxDecoration(
+        color: color.withAlpha(18),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Icon(icon, color: color, size: 16),
+    ),
+    const SizedBox(width: 10),
+    Text(label, style: const TextStyle(
+        fontFamily: 'Playfair', fontSize: 16,
+        fontWeight: FontWeight.w700, color: kText)),
+    const Spacer(),
+    if (action != null) action!,
+  ]);
+}
+
+class _AddButton extends StatelessWidget {
+  final String label; final VoidCallback onTap;
+  const _AddButton(this.label, this.onTap);
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: kAccent.withAlpha(10),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: kAccent.withAlpha(40)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        const Icon(Icons.add_rounded, color: kAccent, size: 14),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(
+            color: kAccent, fontSize: 12, fontWeight: FontWeight.w700)),
+      ]),
+    ),
+  );
+}
+
+// ── Promo codes section ───────────────────────────────────────────────────────
+class _PromoSection extends StatelessWidget {
+  final List<Promotion> promos;
+  final VoidCallback onChanged;
+  const _PromoSection({required this.promos, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) => promos.isEmpty
+    ? _EmptyCard('No promo codes yet', Icons.local_offer_outlined)
+    : AppCard(
+        padding: EdgeInsets.zero,
+        child: Column(children: promos.asMap().entries.map((e) {
+          final i = e.key; final p = e.value;
+          return Column(children: [
+            if (i > 0) const Divider(height: 1, color: kBorder),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: p.isActive
+                        ? kGreen.withAlpha(12) : kBg2,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: p.isActive
+                            ? kGreen.withAlpha(40) : kBorder)),
+                  child: Text(p.code, style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                      color: p.isActive ? kGreen : kMuted)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${p.discountPercentage}% off',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 13)),
+                    Text(p.isActive ? 'Active' : 'Disabled',
+                        style: TextStyle(
+                            color: p.isActive ? kGreen : kMuted,
+                            fontSize: 11)),
+                  ],
+                )),
+                Switch(
+                  value: p.isActive, activeColor: kGreen,
+                  onChanged: (v) async {
+                    final updated = promos.map((x) =>
+                        x.id == p.id ? x.copyWith(isActive: v) : x).toList();
+                    await StorageService.savePromotions(updated);
+                    onChanged();
+                  }),
+              ]),
+            ),
+          ]);
+        }).toList()),
+      );
+}
+
+// ── PIN card ──────────────────────────────────────────────────────────────────
+class _PinCard extends StatelessWidget {
+  final String pin;
+  final VoidCallback onChange;
+  const _PinCard({required this.pin, required this.onChange});
+
+  @override
+  Widget build(BuildContext context) => AppCard(child: Row(children: [
+    Container(
+      width: 48, height: 48,
+      decoration: BoxDecoration(
+        color: kIndigo.withAlpha(12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: kIndigo.withAlpha(30)),
+      ),
+      child: const Icon(Icons.lock_open_rounded, color: kIndigo, size: 22)),
+    const SizedBox(width: 14),
+    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+      const Text('Current PIN', style: TextStyle(
+          color: kMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 4),
+      Row(children: List.generate(pin.length, (_) => Container(
+        width: 10, height: 10,
+        margin: const EdgeInsets.only(right: 5),
+        decoration: BoxDecoration(
+          color: kIndigo, shape: BoxShape.circle,
+          boxShadow: [BoxShadow(
+              color: kIndigo.withAlpha(50), blurRadius: 4)],
+        ),
+      ))),
+    ])),
+    GestureDetector(
+      onTap: onChange,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: kIndigo,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(
+              color: kIndigo.withAlpha(50), blurRadius: 8,
+              offset: const Offset(0, 3))],
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.edit_rounded, color: Colors.white, size: 14),
+          SizedBox(width: 6),
+          Text('Change', style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.w700,
+              fontSize: 13)),
+        ]),
+      ),
+    ),
+  ]));
+}
+
+// ── Staff section ─────────────────────────────────────────────────────────────
+class _StaffSection extends StatefulWidget {
+  final VoidCallback onChanged;
+  const _StaffSection({required this.onChanged});
+  @override State<_StaffSection> createState() => _StaffSectionState();
+}
+
+class _StaffSectionState extends State<_StaffSection> {
+  @override
+  Widget build(BuildContext context) {
+    final staff = StorageService.getStaff();
+    if (staff.isEmpty) return _EmptyCard('No staff members yet', Icons.people_outline);
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(children: staff.asMap().entries.map((e) {
+        final i = e.key; final s = e.value;
+        return Column(children: [
+          if (i > 0) const Divider(height: 1, color: kBorder),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 12),
+            child: Row(children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: kAccent.withAlpha(15),
+                child: Text(
+                  s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                      color: kAccent, fontWeight: FontWeight.w800,
+                      fontSize: 16)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.name, style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 14)),
+                  Text('${s.role}  ·  ${s.phone}',
+                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                ],
+              )),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Transform.scale(scale: 0.85, child: Switch(
+                  value: s.isActive, activeColor: kGreen,
+                  onChanged: (v) async {
+                    final all = staff.map((x) =>
+                        x.id == s.id ? x.copyWith(isActive: v) : x).toList();
+                    await StorageService.saveStaff(all);
+                    setState(() {}); widget.onChanged();
+                  },
+                )),
+                Text(s.isActive ? 'Active' : 'Off duty',
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: s.isActive ? kGreen : kMuted,
+                        fontWeight: FontWeight.w600)),
+              ]),
+            ]),
+          ),
+        ]);
+      }).toList()),
+    );
+  }
+}
+
+// ── Maintenance section ───────────────────────────────────────────────────────
+class _MaintenanceSection extends StatefulWidget {
+  final VoidCallback onChanged;
+  const _MaintenanceSection({required this.onChanged});
+  @override State<_MaintenanceSection> createState() => _MaintenanceSectionState();
+}
+
+class _MaintenanceSectionState extends State<_MaintenanceSection> {
+  static Color _typeColor(String t) => switch (t) {
     'service'    => kIndigo,
     'fuel'       => kGreen,
     'repair'     => kRed,
@@ -408,7 +527,7 @@ class _MaintenancePanelState extends State<_MaintenancePanel> {
     _ => kMuted,
   };
 
-  IconData _typeIcon(String t) => switch (t) {
+  static IconData _typeIcon(String t) => switch (t) {
     'service'    => Icons.settings_rounded,
     'fuel'       => Icons.local_gas_station_rounded,
     'repair'     => Icons.build_rounded,
@@ -416,74 +535,124 @@ class _MaintenancePanelState extends State<_MaintenancePanel> {
     _ => Icons.build_circle_rounded,
   };
 
-  void _add(BuildContext context) {
-    final quads = StorageService.getQuads();
-    int? quadId; String type = 'service', desc = ''; int cost = 0;
-    showDialog(context: context, builder: (ctx) => _StyledDialog(
-      title: 'Log Maintenance',
-      icon: Icons.build_rounded,
-      color: kAccent,
-      content: StatefulBuilder(builder: (ctx, setS) =>
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          DropdownButtonFormField<int>(
-            decoration: const InputDecoration(
-                labelText: 'Quad',
-                prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
-            items: quads.map((q) => DropdownMenuItem(
-                value: q.id, child: Text(q.name))).toList(),
-            onChanged: (v) => quadId = v),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: type,
-            decoration: const InputDecoration(
-                labelText: 'Type',
-                prefixIcon: Icon(Icons.category_rounded, size: 18)),
-            items: ['service','fuel','repair','inspection'].map((t) =>
-                DropdownMenuItem(value: t, child: Text(t))).toList(),
-            onChanged: (v) { if (v != null) setS(() => type = v); }),
-          const SizedBox(height: 12),
-          TextFormField(
-            decoration: const InputDecoration(
-                labelText: 'Description',
-                prefixIcon: Icon(Icons.notes_rounded, size: 18)),
-            maxLines: 2,
-            onChanged: (v) => desc = v),
-          const SizedBox(height: 12),
-          TextFormField(
-            decoration: const InputDecoration(
-                labelText: 'Cost (KES)',
-                prefixIcon: Icon(Icons.payments_outlined, size: 18),
-                suffixText: 'KES'),
-            keyboardType: TextInputType.number,
-            onChanged: (v) => cost = int.tryParse(v) ?? 0),
-        ])),
-      onConfirm: () async {
-        if (quadId == null || desc.trim().isEmpty) return false;
-        final quad = quads.firstWhere((q) => q.id == quadId);
-        final log = MaintenanceLog(
-          id: DateTime.now().millisecondsSinceEpoch,
-          quadId: quadId!, quadName: quad.name, type: type,
-          description: desc.trim(), cost: cost, date: DateTime.now());
-        await StorageService.saveMaintenance(
-            [...StorageService.getMaintenance(), log]);
-        setState(() {});
-        widget.onChanged();
-        return true;
-      },
-    ));
+  @override
+  Widget build(BuildContext context) {
+    final logs = StorageService.getMaintenance().reversed.take(20).toList();
+    if (logs.isEmpty) return _EmptyCard(
+        'No maintenance logs yet', Icons.build_outlined);
+
+    // Total spend
+    final totalSpend = logs.fold(0, (s, l) => s + l.cost);
+
+    return Column(children: [
+      // Summary bar
+      Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: kOrange.withAlpha(8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: kOrange.withAlpha(30)),
+        ),
+        child: Row(children: [
+          const Icon(Icons.analytics_outlined, color: kOrange, size: 14),
+          const SizedBox(width: 8),
+          Text('${logs.length} logs', style: const TextStyle(
+              color: kOrange, fontWeight: FontWeight.w700, fontSize: 13)),
+          const Spacer(),
+          Text('Total: ${totalSpend.kes} KES',
+              style: const TextStyle(color: kMuted, fontSize: 12)),
+        ]),
+      ),
+      AppCard(
+        padding: EdgeInsets.zero,
+        child: Column(children: logs.asMap().entries.map((e) {
+          final i = e.key; final l = e.value;
+          final tc = _typeColor(l.type);
+          return Column(children: [
+            if (i > 0) const Divider(height: 1, color: kBorder),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(children: [
+                Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: tc.withAlpha(12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(_typeIcon(l.type), color: tc, size: 18)),
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Text(l.quadName, style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 13)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: tc.withAlpha(12),
+                          borderRadius: BorderRadius.circular(6)),
+                        child: Text(l.type, style: TextStyle(
+                            color: tc, fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3)),
+                      ),
+                    ]),
+                    const SizedBox(height: 2),
+                    Text(l.description, style: const TextStyle(
+                        color: kMuted, fontSize: 12, height: 1.3)),
+                    Text(l.date.dateOnly,
+                        style: const TextStyle(color: kMuted, fontSize: 10)),
+                  ],
+                )),
+                if (l.cost > 0) Text('${l.cost.kes} KES',
+                    style: const TextStyle(
+                        color: kAccent, fontWeight: FontWeight.w700,
+                        fontSize: 13)),
+              ]),
+            ),
+          ]);
+        }).toList()),
+      ),
+    ]);
   }
 }
 
-// ── Reusable styled dialog ──────────────────────────────────────────────────────
-class _StyledDialog extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
+// ── Empty state card ──────────────────────────────────────────────────────────
+class _EmptyCard extends StatelessWidget {
+  final String label; final IconData icon;
+  const _EmptyCard(this.label, this.icon);
+  @override
+  Widget build(BuildContext context) => AppCard(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Center(child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: kBorder, size: 20),
+          const SizedBox(width: 10),
+          Text(label, style: const TextStyle(color: kMuted, fontSize: 13)),
+        ],
+      )),
+    ),
+  );
+}
+
+// ── Shared dialog ─────────────────────────────────────────────────────────────
+class _ToolDialog extends StatefulWidget {
+  final String title; final IconData icon; final Color color;
   final Widget content;
   final Future<bool> Function() onConfirm;
-
-  const _StyledDialog({required this.title, required this.icon,
+  const _ToolDialog({required this.title, required this.icon,
       required this.color, required this.content, required this.onConfirm});
+  @override State<_ToolDialog> createState() => _ToolDialogState();
+}
+
+class _ToolDialogState extends State<_ToolDialog> {
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) => Dialog(
@@ -493,26 +662,27 @@ class _StyledDialog extends StatelessWidget {
       Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withAlpha(10),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border(bottom: BorderSide(color: color.withAlpha(30)))),
+          color: widget.color.withAlpha(8),
+          borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(24)),
+          border: Border(bottom: BorderSide(
+              color: widget.color.withAlpha(30))),
+        ),
         child: Row(children: [
           Container(
             width: 36, height: 36,
             decoration: BoxDecoration(
-                color: color.withAlpha(20),
-                borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 18)),
+              color: widget.color.withAlpha(18),
+              borderRadius: BorderRadius.circular(10)),
+            child: Icon(widget.icon, color: widget.color, size: 18)),
           const SizedBox(width: 10),
-          Text(title, style: const TextStyle(
+          Expanded(child: Text(widget.title, style: const TextStyle(
               fontFamily: 'Playfair', fontSize: 17,
-              fontWeight: FontWeight.w700)),
+              fontWeight: FontWeight.w700))),
         ]),
       ),
       // Content
-      Padding(
-        padding: const EdgeInsets.all(20),
-        child: content),
+      Padding(padding: const EdgeInsets.all(20), child: widget.content),
       // Actions
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -523,13 +693,25 @@ class _StyledDialog extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                padding: const EdgeInsets.symmetric(vertical: 14)),
-            onPressed: () async {
-              final ok = await onConfirm();
+              backgroundColor: widget.color,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            onPressed: _loading ? null : () async {
+              setState(() => _loading = true);
+              final ok = await widget.onConfirm();
               if (ok && context.mounted) Navigator.pop(context);
+              else setState(() => _loading = false);
             },
-            child: const Text('Confirm'),
+            child: _loading
+                ? const SizedBox(width: 18, height: 18,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2))
+                : const Text('Save',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
           )),
         ]),
       ),
