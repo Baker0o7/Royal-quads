@@ -22,6 +22,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int?    _discounted;
   bool    _loading   = false;
   bool    _copied    = false;
+  int     get _step {
+    if (_selectedQuad == null) return 0;
+    if (_selectedDuration == null) return 1;
+    if (_name.trim().isEmpty || _phone.trim().isEmpty) return 2;
+    return 3;
+  }
 
   final _nameCtrl  = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -207,6 +213,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               _LiveRidesBanner(rides: provider.active),
               const SizedBox(height: 20),
             ],
+
+            // ── Booking stepper ──────────────────────────────────────────
+            _BookingStepper(step: _step),
+            const SizedBox(height: 20),
 
             // ── Fleet grid ────────────────────────────────────────────────────
             SectionHeading('Select Quad', icon: Icons.directions_bike_rounded,
@@ -761,6 +771,84 @@ class _EmptyState extends StatelessWidget {
           fontWeight: FontWeight.w700, color: kMuted)),
       const SizedBox(height: 4),
       Text(sub, style: const TextStyle(color: kMuted, fontSize: 12)),
+    ]),
+  );
+}
+
+// ── Booking stepper widget ────────────────────────────────────────────────────
+class _BookingStepper extends StatelessWidget {
+  final int step;
+  const _BookingStepper({required this.step});
+
+  static const _steps = ['Quad', 'Duration', 'Details', 'Pay'];
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    decoration: BoxDecoration(
+      color: kSurface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: kBorder),
+      boxShadow: kShadowSm,
+    ),
+    child: Column(children: [
+      // Step dots + lines
+      Row(children: List.generate(_steps.length * 2 - 1, (i) {
+        if (i.isOdd) {
+          // connector line
+          final lineIdx = i ~/ 2;
+          return Expanded(child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            height: 2,
+            decoration: BoxDecoration(
+              color: step > lineIdx ? kAccent : kBorder,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ));
+        }
+        final dotIdx = i ~/ 2;
+        final isDone   = step > dotIdx;
+        final isActive = step == dotIdx;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 28, height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isDone ? kAccent : isActive ? kText : Colors.transparent,
+            border: Border.all(
+              color: isDone ? kAccent : isActive ? kText : kBorder,
+              width: isActive ? 2 : 1.5,
+            ),
+            boxShadow: isActive ? [
+              BoxShadow(color: kText.withAlpha(20), blurRadius: 8),
+            ] : isDone ? [
+              BoxShadow(color: kAccent.withAlpha(40), blurRadius: 8),
+            ] : null,
+          ),
+          child: Center(
+            child: isDone
+                ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                : Text('${dotIdx + 1}', style: TextStyle(
+                    fontSize: 11, fontWeight: FontWeight.w800,
+                    color: isActive ? Colors.white : kMuted)),
+          ),
+        );
+      })),
+      const SizedBox(height: 8),
+      // Step labels
+      Row(children: List.generate(_steps.length, (i) {
+        final isDone   = step > i;
+        final isActive = step == i;
+        return Expanded(child: Text(
+          _steps[i],
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 9, fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: isDone ? kAccent : isActive ? kText : kMuted,
+          ),
+        ));
+      })),
     ]),
   );
 }
