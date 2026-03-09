@@ -728,100 +728,158 @@ class _PinScreenState extends State<_PinScreen>
     body: Container(
       decoration: const BoxDecoration(gradient: kHeroGradient),
       child: SafeArea(child: Column(children: [
+
+        // Back button
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, top: 4),
+            child: IconButton(
+              icon: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.arrow_back_rounded,
+                    color: Colors.white54, size: 18),
+              ),
+              onPressed: () => context.go('/'),
+            ),
+          ),
+        ),
+
         const Spacer(),
 
+        // Logo
         Container(
+          width: 90, height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            boxShadow: [BoxShadow(
-                color: kAccent.withAlpha(60), blurRadius: 24)]),
-          child: CircleAvatar(radius: 44,
-              backgroundImage: const AssetImage('assets/images/logo.png'),
-              backgroundColor: Colors.transparent)),
+            border: Border.all(color: kAccent.withAlpha(60), width: 2),
+            boxShadow: [
+              BoxShadow(color: kAccent.withAlpha(50), blurRadius: 32),
+              BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 16),
+            ],
+          ),
+          padding: const EdgeInsets.all(3),
+          child: const CircleAvatar(
+            backgroundImage: AssetImage('assets/images/logo.png'),
+            backgroundColor: Colors.transparent,
+          ),
+        ),
         const SizedBox(height: 20),
         const Text('Admin Access', style: TextStyle(
-            fontFamily: 'Playfair', fontSize: 26,
-            fontWeight: FontWeight.w700, color: Colors.white)),
-        const SizedBox(height: 4),
-        const Text('Enter your 4-digit PIN',
-            style: TextStyle(color: Colors.white38, fontSize: 14)),
+            fontFamily: 'Playfair', fontSize: 28,
+            fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -.5)),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(8),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: Colors.white.withAlpha(15)),
+          ),
+          child: const Text('🔐  ENTER YOUR 4-DIGIT PIN',
+              style: TextStyle(color: Colors.white38, fontSize: 9,
+                  letterSpacing: 2.5, fontWeight: FontWeight.w600)),
+        ),
         const SizedBox(height: 36),
 
         // Dots
         AnimatedBuilder(
           animation: _shakeAnim,
           builder: (_, child) => Transform.translate(
-            offset: Offset(_shakeAnim.value, 0),
-            child: child),
+            offset: Offset(_shakeAnim.value, 0), child: child),
           child: Row(mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(4, (i) => AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              width: i < _pin.length ? 18 : 16,
-              height: i < _pin.length ? 18 : 16,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i < _pin.length ? kAccent : Colors.white12,
-                boxShadow: i < _pin.length ? [
-                  BoxShadow(color: kAccent.withAlpha(80), blurRadius: 8)
-                ] : null,
-              ),
-            ))),
+            children: List.generate(4, (i) {
+              final filled = i < _pin.length;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                width: filled ? 20 : 16,
+                height: filled ? 20 : 16,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: filled ? kAccent : Colors.white.withAlpha(15),
+                  border: Border.all(
+                    color: filled ? kAccent : Colors.white.withAlpha(25),
+                    width: filled ? 0 : 1.5,
+                  ),
+                  boxShadow: filled ? [
+                    BoxShadow(color: kAccent.withAlpha(80), blurRadius: 10)
+                  ] : null,
+                ),
+              );
+            }),
+          ),
         ),
 
         const Spacer(),
 
         // Numpad
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 44),
           child: Column(children: [
             ...[['1','2','3'],['4','5','6'],['7','8','9']].map((row) =>
               Padding(
-                padding: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: row.map((d) => _PinKey(
-                    label: d, onTap: () => _tap(d))).toList()),
+                      label: d, onTap: () => _tap(d))).toList()),
               )),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const SizedBox(width: 70, height: 70),
+              const SizedBox(width: 74, height: 74),
               _PinKey(label: '0', onTap: () => _tap('0')),
               _PinKey(icon: Icons.backspace_outlined, onTap: _back),
             ]),
           ]),
         ),
 
-        const SizedBox(height: 24),
-        TextButton(
-          onPressed: () => context.go('/'),
-          child: const Text('← Back to App',
-              style: TextStyle(color: Colors.white30, fontSize: 13)),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 32),
       ])),
     ),
   );
 }
 
-class _PinKey extends StatelessWidget {
+class _PinKey extends StatefulWidget {
   final String? label;
   final IconData? icon;
   final VoidCallback onTap;
   const _PinKey({this.label, this.icon, required this.onTap});
+  @override State<_PinKey> createState() => _PinKeyState();
+}
+
+class _PinKeyState extends State<_PinKey> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: 70, height: 70,
+    onTapDown: (_) => setState(() => _pressed = true),
+    onTapUp:   (_) { setState(() => _pressed = false); widget.onTap(); },
+    onTapCancel: () => setState(() => _pressed = false),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      width: 74, height: 74,
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(10),
+        color: _pressed
+            ? kAccent.withAlpha(40)
+            : Colors.white.withAlpha(10),
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withAlpha(15))),
-      child: Center(child: label != null
-          ? Text(label!, style: const TextStyle(
-              color: Colors.white, fontSize: 24,
-              fontWeight: FontWeight.w600))
-          : Icon(icon, color: Colors.white54, size: 22)),
+        border: Border.all(
+            color: _pressed
+                ? kAccent.withAlpha(80)
+                : Colors.white.withAlpha(15)),
+        boxShadow: _pressed ? [
+          BoxShadow(color: kAccent.withAlpha(30), blurRadius: 12)
+        ] : null,
+      ),
+      child: Center(child: widget.label != null
+          ? Text(widget.label!, style: TextStyle(
+              color: _pressed ? kAccent : Colors.white,
+              fontSize: 24, fontWeight: FontWeight.w600))
+          : Icon(widget.icon,
+              color: _pressed ? kAccent : Colors.white54, size: 22)),
     ),
   );
 }
