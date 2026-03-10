@@ -160,6 +160,15 @@ class StorageService {
     await saveBookings(bookings);
   }
 
+  /// Mark deposit as returned.
+  static Future<void> returnDeposit(int id) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      return b.copyWith(depositReturned: true);
+    }).toList();
+    await saveBookings(bookings);
+  }
+
   /// Update only the M-Pesa reference on a booking.
   static Future<void> updateBookingMpesa(int id, String mpesaRef) async {
     final bookings = getBookings().map((b) {

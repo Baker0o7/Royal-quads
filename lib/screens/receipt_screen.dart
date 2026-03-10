@@ -302,6 +302,8 @@ class _ReceiptScreenState extends State<ReceiptScreen>
       ['Promo Code', b.promoCode!],
     if (b.overtimeCharge > 0)
       ['Overtime (${b.overtimeMinutes} min)', '+${b.overtimeCharge.kes} KES'],
+    if (b.depositAmount > 0)
+      ['Deposit', '${b.depositAmount.kes} KES${b.depositReturned ? ' (returned)' : ' (hold)'}'],
     if (b.mpesaRef != null)
       ['M-Pesa Ref', b.mpesaRef!],
   ];
@@ -381,6 +383,13 @@ class _ReceiptCard extends StatelessWidget {
                 '+${booking.overtimeCharge.kes} KES',
                 icon: Icons.warning_amber_rounded,
                 valueColor: kRed),
+          if (booking.depositAmount > 0)
+            _Row(
+              'Deposit',
+              '${booking.depositAmount.kes} KES · ${booking.depositReturned ? 'Returned' : 'On Hold'}',
+              icon: Icons.shield_rounded,
+              valueColor: booking.depositReturned ? kGreen : kOrange,
+            ),
           if (booking.mpesaRef != null)
             _Row('M-Pesa', booking.mpesaRef!, icon: Icons.mobile_friendly_rounded,
                 valueColor: kGreen),

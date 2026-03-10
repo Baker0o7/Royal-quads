@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String  _phone     = '';
   String  _promo     = '';
   String  _mpesaRef  = '';
+  int     _deposit   = 0;
   int?    _discounted;
   bool    _loading   = false;
   bool    _copied    = false;
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final _phoneCtrl = TextEditingController();
   final _promoCtrl = TextEditingController();
   final _mpesaCtrl = TextEditingController();
+  final _depositCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
   Timer? _ticker;
@@ -57,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _ticker?.cancel();
     _nameCtrl.dispose(); _phoneCtrl.dispose();
     _promoCtrl.dispose(); _mpesaCtrl.dispose();
+    _depositCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -108,15 +111,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         originalPrice: _selectedPrice!,
         promoCode: _discounted != null ? _promo.trim() : null,
         mpesaRef: _mpesaRef.trim().isEmpty ? null : _mpesaRef.trim(),
+        depositAmount: _deposit,
       );
       if (!mounted) return;
       // Reset form
       _nameCtrl.clear(); _phoneCtrl.clear();
-      _promoCtrl.clear(); _mpesaCtrl.clear();
+      _promoCtrl.clear(); _mpesaCtrl.clear(); _depositCtrl.clear();
       setState(() {
         _selectedQuad = null; _selectedDuration = null;
         _selectedPrice = null; _discounted = null;
-        _name = ''; _phone = ''; _promo = ''; _mpesaRef = '';
+        _name = ''; _phone = ''; _promo = ''; _mpesaRef = ''; _deposit = 0;
       });
       // Route through waiver screen first, then to ride
       context.push('/waiver/${booking.id}');
@@ -314,6 +318,29 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 onChanged: (v) => _phone = v),
+            const SizedBox(height: 12),
+            // Deposit (refundable)
+            TextFormField(
+              controller: _depositCtrl,
+              decoration: InputDecoration(
+                labelText: 'Security Deposit (optional)',
+                hintText: '500',
+                prefixIcon: Container(
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: kOrange.withAlpha(15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.shield_outlined, color: kOrange, size: 16)),
+                helperText: 'Refundable deposit collected from customer',
+                suffixText: 'KES',
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (v) => setState(() {
+                _deposit = int.tryParse(v.trim()) ?? 0;
+              }),
+            ),
 
             const SizedBox(height: 20),
 

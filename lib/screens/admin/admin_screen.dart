@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -15,8 +17,9 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  bool _pinVerified = false;
-  int  _tab = 0;
+  bool   _pinVerified = false;
+  int    _tab = 0;
+  Timer? _ticker;
 
   @override
   void initState() {
@@ -24,7 +27,14 @@ class _AdminScreenState extends State<AdminScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppProvider>().loadAll();
     });
+    // Keep live-ride timers ticking
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && _pinVerified) setState(() {});
+    });
   }
+
+  @override
+  void dispose() { _ticker?.cancel(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +178,11 @@ class AdminOverviewTab extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // ── 7-day revenue chart ───────────────────────────────────────────
+          const _WeeklyChart(),
+
+          const SizedBox(height: 16),
+
           // ── Quick stats ───────────────────────────────────────────────────
           GridView.count(
             crossAxisCount: 2, shrinkWrap: true,
@@ -256,6 +271,147 @@ class AdminOverviewTab extends StatelessWidget {
       context: context, isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const _DailyReportSheet(),
+    );
+  }
+}
+
+
+// ── 7-day Revenue Chart ───────────────────────────────────────────────────────
+class _WeeklyChart extends StatefulWidget {
+  const _WeeklyChart();
+  @override State<_WeeklyChart> createState() => _WeeklyChartState();
+}
+
+class _WeeklyChartState extends State<_WeeklyChart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double>   _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    final now   = DateTime.now();
+    final days  = List.generate(7, (i) =>
+        DateTime(now.year, now.month, now.day - 6 + i));
+    final all   = StorageService.getHistory();
+
+    final revenues = days.map((d) {
+      final start = d;
+      final end   = d.add(const Duration(days: 1));
+      return all.where((b) =>
+          !b.startTime.isBefore(start) && b.startTime.isBefore(end))
+          .fold(0, (s, b) => s + b.totalPaid);
+    }).toList();
+
+    final counts = days.map((d) {
+      final start = d;
+      final end   = d.add(const Duration(days: 1));
+      return all.where((b) =>
+          !b.startTime.isBefore(start) && b.startTime.isBefore(end)).length;
+    }).toList();
+
+    final maxRev = revenues.fold(0, (m, v) => v > m ? v : m);
+    final total7 = revenues.fold(0, (s, v) => s + v);
+
+    final dayLabels = days.map((d) {
+      final isToday = d.day == now.day && d.month == now.month;
+      const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      return isToday ? 'Today' : names[d.weekday - 1];
+    }).toList();
+
+    return AppCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.bar_chart_rounded, color: kAccent, size: 16),
+          const SizedBox(width: 8),
+          const Text('7-Day Revenue', style: TextStyle(
+              fontWeight: FontWeight.w700, fontSize: 14)),
+          const Spacer(),
+          Text('${total7.kes} KES', style: const TextStyle(
+              color: kAccent, fontWeight: FontWeight.w800, fontSize: 13)),
+        ]),
+        const SizedBox(height: 6),
+        Text('${total7 == 0 ? 0 : (total7 / 7).round().kes} KES avg/day',
+            style: const TextStyle(color: kMuted, fontSize: 11)),
+        const SizedBox(height: 16),
+        AnimatedBuilder(
+          animation: _anim,
+          builder: (_, __) => SizedBox(
+            height: 100,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(7, (i) {
+                final rev    = revenues[i];
+                final cnt    = counts[i];
+                final frac   = maxRev == 0 ? 0.0 : rev / maxRev;
+                final barH   = (frac * 80 * _anim.value).clamp(2.0, 80.0);
+                final isToday = i == 6;
+                final isEmpty = rev == 0;
+                return Expanded(child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Count badge
+                      if (cnt > 0 && _anim.value > 0.8)
+                        FadeTransition(
+                          opacity: _anim,
+                          child: Text('$cnt',
+                              style: TextStyle(
+                                  color: isToday ? kAccent : kMuted,
+                                  fontSize: 9, fontWeight: FontWeight.w700)),
+                        )
+                      else
+                        const SizedBox(height: 12),
+                      const SizedBox(height: 2),
+                      // Bar
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: barH,
+                        decoration: BoxDecoration(
+                          gradient: isEmpty ? null : LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: isToday
+                                ? [kAccent, kAccent2]
+                                : [kAccent.withAlpha(80), kAccent.withAlpha(120)],
+                          ),
+                          color: isEmpty ? kBg2 : null,
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(6)),
+                          boxShadow: isToday && !isEmpty ? [
+                            BoxShadow(color: kAccent.withAlpha(50),
+                                blurRadius: 8, offset: const Offset(0, 2)),
+                          ] : null,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Day label
+                      Text(dayLabels[i],
+                          style: TextStyle(
+                              fontSize: isToday ? 10 : 9,
+                              color: isToday ? kAccent : kMuted,
+                              fontWeight: isToday
+                                  ? FontWeight.w800 : FontWeight.w500)),
+                    ],
+                  ),
+                ));
+              }),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }
@@ -532,7 +688,7 @@ class _QSSState extends State<_QuickStartSheet> {
               );
               if (!context.mounted) return;
               Navigator.pop(context);
-              context.push('/ride/${b.id}');
+              context.push('/waiver/${b.id}');
             } catch (e) {
               if (context.mounted)
                 showToast(context,

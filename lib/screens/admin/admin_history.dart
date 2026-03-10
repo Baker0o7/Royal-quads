@@ -77,6 +77,21 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
               onChanged: (v) => setState(() => _search = v),
             )),
             const SizedBox(width: 8),
+            // Export CSV
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _showExport(context, history),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: kBorder),
+                ),
+                child: const Icon(Icons.download_rounded, color: kMuted, size: 16),
+              ),
+            ),
+            const SizedBox(width: 8),
             // Date filter
             GestureDetector(
               onTap: () async {
@@ -212,6 +227,15 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
 
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+
+  void _showExport(BuildContext ctx, List<Booking> rides) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ExportSheet(bookings: rides),
+    );
+  }
 }
 
 class _DateHeader extends StatelessWidget {
@@ -292,84 +316,126 @@ class _HistoryTile extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: () => context.push('/receipt/${booking.id}'),
     child: Container(
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: kCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: kBorder),
         boxShadow: kShadowSm,
       ),
-      child: Row(children: [
-        // Avatar with initial
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: kAccent.withAlpha(15),
-          child: Text(
-            booking.customerName.isNotEmpty
-                ? booking.customerName[0].toUpperCase() : '?',
-            style: const TextStyle(
-                color: kAccent, fontWeight: FontWeight.w800, fontSize: 17),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Details
-        Expanded(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(booking.customerName, style: const TextStyle(
-                fontWeight: FontWeight.w700, fontSize: 14, color: kText)),
-            const SizedBox(height: 3),
-            Row(children: [
-              const Icon(Icons.directions_bike_rounded, size: 11, color: kMuted),
-              const SizedBox(width: 3),
-              Text(booking.quadName,
-                  style: const TextStyle(color: kMuted, fontSize: 12)),
-              const SizedBox(width: 8),
-              const Icon(Icons.timer_rounded, size: 11, color: kMuted),
-              const SizedBox(width: 3),
-              Text('${booking.duration} min',
-                  style: const TextStyle(color: kMuted, fontSize: 12)),
-            ]),
-            if (booking.mpesaRef != null) ...[
-              const SizedBox(height: 2),
-              Row(children: [
-                const Icon(Icons.smartphone_rounded, size: 11, color: kGreen),
-                const SizedBox(width: 3),
-                Text(booking.mpesaRef!, style: const TextStyle(
-                    color: kGreen, fontSize: 11, fontFamily: 'monospace')),
-              ]),
-            ],
-          ],
-        )),
-        // Right side
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('${booking.totalPaid.kes}', style: const TextStyle(
-              color: kAccent, fontWeight: FontWeight.w800, fontSize: 16)),
-          const Text('KES', style: TextStyle(color: kMuted, fontSize: 9,
-              fontWeight: FontWeight.w600)),
-          if (booking.overtimeCharge > 0) ...[
-            const SizedBox(height: 2),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: kRed.withAlpha(12),
-                borderRadius: BorderRadius.circular(6)),
-              child: Text('+${booking.overtimeCharge.kes} OT',
-                  style: const TextStyle(
-                      color: kRed, fontSize: 9, fontWeight: FontWeight.w700)),
+      child: Column(children: [
+        // Main row
+        Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: kAccent.withAlpha(15),
+              child: Text(
+                booking.customerName.isNotEmpty
+                    ? booking.customerName[0].toUpperCase() : '?',
+                style: const TextStyle(
+                    color: kAccent, fontWeight: FontWeight.w800, fontSize: 17)),
             ),
-          ],
-          if (booking.rating != null) ...[
-            const SizedBox(height: 3),
-            Row(mainAxisSize: MainAxisSize.min,
-                children: List.generate(booking.rating!, (_) =>
-                    const Icon(Icons.star_rounded, color: kAccent, size: 10))),
-          ],
-          const SizedBox(height: 2),
-          Text('${booking.startTime.hour.toString().padLeft(2,'0')}:'
-              '${booking.startTime.minute.toString().padLeft(2,'0')}',
-              style: const TextStyle(color: kMuted, fontSize: 10)),
-        ]),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(booking.customerName, style: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 14, color: kText)),
+                const SizedBox(height: 3),
+                Row(children: [
+                  const Icon(Icons.directions_bike_rounded, size: 11, color: kMuted),
+                  const SizedBox(width: 3),
+                  Text(booking.quadName,
+                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.timer_rounded, size: 11, color: kMuted),
+                  const SizedBox(width: 3),
+                  Text('${booking.duration} min',
+                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                ]),
+                if (booking.mpesaRef != null) ...[
+                  const SizedBox(height: 2),
+                  Row(children: [
+                    const Icon(Icons.smartphone_rounded, size: 11, color: kGreen),
+                    const SizedBox(width: 3),
+                    Text(booking.mpesaRef!, style: const TextStyle(
+                        color: kGreen, fontSize: 11, fontFamily: 'monospace')),
+                  ]),
+                ],
+              ],
+            )),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('${booking.totalPaid.kes}', style: const TextStyle(
+                  color: kAccent, fontWeight: FontWeight.w800, fontSize: 16)),
+              const Text('KES', style: TextStyle(
+                  color: kMuted, fontSize: 9, fontWeight: FontWeight.w600)),
+              if (booking.overtimeCharge > 0) ...[
+                const SizedBox(height: 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: kRed.withAlpha(12),
+                    borderRadius: BorderRadius.circular(6)),
+                  child: Text('+${booking.overtimeCharge.kes} OT',
+                      style: const TextStyle(
+                          color: kRed, fontSize: 9, fontWeight: FontWeight.w700)),
+                ),
+              ],
+              if (booking.rating != null) ...[
+                const SizedBox(height: 3),
+                Row(mainAxisSize: MainAxisSize.min,
+                    children: List.generate(booking.rating!, (_) =>
+                        const Icon(Icons.star_rounded, color: kAccent, size: 10))),
+              ],
+              const SizedBox(height: 2),
+              Text(
+                '${booking.startTime.hour.toString().padLeft(2,'0')}:'
+                '${booking.startTime.minute.toString().padLeft(2,'0')}',
+                style: const TextStyle(color: kMuted, fontSize: 10)),
+            ]),
+          ]),
+        ),
+        // Deposit banner
+        if (booking.depositAmount > 0 && !booking.depositReturned)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: kOrange.withAlpha(8),
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(15)),
+              border: Border(top: BorderSide(color: kOrange.withAlpha(30))),
+            ),
+            child: Row(children: [
+              const Icon(Icons.shield_rounded, size: 13, color: kOrange),
+              const SizedBox(width: 6),
+              Text('Deposit: ${booking.depositAmount.kes} KES on hold',
+                  style: const TextStyle(color: kOrange, fontSize: 12,
+                      fontWeight: FontWeight.w600)),
+              const Spacer(),
+              GestureDetector(
+                onTap: () async {
+                  await StorageService.returnDeposit(booking.id);
+                  if (context.mounted) {
+                    context.read<AppProvider>().loadAll();
+                    showToast(context, 'Deposit returned ✓');
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: kOrange.withAlpha(15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: kOrange.withAlpha(50)),
+                  ),
+                  child: const Text('Mark Returned', style: TextStyle(
+                      color: kOrange, fontSize: 11,
+                      fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ]),
+          ),
       ]),
     ),
   );
@@ -390,6 +456,217 @@ class _StatPill extends StatelessWidget {
 }
 
 class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 28, color: kBorder);
+}
+
+// ── CSV Export Sheet ──────────────────────────────────────────────────────────
+class _ExportSheet extends StatefulWidget {
+  final List<Booking> bookings;
+  const _ExportSheet({required this.bookings});
+  @override State<_ExportSheet> createState() => _ExportSheetState();
+}
+
+class _ExportSheetState extends State<_ExportSheet> {
+  bool _copied = false;
+
+  String _buildCsv() {
+    final buf = StringBuffer();
+    // Header
+    buf.writeln('Receipt ID,Date,Time,Customer Name,Phone,'
+        'Quad,Duration (min),Base Price (KES),Overtime (min),'
+        'Overtime Charge (KES),Total (KES),Promo Code,M-Pesa Ref,Rating');
+    // Rows
+    for (final b in widget.bookings) {
+      final date = '${b.startTime.day.toString().padLeft(2,'0')}/'
+          '${b.startTime.month.toString().padLeft(2,'0')}/'
+          '${b.startTime.year}';
+      final time = '${b.startTime.hour.toString().padLeft(2,'0')}:'
+          '${b.startTime.minute.toString().padLeft(2,'0')}';
+      // Escape commas in names
+      String esc(String? s) {
+        if (s == null || s.isEmpty) return '';
+        if (s.contains(',') || s.contains('"') || s.contains('\n')) {
+          return '"${s.replaceAll('"', '""')}"';
+        }
+        return s;
+      }
+      buf.writeln('${b.receiptId},$date,$time,'
+          '${esc(b.customerName)},${b.customerPhone},'
+          '${esc(b.quadName)},${b.duration},'
+          '${b.price},${b.overtimeMinutes},'
+          '${b.overtimeCharge},${b.totalPaid},'
+          '${esc(b.promoCode)},${esc(b.mpesaRef)},'
+          '${b.rating ?? ''}');
+    }
+    return buf.toString();
+  }
+
+  Future<void> _copy() async {
+    final csv = _buildCsv();
+    await Clipboard.setData(ClipboardData(text: csv));
+    setState(() => _copied = true);
+    await Future.delayed(const Duration(seconds: 3));
+    if (mounted) setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = widget.bookings.fold(0, (s, b) => s + b.totalPaid);
+
+    return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+          color: kBg, borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      child: Column(mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Handle
+        Center(child: Container(width: 40, height: 4,
+            decoration: BoxDecoration(
+                color: kBorder, borderRadius: BorderRadius.circular(2)))),
+        const SizedBox(height: 16),
+
+        // Title
+        Row(children: [
+          Container(width: 40, height: 40,
+            decoration: BoxDecoration(
+                color: kGreen.withAlpha(15),
+                borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.table_chart_rounded,
+                color: kGreen, size: 20)),
+          const SizedBox(width: 12),
+          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Export to CSV', style: TextStyle(
+                fontFamily: 'Playfair', fontSize: 20,
+                fontWeight: FontWeight.w700)),
+            Text('Copy and paste into Google Sheets',
+                style: TextStyle(color: kMuted, fontSize: 12)),
+          ]),
+        ]),
+
+        const SizedBox(height: 16),
+
+        // Summary
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: kCard, borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: kBorder),
+          ),
+          child: Row(children: [
+            _ExStat('${widget.bookings.length}', 'Rides', kAccent),
+            _ExDivider(),
+            _ExStat('${total.kes} KES', 'Revenue', kGreen),
+            _ExDivider(),
+            _ExStat('14', 'Columns', kIndigo),
+          ]),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Columns list
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: kBg2, borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: kBorder),
+          ),
+          child: Wrap(
+            spacing: 6, runSpacing: 6,
+            children: [
+              'Receipt ID', 'Date', 'Time', 'Customer', 'Phone',
+              'Quad', 'Duration', 'Base Price', 'OT Mins',
+              'OT Charge', 'Total', 'Promo', 'M-Pesa', 'Rating',
+            ].map((col) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: kCard, borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: kBorder),
+              ),
+              child: Text(col, style: const TextStyle(
+                  color: kMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+            )).toList(),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Instructions
+        Row(children: [
+          const Icon(Icons.info_outline_rounded, size: 14, color: kMuted),
+          const SizedBox(width: 8),
+          const Expanded(child: Text(
+            'Copy → Open Google Sheets → paste in cell A1.',
+            style: TextStyle(color: kMuted, fontSize: 12),
+          )),
+        ]),
+
+        const SizedBox(height: 16),
+
+        // Copy button
+        SizedBox(width: double.infinity, height: 54,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            decoration: BoxDecoration(
+              color: _copied ? kGreen : kAccent,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(
+                color: (_copied ? kGreen : kAccent).withAlpha(60),
+                blurRadius: 16, offset: const Offset(0, 6))],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: _copy,
+                child: Center(child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    key: ValueKey(_copied),
+                    children: [
+                      Icon(_copied
+                          ? Icons.check_circle_rounded
+                          : Icons.copy_rounded,
+                          color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Text(
+                        _copied
+                            ? 'Copied! Paste into Google Sheets'
+                            : 'Copy ${widget.bookings.length} rows to clipboard',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14)),
+                    ],
+                  ),
+                )),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _ExStat extends StatelessWidget {
+  final String value, label; final Color color;
+  const _ExStat(this.value, this.label, this.color);
+  @override
+  Widget build(BuildContext context) => Expanded(child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Text(value, style: TextStyle(
+          fontWeight: FontWeight.w800, fontSize: 14, color: color)),
+      Text(label, style: const TextStyle(color: kMuted, fontSize: 10)),
+    ],
+  ));
+}
+
+class _ExDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Container(width: 1, height: 28, color: kBorder);
