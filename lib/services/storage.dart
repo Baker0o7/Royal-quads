@@ -135,6 +135,52 @@ class StorageService {
     await saveBookings(bookings);
   }
 
+  /// Extend a booking by [addedMins] minutes and add [addedPrice] to its price.
+  static Future<void> extendBooking(int id, int addedMins, int addedPrice) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      // Rebuild with extended duration and updated price
+      return Booking(
+        id: b.id, quadId: b.quadId, userId: b.userId,
+        customerName: b.customerName, customerPhone: b.customerPhone,
+        duration: b.duration + addedMins,
+        price: b.price + addedPrice,
+        originalPrice: b.originalPrice,
+        promoCode: b.promoCode,
+        startTime: b.startTime, endTime: b.endTime,
+        status: b.status, receiptId: b.receiptId,
+        rating: b.rating, feedback: b.feedback,
+        quadName: b.quadName, quadImageUrl: b.quadImageUrl,
+        waiverSigned: b.waiverSigned, groupSize: b.groupSize,
+        depositAmount: b.depositAmount, depositReturned: b.depositReturned,
+        overtimeMinutes: b.overtimeMinutes, overtimeCharge: b.overtimeCharge,
+        mpesaRef: b.mpesaRef,
+      );
+    }).toList();
+    await saveBookings(bookings);
+  }
+
+  /// Update only the M-Pesa reference on a booking.
+  static Future<void> updateBookingMpesa(int id, String mpesaRef) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      return Booking(
+        id: b.id, quadId: b.quadId, userId: b.userId,
+        customerName: b.customerName, customerPhone: b.customerPhone,
+        duration: b.duration, price: b.price, originalPrice: b.originalPrice,
+        promoCode: b.promoCode, startTime: b.startTime, endTime: b.endTime,
+        status: b.status, receiptId: b.receiptId,
+        rating: b.rating, feedback: b.feedback,
+        quadName: b.quadName, quadImageUrl: b.quadImageUrl,
+        waiverSigned: b.waiverSigned, groupSize: b.groupSize,
+        depositAmount: b.depositAmount, depositReturned: b.depositReturned,
+        overtimeMinutes: b.overtimeMinutes, overtimeCharge: b.overtimeCharge,
+        mpesaRef: mpesaRef,
+      );
+    }).toList();
+    await saveBookings(bookings);
+  }
+
   static Booking? getBookingById(int id) {
     try { return getBookings().firstWhere((b) => b.id == id); }
     catch (_) { return null; }

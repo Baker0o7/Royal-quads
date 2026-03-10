@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 import '../theme/theme.dart';
 
 class MainShell extends StatelessWidget {
@@ -14,8 +16,10 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = GoRouterState.of(context).uri.toString();
-    final idx = _tabs.indexWhere((t) => t.path == loc).clamp(0, 2);
+    final loc      = GoRouterState.of(context).uri.toString();
+    final idx      = _tabs.indexWhere((t) => t.path == loc).clamp(0, 2);
+    final active   = context.watch<AppProvider>().active;
+    final liveCount = active.length;
 
     return Scaffold(
       body: child,
@@ -33,38 +37,48 @@ class MainShell extends StatelessWidget {
             height: 64,
             child: Row(
               children: List.generate(_tabs.length, (i) {
-                final t = _tabs[i];
-                final active = i == idx;
+                final t      = _tabs[i];
+                final isActive = i == idx;
+                final showBadge = i == 0 && liveCount > 0;
+
                 return Expanded(child: GestureDetector(
                   onTap: () => context.go(t.path),
                   behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: active
-                                ? kAccent.withAlpha(25)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? kAccent.withAlpha(25)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Icon(t.icon,
+                              color: isActive ? kAccent : Colors.white38,
+                              size: 22),
                           ),
-                          child: Icon(t.icon,
-                            color: active ? kAccent : Colors.white38,
-                            size: 22),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(t.label, style: TextStyle(
-                            color: active ? kAccent : Colors.white30,
-                            fontSize: 10,
-                            fontWeight: active
-                                ? FontWeight.w700 : FontWeight.w400)),
-                      ],
-                    ),
+                          // Live rides badge
+                          if (showBadge)
+                            Positioned(
+                              top: -2, right: -2,
+                              child: _LiveBadge(liveCount),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(t.label, style: TextStyle(
+                          color: isActive ? kAccent : Colors.white30,
+                          fontSize: 10,
+                          fontWeight: isActive
+                              ? FontWeight.w700 : FontWeight.w400)),
+                    ],
                   ),
                 ));
               }),
@@ -74,4 +88,52 @@ class MainShell extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LiveBadge extends StatefulWidget {
+  final int count;
+  const _LiveBadge(this.count);
+  @override State<_LiveBadge> createState() => _LiveBadgeState();
+}
+
+class _LiveBadgeState extends State<_LiveBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900))
+      ..repeat(reverse: true);
+    _anim = Tween<double>(begin: 0.85, end: 1.15).animate(
+        CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) => ScaleTransition(
+    scale: _anim,
+    child: Container(
+      width: 17, height: 17,
+      decoration: BoxDecoration(
+        color: kRed,
+        shape: BoxShape.circle,
+        border: Border.all(color: kHeroTo, width: 1.5),
+        boxShadow: [BoxShadow(
+            color: kRed.withAlpha(80), blurRadius: 6)],
+      ),
+      child: Center(
+        child: Text(
+          widget.count > 9 ? '9+' : '${widget.count}',
+          style: const TextStyle(
+              color: Colors.white, fontSize: 8,
+              fontWeight: FontWeight.w900),
+        ),
+      ),
+    ),
+  );
 }
