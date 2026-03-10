@@ -176,16 +176,23 @@ class _ReceiptScreenState extends State<ReceiptScreen>
   }
 
   Future<void> _sendWhatsApp(Booking b) async {
+    final otLine = b.overtimeCharge > 0
+        ? '\n⚠️ *Overtime:* ${b.overtimeMinutes} min (+${b.overtimeCharge.kes} KES)'
+        : '';
+    final mpesaLine = b.mpesaRef != null && b.mpesaRef!.isNotEmpty
+        ? '\n📲 *M-Pesa Ref:* ${b.mpesaRef}'
+        : '';
     final msg = Uri.encodeComponent(
         '✅ *Royal Quad Bikes Receipt*\n\n'
-        'Hi ${b.customerName}! Thank you for riding with us.\n\n'
+        'Hi ${b.customerName}! Thank you for riding with us 🤙\n\n'
         '🏍️ *Quad:* ${b.quadName}\n'
-        '⏱️ *Duration:* ${b.duration} min\n'
+        '⏱️ *Duration:* ${b.duration} min$otLine\n'
         '📅 *Date:* ${_fmtDate(b.startTime)}\n'
         '🧾 *Receipt:* ${b.receiptId}\n'
-        '💰 *Total:* ${b.totalPaid.kes} KES\n\n'
-        'Mambrui Sand Dunes, Kenya 🇰🇪\n'
-        'We hope to see you again!');
+        '💰 *Total Paid:* ${b.totalPaid.kes} KES$mpesaLine\n\n'
+        'Mambrui Sand Dunes, Kilifi County 🇰🇪\n'
+        'Book again: https://baker0o7.github.io/Royal-quads/\n'
+        'See you on the dunes! 🏜️');
     final phone = b.customerPhone.startsWith('0')
         ? '254${b.customerPhone.substring(1)}'
         : b.customerPhone;

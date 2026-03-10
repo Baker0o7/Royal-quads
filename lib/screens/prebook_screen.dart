@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 import '../models/models.dart';
 import '../services/storage.dart';
 import '../theme/theme.dart';
@@ -80,6 +83,7 @@ class _PrebookScreenState extends State<PrebookScreen>
         scheduledFor: _scheduled,
         status: 'pending',
         createdAt: DateTime.now(),
+        notes: _notes.trim().isEmpty ? null : _notes.trim(),
       );
       await StorageService.savePrebookings(
           [...StorageService.getPrebookings(), pb]);
@@ -233,6 +237,20 @@ class _PrebookScreenState extends State<PrebookScreen>
                         hintText: '0712 345 678',
                         prefixIcon: Icon(Icons.phone_outlined, size: 18)),
                     onChanged: (v) => _phone = v,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Notes / special requests
+                  TextFormField(
+                    controller: _notesCtrl,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                        labelText: 'Notes / Special Requests',
+                        hintText: 'e.g. group of 3, first-time rider...',
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Icon(Icons.sticky_note_2_outlined, size: 18))),
+                    onChanged: (v) => setState(() => _notes = v),
                   ),
 
                   const SizedBox(height: 28),
@@ -704,7 +722,10 @@ class _PrebookTile extends StatelessWidget {
                 bottom: Radius.circular(18)),
             border: Border(top: BorderSide(color: kBorder)),
           ),
-          child: Row(children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
             Icon(Icons.schedule_rounded, size: 13,
                 color: isPast ? kMuted : kGreen),
             const SizedBox(width: 6),
@@ -716,13 +737,29 @@ class _PrebookTile extends StatelessWidget {
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
                   color: isPast ? kMuted : kGreen),
             )),
-            if (prebooking.status == 'pending')
+            if (prebooking.status == 'pending') ...[
               _ActionChip('Confirm', kGreen, Icons.check_rounded,
                   () => onStatusChange(prebooking.id, 'confirmed')),
-            if (prebooking.status == 'confirmed')
+              const SizedBox(width: 6),
               _ActionChip('Cancel', kRed, Icons.close_rounded,
                   () => onStatusChange(prebooking.id, 'cancelled')),
+            ],
+            if (prebooking.status == 'confirmed')
+              _StartRideChip(prebooking: prebooking,
+                  onStarted: () => onStatusChange(prebooking.id, 'completed')),
           ]),
+              if (prebooking.notes != null) ...[
+                const SizedBox(height: 6),
+                Row(children: [
+                  const Icon(Icons.sticky_note_2_outlined, size: 11, color: kMuted),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(prebooking.notes!,
+                      style: const TextStyle(color: kMuted, fontSize: 11),
+                      maxLines: 1, overflow: TextOverflow.ellipsis)),
+                ]),
+              ],
+            ],
+          ),
         ),
       ]),
     );
@@ -756,6 +793,76 @@ class _ActionChip extends StatelessWidget {
         Text(label, style: TextStyle(
             color: color, fontSize: 11, fontWeight: FontWeight.w700)),
       ]),
+    ),
+  );
+}
+
+// ── Start Ride chip — converts prebooking to live booking ────────────────────
+class _StartRideChip extends StatefulWidget {
+  final Prebooking prebooking;
+  final VoidCallback onStarted;
+  const _StartRideChip({required this.prebooking, required this.onStarted});
+  @override State<_StartRideChip> createState() => _StartRideChipState();
+}
+
+class _StartRideChipState extends State<_StartRideChip> {
+  bool _loading = false;
+
+  Future<void> _start() async {
+    setState(() => _loading = true);
+    try {
+      // Pick first available quad
+      final quads = StorageService.getQuads()
+          .where((q) => q.status == 'available').toList();
+      if (quads.isEmpty) {
+        if (mounted) showToast(context, 'No quads available right now', error: true);
+        setState(() => _loading = false);
+        return;
+      }
+
+      final booking = await context.read<AppProvider>().createBooking(
+        quadId: quads.first.id,
+        customerName: widget.prebooking.customerName,
+        customerPhone: widget.prebooking.customerPhone,
+        duration: widget.prebooking.duration,
+        price: widget.prebooking.price,
+        originalPrice: widget.prebooking.price,
+        mpesaRef: widget.prebooking.mpesaRef,
+      );
+
+      widget.onStarted(); // mark prebooking completed
+      if (!mounted) return;
+      context.push('/waiver/${booking.id}');
+    } catch (e) {
+      if (mounted) {
+        showToast(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: _loading ? null : _start,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: kGreen.withAlpha(20),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: kGreen.withAlpha(60)),
+        boxShadow: [BoxShadow(color: kGreen.withAlpha(30), blurRadius: 8)],
+      ),
+      child: _loading
+          ? const SizedBox(width: 14, height: 14,
+              child: CircularProgressIndicator(
+                  color: kGreen, strokeWidth: 2))
+          : Row(mainAxisSize: MainAxisSize.min, children: const [
+              Icon(Icons.play_arrow_rounded, size: 13, color: kGreen),
+              SizedBox(width: 4),
+              Text('Start Ride', style: TextStyle(
+                  color: kGreen, fontSize: 11, fontWeight: FontWeight.w800)),
+            ]),
     ),
   );
 }

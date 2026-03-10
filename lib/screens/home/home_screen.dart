@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -35,16 +36,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final _mpesaCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
+  Timer? _ticker;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppProvider>().loadAll();
     });
+    // Tick every second so live ride timers update
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && context.read<AppProvider>().active.isNotEmpty) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    _ticker?.cancel();
     _nameCtrl.dispose(); _phoneCtrl.dispose();
     _promoCtrl.dispose(); _mpesaCtrl.dispose();
     _scrollCtrl.dispose();
@@ -108,7 +118,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         _selectedPrice = null; _discounted = null;
         _name = ''; _phone = ''; _promo = ''; _mpesaRef = '';
       });
-      context.push('/ride/${booking.id}');
+      // Route through waiver screen first, then to ride
+      context.push('/waiver/${booking.id}');
     } catch (e) {
       if (!mounted) return;
       showToast(context, e.toString().replaceFirst('Exception: ', ''), error: true);
@@ -407,12 +418,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
 
             // ── Start ride ────────────────────────────────────────────────────
-            PrimaryButton(
-              label: 'Start Ride',
-              icon: Icons.play_arrow_rounded,
-              color: kGreen,
-              onTap: _submit,
+            _StartButton(
+              step: _step,
               loading: _loading,
+              onTap: _submit,
             ),
             const SizedBox(height: 48),
 
@@ -773,6 +782,103 @@ class _EmptyState extends StatelessWidget {
       Text(sub, style: const TextStyle(color: kMuted, fontSize: 12)),
     ]),
   );
+}
+
+
+// ── Smart start button ────────────────────────────────────────────────────────
+class _StartButton extends StatelessWidget {
+  final int step;
+  final bool loading;
+  final VoidCallback onTap;
+  const _StartButton({required this.step, required this.loading,
+      required this.onTap});
+
+  static const _hints = [
+    'Select a quad to continue',
+    'Choose a duration to continue',
+    'Enter customer details to continue',
+    'Ready to start!',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final ready = step >= 3;
+    return Column(children: [
+      AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        child: !ready
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.info_outline_rounded,
+                        size: 13, color: kMuted.withAlpha(160)),
+                    const SizedBox(width: 6),
+                    Text(_hints[step.clamp(0, 3)],
+                        style: const TextStyle(
+                            color: kMuted, fontSize: 12)),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
+      SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
+            gradient: ready
+                ? LinearGradient(colors: [
+                    kGreen,
+                    const Color(0xFF00A550),
+                  ])
+                : null,
+            color: ready ? null : kBg2,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: ready
+                ? [BoxShadow(color: kGreen.withAlpha(60),
+                    blurRadius: 16, offset: const Offset(0, 6))]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: ready && !loading ? onTap : null,
+              child: Center(
+                child: loading
+                    ? const SizedBox(width: 24, height: 24,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5))
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            ready
+                                ? Icons.play_arrow_rounded
+                                : Icons.lock_outline_rounded,
+                            color: ready ? Colors.white : kMuted,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            ready ? 'Start Ride' : 'Start Ride',
+                            style: TextStyle(
+                                color: ready ? Colors.white : kMuted,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
+  }
 }
 
 // ── Booking stepper widget ────────────────────────────────────────────────────

@@ -958,6 +958,31 @@ class _LoggedInView extends StatelessWidget {
                 _StatTile(icon: Icons.payments_outlined,
                     color: kGreen, value: spent.kes, label: 'KES Spent'),
               ]),
+              const SizedBox(height: 12),
+              Row(children: [
+                _StatTile(
+                  icon: Icons.local_fire_department_rounded,
+                  color: kRed,
+                  value: myRides.isEmpty ? '—' : '${myRides.where((b) {
+                    final now = DateTime.now();
+                    return b.startTime.year == now.year && b.startTime.month == now.month;
+                  }).fold(0, (s, b) => s + b.totalPaid).kes} KES',
+                  label: 'This Month',
+                ),
+                const SizedBox(width: 12),
+                _StatTile(
+                  icon: Icons.star_rounded,
+                  color: kOrange,
+                  value: () {
+                    if (myRides.isEmpty) return '—';
+                    final rated = myRides.where((b) => b.rating != null).toList();
+                    if (rated.isEmpty) return '—';
+                    final avg = rated.fold(0, (s, b) => s + b.rating!) / rated.length;
+                    return avg.toStringAsFixed(1);
+                  }(),
+                  label: 'Avg Rating',
+                ),
+              ]),
               const SizedBox(height: 20),
 
               // ── Account card ──────────────────────────────────────
@@ -1055,6 +1080,84 @@ class _LoggedInView extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Ride history tile ─────────────────────────────────────────────────────────
+class _RideHistoryTile extends StatelessWidget {
+  final Booking booking;
+  const _RideHistoryTile({required this.booking});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: () => context.push('/receipt/${booking.id}'),
+    child: Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: kCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: kBorder),
+        boxShadow: kShadowSm,
+      ),
+      child: Row(children: [
+        // Star rating indicator
+        Stack(children: [
+          Container(
+            width: 46, height: 46,
+            decoration: BoxDecoration(
+              color: kAccent.withAlpha(12),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(Icons.directions_bike_rounded,
+                color: kAccent, size: 22),
+          ),
+          if (booking.rating != null)
+            Positioned(bottom: -1, right: -1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: kAccent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.star_rounded, size: 8, color: Colors.white),
+                  const SizedBox(width: 2),
+                  Text('${booking.rating}', style: const TextStyle(
+                      color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800)),
+                ]),
+              )),
+        ]),
+        const SizedBox(width: 12),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(booking.quadName, style: const TextStyle(
+                fontWeight: FontWeight.w700, fontSize: 14, color: kText)),
+            const SizedBox(height: 3),
+            Row(children: [
+              const Icon(Icons.timer_rounded, size: 11, color: kMuted),
+              const SizedBox(width: 3),
+              Text('${booking.duration} min',
+                  style: const TextStyle(color: kMuted, fontSize: 12)),
+              const SizedBox(width: 8),
+              const Icon(Icons.calendar_today_rounded, size: 11, color: kMuted),
+              const SizedBox(width: 3),
+              Text('${booking.startTime.day}/${booking.startTime.month}/${booking.startTime.year}',
+                  style: const TextStyle(color: kMuted, fontSize: 12)),
+            ]),
+          ],
+        )),
+        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Text('${booking.totalPaid.kes} KES', style: const TextStyle(
+              color: kAccent, fontWeight: FontWeight.w800, fontSize: 14)),
+          if (booking.overtimeCharge > 0)
+            Text('+${booking.overtimeCharge.kes} OT',
+                style: const TextStyle(color: kRed, fontSize: 10)),
+          const SizedBox(height: 2),
+          const Icon(Icons.chevron_right_rounded, color: kMuted, size: 14),
+        ]),
+      ]),
+    ),
+  );
 }
 
 class _StatTile extends StatelessWidget {

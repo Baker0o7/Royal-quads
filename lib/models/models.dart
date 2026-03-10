@@ -219,22 +219,29 @@ class Prebooking {
   final DateTime scheduledFor;
   final String status;
   final DateTime createdAt;
+  final String? mpesaRef;
+  final String? notes;
 
   const Prebooking({required this.id, this.quadId, this.quadName,
     required this.customerName, required this.customerPhone,
     required this.duration, required this.price,
-    required this.scheduledFor, required this.status, required this.createdAt});
+    required this.scheduledFor, required this.status, required this.createdAt,
+    this.mpesaRef, this.notes});
 
-  Prebooking copyWith({String? status}) => Prebooking(
-    id: id, quadId: quadId, quadName: quadName,
-    customerName: customerName, customerPhone: customerPhone,
-    duration: duration, price: price, scheduledFor: scheduledFor,
-    status: status ?? this.status, createdAt: createdAt);
+  Prebooking copyWith({String? status, String? mpesaRef, String? notes}) =>
+    Prebooking(
+      id: id, quadId: quadId, quadName: quadName,
+      customerName: customerName, customerPhone: customerPhone,
+      duration: duration, price: price, scheduledFor: scheduledFor,
+      status: status ?? this.status, createdAt: createdAt,
+      mpesaRef: mpesaRef ?? this.mpesaRef,
+      notes: notes ?? this.notes);
 
   Map<String, dynamic> toJson() => {'id': id, 'quadId': quadId, 'quadName': quadName,
     'customerName': customerName, 'customerPhone': customerPhone, 'duration': duration,
     'price': price, 'scheduledFor': scheduledFor.toIso8601String(),
-    'status': status, 'createdAt': createdAt.toIso8601String()};
+    'status': status, 'createdAt': createdAt.toIso8601String(),
+    'mpesaRef': mpesaRef, 'notes': notes};
 
   factory Prebooking.fromJson(Map<String, dynamic> j) => Prebooking(
     id: j['id'] as int, quadId: j['quadId'] as int?, quadName: j['quadName'] as String?,
@@ -242,5 +249,7 @@ class Prebooking {
     duration: j['duration'] as int, price: j['price'] as int,
     scheduledFor: DateTime.parse(j['scheduledFor'] as String),
     status: (j['status'] as String?) ?? 'pending',
-    createdAt: DateTime.parse(j['createdAt'] as String));
+    createdAt: DateTime.parse(j['createdAt'] as String),
+    mpesaRef: j['mpesaRef'] as String?,
+    notes: j['notes'] as String?);
 }

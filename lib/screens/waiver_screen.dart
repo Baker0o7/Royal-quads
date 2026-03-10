@@ -69,7 +69,7 @@ class _WaiverScreenState extends State<WaiverScreen>
       await Future.delayed(const Duration(milliseconds: 900));
       if (!mounted) return;
       showToast(context, 'Waiver signed ✅');
-      context.pop();
+      context.go('/ride/${widget.bookingId}');
     } catch (e) {
       if (mounted) showToast(context, '$e', error: true);
       setState(() => _loading = false);
