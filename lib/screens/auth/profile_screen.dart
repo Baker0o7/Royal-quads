@@ -560,55 +560,186 @@ class _Sha1FixBanner extends StatefulWidget {
 class _Sha1FixBannerState extends State<_Sha1FixBanner> {
   bool _expanded = true;
 
+  static const _ciSha1 =
+      '69:D6:F3:16:72:D5:55:FE:0D:22:DF:04:6B:F3:F9:18:64:EA:A1:97';
+
   @override
   Widget build(BuildContext context) => Container(
     decoration: BoxDecoration(
       color: const Color(0xFFFFF8E6),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xFFE8B84B).withAlpha(120)),
+      boxShadow: [BoxShadow(color: const Color(0xFFE8B84B).withAlpha(30),
+          blurRadius: 12, offset: const Offset(0, 4))],
     ),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      // Header
       GestureDetector(
         onTap: () => setState(() => _expanded = !_expanded),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(children: [
-            const Text('🔧', style: TextStyle(fontSize: 16)),
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8B84B).withAlpha(40),
+                borderRadius: BorderRadius.circular(8)),
+              child: const Center(child: Text('🔧',
+                  style: TextStyle(fontSize: 16)))),
             const SizedBox(width: 10),
-            const Expanded(child: Text('Fix Google Sign-In (one-time setup)',
-                style: TextStyle(fontWeight: FontWeight.w700,
-                    fontSize: 13, color: Color(0xFF7A5800)))),
-            Icon(_expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                color: const Color(0xFF7A5800), size: 18),
+            const Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Fix Google Sign-In — Error 10',
+                    style: TextStyle(fontWeight: FontWeight.w800,
+                        fontSize: 13, color: Color(0xFF7A5800))),
+                Text('Register your local SHA-1 in GCP (one-time)',
+                    style: TextStyle(fontSize: 11, color: Color(0xFFAA8030))),
+              ],
+            )),
+            AnimatedRotation(
+              turns: _expanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.expand_more_rounded,
+                  color: Color(0xFF7A5800), size: 18)),
           ]),
         ),
       ),
+
       if (_expanded) ...[
         const Divider(height: 1, color: Color(0xFFE8D08A)),
         Padding(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text(
-              'Error 10 (DEVELOPER_ERROR): The SHA-1 fingerprint of this app\'s '
-              'signing certificate is not registered in Google Cloud Console. '
-              'Phone/password sign-in works fine.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF7A5800), height: 1.6),
+
+            // Why section
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEFCC),
+                borderRadius: BorderRadius.circular(8)),
+              child: const Text(
+                'Your local machine uses a different debug keystore than CI. '
+                'You must register YOUR machine's SHA-1 in Google Cloud Console. '
+                'You can register multiple SHA-1s on the same Android client.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF7A5800), height: 1.6),
+              ),
             ),
+
             const SizedBox(height: 14),
-            _FixStep('1', 'Run in your project terminal:'),
-            _CodeSnippet('cd android && ./gradlew signingReport'),
+
+            // Step 1 — get local SHA-1
+            _FixStep('1', 'Get YOUR machine's SHA-1 — run this in a terminal:'),
+            _CodeSnippet(
+              'bash scripts/get_sha1.sh
+'
+              '# — OR manually —
+'
+              'keytool -list -v \\
+'
+              '  -keystore ~/.android/debug.keystore \\
+'
+              '  -alias androiddebugkey \\
+'
+              '  -storepass android -keypass android',
+            ),
+
+            const SizedBox(height: 8),
+
+            // Step 2 — GCP
+            _FixStep('2', 'Open Google Cloud Console → APIs & Services → Credentials'),
+            _CopySnippet('https://console.cloud.google.com/apis/credentials'),
+
             const SizedBox(height: 6),
-            _FixStep('2', 'Copy the SHA-1 from the debug or release variant.'),
+
+            // Step 3 — find client
+            _FixStep('3',
+                'Find your Android OAuth client for com.royalquadbikes.app. '
+                'If it doesn't exist → + Create Credentials → OAuth 2.0 Client ID → Android'),
+
             const SizedBox(height: 6),
-            _FixStep('3', 'Go to: console.cloud.google.com → APIs & Services → Credentials → your Android OAuth 2.0 Client → add the SHA-1 → Save'),
+
+            // Step 4 — add SHA-1s
+            _FixStep('4', 'Add BOTH SHA-1s (you can have multiple on one client):'),
             const SizedBox(height: 6),
-            _FixStep('4', 'Package name to register:'),
+            Padding(
+              padding: const EdgeInsets.only(left: 26),
+              child: Column(children: [
+                _ShaBadge('LOCAL (your machine)', '← run step 1 above', false),
+                const SizedBox(height: 6),
+                _ShaBadge('CI (GitHub Actions)', _ciSha1, true),
+              ]),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Step 5 — package name
+            _FixStep('5', 'Package name (copy exactly):'),
             _CopySnippet('com.royalquadbikes.app'),
-            const SizedBox(height: 6),
-            _FixStep('5', 'Download the updated google-services.json → place it in android/app/ → rebuild APK'),
+
+            const SizedBox(height: 8),
+
+            // Step 6 — save
+            _FixStep('6', 'Click Save → rebuild the APK → Google Sign-In works ✅'),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: kGreen.withAlpha(40))),
+              child: const Row(children: [
+                Icon(Icons.info_outline_rounded,
+                    size: 14, color: Color(0xFF2E7D32)),
+                SizedBox(width: 6),
+                Expanded(child: Text(
+                  'No google-services.json needed — this app doesn't use Firebase.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF2E7D32),
+                      fontWeight: FontWeight.w600))),
+              ]),
+            ),
           ]),
         ),
       ],
+    ]),
+  );
+}
+
+class _ShaBadge extends StatefulWidget {
+  final String label, sha1; final bool copyable;
+  const _ShaBadge(this.label, this.sha1, this.copyable);
+  @override State<_ShaBadge> createState() => _ShaBadgeState();
+}
+
+class _ShaBadgeState extends State<_ShaBadge> {
+  bool _copied = false;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1E1E1E),
+      borderRadius: BorderRadius.circular(8)),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(widget.label, style: const TextStyle(
+          color: Color(0xFF9CDCFE), fontSize: 10,
+          fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+      const SizedBox(height: 4),
+      Row(children: [
+        Expanded(child: Text(widget.sha1, style: const TextStyle(
+            fontFamily: 'monospace', fontSize: 11,
+            color: Color(0xFFCE9178)))),
+        if (widget.copyable)
+          GestureDetector(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: widget.sha1));
+              setState(() => _copied = true);
+              Future.delayed(const Duration(seconds: 2),
+                  () { if (mounted) setState(() => _copied = false); });
+            },
+            child: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded,
+                size: 14,
+                color: _copied ? kGreen : Colors.white38)),
+      ]),
     ]),
   );
 }
