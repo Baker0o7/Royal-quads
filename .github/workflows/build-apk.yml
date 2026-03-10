@@ -13,22 +13,25 @@ jobs:
       contents: write
 
     steps:
+      # ── 1. Source ────────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── 2. Toolchain ─────────────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
 
-      - name: Set up Flutter
+      - name: Set up Flutter 3.27.4
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.27.4
+          flutter-version: "3.27.4"
           channel: stable
           cache: true
 
+      # ── 3. Android config ────────────────────────────────────────────────────
       - name: Write local.properties
         run: |
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' \
@@ -36,37 +39,42 @@ jobs:
             > android/local.properties
           chmod +x android/gradlew
 
-
-      - name: "🔑 Print SHA-1 fingerprint (Google Sign-In setup)"
+      # ── 4. Print SHA-1 (Google Sign-In reference) ────────────────────────────
+      - name: Print debug keystore SHA-1
         run: |
           echo "======================================================="
-          echo "  GOOGLE SIGN-IN — Register this SHA-1 in GCP Console"
+          echo "  GOOGLE SIGN-IN — SHA-1 for GCP Console"
           echo "======================================================="
-          cd android
-          chmod +x gradlew
-          ./gradlew signingReport 2>/dev/null | grep -A5 "Variant: debug" | grep -E "SHA1:|SHA-256:" ||             keytool -list -v -keystore ~/.android/debug.keystore               -alias androiddebugkey -storepass android -keypass android 2>/dev/null               | grep -E "SHA1:|SHA-256:"
-          echo "  Package name : com.royalquadbikes.app"
-          echo "  Register at  : console.cloud.google.com"
-          echo "  Path         : APIs & Services → Credentials → Android OAuth Client"
+          keytool -list -v \
+            -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey \
+            -storepass android -keypass android 2>/dev/null \
+            | grep "SHA1:"
+          echo "  Package: com.royalquadbikes.app"
           echo "======================================================="
 
-      - name: Get dependencies
+      # ── 5. Dependencies ──────────────────────────────────────────────────────
+      - name: Get Flutter dependencies
         run: flutter pub get
 
+      # ── 6. App icons ─────────────────────────────────────────────────────────
       - name: Inject app icons
         run: |
           pip install Pillow --break-system-packages --quiet
           python3 scripts/inject-icons.py
 
-      - name: Build debug APK
-        run: flutter build apk --debug --no-tree-shake-icons
+      # ── 7. Build ─────────────────────────────────────────────────────────────
+      - name: Build release APK (unsigned)
+        run: flutter build apk --release --no-tree-shake-icons
 
+      # ── 8. Stage output ──────────────────────────────────────────────────────
       - name: Stage APK
         run: |
           mkdir -p output
-          cp build/app/outputs/flutter-apk/app-debug.apk output/Royal-Quads.apk
+          cp build/app/outputs/flutter-apk/app-release.apk output/Royal-Quads.apk
           echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
+      # ── 9. Artifact (always kept even if release fails) ──────────────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -74,40 +82,45 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      - name: Generate release tag
+      # ── 10. Tag ──────────────────────────────────────────────────────────────
+      - name: Derive release tag
         id: version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
           else
+            VER=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
             SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
-            echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
+            echo "tag=v${VER}-${SHA}" >> "$GITHUB_OUTPUT"
           fi
 
+      # ── 11. GitHub Release ───────────────────────────────────────────────────
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
+          name: "Royal Quad Bikes ${{ steps.version.outputs.tag }}"
           body: |
-            ## Royal Quad Bikes v2.8.0 — Flutter Android APK
+            ## Royal Quad Bikes ${{ steps.version.outputs.tag }}
 
-            Native Flutter rewrite — download and install on Android.
+            **Android APK** — download and install directly.
 
-            > Enable **Install from unknown sources** in Settings first.
+            > Enable **Install from unknown sources** before installing.
 
             ### Features
             - Live countdown timer + overtime billing (100 KES/min)
-            - M-Pesa payment with confirmation code
-            - Admin dashboard with PIN lock + Quick-Start booking
-            - History search + daily cash report
-            - Pre-bookings, safety waiver, PDF receipts, WhatsApp
-            - Google Sign-In
+            - Extend ride, end-ride confirmation with M-Pesa ref capture
+            - Security deposit tracking with return workflow
+            - Pre-bookings with notes, confirm & one-tap Start Ride
+            - Waiver → active ride → receipt flow
+            - Admin dashboard: fleet, history, tools, daily report
+            - 7-day revenue chart + CSV export (Google Sheets)
+            - Google Sign-In, promo codes, PDF receipts, WhatsApp
 
             ### Install
             1. Download **Royal-Quads.apk** below
-            2. Settings > Security > Install unknown apps > enable
-            3. Open APK and tap **Install**
+            2. Open the file and tap **Install**
+            3. If blocked: Settings → Security → enable **Unknown sources**
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
