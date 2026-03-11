@@ -27,6 +27,15 @@ jobs:
           channel: stable
           cache: true
 
+      # Write local.properties immediately after Flutter is on PATH
+      # so settings.gradle can find flutter.sdk before Gradle init
+      - name: Write local.properties
+        run: |
+          printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
+            > android/local.properties
+          cat android/local.properties
+          chmod +x android/gradlew
+
       - name: Create debug keystore & print SHA-1
         run: |
           mkdir -p "$HOME/.android"
@@ -47,12 +56,6 @@ jobs:
             | grep "SHA1:"
           echo "  Package: com.royalquadbikes.app"
           echo "============================================"
-
-      - name: Write local.properties
-        run: |
-          printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
-            > android/local.properties
-          chmod +x android/gradlew
 
       - name: Flutter pub get
         run: flutter pub get
