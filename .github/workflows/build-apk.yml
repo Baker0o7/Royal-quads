@@ -42,15 +42,35 @@ jobs:
       # ── 4. Print SHA-1 (Google Sign-In reference) ────────────────────────────
       - name: Print debug keystore SHA-1
         run: |
+          KEYSTORE="$HOME/.android/debug.keystore"
+          mkdir -p "$HOME/.android"
+
+          # Create the standard debug keystore if it doesn't exist yet
+          if [ ! -f "$KEYSTORE" ]; then
+            keytool -genkeypair \
+              -v \
+              -keystore "$KEYSTORE" \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              2>/dev/null
+          fi
+
           echo "======================================================="
-          echo "  GOOGLE SIGN-IN — SHA-1 for GCP Console"
+          echo "  GOOGLE SIGN-IN — Register this SHA-1 in GCP Console"
           echo "======================================================="
           keytool -list -v \
-            -keystore ~/.android/debug.keystore \
+            -keystore "$KEYSTORE" \
             -alias androiddebugkey \
-            -storepass android -keypass android 2>/dev/null \
-            | grep "SHA1:"
-          echo "  Package: com.royalquadbikes.app"
+            -storepass android \
+            -keypass android \
+            | grep -E "SHA1:|SHA-256:"
+          echo "  Package : com.royalquadbikes.app"
+          echo "  GCP URL : console.cloud.google.com/apis/credentials"
           echo "======================================================="
 
       # ── 5. Dependencies ──────────────────────────────────────────────────────
