@@ -1,12 +1,10 @@
 pluginManagement {
     def flutterSdkPath = {
-        // 1. Try local.properties (local dev)
         def props = new Properties()
         def localProps = file("local.properties")
         if (localProps.exists()) {
             localProps.withInputStream { props.load(it) }
         }
-        // 2. Fall back to FLUTTER_ROOT env var (CI / GitHub Actions)
         def path = props.getProperty("flutter.sdk") ?: System.getenv("FLUTTER_ROOT")
         assert path != null, "flutter.sdk not set in local.properties and FLUTTER_ROOT env var is empty"
         return path
@@ -19,10 +17,15 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-}
 
-plugins {
-    id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    // Explicit versions so Gradle can resolve these from google() without the
+    // includeBuild needing to re-export them. Required by Gradle 7.6+ plugin system.
+    plugins {
+        id "com.android.application" version "8.3.2"
+        id "com.android.library"     version "8.3.2"
+        id "org.jetbrains.kotlin.android" version "1.9.24"
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
 }
 
 include ":app"

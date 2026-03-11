@@ -12,36 +12,30 @@ jobs:
       contents: write
 
     steps:
-      # ── 1. Checkout ───────────────────────────────────────────────────────────
       - uses: actions/checkout@v4
 
-      # ── 2. Java ───────────────────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # ── 3. Flutter (latest stable, no version pin — most reliable) ────────────
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      # ── 4. Android prerequisites ──────────────────────────────────────────────
-      - name: Bootstrap Android
+      # Write local.properties right after Flutter is on PATH.
+      # settings.gradle also reads FLUTTER_ROOT env var as fallback,
+      # but flutter build apk writes it too — belt AND suspenders.
+      - name: Write local.properties & create debug keystore
         run: |
-          # Write local.properties so settings.gradle can find flutter.sdk
-          # (settings.gradle also reads FLUTTER_ROOT env var as fallback)
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
-          echo "--- local.properties ---"
           cat android/local.properties
-          echo "------------------------"
           chmod +x android/gradlew
 
-          # Create debug keystore required by release signingConfig
           mkdir -p "$HOME/.android"
           keytool -genkeypair \
             -keystore "$HOME/.android/debug.keystore" \
@@ -50,35 +44,30 @@ jobs:
             -storepass android -keypass android \
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
-          echo "SHA-1 (register in GCP for Google Sign-In):"
+          echo "SHA-1 (add to GCP Console for Google Sign-In):"
           keytool -list -v \
             -keystore "$HOME/.android/debug.keystore" \
             -alias androiddebugkey \
             -storepass android -keypass android \
             | grep "SHA1:"
 
-      # ── 5. Dart dependencies ──────────────────────────────────────────────────
       - name: Flutter pub get
         run: flutter pub get
 
-      # ── 6. App icon injection ─────────────────────────────────────────────────
       - name: Inject app icons
         run: |
           pip install Pillow --break-system-packages --quiet
           python3 scripts/inject-icons.py
 
-      # ── 7. Build ──────────────────────────────────────────────────────────────
       - name: Build release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      # ── 8. Stage ─────────────────────────────────────────────────────────────
       - name: Stage APK
         run: |
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-release.apk output/Royal-Quads.apk
           echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
-      # ── 9. Artifact (downloadable from Actions tab, kept 30 days) ────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -86,7 +75,6 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      # ── 10. GitHub Release ───────────────────────────────────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -95,7 +83,7 @@ jobs:
           body: |
             ## Royal Quad Bikes ${{ github.ref_name }}
 
-            Android APK — download and install directly.
+            Android APK — download and install directly on any Android device.
 
             > ⚠️ Enable **Install from unknown sources** before installing.
             > Settings → Apps → Special app access → Install unknown apps → Allow
@@ -105,8 +93,8 @@ jobs:
             - Extend ride & M-Pesa ref capture at checkout
             - Security deposit tracking with one-tap return
             - Pre-bookings with notes, waiver → ride flow
-            - Admin dashboard: fleet, history, daily report
-            - 7-day revenue chart + CSV export to Google Sheets
+            - Admin dashboard: fleet, history, 7-day revenue chart
+            - CSV export to Google Sheets, fleet management
             - Google Sign-In, promo codes, PDF receipts, WhatsApp
 
             ### Install
