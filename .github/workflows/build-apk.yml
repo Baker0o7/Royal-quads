@@ -23,11 +23,11 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.4"
+          flutter-version-file: pubspec.yaml
           channel: stable
           cache: true
 
-      - name: Create debug keystore
+      - name: Create debug keystore & print SHA-1
         run: |
           mkdir -p "$HOME/.android"
           keytool -genkeypair -v \
@@ -37,12 +37,16 @@ jobs:
             -storepass android -keypass android \
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
-          echo "Keystore SHA-1:"
+          echo "============================================"
+          echo "  SHA-1 (register in GCP for Google Sign-In)"
+          echo "============================================"
           keytool -list -v \
             -keystore "$HOME/.android/debug.keystore" \
             -alias androiddebugkey \
             -storepass android -keypass android \
             | grep "SHA1:"
+          echo "  Package: com.royalquadbikes.app"
+          echo "============================================"
 
       - name: Write local.properties
         run: |
