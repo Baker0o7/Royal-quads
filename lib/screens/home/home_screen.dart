@@ -64,13 +64,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _selectPricing(Map p) => setState(() {
+  void _selectPricing(Map p) {
+    HapticFeedback.selectionClick();
+    setState(() {
     _selectedDuration = p['duration'] as int;
     _selectedPrice    = p['price'] as int;
     _discounted       = null;
     _promoCtrl.clear();
     _promo = '';
-  });
+    });
+  }
 
   Future<void> _applyPromo() async {
     if (_selectedPrice == null || _promo.trim().isEmpty) {
@@ -87,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _submit() async {
+    HapticFeedback.mediumImpact();
     FocusScope.of(context).unfocus();
     if (_selectedQuad == null) {
       showToast(context, 'Please select a quad', error: true); return;
@@ -143,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         // ── App Bar ─────────────────────────────────────────────────────────
         SliverAppBar(
-          expandedHeight: 170,
+          expandedHeight: 200,
           pinned: true,
           stretch: true,
           flexibleSpace: FlexibleSpaceBar(
@@ -151,6 +155,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             stretchModes: const [StretchMode.zoomBackground],
             background: Stack(fit: StackFit.expand, children: [
               Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
+              // Dune silhouette painter
+              Positioned.fill(child: CustomPaint(
+                painter: _DunesHeroPainter(),
+              )),
               // Subtle logo watermark
               Positioned.fill(child: Opacity(
                 opacity: 0.06,
@@ -258,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 children: provider.quads.map((q) => _QuadCard(
                   quad: q, selected: _selectedQuad == q.id,
                   onTap: q.status == 'available'
-                      ? () => setState(() => _selectedQuad = q.id)
+                      ? () { HapticFeedback.lightImpact(); setState(() => _selectedQuad = q.id); }
                       : null,
                 )).toList(),
               ),
@@ -984,4 +992,69 @@ class _BookingStepper extends StatelessWidget {
       })),
     ]),
   );
+}
+
+// ── Dune silhouette painter (home hero background) ────────────────────────────
+class _DunesHeroPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Far dune — faint
+    final p1 = Paint()..color = const Color(0x18C9972A);
+    final d1 = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * 0.60)
+      ..cubicTo(
+        size.width * 0.18, size.height * 0.38,
+        size.width * 0.40, size.height * 0.50,
+        size.width * 0.62, size.height * 0.42,
+      )
+      ..cubicTo(
+        size.width * 0.78, size.height * 0.36,
+        size.width * 0.90, size.height * 0.48,
+        size.width,        size.height * 0.44,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(d1, p1);
+
+    // Near dune — stronger
+    final p2 = Paint()..color = const Color(0x22C9972A);
+    final d2 = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * 0.78)
+      ..cubicTo(
+        size.width * 0.22, size.height * 0.56,
+        size.width * 0.46, size.height * 0.72,
+        size.width * 0.60, size.height * 0.62,
+      )
+      ..cubicTo(
+        size.width * 0.74, size.height * 0.52,
+        size.width * 0.88, size.height * 0.68,
+        size.width,        size.height * 0.66,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(d2, p2);
+
+    // Ridge highlight
+    final pRidge = Paint()
+      ..color = kAccent.withAlpha(35)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    final ridge = Path()
+      ..moveTo(0, size.height * 0.78)
+      ..cubicTo(
+        size.width * 0.22, size.height * 0.56,
+        size.width * 0.46, size.height * 0.72,
+        size.width * 0.60, size.height * 0.62,
+      )
+      ..cubicTo(
+        size.width * 0.74, size.height * 0.52,
+        size.width * 0.88, size.height * 0.68,
+        size.width,        size.height * 0.66,
+      );
+    canvas.drawPath(ridge, pRidge);
+  }
+
+  @override bool shouldRepaint(_) => false;
 }

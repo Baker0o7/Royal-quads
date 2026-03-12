@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/models.dart';
 import '../services/storage.dart';
@@ -415,6 +416,38 @@ class _ReceiptCard extends StatelessWidget {
                       fontSize: 22, fontWeight: FontWeight.w900)),
             ]),
           ),
+          const SizedBox(height: 14),
+          // QR row
+          Row(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: QrImageView(
+                data: booking.receiptId,
+                version: QrVersions.auto,
+                size: 72,
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.all(6),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Scan to verify receipt',
+                    style: TextStyle(color: kMuted, fontSize: 10,
+                        letterSpacing: 0.5)),
+                const SizedBox(height: 4),
+                Text(booking.receiptId,
+                    style: const TextStyle(
+                        fontFamily: 'monospace', fontSize: 13,
+                        fontWeight: FontWeight.w700, color: kText,
+                        letterSpacing: 1.5)),
+                const SizedBox(height: 4),
+                const Text('Royal Quad Bikes · Mambrui, Kenya',
+                    style: TextStyle(color: kMuted, fontSize: 10)),
+              ],
+            )),
+          ]),
         ]),
       ),
     ]),

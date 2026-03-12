@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -12,6 +13,7 @@ class MainShell extends StatelessWidget {
     (path: '/',         icon: Icons.directions_bike_rounded,  label: 'Book'),
     (path: '/profile',  icon: Icons.person_rounded,           label: 'Profile'),
     (path: '/prebook',  icon: Icons.calendar_month_rounded,   label: 'Pre-book'),
+    (path: '/dunes',    icon: Icons.terrain_rounded,          label: 'Dunes'),
   ];
 
   @override
@@ -36,7 +38,8 @@ class MainShell extends StatelessWidget {
           child: SizedBox(
             height: 64,
             child: Row(
-              children: List.generate(_tabs.length, (i) {
+              children: [
+              ...List.generate(_tabs.length, (i) {
                 final t      = _tabs[i];
                 final isActive = i == idx;
                 final showBadge = i == 0 && liveCount > 0;
@@ -82,7 +85,37 @@ class MainShell extends StatelessWidget {
                   ),
                 ));
               }),
-            ),
+
+              // Theme toggle
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AppProvider>().toggleTheme();
+                },
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 52,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        context.watch<AppProvider>().themeMode == ThemeMode.dark
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
+                        color: Colors.white38,
+                        size: 22,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        context.watch<AppProvider>().themeMode == ThemeMode.dark
+                            ? 'Light' : 'Dark',
+                        style: const TextStyle(
+                            color: Colors.white24, fontSize: 9)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

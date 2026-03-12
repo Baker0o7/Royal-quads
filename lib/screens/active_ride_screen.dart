@@ -133,7 +133,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
       await context.read<AppProvider>().completeBooking(
           widget.bookingId, _otMins);
       if (!mounted) return;
-      context.go('/receipt/${widget.bookingId}');
+      context.go('/ride_complete/${widget.bookingId}');
     } catch (e) {
       if (!mounted) return;
       showToast(context, e.toString().replaceFirst('Exception: ', ''), error: true);

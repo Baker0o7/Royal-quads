@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/storage.dart';
 
@@ -8,14 +9,28 @@ class AppProvider extends ChangeNotifier {
   List<Booking>  _history   = [];
   AppUser?       _user;
   bool           _loading   = false;
+  ThemeMode      _themeMode = ThemeMode.dark;
 
-  List<Quad>    get quads   => _quads;
-  List<Booking> get active  => _active;
-  List<Booking> get history => _history;
-  AppUser?      get user    => _user;
-  bool          get loading => _loading;
+  List<Quad>    get quads     => _quads;
+  List<Booking> get active    => _active;
+  List<Booking> get history   => _history;
+  AppUser?      get user      => _user;
+  bool          get loading   => _loading;
+  ThemeMode     get themeMode => _themeMode;
 
   void _set(VoidCallback fn) { fn(); notifyListeners(); }
+
+  void initTheme() {
+    _themeMode = StorageService.getThemeName() == 'light'
+        ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+  }
+
+  void toggleTheme() {
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    StorageService.setThemeName(_themeMode == ThemeMode.light ? 'light' : 'dark');
+    notifyListeners();
+  }
 
   Future<void> loadAll() async {
     _set(() => _loading = true);

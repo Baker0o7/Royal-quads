@@ -353,3 +353,65 @@ extension DateFmt on DateTime {
   String get dateOnly =>
       '${day.toString().padLeft(2,'0')}/${month.toString().padLeft(2,'0')}/$year';
 }
+
+
+// ── Dark Theme ─────────────────────────────────────────────────────────────────
+const kDarkBg      = Color(0xFF0F0D0A);
+const kDarkBg2     = Color(0xFF1A1512);
+const kDarkCard    = Color(0xFF1E1A16);
+const kDarkSurface = Color(0xFF141210);
+const kDarkBorder  = Color(0xFF2D2820);
+const kDarkText    = Color(0xFFF5F0E8);
+const kDarkMuted   = Color(0xFF9A8E7E);
+
+final kDarkTheme = ThemeData(
+  useMaterial3: true,
+  brightness: Brightness.dark,
+  scaffoldBackgroundColor: kDarkBg,
+  colorScheme: const ColorScheme.dark(
+    primary: kAccent, secondary: kAccent2,
+    surface: kDarkSurface, onSurface: kDarkText,
+    error: kRed,
+  ),
+  fontFamily: 'DM Sans',
+  appBarTheme: const AppBarTheme(
+    backgroundColor: kHeroTo, foregroundColor: Colors.white, elevation: 0,
+    centerTitle: true, scrolledUnderElevation: 0,
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: kAccent, foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      elevation: 0,
+    ),
+  ),
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true, fillColor: kDarkCard,
+    border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: kDarkBorder)),
+    enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: kDarkBorder, width: 1.5)),
+    focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: kAccent, width: 2)),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+    labelStyle: const TextStyle(color: kDarkMuted, fontSize: 14),
+    hintStyle: TextStyle(color: kDarkMuted.withAlpha(150)),
+    prefixIconColor: kDarkMuted,
+  ),
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: kDarkText,
+    contentTextStyle: const TextStyle(color: kDarkBg, fontFamily: 'DM Sans', fontSize: 14),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    behavior: SnackBarBehavior.floating,
+    insetPadding: const EdgeInsets.all(12),
+  ),
+  dividerTheme: const DividerThemeData(color: kDarkBorder, thickness: 1, space: 24),
+  listTileTheme: const ListTileThemeData(
+    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+  ),
+);

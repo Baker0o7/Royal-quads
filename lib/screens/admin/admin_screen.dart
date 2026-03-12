@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -179,6 +180,16 @@ class AdminOverviewTab extends StatelessWidget {
 
           // ── 7-day revenue chart ───────────────────────────────────────────
           const _WeeklyChart(),
+
+          const SizedBox(height: 16),
+
+          // ── 30-day line chart ─────────────────────────────────────────────
+          const _MonthlyLineChart(),
+
+          const SizedBox(height: 16),
+
+          // ── Revenue by quad pie chart ─────────────────────────────────────
+          _QuadPieChart(history: history),
 
           const SizedBox(height: 16),
 
@@ -410,6 +421,197 @@ class _WeeklyChartState extends State<_WeeklyChart>
             ),
           ),
         ),
+      ]),
+    );
+  }
+}
+
+class _MonthlyLineChart extends StatelessWidget {
+  const _MonthlyLineChart();
+
+  @override
+  Widget build(BuildContext context) {
+    final now     = DateTime.now();
+    final history = StorageService.getHistory();
+
+    // Build 30-day buckets
+    final days = List.generate(30, (i) {
+      final day = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: 29 - i));
+      final total = history
+          .where((b) =>
+              b.startTime.year  == day.year  &&
+              b.startTime.month == day.month &&
+              b.startTime.day   == day.day)
+          .fold(0, (s, b) => s + b.totalPaid);
+      return FlSpot(i.toDouble(), total.toDouble());
+    });
+
+    final maxY = days.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    final safeMax = maxY < 100 ? 5000.0 : maxY * 1.15;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1612),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF2D2820)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Row(children: [
+          Icon(Icons.show_chart_rounded, color: kIndigo, size: 16),
+          SizedBox(width: 8),
+          Text('30-Day Revenue',
+              style: TextStyle(color: Colors.white70,
+                  fontWeight: FontWeight.w700, fontSize: 13)),
+        ]),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 140,
+          child: LineChart(LineChartData(
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              horizontalInterval: safeMax / 4,
+              getDrawingHorizontalLine: (_) => FlLine(
+                color: Colors.white.withAlpha(12),
+                strokeWidth: 1,
+              ),
+            ),
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 48,
+                  interval: safeMax / 4,
+                  getTitlesWidget: (v, _) => Text(
+                    v >= 1000 ? '${(v / 1000).toStringAsFixed(0)}k' : v.toInt().toString(),
+                    style: const TextStyle(color: Colors.white38, fontSize: 9),
+                  ),
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  interval: 7,
+                  getTitlesWidget: (v, _) {
+                    final day = DateTime(now.year, now.month, now.day)
+                        .subtract(Duration(days: 29 - v.toInt()));
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '${day.day}/${day.month}',
+                        style: const TextStyle(color: Colors.white38, fontSize: 9),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              rightTitles:  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles:    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            ),
+            borderData: FlBorderData(show: false),
+            minX: 0, maxX: 29,
+            minY: 0, maxY: safeMax,
+            lineBarsData: [
+              LineChartBarData(
+                spots: days,
+                isCurved: true,
+                color: kIndigo,
+                barWidth: 2.5,
+                dotData: const FlDotData(show: false),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    colors: [kIndigo.withAlpha(70), kIndigo.withAlpha(0)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+            ],
+          )),
+        ),
+      ]),
+    );
+  }
+}
+
+class _QuadPieChart extends StatelessWidget {
+  final List<Booking> history;
+  const _QuadPieChart({required this.history});
+
+  @override
+  Widget build(BuildContext context) {
+    // Revenue per quad
+    final Map<String, int> byQuad = {};
+    for (final b in history) {
+      byQuad[b.quadName] = (byQuad[b.quadName] ?? 0) + b.totalPaid;
+    }
+    if (byQuad.isEmpty) return const SizedBox.shrink();
+
+    final sorted = byQuad.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final total = sorted.fold(0, (s, e) => s + e.value);
+    final colors = [kAccent, kGreen, kIndigo, kRed, kOrange,
+                    const Color(0xFF06B6D4), const Color(0xFFA855F7)];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1612),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF2D2820)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Row(children: [
+          Icon(Icons.pie_chart_rounded, color: kAccent, size: 16),
+          SizedBox(width: 8),
+          Text('Revenue by Quad',
+              style: TextStyle(color: Colors.white70,
+                  fontWeight: FontWeight.w700, fontSize: 13)),
+        ]),
+        const SizedBox(height: 16),
+        Row(children: [
+          SizedBox(
+            width: 130, height: 130,
+            child: PieChart(PieChartData(
+              sections: sorted.asMap().entries.map((e) {
+                final pct = e.value.value / total * 100;
+                return PieChartSectionData(
+                  value: e.value.value.toDouble(),
+                  color: colors[e.key % colors.length],
+                  radius: 40,
+                  title: '${pct.round()}%',
+                  titleStyle: const TextStyle(
+                      color: Colors.white, fontSize: 9,
+                      fontWeight: FontWeight.w700),
+                );
+              }).toList(),
+              sectionsSpace: 2,
+              centerSpaceRadius: 28,
+            )),
+          ),
+          const SizedBox(width: 16),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: sorted.asMap().entries.map((e) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(children: [
+                Container(width: 8, height: 8,
+                    decoration: BoxDecoration(
+                        color: colors[e.key % colors.length],
+                        shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                Expanded(child: Text(e.value.key,
+                    style: const TextStyle(color: Colors.white70, fontSize: 11),
+                    overflow: TextOverflow.ellipsis)),
+                Text('${e.value.value.kes}',
+                    style: const TextStyle(color: Colors.white38, fontSize: 10)),
+              ]),
+            )).toList(),
+          )),
+        ]),
       ]),
     );
   }
