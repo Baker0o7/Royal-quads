@@ -299,7 +299,7 @@ class _AuthViewState extends State<_AuthView> {
       if (!mounted) return;
       final msg = e.toString();
       if (msg.contains('10') || msg.contains('DEVELOPER_ERROR')) {
-        showToast(context, 'SHA-1 not registered — see fix below', error: true);
+        showToast(context, 'SHA-1 not registered -- see fix below', error: true);
         setState(() => _showSha1Fix = true);
       } else if (msg.contains('network_error') || msg.contains('NetworkError')) {
         showToast(context, 'No internet connection', error: true);
@@ -590,7 +590,7 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
             const Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fix Google Sign-In — Error 10',
+                Text('Fix Google Sign-In -- Error 10',
                     style: TextStyle(fontWeight: FontWeight.w800,
                         fontSize: 13, color: Color(0xFF7A5800))),
                 Text('Register your local SHA-1 in GCP (one-time)',
@@ -620,7 +620,7 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
                 borderRadius: BorderRadius.circular(8)),
               child: const Text(
                 'Your local machine uses a different debug keystore than CI. '
-                'You must register YOUR machine's SHA-1 in Google Cloud Console. '
+                'You must register YOUR machine\'s SHA-1 in Google Cloud Console. '
                 'You can register multiple SHA-1s on the same Android client.',
                 style: TextStyle(fontSize: 12, color: Color(0xFF7A5800), height: 1.6),
               ),
@@ -628,12 +628,12 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
 
             const SizedBox(height: 14),
 
-            // Step 1 — get local SHA-1
-            _FixStep('1', 'Get YOUR machine's SHA-1 — run this in a terminal:'),
+            // Step 1 -- get local SHA-1
+            _FixStep('1', 'Get YOUR machine\'s SHA-1 -- run this in a terminal:'),
             _CodeSnippet(
               'bash scripts/get_sha1.sh
 '
-              '# — OR manually —
+              '# - OR manually -
 '
               'keytool -list -v \\
 '
@@ -646,26 +646,26 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
 
             const SizedBox(height: 8),
 
-            // Step 2 — GCP
-            _FixStep('2', 'Open Google Cloud Console → APIs & Services → Credentials'),
+            // Step 2 -- GCP
+            _FixStep('2', 'Open Google Cloud Console -> APIs & Services -> Credentials'),
             _CopySnippet('https://console.cloud.google.com/apis/credentials'),
 
             const SizedBox(height: 6),
 
-            // Step 3 — find client
+            // Step 3 -- find client
             _FixStep('3',
                 'Find your Android OAuth client for com.royalquadbikes.app. '
-                'If it doesn't exist → + Create Credentials → OAuth 2.0 Client ID → Android'),
+                'If it doesn\'t exist - Create Credentials - OAuth 2.0 Client ID - Android'),
 
             const SizedBox(height: 6),
 
-            // Step 4 — add SHA-1s
+            // Step 4 -- add SHA-1s
             _FixStep('4', 'Add BOTH SHA-1s (you can have multiple on one client):'),
             const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.only(left: 26),
               child: Column(children: [
-                _ShaBadge('LOCAL (your machine)', '← run step 1 above', false),
+                _ShaBadge('LOCAL (your machine)', '<- run step 1 above', false),
                 const SizedBox(height: 6),
                 _ShaBadge('CI (GitHub Actions)', _ciSha1, true),
               ]),
@@ -673,14 +673,14 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
 
             const SizedBox(height: 8),
 
-            // Step 5 — package name
+            // Step 5 -- package name
             _FixStep('5', 'Package name (copy exactly):'),
             _CopySnippet('com.royalquadbikes.app'),
 
             const SizedBox(height: 8),
 
-            // Step 6 — save
-            _FixStep('6', 'Click Save → rebuild the APK → Google Sign-In works ✅'),
+            // Step 6 -- save
+            _FixStep('6', 'Click Save -> rebuild the APK -> Google Sign-In works ✅'),
             const SizedBox(height: 4),
             Container(
               padding: const EdgeInsets.all(8),
@@ -693,7 +693,7 @@ class _Sha1FixBannerState extends State<_Sha1FixBanner> {
                     size: 14, color: Color(0xFF2E7D32)),
                 SizedBox(width: 6),
                 Expanded(child: Text(
-                  'No google-services.json needed — this app doesn't use Firebase.',
+                  'No google-services.json needed - this app doesn\'t use Firebase.',
                   style: TextStyle(fontSize: 11, color: Color(0xFF2E7D32),
                       fontWeight: FontWeight.w600))),
               ]),
@@ -963,7 +963,7 @@ class _LoggedInView extends StatelessWidget {
                 _StatTile(
                   icon: Icons.local_fire_department_rounded,
                   color: kRed,
-                  value: myRides.isEmpty ? '—' : '${myRides.where((b) {
+                  value: myRides.isEmpty ? '--' : '${myRides.where((b) {
                     final now = DateTime.now();
                     return b.startTime.year == now.year && b.startTime.month == now.month;
                   }).fold(0, (s, b) => s + b.totalPaid).kes} KES',
@@ -974,9 +974,9 @@ class _LoggedInView extends StatelessWidget {
                   icon: Icons.star_rounded,
                   color: kOrange,
                   value: () {
-                    if (myRides.isEmpty) return '—';
+                    if (myRides.isEmpty) return '--';
                     final rated = myRides.where((b) => b.rating != null).toList();
-                    if (rated.isEmpty) return '—';
+                    if (rated.isEmpty) return '--';
                     final avg = rated.fold(0, (s, b) => s + b.rating!) / rated.length;
                     return avg.toStringAsFixed(1);
                   }(),

@@ -151,7 +151,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
   // ignore: unused_element
   static const _chips = <({String label, String value, Color? color, Color accent})>[];
 
-  Widget _buildChip(({String label, String value, Color? color, Color accent}) c) {
+  Widget _buildChip(_FilterChip c) {
     final active = _filter == c.value;
     return GestureDetector(
       onTap: () => setState(() => _filter = c.value),

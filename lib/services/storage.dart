@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 
@@ -11,14 +10,6 @@ class StorageService {
   }
 
   static SharedPreferences get _p => _prefs!;
-
-  // ── Onboarding ────────────────────────────────────────────────────────────
-  static bool isOnboarded() => _p.getBool('rq:onboarded') ?? false;
-  static Future<void> setOnboarded() => _p.setBool('rq:onboarded', true);
-
-  // ── Theme ─────────────────────────────────────────────────────────────────
-  static String getThemeName() => _p.getString('rq:theme') ?? 'dark';
-  static Future<void> setThemeName(String mode) => _p.setString('rq:theme', mode);
 
   static List<Map<String, dynamic>> _loadList(String key) {
     try {
@@ -45,12 +36,9 @@ class StorageService {
   static Future<void> setOnboarded() => _p.setBool('rq:onboarded', true);
 
   // ── Theme ─────────────────────────────────────────────────────────────────
-  static ThemeMode getThemeMode() {
-    final val = _p.getString('rq:theme') ?? 'dark';
-    return val == 'light' ? ThemeMode.light : ThemeMode.dark;
-  }
-  static Future<void> setThemeMode(ThemeMode mode) =>
-      _p.setString('rq:theme', mode == ThemeMode.light ? 'light' : 'dark');
+  static String getThemeName() => _p.getString('rq:theme') ?? 'dark';
+  static Future<void> setThemeName(String mode) => _p.setString('rq:theme', mode);
+
 
   // ── Quads ─────────────────────────────────────────────────────────────────
   static List<Quad> getQuads() {
@@ -98,101 +86,122 @@ class StorageService {
   static List<Booking> getActive() =>
       getBookings().where((b) => b.status == 'active').toList();
 
-  static List<Booking> getHistory() =>
-      getBookings().where((b) => b.status == 'completed').toList();
-
-  static Booking? getBookingById(int id) {
-    try {
-      return getBookings().firstWhere((b) => b.id == id);
-    } catch (_) { return null; }
+  static List<Booking> getHistory() {
+    final all = getBookings().where((b) => b.status == 'completed').toList();
+    all.sort((a, b) => b.startTime.compareTo(a.startTime));
+    return all;
   }
 
   static Future<Booking> createBooking({
     required int quadId, int? userId,
     required String customerName, required String customerPhone,
-    required int duration, required int price,
-    int? originalPrice, String? promoCode, int groupSize = 1,
-    int depositAmount = 0, String? mpesaRef, bool waiverSigned = false,
+    required int duration, required int price, int? originalPrice,
+    String? promoCode, int groupSize = 1, int depositAmount = 0,
+    String? mpesaRef, bool waiverSigned = false,
   }) async {
     final quads = getQuads();
-    final quad  = quads.firstWhere((q) => q.id == quadId);
-    if (quad.status != 'available') throw Exception('${quad.name} is not available');
-    final bookings = getBookings();
-    final id = _nextId('rq:booking_seq');
+    final quad = quads.firstWhere((q) => q.id == quadId,
+        orElse: () => throw Exception('Quad not found'));
+    if (quad.status != 'available') throw Exception('Quad is not available');
+
     final booking = Booking(
-      id: id, quadId: quadId, quadName: quad.name,
-      userId: userId, customerName: customerName,
-      customerPhone: customerPhone, duration: duration,
-      price: price, originalPrice: originalPrice ?? price,
-      promoCode: promoCode, groupSize: groupSize,
-      depositAmount: depositAmount, mpesaRef: mpesaRef,
-      waiverSigned: waiverSigned,
-      startTime: DateTime.now(), status: 'active',
-      receiptId: _receiptId(),
+      id: _nextId('rq:booking_seq'), quadId: quadId, userId: userId,
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.replaceAll(RegExp(r'[\s\-().]+'), ''),
+      duration: duration, price: price,
+      originalPrice: originalPrice ?? price,
+      promoCode: promoCode, startTime: DateTime.now(),
+      status: 'active', receiptId: _receiptId(),
+      quadName: quad.name, quadImageUrl: quad.imageUrl,
+      waiverSigned: waiverSigned, groupSize: groupSize,
+      depositAmount: depositAmount,
+      mpesaRef: mpesaRef?.trim().toUpperCase(),
     );
-    await saveBookings([...bookings, booking]);
-    await updateQuad(quadId, status: 'rented');
+
+    await saveBookings([...getBookings(), booking]);
+    await saveQuads(quads.map((q) => q.id == quadId ? q.copyWith(status: 'rented') : q).toList());
     return booking;
   }
 
   static Future<void> completeBooking(int id, int overtimeMins) async {
-    final bookings = getBookings();
-    final idx = bookings.indexWhere((b) => b.id == id);
-    if (idx < 0) return;
-    final b = bookings[idx];
-    final otCharge = overtimeMins * kOvertimeRate;
-    final updated = b.copyWith(
-      status: 'completed',
-      endTime: DateTime.now(),
-      overtimeMinutes: overtimeMins,
-      overtimeCharge: otCharge,
-    );
-    bookings[idx] = updated;
+    int quadId = 0;
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      quadId = b.quadId;
+      return b.copyWith(
+        status: 'completed', endTime: DateTime.now(),
+        overtimeMinutes: overtimeMins,
+        overtimeCharge: overtimeMins * kOvertimeRate,
+      );
+    }).toList();
     await saveBookings(bookings);
-    await updateQuad(b.quadId, status: 'available');
-  }
-
-  static Future<void> updateMpesaRef(int id, String ref) async {
-    final bookings = getBookings();
-    final idx = bookings.indexWhere((b) => b.id == id);
-    if (idx < 0) return;
-    bookings[idx] = bookings[idx].copyWith(mpesaRef: ref);
-    await saveBookings(bookings);
+    if (quadId != 0) await updateQuad(quadId, status: 'available');
   }
 
   static Future<void> submitFeedback(int id, int rating, String feedback) async {
-    final bookings = getBookings();
-    final idx = bookings.indexWhere((b) => b.id == id);
-    if (idx < 0) return;
-    bookings[idx] = bookings[idx].copyWith(rating: rating, feedback: feedback);
+    final bookings = getBookings().map((b) =>
+        b.id == id ? b.copyWith(rating: rating, feedback: feedback) : b).toList();
     await saveBookings(bookings);
   }
 
+  /// Extend a booking by [addedMins] minutes and add [addedPrice] to its price.
+  static Future<void> extendBooking(int id, int addedMins, int addedPrice) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      // Rebuild with extended duration and updated price
+      return Booking(
+        id: b.id, quadId: b.quadId, userId: b.userId,
+        customerName: b.customerName, customerPhone: b.customerPhone,
+        duration: b.duration + addedMins,
+        price: b.price + addedPrice,
+        originalPrice: b.originalPrice,
+        promoCode: b.promoCode,
+        startTime: b.startTime, endTime: b.endTime,
+        status: b.status, receiptId: b.receiptId,
+        rating: b.rating, feedback: b.feedback,
+        quadName: b.quadName, quadImageUrl: b.quadImageUrl,
+        waiverSigned: b.waiverSigned, groupSize: b.groupSize,
+        depositAmount: b.depositAmount, depositReturned: b.depositReturned,
+        overtimeMinutes: b.overtimeMinutes, overtimeCharge: b.overtimeCharge,
+        mpesaRef: b.mpesaRef,
+      );
+    }).toList();
+    await saveBookings(bookings);
+  }
+
+  /// Mark deposit as returned.
   static Future<void> returnDeposit(int id) async {
-    final bookings = getBookings();
-    final idx = bookings.indexWhere((b) => b.id == id);
-    if (idx < 0) return;
-    bookings[idx] = bookings[idx].copyWith(depositReturned: true);
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      return b.copyWith(depositReturned: true);
+    }).toList();
     await saveBookings(bookings);
   }
 
-  // ── Sales summary ─────────────────────────────────────────────────────────
-  static Map<String, int> getSalesSummary() {
-    final history = getHistory();
-    final now = DateTime.now();
-    final todayStart  = DateTime(now.year, now.month, now.day);
-    final weekStart   = todayStart.subtract(const Duration(days: 6));
-    final monthStart  = DateTime(now.year, now.month, 1);
+  /// Update only the M-Pesa reference on a booking.
+  static Future<void> updateBookingMpesa(int id, String mpesaRef) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      return Booking(
+        id: b.id, quadId: b.quadId, userId: b.userId,
+        customerName: b.customerName, customerPhone: b.customerPhone,
+        duration: b.duration, price: b.price, originalPrice: b.originalPrice,
+        promoCode: b.promoCode, startTime: b.startTime, endTime: b.endTime,
+        status: b.status, receiptId: b.receiptId,
+        rating: b.rating, feedback: b.feedback,
+        quadName: b.quadName, quadImageUrl: b.quadImageUrl,
+        waiverSigned: b.waiverSigned, groupSize: b.groupSize,
+        depositAmount: b.depositAmount, depositReturned: b.depositReturned,
+        overtimeMinutes: b.overtimeMinutes, overtimeCharge: b.overtimeCharge,
+        mpesaRef: mpesaRef,
+      );
+    }).toList();
+    await saveBookings(bookings);
+  }
 
-    int today = 0, week = 0, month = 0, overtime = 0;
-    for (final b in history) {
-      final t = b.totalPaid;
-      if (!b.startTime.isBefore(todayStart)) today += t;
-      if (!b.startTime.isBefore(weekStart))  week  += t;
-      if (!b.startTime.isBefore(monthStart)) month += t;
-      overtime += b.overtimeCharge;
-    }
-    return {'today': today, 'week': week, 'month': month, 'overtime': overtime};
+  static Booking? getBookingById(int id) {
+    try { return getBookings().firstWhere((b) => b.id == id); }
+    catch (_) { return null; }
   }
 
   // ── Users ─────────────────────────────────────────────────────────────────
@@ -202,39 +211,105 @@ class StorageService {
   static Future<void> saveUsers(List<AppUser> users) =>
       _saveList('rq:users', users.map((u) => u.toJson()).toList());
 
-  static Future<AppUser> registerUser(String name, String phone, String password) async {
-    final users = getUsers();
-    if (users.any((u) => u.phone == phone)) throw Exception('Phone already registered');
-    final user = AppUser(id: _nextId('rq:user_seq'), name: name, phone: phone, password: password);
-    await saveUsers([...users, user]);
-    return user;
+  static Future<AppUser> loginUser(String phone, String password) async {
+    final norm = phone.replaceAll(RegExp(r'[\s\-().]+'), '');
+    try {
+      return getUsers().firstWhere((u) =>
+          u.phone.replaceAll(RegExp(r'[\s\-().]+'), '') == norm &&
+          u.password == password);
+    } catch (_) { throw Exception('Invalid phone number or password'); }
   }
 
-  static Future<AppUser> loginUser(String phone, String password) async {
+  static Future<AppUser> registerUser(String name, String phone, String password) async {
+    if (name.trim().isEmpty) throw Exception('Name is required');
+    final norm = phone.replaceAll(RegExp(r'[\s\-().]+'), '');
+    if (norm.length < 9) throw Exception('Enter a valid phone number');
+    if (password.length < 4) throw Exception('Password must be at least 4 characters');
+    final users = getUsers();
+    if (users.any((u) => u.phone.replaceAll(RegExp(r'[\s\-().]+'), '') == norm)) {
+      throw Exception('Phone number already registered');
+    }
+    final u = AppUser(id: _nextId('rq:user_seq'), name: name.trim(),
+        phone: norm, role: 'user', password: password);
+    await saveUsers([...users, u]);
+    return u;
+  }
+
+  static Future<AppUser> upsertGoogleUser({
+    required String googleId, required String name,
+    required String email, required String avatarUrl,
+  }) async {
     final users = getUsers();
     try {
-      return users.firstWhere((u) => u.phone == phone && u.password == password);
-    } catch (_) { throw Exception('Invalid phone or password'); }
+      final existing = users.firstWhere((u) => u.googleId == googleId);
+      final updated = users.map((u) => u.id == existing.id
+          ? AppUser(id: u.id, name: name, phone: u.phone, role: u.role,
+              password: u.password, googleId: googleId, avatarUrl: avatarUrl, email: email)
+          : u).toList();
+      await saveUsers(updated);
+      return updated.firstWhere((u) => u.googleId == googleId);
+    } catch (_) {
+      final u = AppUser(id: _nextId('rq:user_seq'), name: name, phone: '',
+          role: 'user', password: '', googleId: googleId, avatarUrl: avatarUrl, email: email);
+      await saveUsers([...users, u]);
+      return u;
+    }
   }
 
-  // ── Promos ────────────────────────────────────────────────────────────────
-  static List<PromoCode> getPromos() =>
-      _loadList('rq:promos').map(PromoCode.fromJson).toList();
+  // ── Promotions ────────────────────────────────────────────────────────────
+  static List<Promotion> getPromotions() =>
+      _loadList('rq:promotions').map(Promotion.fromJson).toList();
 
-  static Future<void> savePromos(List<PromoCode> promos) =>
-      _saveList('rq:promos', promos.map((p) => p.toJson()).toList());
+  static Future<void> savePromotions(List<Promotion> promos) =>
+      _saveList('rq:promotions', promos.map((p) => p.toJson()).toList());
 
   static int? applyPromo(String code, int price) {
     try {
-      final p = getPromos().firstWhere(
-          (p) => p.code == code.toUpperCase() && p.active);
-      return p.isPercent
-          ? (price * (1 - p.discount / 100)).round()
-          : (price - p.discount).clamp(0, price);
+      final p = getPromotions().firstWhere(
+          (p) => p.isActive && p.code.toUpperCase() == code.toUpperCase());
+      return (price * (1 - p.discountPercentage / 100)).round();
     } catch (_) { return null; }
   }
 
+  // ── Staff ─────────────────────────────────────────────────────────────────
+  static List<Staff> getStaff() => _loadList('rq:staff').map(Staff.fromJson).toList();
+  static Future<void> saveStaff(List<Staff> staff) =>
+      _saveList('rq:staff', staff.map((s) => s.toJson()).toList());
+
+  // ── Maintenance ───────────────────────────────────────────────────────────
+  static List<MaintenanceLog> getMaintenance() =>
+      _loadList('rq:maintenance').map(MaintenanceLog.fromJson).toList();
+  static Future<void> saveMaintenance(List<MaintenanceLog> logs) =>
+      _saveList('rq:maintenance', logs.map((l) => l.toJson()).toList());
+
+  // ── Prebookings ───────────────────────────────────────────────────────────
+  static List<Prebooking> getPrebookings() =>
+      _loadList('rq:prebookings').map(Prebooking.fromJson).toList();
+  static Future<void> savePrebookings(List<Prebooking> items) =>
+      _saveList('rq:prebookings', items.map((p) => p.toJson()).toList());
+
   // ── Admin PIN ─────────────────────────────────────────────────────────────
-  static bool verifyAdminPin(String pin) => pin == (_p.getString('rq:admin_pin') ?? '1234');
+  static String getAdminPin() => _p.getString('rq:admin_pin') ?? '1234';
   static Future<void> setAdminPin(String pin) => _p.setString('rq:admin_pin', pin);
+  static bool verifyAdminPin(String pin) => pin == getAdminPin();
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
+  static Map<String, int> getSalesSummary() {
+    final history = getHistory();
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final weekStart  = todayStart.subtract(Duration(days: now.weekday - 1));
+    final monthStart = DateTime(now.year, now.month, 1);
+
+    int total = 0, today = 0, week = 0, month = 0, overtime = 0;
+    for (final b in history) {
+      final rev = b.price + b.overtimeCharge;
+      total   += rev;
+      overtime += b.overtimeCharge;
+      if (!b.startTime.isBefore(todayStart)) today += rev;
+      if (!b.startTime.isBefore(weekStart))  week  += rev;
+      if (!b.startTime.isBefore(monthStart)) month += rev;
+    }
+    return {'total': total, 'today': today, 'week': week, 'month': month, 'overtime': overtime};
+  }
 }

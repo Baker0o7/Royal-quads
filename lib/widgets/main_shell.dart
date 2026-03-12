@@ -119,7 +119,8 @@ class MainShell extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
