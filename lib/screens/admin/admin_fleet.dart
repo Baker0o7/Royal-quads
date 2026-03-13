@@ -572,6 +572,6 @@ class _FleetDivider extends StatelessWidget {
 }
 
 class _FilterChip {
-  final String label, value; final Color? color, accent;
+  final String label, value; final Color color, accent;
   const _FilterChip(this.label, this.value, this.color, this.accent);
 }

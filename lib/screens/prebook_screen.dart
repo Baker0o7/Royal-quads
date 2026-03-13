@@ -17,9 +17,10 @@ class _PrebookScreenState extends State<PrebookScreen>
 
   final _nameCtrl  = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
   final _formKey   = GlobalKey<FormState>();
 
-  String   _name  = '', _phone = '';
+  String   _name  = '', _phone = '', _notes = '';
   int?     _duration, _price;
   DateTime _scheduled = DateTime.now().add(const Duration(hours: 2));
   bool     _loading   = false;
@@ -35,6 +36,7 @@ class _PrebookScreenState extends State<PrebookScreen>
     _tabs.dispose();
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
+    _notesCtrl.dispose();
     super.dispose();
   }
 
