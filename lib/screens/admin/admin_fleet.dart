@@ -52,7 +52,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(children: [
-              _FilterChip('All',         'all',         null,         kAccent),
+              _FilterChip('All',         'all',         kAccent,      kAccent),
               _FilterChip('Available',   'available',   kGreen,       kGreen),
               _FilterChip('On Track',    'rented',      kAccent,      kAccent),
               _FilterChip('Maintenance', 'maintenance', kRed,         kRed),
