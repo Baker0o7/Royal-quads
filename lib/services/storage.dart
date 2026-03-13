@@ -235,26 +235,6 @@ class StorageService {
     return u;
   }
 
-  static Future<AppUser> upsertGoogleUser({
-    required String googleId, required String name,
-    required String email, required String avatarUrl,
-  }) async {
-    final users = getUsers();
-    try {
-      final existing = users.firstWhere((u) => u.googleId == googleId);
-      final updated = users.map((u) => u.id == existing.id
-          ? AppUser(id: u.id, name: name, phone: u.phone, role: u.role,
-              password: u.password, googleId: googleId, avatarUrl: avatarUrl, email: email)
-          : u).toList();
-      await saveUsers(updated);
-      return updated.firstWhere((u) => u.googleId == googleId);
-    } catch (_) {
-      final u = AppUser(id: _nextId('rq:user_seq'), name: name, phone: '',
-          role: 'user', password: '', googleId: googleId, avatarUrl: avatarUrl, email: email);
-      await saveUsers([...users, u]);
-      return u;
-    }
-  }
 
   // ── Promotions ────────────────────────────────────────────────────────────
   static List<Promotion> getPromotions() =>

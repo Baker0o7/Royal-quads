@@ -126,21 +126,19 @@ class AppUser {
   final String phone;
   final String role;
   final String password;
-  final String? googleId;
-  final String? avatarUrl;
   final String? email;
 
   const AppUser({required this.id, required this.name, required this.phone,
-    required this.role, required this.password, this.googleId, this.avatarUrl, this.email});
+    required this.role, required this.password, this.email});
 
   Map<String, dynamic> toJson() => {'id': id, 'name': name, 'phone': phone,
-    'role': role, 'password': password, 'googleId': googleId, 'avatarUrl': avatarUrl, 'email': email};
+    'role': role, 'password': password, 'email': email};
 
   factory AppUser.fromJson(Map<String, dynamic> j) => AppUser(
     id: j['id'] as int, name: (j['name'] as String?) ?? '',
     phone: (j['phone'] as String?) ?? '', role: (j['role'] as String?) ?? 'user',
     password: (j['password'] as String?) ?? '',
-    googleId: j['googleId'] as String?, avatarUrl: j['avatarUrl'] as String?, email: j['email'] as String?);
+    email: j['email'] as String?);
 }
 
 class Promotion {
