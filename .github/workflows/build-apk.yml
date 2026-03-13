@@ -83,24 +83,33 @@ jobs:
           body: |
             ## Royal Quad Bikes ${{ github.ref_name }}
 
-            Android APK — download and install directly on any Android device.
+            Android APK -- install directly on any Android device.
 
-            > ⚠️ Enable **Install from unknown sources** before installing.
-            > Settings → Apps → Special app access → Install unknown apps → Allow
+            > **Before installing:** Settings > Apps > Special app access > Install unknown apps > Allow for your file manager
 
-            ### Features
-            - Live ride timer + overtime billing (100 KES/min)
-            - Extend ride & M-Pesa ref capture at checkout
+            ### What is in this build
+            - Animated splash screen + first-launch onboarding (3 slides)
+            - Booking ticket screen with live countdown + scan-to-verify QR code
+            - Ride complete screen: confetti, animated KES counter, WhatsApp share
+            - Dark / Light mode toggle (persisted across restarts)
+            - Mambrui Dunes location tab: painted map, directions, operating hours
+            - Admin: 30-day revenue line chart + revenue-by-quad pie chart
+            - Redesigned PDF receipt: gold gradient bars, total banner
+            - Phone + password auth only (Google Sign-In removed)
+            - Haptic feedback on all key interactions
+
+            ### Core features
+            - Live ride timer + overtime at 100 KES/min
+            - M-Pesa till number copy + confirmation code capture
             - Security deposit tracking with one-tap return
-            - Pre-bookings with notes, waiver → ride flow
-            - Admin dashboard: fleet, history, 7-day revenue chart
-            - CSV export to Google Sheets, fleet management
-            - Google Sign-In, promo codes, PDF receipts, WhatsApp
+            - Pre-bookings, waiver flow, admin dashboard
+            - CSV export, fleet management, promo codes
 
-            ### Install
+            ### Install steps
             1. Download **Royal-Quads.apk** below
-            2. Open it on your phone and tap **Install**
-            3. If blocked: Settings → Security → enable **Install unknown apps**
+            2. Open on your Android phone -- tap Install
+            3. If blocked: Settings > Security > Install unknown apps > Allow
+
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
