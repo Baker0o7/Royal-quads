@@ -212,77 +212,120 @@ class _ReceiptScreenState extends State<ReceiptScreen>
       final rows = _receiptRows(booking);
       doc.addPage(pw.Page(
         pageFormat: PdfPageFormat.a5,
-        margin: const pw.EdgeInsets.all(32),
+        margin: const pw.EdgeInsets.all(28),
         build: (ctx) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
+            // Gold top bar
+            pw.Container(height: 3,
+                decoration: const pw.BoxDecoration(
+                  gradient: pw.LinearGradient(
+                    colors: [PdfColors.amber300, PdfColors.amber800,
+                             PdfColors.amber300]))),
+            pw.SizedBox(height: 14),
             // Header
-            pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
+            pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               pw.Expanded(child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('Royal Quad Bikes',
-                      style: pw.TextStyle(fontSize: 20,
-                          fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Royal Quad Bikes', style: pw.TextStyle(
+                      fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                  pw.SizedBox(height: 2),
                   pw.Text('Mambrui Sand Dunes, Kilifi County, Kenya',
-                      style: const pw.TextStyle(fontSize: 10,
+                      style: const pw.TextStyle(fontSize: 9,
                           color: PdfColors.grey600)),
+                  pw.Text('M-Pesa Till: 6685024 | baker0o7.github.io/Royal-quads',
+                      style: const pw.TextStyle(fontSize: 8,
+                          color: PdfColors.grey500)),
                 ],
               )),
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6),
+                    horizontal: 10, vertical: 8),
                 decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.amber700),
+                  color: PdfColors.amber50,
+                  border: pw.Border.all(color: PdfColors.amber700, width: 1.5),
                   borderRadius: const pw.BorderRadius.all(
-                      pw.Radius.circular(6)),
+                      pw.Radius.circular(8)),
                 ),
-                child: pw.Text('RECEIPT',
-                    style: pw.TextStyle(fontSize: 11,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.amber800)),
+                child: pw.Column(children: [
+                  pw.Text('RECEIPT', style: pw.TextStyle(fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.amber900)),
+                  pw.SizedBox(height: 2),
+                  pw.Text(booking.receiptId, style: pw.TextStyle(fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.amber800)),
+                ]),
               ),
             ]),
-            pw.SizedBox(height: 4),
-            pw.Divider(color: PdfColors.amber700, thickness: 2),
+            pw.SizedBox(height: 10),
+            pw.Container(height: 2,
+                decoration: const pw.BoxDecoration(
+                  gradient: pw.LinearGradient(
+                    colors: [PdfColors.amber700, PdfColors.amber300,
+                             PdfColors.amber700]))),
             pw.SizedBox(height: 12),
-            // Receipt ID
-            pw.Text(booking.receiptId,
-                style: pw.TextStyle(fontSize: 13,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey700)),
-            pw.SizedBox(height: 16),
             // Rows
-            ...rows.map((r) => pw.Padding(
-              padding: const pw.EdgeInsets.symmetric(vertical: 4),
+            ...rows.map((r) => pw.Container(
+              padding: const pw.EdgeInsets.symmetric(vertical: 5),
+              decoration: const pw.BoxDecoration(
+                border: pw.Border(
+                    bottom: pw.BorderSide(
+                        color: PdfColors.grey200, width: 0.5))),
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(r[0], style: const pw.TextStyle(
-                      fontSize: 11, color: PdfColors.grey700)),
+                      fontSize: 10, color: PdfColors.grey700)),
                   pw.Text(r[1], style: pw.TextStyle(
-                      fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                      fontSize: 10, fontWeight: pw.FontWeight.bold)),
                 ],
               ),
             )),
-            pw.SizedBox(height: 8),
-            pw.Divider(),
+            pw.SizedBox(height: 10),
+            // Total banner
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 12),
+              decoration: const pw.BoxDecoration(
+                gradient: pw.LinearGradient(
+                  colors: [PdfColors.amber800, PdfColors.amber600]),
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
+              ),
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('TOTAL PAID', style: pw.TextStyle(fontSize: 13,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white)),
+                  pw.Text('${booking.totalPaid.kes} KES',
+                      style: pw.TextStyle(fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.white)),
+                ],
+              ),
+            ),
+            pw.Spacer(),
+            pw.Container(height: 1, color: PdfColors.grey300),
+            pw.SizedBox(height: 6),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('TOTAL', style: pw.TextStyle(
-                    fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${booking.totalPaid.kes} KES',
-                    style: pw.TextStyle(fontSize: 16,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.amber800)),
+                pw.Text('Thank you for riding with Royal Quad Bikes!',
+                    style: const pw.TextStyle(
+                        fontSize: 8, color: PdfColors.grey600)),
+                pw.Text('Mambrui Sand Dunes, Kenya',
+                    style: const pw.TextStyle(
+                        fontSize: 8, color: PdfColors.grey400)),
               ],
             ),
-            pw.Spacer(),
-            pw.Divider(color: PdfColors.grey300),
-            pw.Center(child: pw.Text('Thank you for riding with us!',
-                style: const pw.TextStyle(
-                    fontSize: 10, color: PdfColors.grey600))),
+            pw.SizedBox(height: 4),
+            pw.Container(height: 2,
+                decoration: const pw.BoxDecoration(
+                  gradient: pw.LinearGradient(
+                    colors: [PdfColors.amber300, PdfColors.amber700,
+                             PdfColors.amber300]))),
           ],
         ),
       ));

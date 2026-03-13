@@ -10,6 +10,7 @@ import 'screens/prebook_screen.dart';
 import 'screens/dunes_screen.dart';
 import 'screens/admin/admin_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/booking_ticket_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'widgets/main_shell.dart';
 
@@ -27,6 +28,11 @@ final appRouter = GoRouter(
         GoRoute(path: '/prebook', builder: (_, __) => const PrebookScreen()),
         GoRoute(path: '/dunes',   builder: (_, __) => const DunesScreen()),
       ],
+    ),
+    GoRoute(
+      path: '/ticket/:id',
+      builder: (ctx, s) => BookingTicketScreen(
+          bookingId: int.parse(s.pathParameters['id']!)),
     ),
     GoRoute(
       path: '/ride/:id',

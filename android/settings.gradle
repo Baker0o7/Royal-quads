@@ -21,9 +21,9 @@ pluginManagement {
     // Explicit versions so Gradle can resolve these from google() without the
     // includeBuild needing to re-export them. Required by Gradle 7.6+ plugin system.
     plugins {
-        id "com.android.application" version "8.3.2"
-        id "com.android.library"     version "8.3.2"
-        id "org.jetbrains.kotlin.android" version "1.9.24"
+        id "com.android.application" version "8.7.3"
+        id "com.android.library"     version "8.7.3"
+        id "org.jetbrains.kotlin.android" version "2.1.0"
         id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
     }
 }
