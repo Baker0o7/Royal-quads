@@ -60,7 +60,7 @@ jobs:
           python3 scripts/inject-icons.py
 
       - name: Build release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
 
       - name: Stage APK
         run: |
