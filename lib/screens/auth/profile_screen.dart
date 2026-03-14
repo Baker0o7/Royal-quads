@@ -205,7 +205,11 @@ class _AuthViewState extends State<_AuthView> {
   final _phoneCtrl = TextEditingController();
   final _pwCtrl    = TextEditingController();
   final _formKey   = GlobalKey<FormState>();
-  bool _showPw = false, _loading = false;
+  bool   _showPw   = false;
+  bool   _loading  = false;
+  bool   _otpStep  = false;   // true = showing OTP entry screen
+  String _otpCode  = '';       // the generated code (shown in snackbar)
+  String _otpEntered = '';
 
   @override
   void dispose() {
@@ -213,19 +217,36 @@ class _AuthViewState extends State<_AuthView> {
     super.dispose();
   }
 
+  /// Generate a 6-digit OTP, display it (simulates SMS), show OTP screen.
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     HapticFeedback.mediumImpact();
+
+    if (widget.mode == _Mode.signUp && !_otpStep) {
+      // Generate OTP and show verification step
+      final rng = DateTime.now().millisecondsSinceEpoch % 1000000;
+      _otpCode = rng.toString().padLeft(6, '0');
+      setState(() => _otpStep = true);
+      // Simulate SMS — display code in snackbar
+      if (mounted) {
+        showToast(context,
+            'OTP sent to ${_phoneCtrl.text.trim()}: $_otpCode');
+      }
+      return;
+    }
+
     setState(() => _loading = true);
     try {
       final prov = context.read<AppProvider>();
       if (widget.mode == _Mode.signIn) {
         await prov.signIn(_phoneCtrl.text.trim(), _pwCtrl.text);
+        if (mounted) showToast(context, 'Welcome back! 🏍️');
       } else {
+        // OTP already verified — register
         await prov.register(
             _nameCtrl.text.trim(), _phoneCtrl.text.trim(), _pwCtrl.text);
+        if (mounted) showToast(context, 'Account created! Welcome 🏍️');
       }
-      if (mounted) showToast(context, 'Welcome! 🏍️');
     } catch (e) {
       if (mounted) showToast(context,
           e.toString().replaceFirst('Exception: ', ''), error: true);
@@ -234,8 +255,32 @@ class _AuthViewState extends State<_AuthView> {
     }
   }
 
+  void _verifyOtp(String entered) {
+    if (entered == _otpCode) {
+      _otpEntered = entered;
+      _submit(); // proceed to register
+    } else {
+      showToast(context, 'Incorrect OTP — please try again', error: true);
+    }
+  }
+
+  void _resendOtp() {
+    final rng = DateTime.now().millisecondsSinceEpoch % 1000000;
+    _otpCode = rng.toString().padLeft(6, '0');
+    showToast(context, 'New OTP: $_otpCode');
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    if (_otpStep) return _OtpScreen(
+      phone: _phoneCtrl.text.trim(),
+      onVerify: _verifyOtp,
+      onResend: _resendOtp,
+      onBack: () => setState(() => _otpStep = false),
+      loading: _loading,
+    );
+
+    return Scaffold(
     body: SafeArea(child: Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -405,6 +450,7 @@ class _AuthViewState extends State<_AuthView> {
       ),
     )),
   );
+  }
 }
 
 // ── Shared auth widgets ────────────────────────────────────────────────────────
@@ -778,4 +824,313 @@ class _Heading extends StatelessWidget {
   Widget build(BuildContext context) => Text(text,
       style: const TextStyle(fontFamily: 'Playfair',
           fontSize: 18, fontWeight: FontWeight.w700, color: kText));
+}
+
+// ── OTP Verification Screen ───────────────────────────────────────────────────
+class _OtpScreen extends StatefulWidget {
+  final String phone;
+  final void Function(String) onVerify;
+  final VoidCallback onResend, onBack;
+  final bool loading;
+  const _OtpScreen({required this.phone, required this.onVerify,
+      required this.onResend, required this.onBack, required this.loading});
+  @override State<_OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<_OtpScreen>
+    with SingleTickerProviderStateMixin {
+  final _controllers = List.generate(6, (_) => TextEditingController());
+  final _focuses     = List.generate(6, (_) => FocusNode());
+  late AnimationController _shakeCtrl;
+  late Animation<double>   _shakeAnim;
+  int _resendSeconds = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _shakeAnim = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -8.0, end: 8.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 8.0, end: -8.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -8.0, end: 0.0), weight: 1),
+    ]).animate(CurvedAnimation(parent: _shakeCtrl, curve: Curves.easeInOut));
+
+    _startResendTimer();
+  }
+
+  void _startResendTimer() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() => _resendSeconds = (_resendSeconds - 1).clamp(0, 30));
+      return _resendSeconds > 0;
+    });
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers) c.dispose();
+    for (final f in _focuses) f.dispose();
+    _shakeCtrl.dispose();
+    super.dispose();
+  }
+
+  String get _enteredCode =>
+      _controllers.map((c) => c.text).join();
+
+  void _onDigit(int index, String val) {
+    if (val.length > 1) {
+      // Handle paste — fill all boxes
+      final digits = val.replaceAll(RegExp(r'\D'), '').substring(0, 6.clamp(0, val.length));
+      for (var i = 0; i < digits.length && i < 6; i++) {
+        _controllers[i].text = digits[i];
+      }
+      if (digits.length == 6) {
+        _focuses[5].requestFocus();
+        _verify();
+      }
+      return;
+    }
+    if (val.isNotEmpty && index < 5) {
+      _focuses[index + 1].requestFocus();
+    }
+    if (_enteredCode.length == 6) _verify();
+  }
+
+  void _onBackspace(int index) {
+    if (_controllers[index].text.isEmpty && index > 0) {
+      _controllers[index - 1].clear();
+      _focuses[index - 1].requestFocus();
+    }
+  }
+
+  void _verify() {
+    final code = _enteredCode;
+    if (code.length < 6) return;
+    widget.onVerify(code);
+    // Shake on wrong (handled by parent showing toast)
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && code != '') _shakeCtrl.forward(from: 0);
+    });
+  }
+
+  void _resend() {
+    if (_resendSeconds > 0) return;
+    for (final c in _controllers) c.clear();
+    _focuses[0].requestFocus();
+    setState(() => _resendSeconds = 30);
+    widget.onResend();
+    _startResendTimer();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: kMuted),
+              onPressed: widget.onBack,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Icon
+          Container(
+            width: 72, height: 72,
+            decoration: BoxDecoration(
+              color: kAccent.withAlpha(15),
+              shape: BoxShape.circle,
+              border: Border.all(color: kAccent.withAlpha(40), width: 2),
+            ),
+            child: const Icon(Icons.sms_rounded, color: kAccent, size: 32),
+          ),
+          const SizedBox(height: 20),
+
+          const Text('Verify your number',
+              style: TextStyle(fontFamily: 'Playfair', fontSize: 28,
+                  fontWeight: FontWeight.w700, color: kText,
+                  letterSpacing: -0.5)),
+          const SizedBox(height: 6),
+          RichText(text: TextSpan(
+            style: const TextStyle(color: kMuted, fontSize: 14,
+                height: 1.5),
+            children: [
+              const TextSpan(text: 'Enter the 6-digit code sent to '),
+              TextSpan(text: widget.phone,
+                  style: const TextStyle(color: kText,
+                      fontWeight: FontWeight.w700)),
+            ],
+          )),
+          const SizedBox(height: 32),
+
+          // OTP boxes
+          AnimatedBuilder(
+            animation: _shakeAnim,
+            builder: (_, child) => Transform.translate(
+              offset: Offset(_shakeAnim.value, 0),
+              child: child,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(6, (i) => _OtpBox(
+                controller: _controllers[i],
+                focusNode: _focuses[i],
+                onChanged: (v) => _onDigit(i, v),
+                onBackspace: () => _onBackspace(i),
+                autofocus: i == 0,
+              )),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Verify button
+          SizedBox(
+            width: double.infinity, height: 54,
+            child: ElevatedButton(
+              onPressed: widget.loading ? null : () => _verify(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: widget.loading
+                  ? const SizedBox(width: 22, height: 22,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2.5))
+                  : const Text('Verify & Create Account',
+                      style: TextStyle(fontSize: 15,
+                          fontWeight: FontWeight.w700)),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Resend
+          Center(child: GestureDetector(
+            onTap: _resendSeconds == 0 ? _resend : null,
+            child: RichText(text: TextSpan(
+              style: const TextStyle(fontSize: 13, color: kMuted),
+              children: [
+                const TextSpan(text: "Didn't receive it? "),
+                TextSpan(
+                  text: _resendSeconds > 0
+                      ? 'Resend in ${_resendSeconds}s'
+                      : 'Resend OTP',
+                  style: TextStyle(
+                    color: _resendSeconds > 0 ? kMuted : kAccent,
+                    fontWeight: _resendSeconds > 0
+                        ? FontWeight.w400 : FontWeight.w700,
+                  ),
+                ),
+              ],
+            )),
+          )),
+
+          const SizedBox(height: 16),
+
+          // Info note
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: kIndigo.withAlpha(10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: kIndigo.withAlpha(30)),
+            ),
+            child: const Row(children: [
+              Icon(Icons.info_outline_rounded, color: kIndigo, size: 16),
+              SizedBox(width: 10),
+              Expanded(child: Text(
+                'The OTP is shown in the notification bar above for testing. '
+                'In production, it will be sent via SMS.',
+                style: TextStyle(color: kIndigo, fontSize: 12, height: 1.5),
+              )),
+            ]),
+          ),
+        ]),
+      ),
+    ),
+  );
+}
+
+// ── Single OTP digit box ──────────────────────────────────────────────────────
+class _OtpBox extends StatefulWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onBackspace;
+  final bool autofocus;
+  const _OtpBox({required this.controller, required this.focusNode,
+      required this.onChanged, required this.onBackspace,
+      this.autofocus = false});
+  @override State<_OtpBox> createState() => _OtpBoxState();
+}
+
+class _OtpBoxState extends State<_OtpBox> {
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(() {
+      if (mounted) setState(() => _focused = widget.focusNode.hasFocus);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedContainer(
+    duration: const Duration(milliseconds: 150),
+    width: 46, height: 56,
+    decoration: BoxDecoration(
+      color: _focused ? kAccent.withAlpha(10) : kCard,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(
+        color: _focused ? kAccent
+            : widget.controller.text.isNotEmpty ? kAccent.withAlpha(80)
+            : kBorder,
+        width: _focused ? 2 : 1.5,
+      ),
+      boxShadow: _focused ? [
+        BoxShadow(color: kAccent.withAlpha(30),
+            blurRadius: 12, offset: const Offset(0, 3))
+      ] : kShadowXs,
+    ),
+    child: KeyboardListener(
+      focusNode: FocusNode(),
+      onKeyEvent: (e) {
+        if (e is KeyDownEvent &&
+            e.logicalKey == LogicalKeyboardKey.backspace &&
+            widget.controller.text.isEmpty) {
+          widget.onBackspace();
+        }
+      },
+      child: TextField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 6, // Allow paste of full 6 digits
+        style: const TextStyle(
+            fontSize: 22, fontWeight: FontWeight.w800, color: kText),
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          counterText: '',
+          contentPadding: EdgeInsets.zero,
+        ),
+        onChanged: widget.onChanged,
+        inputFormatters: [
+          // Allow only digits
+        ],
+      ),
+    ),
+  );
 }
