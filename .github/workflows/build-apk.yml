@@ -61,12 +61,14 @@ jobs:
           python3 scripts/inject-icons.py
 
       - name: Build release APK
-        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
+        run: |
+          mkdir -p output
+          flutter build apk --release --no-tree-shake-icons \
+            --android-skip-build-dependency-validation \
+            --output output/Royal-Quads.apk
 
       - name: Stage APK
         run: |
-          mkdir -p output
-          cp build/app/outputs/flutter-apk/app-release.apk output/Royal-Quads.apk
           echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
