@@ -57,7 +57,7 @@ jobs:
 
       - name: Inject app icons
         run: |
-          pip install Pillow --break-system-packages --quiet
+          pip install Pillow --quiet
           python3 scripts/inject-icons.py
 
       - name: Build release APK
