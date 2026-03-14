@@ -105,29 +105,46 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = index == current;
-    return Expanded(child: GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: active ? kAccent.withAlpha(25) : Colors.transparent,
-            borderRadius: BorderRadius.circular(20)),
-          child: Icon(icon,
-              color: active ? kAccent : Colors.white38, size: 22)),
-        const SizedBox(height: 2),
-        Text(label, style: TextStyle(
-            color: active ? kAccent : Colors.white30,
-            fontSize: 10,
-            fontWeight: active ? FontWeight.w700 : FontWeight.w400)),
-      ]),
-    ));
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: active
+                    ? kAccent.withAlpha(25)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(icon,
+                  color: active ? kAccent : Colors.white38,
+                  size: 22),
+            ),
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: active
+                    ? FontWeight.w700 : FontWeight.w400,
+                color: active ? kAccent : Colors.white30,
+                fontFamily: 'DM Sans',
+              ),
+              child: Text(label),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-// ── Overview Tab ───────────────────────────────────────────────────────────────
 class AdminOverviewTab extends StatelessWidget {
   const AdminOverviewTab({super.key});
 

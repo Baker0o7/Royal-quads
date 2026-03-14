@@ -353,10 +353,17 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(child: Column(children: [
-    Icon(icon, color: color, size: 18),
-    const SizedBox(height: 4),
+    Container(
+      width: 36, height: 36,
+      decoration: BoxDecoration(
+        color: color.withAlpha(20),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: color, size: 18)),
+    const SizedBox(height: 6),
     Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w700,
         fontSize: 13), textAlign: TextAlign.center),
+    const SizedBox(height: 2),
     Text(label, style: const TextStyle(color: Colors.white38, fontSize: 10)),
   ]));
 }

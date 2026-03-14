@@ -19,7 +19,7 @@ class MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc      = GoRouterState.of(context).uri.toString();
-    final idx      = _tabs.indexWhere((t) => t.path == loc).clamp(0, 2);
+    final idx      = _tabs.indexWhere((t) => t.path == loc).clamp(0, 3);
     final active   = context.watch<AppProvider>().active;
     final liveCount = active.length;
 

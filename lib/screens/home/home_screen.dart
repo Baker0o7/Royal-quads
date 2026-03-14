@@ -498,78 +498,111 @@ class _LiveRidesBanner extends StatelessWidget {
   );
 }
 
-class _QuadCard extends StatelessWidget {
+class _QuadCard extends StatefulWidget {
   final Quad quad;
   final bool selected;
   final VoidCallback? onTap;
   const _QuadCard({super.key, required this.quad,
       required this.selected, this.onTap});
+  @override State<_QuadCard> createState() => _QuadCardState();
+}
+
+class _QuadCardState extends State<_QuadCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 100));
+    _scale = Tween(begin: 1.0, end: 0.95)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+  @override void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
-    final isAvail = quad.status == 'available';
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: selected ? kHeroFrom : kCard,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected
-                ? kAccent
-                : isAvail
-                    ? kBorder
-                    : kRed.withAlpha(60),
-            width: selected ? 2 : 1,
-          ),
-          boxShadow: selected
-              ? [BoxShadow(color: kAccent.withAlpha(30),
-                  blurRadius: 16, offset: const Offset(0, 4))]
-              : kShadowSm,
-        ),
-        child: Stack(children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(children: [
-                  Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? kAccent.withAlpha(30)
-                          : kAccent.withAlpha(12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.directions_bike_rounded,
-                        color: selected ? kAccent2 : kAccent, size: 20)),
-                  const Spacer(),
-                  if (!isAvail && !selected)
-                    Icon(Icons.lock_outline_rounded,
-                        color: kMuted.withAlpha(80), size: 14),
-                ]),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(quad.name, style: TextStyle(
-                      color: selected ? Colors.white : kText,
-                      fontWeight: FontWeight.w800, fontSize: 13)),
-                  const SizedBox(height: 4),
-                  StatusBadge(quad.status),
-                ]),
-              ],
+    final isAvail = widget.quad.status == 'available';
+    final sel     = widget.selected;
+    return ScaleTransition(
+      scale: _scale,
+      child: GestureDetector(
+        onTapDown: (_) { if (isAvail) _ctrl.forward(); },
+        onTapUp:   (_) { _ctrl.reverse(); widget.onTap?.call(); },
+        onTapCancel: () => _ctrl.reverse(),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: sel ? kHeroFrom : kCard,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: sel ? kAccent
+                  : isAvail ? kBorder : kRed.withAlpha(50),
+              width: sel ? 2 : 1.5,
             ),
+            boxShadow: sel
+                ? [BoxShadow(color: kAccent.withAlpha(40),
+                    blurRadius: 20, offset: const Offset(0, 6))]
+                : kShadowSm,
           ),
-          if (selected)
-            Positioned(top: 8, right: 8, child:
-              Container(
-                width: 20, height: 20,
-                decoration: BoxDecoration(
-                    color: kAccent, shape: BoxShape.circle),
-                child: const Icon(Icons.check_rounded,
-                    color: Colors.white, size: 13))),
-        ]),
+          child: Stack(children: [
+            Padding(
+              padding: const EdgeInsets.all(13),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: sel
+                            ? kAccent.withAlpha(35)
+                            : kAccent.withAlpha(12),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: Icon(Icons.directions_bike_rounded,
+                          color: sel ? kAccent2 : kAccent, size: 20)),
+                    const Spacer(),
+                    if (!isAvail && !sel)
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: kRed.withAlpha(15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(Icons.lock_outline_rounded,
+                            color: kRed.withAlpha(120), size: 12)),
+                  ]),
+                  Column(crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Text(widget.quad.name, style: TextStyle(
+                        color: sel ? Colors.white : kText,
+                        fontWeight: FontWeight.w800, fontSize: 13)),
+                    const SizedBox(height: 5),
+                    StatusBadge(widget.quad.status),
+                  ]),
+                ],
+              ),
+            ),
+            if (sel)
+              Positioned(top: 8, right: 8,
+                child: Container(
+                  width: 22, height: 22,
+                  decoration: BoxDecoration(
+                    gradient: kGoldGradient,
+                    shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(
+                        color: kAccent.withAlpha(60), blurRadius: 8)],
+                  ),
+                  child: const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 13))),
+          ]),
+        ),
       ),
     );
   }
@@ -585,49 +618,78 @@ class _ActiveTile extends StatelessWidget {
     final totalSecs = booking.duration * 60;
     final remaining = totalSecs - elapsed;
     final overtime  = remaining < 0;
+    final progress  = overtime ? 1.0 : (elapsed / totalSecs).clamp(0.0, 1.0);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
         onTap: () => context.push('/ride/${booking.id}'),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: overtime ? kRed.withAlpha(8) : kHeroFrom.withAlpha(8),
-            borderRadius: BorderRadius.circular(16),
+            color: overtime ? kRed.withAlpha(10) : kHeroFrom.withAlpha(6),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-                color: overtime ? kRed.withAlpha(40) : kBorder),
+                color: overtime ? kRed.withAlpha(50) : kBorder,
+                width: overtime ? 1.5 : 1),
             boxShadow: kShadowSm,
           ),
-          child: Row(children: [
-            Container(
-              width: 42, height: 42,
-              decoration: BoxDecoration(
-                color: overtime ? kRed.withAlpha(20) : kAccent.withAlpha(15),
-                borderRadius: BorderRadius.circular(12)),
-              child: Icon(Icons.directions_bike_rounded,
-                  color: overtime ? kRed : kAccent, size: 20)),
-            const SizedBox(width: 12),
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(booking.quadName, style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14)),
-                Text(booking.customerName,
-                    style: const TextStyle(color: kMuted, fontSize: 12)),
-              ],
-            )),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(
-                overtime
-                    ? 'OT ${((-remaining) ~/ 60).toString().padLeft(2,'0')}:${((-remaining) % 60).toString().padLeft(2,'0')}'
-                    : '${(remaining ~/ 60).toString().padLeft(2,'0')}:${(remaining % 60).toString().padLeft(2,'0')} left',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13,
-                    fontFamily: 'monospace',
-                    color: overtime ? kRed : kAccent)),
-              const Icon(Icons.chevron_right_rounded, color: kMuted, size: 16),
+          child: Column(children: [
+            Row(children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  color: overtime ? kRed.withAlpha(20) : kAccent.withAlpha(15),
+                  borderRadius: BorderRadius.circular(13)),
+                child: Icon(Icons.directions_bike_rounded,
+                    color: overtime ? kRed : kAccent, size: 22)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(booking.quadName, style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 14)),
+                  Text(booking.customerName,
+                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                ],
+              )),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: overtime
+                        ? kRed.withAlpha(20) : kAccent.withAlpha(15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    overtime
+                        ? 'OT ${((-remaining) ~/ 60).toString().padLeft(2,"0")}:${((-remaining) % 60).toString().padLeft(2,"0")}'
+                        : '${(remaining ~/ 60).toString().padLeft(2,"0")}:${(remaining % 60).toString().padLeft(2,"0")}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 13,
+                        fontFamily: 'monospace',
+                        color: overtime ? kRed : kAccent)),
+                ),
+                const SizedBox(height: 2),
+                Text(overtime ? 'overtime' : 'remaining',
+                    style: TextStyle(
+                        color: overtime
+                            ? kRed.withAlpha(150) : kMuted,
+                        fontSize: 9)),
+              ]),
             ]),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 4,
+                backgroundColor: (overtime ? kRed : kAccent).withAlpha(20),
+                valueColor: AlwaysStoppedAnimation(
+                    overtime ? kRed : kAccent),
+              ),
+            ),
           ]),
         ),
       ),
