@@ -10,6 +10,7 @@ import '../../theme/theme.dart';
 import 'admin_fleet.dart';
 import 'admin_history.dart';
 import 'admin_tools.dart';
+import 'admin_analytics.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -73,6 +74,7 @@ class _AdminScreenState extends State<AdminScreen> {
           AdminFleetTab(),
           AdminHistoryTab(),
           AdminToolsTab(),
+          AdminAnalyticsTab(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -84,10 +86,11 @@ class _AdminScreenState extends State<AdminScreen> {
         ),
         child: SafeArea(top: false, child: SizedBox(height: 64,
           child: Row(children: [
-            _NavItem(Icons.dashboard_rounded,     'Overview', 0, _tab, () => setState(() => _tab = 0)),
-            _NavItem(Icons.directions_bike_rounded,'Fleet',   1, _tab, () => setState(() => _tab = 1)),
-            _NavItem(Icons.history_rounded,        'History', 2, _tab, () => setState(() => _tab = 2)),
-            _NavItem(Icons.settings_rounded,       'Tools',   3, _tab, () => setState(() => _tab = 3)),
+            _NavItem(Icons.dashboard_rounded,     'Overview',  0, _tab, () => setState(() => _tab = 0)),
+            _NavItem(Icons.directions_bike_rounded,'Fleet',     1, _tab, () => setState(() => _tab = 1)),
+            _NavItem(Icons.history_rounded,        'History',   2, _tab, () => setState(() => _tab = 2)),
+            _NavItem(Icons.settings_rounded,       'Tools',     3, _tab, () => setState(() => _tab = 3)),
+            _NavItem(Icons.analytics_rounded,      'Analytics', 4, _tab, () => setState(() => _tab = 4)),
           ]),
         )),
       ),

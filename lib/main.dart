@@ -5,6 +5,7 @@ import 'providers/app_provider.dart';
 import 'router.dart';
 import 'services/storage.dart';
 import 'theme/theme.dart';
+import 'theme/app_themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,12 +35,13 @@ class RoyalQuadApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppProvider>().themeMode;
+    final prov = context.watch<AppProvider>();
+    final variant = prov.appTheme;
     return MaterialApp.router(
       title: 'Royal Quad Bikes',
-      theme: kTheme,
-      darkTheme: kDarkTheme,
-      themeMode: themeMode,
+      theme: buildLightTheme(variant),
+      darkTheme: buildDarkTheme(variant),
+      themeMode: prov.themeMode,
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
       builder: (context, child) => MediaQuery(

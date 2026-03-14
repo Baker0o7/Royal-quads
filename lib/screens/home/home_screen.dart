@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/models.dart';
 import '../../providers/app_provider.dart';
+import '../../services/storage.dart';
 import '../../theme/theme.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,11 +18,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int?    _selectedQuad;
   int?    _selectedDuration;
   int?    _selectedPrice;
-  String  _name      = '';
-  String  _phone     = '';
-  String  _promo     = '';
-  String  _mpesaRef  = '';
-  int     _deposit   = 0;
+  String  _name           = '';
+  String  _phone          = '';
+  String  _emergencyContact = '';
+  String  _promo          = '';
+  String  _mpesaRef       = '';
+  int     _deposit        = 0;
   int?    _discounted;
   bool    _loading   = false;
   bool    _copied    = false;
@@ -35,7 +38,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final _phoneCtrl = TextEditingController();
   final _promoCtrl = TextEditingController();
   final _mpesaCtrl = TextEditingController();
-  final _depositCtrl = TextEditingController();
+  final _depositCtrl   = TextEditingController();
+  final _emergencyCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
   Timer? _ticker;
@@ -60,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _nameCtrl.dispose(); _phoneCtrl.dispose();
     _promoCtrl.dispose(); _mpesaCtrl.dispose();
     _depositCtrl.dispose();
+    _emergencyCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -87,6 +92,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       setState(() => _discounted = disc);
       showToast(context, 'Promo applied — saved ${(_selectedPrice! - disc).kes} KES! 🎉');
     }
+  }
+
+  void _sendBookingConfirmation(dynamic booking) {
+    if (_phone.trim().isEmpty) return;
+    final phone = _phone.trim().startsWith('0')
+        ? '254${_phone.trim().substring(1)}' : _phone.trim();
+    final price = (_discounted ?? _selectedPrice ?? 0);
+    final msg = Uri.encodeComponent(
+        '✅ *Royal Quad Bikes — Booking Confirmed!*\n\n'
+        'Hi ${_name.trim()}! Your ride is booked 🏍️\n\n'
+        '🏍️ *Quad:* ${booking.quadName}\n'
+        '⏱️ *Duration:* ${_selectedDuration} min\n'
+        '💰 *Price:* ${price.toString()} KES\n'
+        '🧾 *Booking ID:* ${booking.receiptId}\n\n'
+        '📍 *Location:* Mambrui Sand Dunes, Kilifi County\n'
+        '💳 *M-Pesa Till:* $kTillNumber\n\n'
+        'Please arrive 5 min early. Helmet required. 🪖\n'
+        'See you on the dunes! 🏜️');
+    final url = Uri.parse('https://wa.me/$phone?text=$msg');
+    launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _submit() async {
@@ -117,14 +142,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         mpesaRef: _mpesaRef.trim().isEmpty ? null : _mpesaRef.trim(),
         depositAmount: _deposit,
       );
+      // Store emergency contact + waiver state per phone
+      if (_emergencyContact.trim().isNotEmpty) {
+        await StorageService.setEmergencyContact(
+            _phone.trim(), _emergencyContact.trim());
+      }
+      // Award loyalty points (1 point per 100 KES)
+      final pts = ((_discounted ?? _selectedPrice!) / 100).floor();
+      if (pts > 0) {
+        await StorageService.addLoyaltyPoints(_phone.trim(), pts);
+      }
+      // WhatsApp booking confirmation
+      _sendBookingConfirmation(booking);
       if (!mounted) return;
       // Reset form
       _nameCtrl.clear(); _phoneCtrl.clear();
       _promoCtrl.clear(); _mpesaCtrl.clear(); _depositCtrl.clear();
+      _emergencyCtrl.clear();
       setState(() {
         _selectedQuad = null; _selectedDuration = null;
         _selectedPrice = null; _discounted = null;
         _name = ''; _phone = ''; _promo = ''; _mpesaRef = ''; _deposit = 0;
+        _emergencyContact = '';
       });
       // Route through waiver screen first, then to ride
       context.push('/waiver/${booking.id}');
@@ -274,7 +313,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             const SizedBox(height: 24),
 
             // ── Duration ─────────────────────────────────────────────────────
-            SectionHeading('Duration & Price', icon: Icons.timer_rounded),
+            Builder(builder: (ctx) {
+              final mult = StorageService.getCurrentPriceMultiplier();
+              return SectionHeading('Duration & Price',
+                icon: Icons.timer_rounded,
+                trailing: mult != 1.0 ? GoldBadge(
+                  '${mult}x ${mult > 1 ? "Peak" : "Off-Peak"}',
+                  icon: Icons.bolt_rounded,
+                ) : null,
+              );
+            }),
             GridView.count(
               crossAxisCount: 3, shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -305,9 +353,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           color: sel ? kAccent2 : kText,
                           fontWeight: FontWeight.w800, fontSize: 13)),
                       const SizedBox(height: 2),
-                      Text('${(p['price'] as int).kes} KES', style: TextStyle(
-                          color: sel ? Colors.white54 : kMuted,
-                          fontSize: 11)),
+                      Builder(builder: (_) {
+                        final mult = StorageService.getCurrentPriceMultiplier();
+                        final base = p['price'] as int;
+                        final actual = (base * mult).round();
+                        return Column(mainAxisSize: MainAxisSize.min, children: [
+                          if (mult != 1.0)
+                            Text('${base.kes}', style: TextStyle(
+                                color: sel ? Colors.white30 : kBorder,
+                                fontSize: 9,
+                                decoration: TextDecoration.lineThrough)),
+                          Text('${actual.kes} KES', style: TextStyle(
+                              color: sel ? Colors.white54 : kMuted,
+                              fontSize: 11)),
+                        ]);
+                      }),
                     ]),
                   ),
                 );
@@ -326,6 +386,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 onChanged: (v) => _phone = v),
+            const SizedBox(height: 12),
+            _TextField(ctrl: _emergencyCtrl,
+                label: 'Emergency Contact (optional)',
+                icon: Icons.emergency_rounded,
+                onChanged: (v) => setState(() => _emergencyContact = v)),
             const SizedBox(height: 12),
             // Deposit (refundable)
             TextFormField(

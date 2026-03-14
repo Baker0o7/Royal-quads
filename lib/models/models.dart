@@ -251,3 +251,97 @@ class Prebooking {
     mpesaRef: j['mpesaRef'] as String?,
     notes: j['notes'] as String?);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// New feature models
+// ─────────────────────────────────────────────────────────────────────────────
+
+class IncidentReport {
+  final int id;
+  final int? bookingId;
+  final String quadName;
+  final String customerName;
+  final String type;        // 'fall' | 'mechanical' | 'medical' | 'other'
+  final String description;
+  final DateTime date;
+  final String reportedBy;
+
+  const IncidentReport({
+    required this.id, this.bookingId,
+    required this.quadName, required this.customerName,
+    required this.type, required this.description,
+    required this.date, required this.reportedBy,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id, 'bookingId': bookingId, 'quadName': quadName,
+    'customerName': customerName, 'type': type,
+    'description': description, 'date': date.toIso8601String(),
+    'reportedBy': reportedBy,
+  };
+
+  factory IncidentReport.fromJson(Map<String, dynamic> j) => IncidentReport(
+    id: j['id'] as int,
+    bookingId: j['bookingId'] as int?,
+    quadName: (j['quadName'] as String?) ?? '',
+    customerName: (j['customerName'] as String?) ?? '',
+    type: (j['type'] as String?) ?? 'other',
+    description: (j['description'] as String?) ?? '',
+    date: DateTime.parse(j['date'] as String),
+    reportedBy: (j['reportedBy'] as String?) ?? '',
+  );
+}
+
+class LoyaltyAccount {
+  final String phone;
+  final int points;
+  final int totalEarned;
+  final int totalRides;
+
+  const LoyaltyAccount({
+    required this.phone, required this.points,
+    required this.totalEarned, required this.totalRides,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'phone': phone, 'points': points,
+    'totalEarned': totalEarned, 'totalRides': totalRides,
+  };
+
+  factory LoyaltyAccount.fromJson(Map<String, dynamic> j) => LoyaltyAccount(
+    phone: j['phone'] as String,
+    points: (j['points'] as int?) ?? 0,
+    totalEarned: (j['totalEarned'] as int?) ?? 0,
+    totalRides: (j['totalRides'] as int?) ?? 0,
+  );
+}
+
+class DynamicPricingRule {
+  final int id;
+  final String label;     // 'morning', 'peak', 'sunset', 'offpeak'
+  final int startHour;    // 0-23
+  final int endHour;      // 0-23
+  final double multiplier;
+  final bool active;
+
+  const DynamicPricingRule({
+    required this.id, required this.label,
+    required this.startHour, required this.endHour,
+    required this.multiplier, required this.active,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id, 'label': label, 'startHour': startHour,
+    'endHour': endHour, 'multiplier': multiplier, 'active': active,
+  };
+
+  factory DynamicPricingRule.fromJson(Map<String, dynamic> j) =>
+      DynamicPricingRule(
+        id: j['id'] as int,
+        label: (j['label'] as String?) ?? '',
+        startHour: (j['startHour'] as int?) ?? 0,
+        endHour: (j['endHour'] as int?) ?? 23,
+        multiplier: ((j['multiplier'] as num?) ?? 1.0).toDouble(),
+        active: (j['active'] as bool?) ?? true,
+      );
+}

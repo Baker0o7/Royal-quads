@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../screens/theme_picker_screen.dart';
 import '../theme/theme.dart';
 
 class MainShell extends StatelessWidget {
@@ -90,7 +91,8 @@ class MainShell extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  context.read<AppProvider>().toggleTheme();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const ThemePickerScreen()));
                 },
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
@@ -98,18 +100,11 @@ class MainShell extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        context.watch<AppProvider>().themeMode == ThemeMode.dark
-                            ? Icons.light_mode_rounded
-                            : Icons.dark_mode_rounded,
-                        color: Colors.white38,
-                        size: 22,
-                      ),
+                      Icon(Icons.palette_rounded,
+                        color: Colors.white38, size: 22),
                       const SizedBox(height: 2),
-                      Text(
-                        context.watch<AppProvider>().themeMode == ThemeMode.dark
-                            ? 'Light' : 'Dark',
-                        style: const TextStyle(
+                      const Text('Theme',
+                        style: TextStyle(
                             color: Colors.white24, fontSize: 9)),
                     ],
                   ),

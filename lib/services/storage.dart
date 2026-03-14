@@ -292,4 +292,152 @@ class StorageService {
     }
     return {'total': total, 'today': today, 'week': week, 'month': month, 'overtime': overtime};
   }
+
+  // ── Incidents ─────────────────────────────────────────────────────────────
+  static List<IncidentReport> getIncidents() =>
+      _loadList('rq:incidents').map(IncidentReport.fromJson).toList();
+  static Future<void> saveIncidents(List<IncidentReport> items) =>
+      _saveList('rq:incidents', items.map((i) => i.toJson()).toList());
+  static Future<IncidentReport> addIncident({
+    required String quadName, required String customerName,
+    required String type, required String description,
+    required String reportedBy, int? bookingId,
+  }) async {
+    final items = getIncidents();
+    final inc = IncidentReport(
+      id: _nextId('rq:incident_seq'), bookingId: bookingId,
+      quadName: quadName, customerName: customerName,
+      type: type, description: description,
+      date: DateTime.now(), reportedBy: reportedBy,
+    );
+    await saveIncidents([...items, inc]);
+    return inc;
+  }
+
+  // ── Loyalty ───────────────────────────────────────────────────────────────
+  static Map<String, dynamic> _loadMap(String key) {
+    try {
+      final raw = _p.getString(key);
+      if (raw == null) return {};
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) { return {}; }
+  }
+
+  static Future<void> _saveMap(String key, Map<String, dynamic> data) =>
+      _p.setString(key, jsonEncode(data));
+
+  static LoyaltyAccount? getLoyaltyAccount(String phone) {
+    final all = _loadMap('rq:loyalty');
+    if (!all.containsKey(phone)) return null;
+    return LoyaltyAccount.fromJson(
+        Map<String, dynamic>.from(all[phone] as Map));
+  }
+
+  static Future<void> addLoyaltyPoints(String phone, int pointsEarned) async {
+    final all = _loadMap('rq:loyalty');
+    LoyaltyAccount acc;
+    if (all.containsKey(phone)) {
+      final existing = LoyaltyAccount.fromJson(
+          Map<String, dynamic>.from(all[phone] as Map));
+      acc = LoyaltyAccount(
+        phone: phone,
+        points: existing.points + pointsEarned,
+        totalEarned: existing.totalEarned + pointsEarned,
+        totalRides: existing.totalRides + 1,
+      );
+    } else {
+      acc = LoyaltyAccount(
+        phone: phone, points: pointsEarned,
+        totalEarned: pointsEarned, totalRides: 1,
+      );
+    }
+    all[phone] = acc.toJson();
+    await _saveMap('rq:loyalty', all);
+  }
+
+  static Future<void> redeemLoyaltyPoints(String phone, int points) async {
+    final all = _loadMap('rq:loyalty');
+    if (!all.containsKey(phone)) return;
+    final existing = LoyaltyAccount.fromJson(
+        Map<String, dynamic>.from(all[phone] as Map));
+    final updated = LoyaltyAccount(
+      phone: phone,
+      points: (existing.points - points).clamp(0, 999999),
+      totalEarned: existing.totalEarned,
+      totalRides: existing.totalRides,
+    );
+    all[phone] = updated.toJson();
+    await _saveMap('rq:loyalty', all);
+  }
+
+  // ── Dynamic pricing ───────────────────────────────────────────────────────
+  static List<DynamicPricingRule> getDynamicPricing() {
+    final items = _loadList('rq:dynamic_pricing');
+    if (items.isEmpty) {
+      final defaults = [
+        DynamicPricingRule(id:1, label:'Early Bird',  startHour:6,  endHour:9,  multiplier:0.9, active:false),
+        DynamicPricingRule(id:2, label:'Morning',     startHour:9,  endHour:12, multiplier:1.0, active:true),
+        DynamicPricingRule(id:3, label:'Afternoon',   startHour:12, endHour:16, multiplier:1.0, active:true),
+        DynamicPricingRule(id:4, label:'Peak (4-6pm)',startHour:16, endHour:18, multiplier:1.25,active:false),
+        DynamicPricingRule(id:5, label:'Sunset',      startHour:18, endHour:20, multiplier:1.5, active:false),
+        DynamicPricingRule(id:6, label:'Off-peak',    startHour:20, endHour:6,  multiplier:0.8, active:false),
+      ];
+      _saveList('rq:dynamic_pricing',
+          defaults.map((r) => r.toJson()).toList());
+      return defaults;
+    }
+    return items.map(DynamicPricingRule.fromJson).toList();
+  }
+
+  static Future<void> saveDynamicPricing(List<DynamicPricingRule> rules) =>
+      _saveList('rq:dynamic_pricing', rules.map((r) => r.toJson()).toList());
+
+  static double getCurrentPriceMultiplier() {
+    final hour = DateTime.now().hour;
+    final rules = getDynamicPricing();
+    for (final r in rules) {
+      if (!r.active) continue;
+      if (r.startHour <= r.endHour) {
+        if (hour >= r.startHour && hour < r.endHour) return r.multiplier;
+      } else {
+        // Overnight rule (e.g. 20-6)
+        if (hour >= r.startHour || hour < r.endHour) return r.multiplier;
+      }
+    }
+    return 1.0;
+  }
+
+  // ── Waiver expiry ─────────────────────────────────────────────────────────
+  static bool hasValidWaiver(String phone) {
+    final raw = _p.getString('rq:waiver:$phone');
+    if (raw == null) return false;
+    final signed = DateTime.tryParse(raw);
+    if (signed == null) return false;
+    return DateTime.now().difference(signed).inDays < 30;
+  }
+
+  static Future<void> recordWaiverSigned(String phone) =>
+      _p.setString('rq:waiver:$phone', DateTime.now().toIso8601String());
+
+  // ── Emergency contacts ────────────────────────────────────────────────────
+  static String? getEmergencyContact(String phone) =>
+      _p.getString('rq:emergency:$phone');
+  static Future<void> setEmergencyContact(String phone, String contact) =>
+      _p.setString('rq:emergency:$phone', contact);
+
+  // ── Shift clock-in/out ────────────────────────────────────────────────────
+  static bool isStaffClockedIn(int staffId) =>
+      _p.getBool('rq:shift:$staffId') ?? false;
+  static Future<void> clockIn(int staffId) async {
+    await _p.setBool('rq:shift:$staffId', true);
+    await _p.setString('rq:shift_start:$staffId',
+        DateTime.now().toIso8601String());
+  }
+  static Future<void> clockOut(int staffId) async {
+    await _p.setBool('rq:shift:$staffId', false);
+  }
+  static DateTime? getShiftStart(int staffId) {
+    final raw = _p.getString('rq:shift_start:$staffId');
+    return raw != null ? DateTime.tryParse(raw) : null;
+  }
 }

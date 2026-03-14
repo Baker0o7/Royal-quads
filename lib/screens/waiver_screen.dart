@@ -69,6 +69,12 @@ class _WaiverScreenState extends State<WaiverScreen>
       await Future.delayed(const Duration(milliseconds: 900));
       if (!mounted) return;
       showToast(context, 'Waiver signed ✅');
+      // Record waiver signature for 30-day expiry
+      final booking = StorageService.getBookingById(widget.bookingId);
+      if (booking != null) {
+        await StorageService.recordWaiverSigned(booking.customerPhone);
+      }
+      if (!mounted) return;
       context.go('/ticket/${widget.bookingId}');
     } catch (e) {
       if (mounted) showToast(context, '$e', error: true);
