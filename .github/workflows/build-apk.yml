@@ -61,12 +61,25 @@ jobs:
           python3 scripts/inject-icons.py
 
       - name: Build release APK
-        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
+        run: |
+          # Run Gradle directly — bypass flutter's post-build APK path validator
+          # which fails when the APK lands at Gradle's standard path instead of
+          # Flutter's expected build/app/outputs/flutter-apk/ path.
+          cd android && ./gradlew assembleRelease \
+            -Pflutter.sdk="$FLUTTER_ROOT" \
+            -Pflutter.buildMode=release \
+            -Pflutter.targetPlatform=android-arm,android-arm64,android-x64 \
+            --no-daemon --stacktrace 2>&1
+          cd ..
 
       - name: Stage APK
         run: |
           mkdir -p output
-          APK=$(find build -name "app-release.apk" | head -1)
+          APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "APK not found under build/, searching entire workspace..."
+            APK=$(find . -name "app-release.apk" 2>/dev/null | grep -v ".git" | head -1)
+          fi
           echo "Found APK: $APK"
           cp "$APK" output/Royal-Quads.apk
           echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
