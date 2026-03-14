@@ -10,9 +10,6 @@ pluginManagement {
         return path
     }()
 
-    // Expose SDK path to other scripts
-    settings.ext.flutterSdkPath = flutterSdkPath
-
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
@@ -21,23 +18,14 @@ pluginManagement {
         gradlePluginPortal()
     }
 
-    // Explicit versions for AGP and Kotlin so Gradle can resolve them
-    // from google() / gradlePluginPortal() without needing a buildscript block.
-    // NOTE: dev.flutter.flutter-gradle-plugin is intentionally NOT listed here —
-    // it must be resolved exclusively through the includeBuild above, not from
-    // Maven. Listing it here with a version causes Gradle to attempt Maven
-    // resolution first and breaks the engine classpath setup.
+    // Explicit versions so Gradle can resolve these from google() without the
+    // includeBuild needing to re-export them. Required by Gradle 7.6+ plugin system.
     plugins {
-        id "com.android.application"      version "8.3.2"
-        id "com.android.library"          version "8.3.2"
+        id "com.android.application" version "8.3.2"
+        id "com.android.library"     version "8.3.2"
+        id "org.jetbrains.kotlin.android" version "1.9.24"
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
     }
-}
-
-// Top-level plugins block: dev.flutter.flutter-gradle-plugin is resolved
-// here (outside pluginManagement.plugins) so Gradle routes it through the
-// pluginManagement includeBuild only — no version needed or wanted.
-plugins {
-    id "dev.flutter.flutter-gradle-plugin" apply false
 }
 
 include ":app"
