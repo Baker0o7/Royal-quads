@@ -18,36 +18,45 @@ class ThemePickerScreen extends StatelessWidget {
         SliverAppBar(
           expandedHeight: 130,
           pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: prov.appTheme.gradient,
-              ),
-              child: SafeArea(child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    const Text('Appearance',
-                        style: TextStyle(
-                            fontFamily: 'Playfair',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white)),
-                    const SizedBox(height: 4),
-                    Text('${prov.appTheme.emoji}  ${prov.appTheme.label}  •  '
-                        '${isDark ? "Dark" : "Light"} mode',
-                        style: const TextStyle(
-                            color: Colors.white54, fontSize: 13)),
-                  ],
-                ),
-              )),
-            ),
-          ),
+          automaticallyImplyLeading: false,
+          // Title shown only when collapsed
+          title: const Text('Appearance',
+              style: TextStyle(fontFamily: 'Playfair',
+                  fontSize: 17, color: Colors.white)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(gradient: prov.appTheme.gradient),
+              child: SafeArea(
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Appearance',
+                            style: TextStyle(
+                                fontFamily: 'Playfair',
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white)),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${prov.appTheme.emoji}  ${prov.appTheme.label}  •  '
+                          '${isDark ? "Dark" : "Light"} mode',
+                          style: const TextStyle(
+                              color: Colors.white54, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
 

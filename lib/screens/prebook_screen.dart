@@ -115,47 +115,16 @@ class _PrebookScreenState extends State<PrebookScreen>
           SliverAppBar(
             expandedHeight: 130, pinned: true, stretch: true,
             flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const [StretchMode.zoomBackground],
-              // No FlexibleSpaceBar title — avoids duplicate with background text
               background: Stack(fit: StackFit.expand, children: [
                 Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
                 Positioned(top: 0, left: 0, right: 0,
                   child: Container(height: 2,
                     decoration: const BoxDecoration(gradient: kGoldGradient))),
-                // Hero content sits in the LOWER half of the flexible area
-                // so it never overlaps the toolbar
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 44, height: 44,
-                          decoration: BoxDecoration(
-                            color: kAccent.withAlpha(20),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: kAccent.withAlpha(60)),
-                            boxShadow: [BoxShadow(
-                                color: kAccent.withAlpha(40), blurRadius: 14)],
-                          ),
-                          child: const Icon(Icons.calendar_month_rounded,
-                              color: kAccent2, size: 22)),
-                        const SizedBox(height: 6),
-                        const Text('Pre-Bookings', style: TextStyle(
-                            fontFamily: 'Playfair', fontSize: 18,
-                            fontWeight: FontWeight.w700, color: Colors.white)),
-                        const SizedBox(height: 1),
-                        const Text('SCHEDULE IN ADVANCE',
-                            style: TextStyle(color: Colors.white30,
-                                fontSize: 9, letterSpacing: 2.5)),
-                      ],
-                    ),
-                  ),
-                ),
               ]),
             ),
+            title: const Text('Pre-Bookings',
+                style: TextStyle(fontFamily: 'Playfair',
+                    fontSize: 17, color: Colors.white)),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(46),
               child: Container(
