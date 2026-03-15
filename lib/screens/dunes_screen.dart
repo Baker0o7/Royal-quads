@@ -171,14 +171,12 @@ class _DunesScreenState extends State<DunesScreen> {
                     key: _repaintKey,
                     child: FlutterMap(
                       mapController: _mapCtrl,
-                      options: const MapOptions(
-                        initialCenter: _location,
-                        initialZoom: _zoom,
+                      options: MapOptions(
+                        center: _location,
+                        zoom: _zoom,
                         minZoom: 10,
                         maxZoom: 18,
-                        interactionOptions: InteractionOptions(
-                          flags: InteractiveFlag.all,
-                        ),
+                        interactiveFlags: InteractiveFlag.all,
                       ),
                       children: [
                         TileLayer(
@@ -247,15 +245,15 @@ class _DunesScreenState extends State<DunesScreen> {
                         _MapBtn(
                           icon: Icons.add_rounded,
                           onTap: () => _mapCtrl.move(
-                              _mapCtrl.camera.center,
-                              _mapCtrl.camera.zoom + 1),
+                              _mapCtrl.center,
+                              _mapCtrl.zoom + 1),
                         ),
                         const SizedBox(height: 6),
                         _MapBtn(
                           icon: Icons.remove_rounded,
                           onTap: () => _mapCtrl.move(
-                              _mapCtrl.camera.center,
-                              _mapCtrl.camera.zoom - 1),
+                              _mapCtrl.center,
+                              _mapCtrl.zoom - 1),
                         ),
                         const SizedBox(height: 6),
                         _MapBtn(
