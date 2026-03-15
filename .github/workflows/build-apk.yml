@@ -12,14 +12,17 @@ jobs:
       contents: write
 
     steps:
+      # ── Checkout ──────────────────────────────────────────────────────────
       - uses: actions/checkout@v4
 
+      # ── Java 17 ───────────────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
+      # ── Flutter 3.27.4 (pinned) ───────────────────────────────────────────
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -27,13 +30,17 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Write local.properties & create debug keystore
+      # ── Android build prerequisites ───────────────────────────────────────
+      - name: Prepare Android build environment
         run: |
+          # Write local.properties
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
-          cat android/local.properties
+
+          # Ensure gradlew is executable
           chmod +x android/gradlew
 
+          # Create debug keystore for release signing
           mkdir -p "$HOME/.android"
           keytool -genkeypair \
             -keystore "$HOME/.android/debug.keystore" \
@@ -43,33 +50,51 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
 
+          echo "local.properties:"
+          cat android/local.properties
+
+      # ── Dart dependencies ─────────────────────────────────────────────────
       - name: Flutter pub get
         run: flutter pub get
 
+      # ── App icon injection ────────────────────────────────────────────────
       - name: Inject app icons
         run: |
           pip install Pillow --quiet
           python3 scripts/inject-icons.py
 
+      # ── Build APK ─────────────────────────────────────────────────────────
+      # flutter build apk exits 1 when it can't find the APK at its expected
+      # path, even though Gradle built it successfully.  We capture the exit
+      # code with "|| BUILD_FAILED=1", then check if the file actually exists
+      # — if it does, the build succeeded and we carry on.
       - name: Build release APK
         run: |
+          BUILD_FAILED=0
           flutter build apk \
             --release \
             --no-tree-shake-icons \
-            --android-skip-build-dependency-validation
+            --android-skip-build-dependency-validation \
+            || BUILD_FAILED=1
 
-      - name: Stage APK
-        run: |
-          mkdir -p output
-          # flutter build apk outputs here in 3.27.4
-          APK="build/app/outputs/flutter-apk/app-release.apk"
-          if [ ! -f "$APK" ]; then
-            # fallback: search entire build tree
-            APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
+          echo "flutter exit code: $BUILD_FAILED"
+
+          # Locate the APK regardless of which path flutter put it in
+          APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: APK not found — build genuinely failed"
+            exit 1
           fi
-          echo "APK: $APK  (size: $(du -sh "$APK" 2>/dev/null | cut -f1))"
-          cp "$APK" output/Royal-Quads.apk
 
+          echo "APK located: $APK"
+          echo "APK size: $(du -sh "$APK" | cut -f1)"
+
+          mkdir -p output
+          cp "$APK" output/Royal-Quads.apk
+          echo "Staged to output/Royal-Quads.apk"
+
+      # ── Upload artifact ───────────────────────────────────────────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -77,6 +102,7 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
+      # ── GitHub Release ────────────────────────────────────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -87,24 +113,28 @@ jobs:
 
             Android APK -- install directly on any Android device.
 
-            > **Before installing:** Settings > Apps > Special app access > Install unknown apps > Allow
+            > **Before installing:**
+            > Settings > Apps > Special app access > Install unknown apps > Allow
 
-            ### What is in this build
-            - 6 colour themes (Desert Gold, Ocean Breeze, Forest Night, Midnight Purple, Crimson Sunset, Slate Pro)
-            - Dark / Light mode toggle
-            - Interactive offline map of Mambrui Sand Dunes (save for no-internet use)
-            - OTP verification on sign-up
-            - End-of-Day PDF report, dynamic pricing, loyalty points
-            - Peak hours heatmap, quad utilisation charts
-            - Incident reporting, emergency contacts
-            - Animated splash + onboarding, confetti ride complete screen
-            - Booking ticket with QR code, PDF receipt with gold design
-            - Live ride timer, M-Pesa capture, WhatsApp confirmation
+            ### Features in this build
+            - 6 colour themes: Desert Gold, Ocean Breeze, Forest Night, Midnight Purple, Crimson Sunset, Slate Pro
+            - Dark / Light mode per theme, persisted across restarts
+            - Interactive map of Mambrui Sand Dunes with offline save
+            - OTP verification on account sign-up
+            - End-of-Day PDF report, dynamic pricing rules, loyalty points
+            - Peak hours heatmap, quad utilisation charts, customer insights
+            - Incident log, emergency contacts, waiver expiry tracking
+            - Animated splash + 3-slide onboarding
+            - Confetti ride-complete screen with animated KES counter
+            - Booking ticket with QR code + live countdown
+            - PDF receipt with gold design, WhatsApp share
+            - Live ride timer, overtime billing, M-Pesa capture
+            - Admin: fleet management, history, charts, promo codes
 
-            ### Install
+            ### How to install
             1. Download **Royal-Quads.apk** below
-            2. Open on your Android phone and tap **Install**
-            3. If blocked: Settings > Security > Install unknown apps > Allow
+            2. Open the file on your Android phone -- tap **Install**
+            3. If prompted: Settings > Security > Install unknown apps > Allow
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
