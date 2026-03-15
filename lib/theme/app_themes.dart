@@ -39,7 +39,7 @@ extension AppThemeX on AppTheme {
   }[this]!;
 
   String get description => const {
-    AppTheme.materialYou:    'Adapts to your wallpaper (Android 12+)',
+    AppTheme.materialYou:    'Neutral adaptive palette — harmonises with any theme',
     AppTheme.desertGold:     'Warm sand and gold — the classic Royal look',
     AppTheme.oceanBreeze:    'Cool coastal blue tones',
     AppTheme.forestNight:    'Natural forest greens',
