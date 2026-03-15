@@ -73,8 +73,9 @@ jobs:
           flutter build apk \
             --release \
             --no-tree-shake-icons \
-            --android-skip-build-dependency-validation \
-            || true
+            --android-skip-build-dependency-validation
+          echo "=== build/app/outputs tree ==="
+          find build/app/outputs -type f 2>/dev/null || echo "outputs dir missing"
 
       - name: Find and stage APK
         run: |

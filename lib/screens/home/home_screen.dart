@@ -250,9 +250,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                    color: kRed.withAlpha(40),
+                    color: kRed.withAlpha(35),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: kRed.withAlpha(80))),
+                    border: Border.all(color: kRed.withAlpha(70), width: 1.5)),
                 child: Row(children: [
                   Container(width: 6, height: 6,
                       decoration: const BoxDecoration(
@@ -334,14 +334,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     decoration: BoxDecoration(
-                      color: sel ? kText : kCard,
+                      color: sel
+                          ? Theme.of(context).colorScheme.primary.withAlpha(200)
+                          : Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                          color: sel ? kAccent : kBorder,
-                          width: sel ? 2 : 1),
+                          color: sel
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).dividerColor,
+                          width: sel ? 2 : 1.5),
                       boxShadow: sel ? [
-                        BoxShadow(color: kAccent.withAlpha(30),
-                            blurRadius: 12, offset: const Offset(0, 4)),
+                        BoxShadow(
+                            color: Theme.of(context).colorScheme.primary
+                                .withAlpha(50),
+                            blurRadius: 14, offset: const Offset(0, 4)),
                       ] : kShadowSm,
                     ),
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -350,7 +356,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             color: kAccent, size: 14),
                       if (sel) const SizedBox(height: 2),
                       Text(p['label'] as String, style: TextStyle(
-                          color: sel ? kAccent2 : kText,
+                          color: sel
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w800, fontSize: 13)),
                       const SizedBox(height: 2),
                       Builder(builder: (_) {
@@ -993,15 +1001,17 @@ class _StartButton extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: ready
                 ? LinearGradient(colors: [
-                    kGreen,
-                    const Color(0xFF00A550),
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
                   ])
                 : null,
-            color: ready ? null : kBg2,
+            color: ready ? null
+                : Theme.of(context).dividerColor.withAlpha(100),
             borderRadius: BorderRadius.circular(16),
             boxShadow: ready
-                ? [BoxShadow(color: kGreen.withAlpha(60),
-                    blurRadius: 16, offset: const Offset(0, 6))]
+                ? [BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(70),
+                    blurRadius: 18, offset: const Offset(0, 6))]
                 : null,
           ),
           child: Material(
@@ -1051,12 +1061,15 @@ class _BookingStepper extends StatelessWidget {
   static const _steps = ['Quad', 'Duration', 'Details', 'Pay'];
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
+    return Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     decoration: BoxDecoration(
-      color: kSurface,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: kBorder),
+      border: Border.all(
+          color: Theme.of(context).dividerColor),
       boxShadow: kShadowSm,
     ),
     child: Column(children: [
@@ -1082,9 +1095,9 @@ class _BookingStepper extends StatelessWidget {
           width: 28, height: 28,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isDone ? kAccent : isActive ? kText : Colors.transparent,
+            color: isDone ? accent : isActive ? kText : Colors.transparent,
             border: Border.all(
-              color: isDone ? kAccent : isActive ? kText : kBorder,
+              color: isDone ? accent : isActive ? accent : kBorder,
               width: isActive ? 2 : 1.5,
             ),
             boxShadow: isActive ? [
@@ -1113,12 +1126,13 @@ class _BookingStepper extends StatelessWidget {
           style: TextStyle(
             fontSize: 9, fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
-            color: isDone ? kAccent : isActive ? kText : kMuted,
+            color: isDone ? accent : isActive ? kText : kMuted,
           ),
         ));
       })),
     ]),
   );
+  }
 }
 
 // ── Dune silhouette painter (home hero background) ────────────────────────────

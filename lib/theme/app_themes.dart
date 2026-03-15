@@ -90,6 +90,7 @@ extension AppThemeX on AppTheme {
 
 ThemeData buildLightTheme(AppTheme t) => ThemeData(
   useMaterial3: true,
+  cardColor: Colors.white,
   scaffoldBackgroundColor: const Color(0xFFF7F2EA),
   colorScheme: ColorScheme.light(
     primary: t.primary, secondary: t.primary2,
@@ -123,6 +124,7 @@ ThemeData buildLightTheme(AppTheme t) => ThemeData(
 
 ThemeData buildDarkTheme(AppTheme t) => ThemeData(
   useMaterial3: true,
+  cardColor: const Color(0xFF201C18),
   brightness: Brightness.dark,
   scaffoldBackgroundColor: const Color(0xFF0F0D0A),
   colorScheme: ColorScheme.dark(

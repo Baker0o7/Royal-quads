@@ -161,7 +161,7 @@ class _RoleCardState extends State<_RoleCard> {
       decoration: BoxDecoration(
         color: kCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: kBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: kShadowMd,
       ),
       child: Row(children: [
@@ -1090,7 +1090,9 @@ class _OtpBoxState extends State<_OtpBox> {
     duration: const Duration(milliseconds: 150),
     width: 46, height: 56,
     decoration: BoxDecoration(
-      color: _focused ? kAccent.withAlpha(10) : kCard,
+      color: _focused
+          ? kAccent.withAlpha(10)
+          : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(14),
       border: Border.all(
         color: _focused ? kAccent

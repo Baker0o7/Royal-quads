@@ -85,7 +85,6 @@ class _WaiverScreenState extends State<WaiverScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBg,
       body: Stack(children: [
         CustomScrollView(controller: _scroll, slivers: [
           // ── App Bar ──────────────────────────────────────────────────────

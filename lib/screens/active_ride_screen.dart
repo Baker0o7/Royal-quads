@@ -173,7 +173,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
               radius: 1.2,
               colors: _overtime
                   ? [const Color(0xFF2D0A0A), kHeroTo]
-                  : [const Color(0xFF0A1A2E), kHeroTo],
+                  : [kHeroFrom, kHeroTo],
             ),
           ),
         ),
@@ -480,7 +480,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-        color: kBg, borderRadius: BorderRadius.circular(24)),
+        color: Theme.of(context).scaffoldBackgroundColor, borderRadius: BorderRadius.circular(24)),
     padding: EdgeInsets.only(
       bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       top: 20, left: 20, right: 20,
@@ -671,7 +671,7 @@ class _ExtendSheetState extends State<_ExtendSheet> {
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-        color: kBg, borderRadius: BorderRadius.circular(24)),
+        color: Theme.of(context).scaffoldBackgroundColor, borderRadius: BorderRadius.circular(24)),
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
     child: Column(mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start, children: [

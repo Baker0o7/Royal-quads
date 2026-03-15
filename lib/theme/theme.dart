@@ -309,7 +309,8 @@ class PrimaryButton extends StatelessWidget {
       this.color, this.outlined = false});
   @override
   Widget build(BuildContext context) {
-    final bg = color ?? kText;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = color ?? (isDark ? const Color(0xFFF5EFE6) : kText);
     return SizedBox(
       width: double.infinity,
       child: GestureDetector(
@@ -500,4 +501,16 @@ extension DateFmt on DateTime {
       '${day.toString().padLeft(2,'0')}/${month.toString().padLeft(2,'0')}/$year';
   String get timeOnly =>
       '${hour.toString().padLeft(2,'0')}:${minute.toString().padLeft(2,'0')}';
+}
+
+// ── Theme-aware helpers ───────────────────────────────────────────────────────
+extension ThemeContextX on BuildContext {
+  Color get accent    => Theme.of(this).colorScheme.primary;
+  Color get accent2   => Theme.of(this).colorScheme.secondary;
+  bool  get isDark    => Theme.of(this).brightness == Brightness.dark;
+  Color get cardColor => isDark ? kDarkCard : kCard;
+  Color get surfColor => isDark ? kDarkBg2  : kSurface;
+  Color get textColor => isDark ? kDarkText : kText;
+  Color get mutedColor=> isDark ? kDarkMuted: kMuted;
+  Color get bordColor => isDark ? kDarkBorder: kBorder;
 }

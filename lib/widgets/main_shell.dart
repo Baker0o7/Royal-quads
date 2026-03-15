@@ -11,18 +11,18 @@ class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.child});
 
   static const _tabs = [
-    (path: '/',         icon: Icons.directions_bike_rounded,  label: 'Book'),
-    (path: '/profile',  icon: Icons.person_rounded,           label: 'Profile'),
-    (path: '/prebook',  icon: Icons.calendar_month_rounded,   label: 'Pre-book'),
-    (path: '/dunes',    icon: Icons.terrain_rounded,          label: 'Dunes'),
+    (path: '/',        icon: Icons.directions_bike_rounded, label: 'Book'),
+    (path: '/profile', icon: Icons.person_rounded,          label: 'Profile'),
+    (path: '/prebook', icon: Icons.calendar_month_rounded,  label: 'Pre-book'),
+    (path: '/dunes',   icon: Icons.terrain_rounded,         label: 'Dunes'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final loc      = GoRouterState.of(context).uri.toString();
-    final idx      = _tabs.indexWhere((t) => t.path == loc).clamp(0, 3);
-    final active   = context.watch<AppProvider>().active;
-    final liveCount = active.length;
+    final loc       = GoRouterState.of(context).uri.toString();
+    final idx       = _tabs.indexWhere((t) => t.path == loc).clamp(0, 3);
+    final liveCount = context.watch<AppProvider>().active.length;
+    final accent    = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       body: child,
@@ -30,69 +30,75 @@ class MainShell extends StatelessWidget {
         decoration: BoxDecoration(
           color: kHeroTo,
           boxShadow: [
-            BoxShadow(color: Colors.black.withAlpha(60),
-                blurRadius: 20, offset: const Offset(0, -4)),
+            BoxShadow(color: Colors.black.withAlpha(80),
+                blurRadius: 24, offset: const Offset(0, -1)),
           ],
+          border: Border(
+            top: BorderSide(color: Colors.white.withAlpha(10), width: 0.5),
+          ),
         ),
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 64,
-            child: Row(
-              children: [
+            height: 62,
+            child: Row(children: [
               ...List.generate(_tabs.length, (i) {
-                final t      = _tabs[i];
-                final isActive = i == idx;
+                final t         = _tabs[i];
+                final isActive  = i == idx;
                 final showBadge = i == 0 && liveCount > 0;
 
                 return Expanded(child: GestureDetector(
-                  onTap: () => context.go(t.path),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    context.go(t.path);
+                  },
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? kAccent.withAlpha(25)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Icon(t.icon,
-                              color: isActive ? kAccent : Colors.white38,
-                              size: 22),
+                      Stack(clipBehavior: Clip.none, children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? accent.withAlpha(28)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          // Live rides badge
-                          if (showBadge)
-                            Positioned(
-                              top: -2, right: -2,
-                              child: _LiveBadge(liveCount),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(t.label, style: TextStyle(
-                          color: isActive ? kAccent : Colors.white30,
-                          fontSize: 10,
+                          child: Icon(t.icon,
+                              color: isActive ? accent : Colors.white38,
+                              size: 21),
+                        ),
+                        if (showBadge)
+                          Positioned(top: -3, right: -3,
+                              child: _LiveBadge(liveCount)),
+                      ]),
+                      const SizedBox(height: 3),
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 220),
+                        style: TextStyle(
+                          color: isActive
+                              ? accent : Colors.white.withAlpha(60),
+                          fontSize: 9.5,
                           fontWeight: isActive
-                              ? FontWeight.w700 : FontWeight.w400)),
+                              ? FontWeight.w700 : FontWeight.w400,
+                          fontFamily: 'DM Sans',
+                        ),
+                        child: Text(t.label),
+                      ),
                     ],
                   ),
                 ));
               }),
 
-              // Theme toggle
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const ThemePickerScreen()));
+                      builder: (_) => const ThemePickerScreen()));
                 },
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
@@ -100,22 +106,31 @@ class MainShell extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.palette_rounded,
-                        color: Colors.white38, size: 22),
-                      const SizedBox(height: 2),
-                      const Text('Theme',
-                        style: TextStyle(
-                            color: Colors.white24, fontSize: 9)),
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: accent.withAlpha(18),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: accent.withAlpha(40), width: 1),
+                        ),
+                        child: Icon(Icons.palette_outlined,
+                            color: accent.withAlpha(180), size: 15),
+                      ),
+                      const SizedBox(height: 3),
+                      Text('Theme',
+                          style: TextStyle(
+                              color: accent.withAlpha(100),
+                              fontSize: 9, fontFamily: 'DM Sans')),
                     ],
                   ),
                 ),
               ),
-            ],
+            ]),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -140,29 +155,25 @@ class _LiveBadgeState extends State<_LiveBadge>
         CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
-  @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  @override void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) => ScaleTransition(
     scale: _anim,
     child: Container(
-      width: 17, height: 17,
+      width: 16, height: 16,
       decoration: BoxDecoration(
         color: kRed,
         shape: BoxShape.circle,
         border: Border.all(color: kHeroTo, width: 1.5),
-        boxShadow: [BoxShadow(
-            color: kRed.withAlpha(80), blurRadius: 6)],
+        boxShadow: [BoxShadow(color: kRed.withAlpha(90), blurRadius: 6)],
       ),
-      child: Center(
-        child: Text(
-          widget.count > 9 ? '9+' : '${widget.count}',
-          style: const TextStyle(
-              color: Colors.white, fontSize: 8,
-              fontWeight: FontWeight.w900),
-        ),
-      ),
+      child: Center(child: Text(
+        widget.count > 9 ? '9+' : '${widget.count}',
+        style: const TextStyle(
+            color: Colors.white, fontSize: 7.5,
+            fontWeight: FontWeight.w900),
+      )),
     ),
   );
 }

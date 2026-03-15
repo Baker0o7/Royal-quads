@@ -363,9 +363,14 @@ class _ReceiptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     decoration: BoxDecoration(
-      color: kCard,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: kShadowMd,
+      color: Theme.of(context).cardColor,
+      borderRadius: BorderRadius.circular(24),
+      boxShadow: [
+        BoxShadow(color: kAccent.withAlpha(18),
+            blurRadius: 40, offset: const Offset(0, 12)),
+        BoxShadow(color: Colors.black.withAlpha(16),
+            blurRadius: 12, offset: const Offset(0, 3)),
+      ],
     ),
     child: Column(children: [
       // Card header

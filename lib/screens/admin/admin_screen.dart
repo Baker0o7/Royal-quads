@@ -50,7 +50,6 @@ class _AdminScreenState extends State<AdminScreen> {
     );
 
     return Scaffold(
-      backgroundColor: kBg,
       appBar: AppBar(
         title: const Text('Admin Dashboard',
             style: TextStyle(fontFamily: 'Playfair',
@@ -643,14 +642,17 @@ class _RevPill extends StatelessWidget {
   const _RevPill(this.label, this.value, this.color);
   @override
   Widget build(BuildContext context) => Expanded(child: Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: color.withAlpha(20),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: color.withAlpha(40))),
+      color: color.withAlpha(18),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: color.withAlpha(35), width: 1.5),
+      boxShadow: [BoxShadow(color: color.withAlpha(25),
+          blurRadius: 8, offset: const Offset(0, 2))]),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(value, style: TextStyle(
-          color: color, fontWeight: FontWeight.w800, fontSize: 13)),
+          color: color, fontWeight: FontWeight.w800, fontSize: 14)),
+      const SizedBox(height: 1),
       Text(label, style: const TextStyle(
           color: Colors.white38, fontSize: 10)),
     ]),
@@ -665,19 +667,25 @@ class _StatCard extends StatelessWidget {
       {required this.sub});
   @override
   Widget build(BuildContext context) => AppCard(
+    shadows: [
+      BoxShadow(color: color.withAlpha(20),
+          blurRadius: 16, offset: const Offset(0, 4))
+    ],
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Container(
-          width: 32, height: 32,
+          width: 36, height: 36,
           decoration: BoxDecoration(
-              color: color.withAlpha(18),
-              borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: color, size: 17)),
+              color: color.withAlpha(20),
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: [BoxShadow(color: color.withAlpha(40),
+                  blurRadius: 8)]),
+          child: Icon(icon, color: color, size: 18)),
         const Spacer(),
       ]),
-      const SizedBox(height: 6),
+      const SizedBox(height: 8),
       Text(value, style: const TextStyle(
-          fontFamily: 'Playfair', fontSize: 19,
+          fontFamily: 'Playfair', fontSize: 22,
           fontWeight: FontWeight.w900)),
       Text('$label · $sub',
           style: const TextStyle(color: kMuted, fontSize: 10)),

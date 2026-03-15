@@ -734,9 +734,9 @@ class _IncidentsCard extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: kRed.withAlpha(8),
+              color: kRed.withAlpha(10),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: kRed.withAlpha(25)),
+              border: Border.all(color: kRed.withAlpha(30), width: 1.5),
             ),
             child: Row(children: [
               Container(
