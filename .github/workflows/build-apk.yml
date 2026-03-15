@@ -70,29 +70,48 @@ jobs:
       # — if it does, the build succeeded and we carry on.
       - name: Build release APK
         run: |
-          BUILD_FAILED=0
           flutter build apk \
             --release \
             --no-tree-shake-icons \
             --android-skip-build-dependency-validation \
-            || BUILD_FAILED=1
+            || true
 
-          echo "flutter exit code: $BUILD_FAILED"
+      - name: Find and stage APK
+        run: |
+          echo "=== Searching for APK ==="
+          find . -name "app-release.apk" 2>/dev/null | grep -v ".git" || echo "not found by find"
 
-          # Locate the APK regardless of which path flutter put it in
-          APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
+          echo "=== Standard paths ==="
+          ls -la build/app/outputs/flutter-apk/  2>/dev/null || echo "flutter-apk/ missing"
+          ls -la build/app/outputs/apk/release/   2>/dev/null || echo "apk/release/ missing"
+
+          # Try every known path
+          APK=""
+          for PATH_TRY in \
+            "build/app/outputs/flutter-apk/app-release.apk" \
+            "build/app/outputs/apk/release/app-release.apk" \
+            "build/app/outputs/apk/app-release.apk"
+          do
+            if [ -f "$PATH_TRY" ]; then
+              APK="$PATH_TRY"
+              echo "Found at: $APK"
+              break
+            fi
+          done
+
+          # Last resort: find anywhere
+          if [ -z "$APK" ]; then
+            APK=$(find . -name "app-release.apk" 2>/dev/null | grep -v ".git" | head -1)
+          fi
 
           if [ -z "$APK" ]; then
-            echo "ERROR: APK not found — build genuinely failed"
+            echo "ERROR: APK not found anywhere — build failed"
             exit 1
           fi
 
-          echo "APK located: $APK"
-          echo "APK size: $(du -sh "$APK" | cut -f1)"
-
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "Staged to output/Royal-Quads.apk"
+          echo "Staged: output/Royal-Quads.apk  ($(du -sh output/Royal-Quads.apk | cut -f1))"
 
       # ── Upload artifact ───────────────────────────────────────────────────
       - name: Upload artifact
