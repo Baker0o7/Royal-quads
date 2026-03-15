@@ -10,47 +10,62 @@ class ThemePickerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prov  = context.watch<AppProvider>();
-    final isDark = prov.themeMode == ThemeMode.dark;
+    final prov   = context.watch<AppProvider>();
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: CustomScrollView(slivers: [
+
+        // ── Header ───────────────────────────────────────────────────────
         SliverAppBar(
           expandedHeight: 130,
           pinned: true,
           automaticallyImplyLeading: false,
-          // Title shown only when collapsed
-          title: const Text('Appearance',
-              style: TextStyle(fontFamily: 'Playfair',
-                  fontSize: 17, color: Colors.white)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          title: const Text('Appearance',
+              style: TextStyle(fontFamily: 'Playfair',
+                  fontSize: 17, color: Colors.white)),
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
-              decoration: BoxDecoration(gradient: prov.appTheme.gradient),
+              decoration: BoxDecoration(
+                gradient: prov.appTheme.isDynamic
+                    ? prov.appTheme.gradientFrom(scheme.primary)
+                    : prov.appTheme.gradient,
+              ),
               child: SafeArea(
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Appearance',
-                            style: TextStyle(
-                                fontFamily: 'Playfair',
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white)),
+                        Text('Appearance', style: const TextStyle(
+                            fontFamily: 'Playfair', fontSize: 26,
+                            fontWeight: FontWeight.w700, color: Colors.white)),
                         const SizedBox(height: 4),
-                        Text(
-                          '${prov.appTheme.emoji}  ${prov.appTheme.label}  •  '
-                          '${isDark ? "Dark" : "Light"} mode',
-                          style: const TextStyle(
+                        Row(children: [
+                          Text(prov.appTheme.emoji,
+                              style: const TextStyle(fontSize: 13)),
+                          const SizedBox(width: 6),
+                          Text(prov.appTheme.label,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 13,
+                                  fontWeight: FontWeight.w500)),
+                          const Text('  ·  ',
+                              style: TextStyle(color: Colors.white30)),
+                          Text(switch (prov.themeMode) {
+                            ThemeMode.dark   => 'Dark',
+                            ThemeMode.light  => 'Light',
+                            ThemeMode.system => 'System',
+                          }, style: const TextStyle(
                               color: Colors.white54, fontSize: 13)),
+                        ]),
                       ],
                     ),
                   ),
@@ -64,43 +79,43 @@ class ThemePickerScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           sliver: SliverList(delegate: SliverChildListDelegate([
 
-            // ── Dark / Light toggle ──────────────────────────────────────
-            _Section('Mode'),
+            // ── Mode toggle ────────────────────────────────────────────────
+            _SectionLabel('Mode'),
             const SizedBox(height: 10),
-            Row(children: [
-              _ModeCard(
-                icon: Icons.dark_mode_rounded,
-                label: 'Dark',
-                selected: isDark,
-                onTap: () {
+            _ModeRow(current: prov.themeMode,
+                onSelect: (m) {
                   HapticFeedback.selectionClick();
-                  if (!isDark) prov.toggleTheme();
-                },
-              ),
-              const SizedBox(width: 12),
-              _ModeCard(
-                icon: Icons.light_mode_rounded,
-                label: 'Light',
-                selected: !isDark,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  if (isDark) prov.toggleTheme();
-                },
-              ),
-            ]),
+                  prov.setThemeMode(m);
+                }),
 
             const SizedBox(height: 28),
 
-            // ── Theme cards ───────────────────────────────────────────────
-            _Section('Theme Colour'),
+            // ── Material You (pinned at top) ───────────────────────────────
+            _SectionLabel('Dynamic Colour'),
+            const SizedBox(height: 10),
+            _MaterialYouCard(
+              selected: prov.appTheme == AppTheme.materialYou,
+              scheme: scheme,
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                prov.setTheme(AppTheme.materialYou);
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── Static themes ──────────────────────────────────────────────
+            _SectionLabel('Colour Themes'),
             const SizedBox(height: 10),
 
-            ...AppTheme.values.map((t) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+            ...AppTheme.values
+                .where((t) => t != AppTheme.materialYou)
+                .map((t) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
               child: _ThemeCard(
                 theme: t,
                 selected: prov.appTheme == t,
-                isDark: isDark,
+                scheme: scheme,
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   prov.setTheme(t);
@@ -108,16 +123,12 @@ class ThemePickerScreen extends StatelessWidget {
               ),
             )),
 
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                'Theme changes apply instantly',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface
-                        .withAlpha(80),
-                    fontSize: 12),
-              ),
-            ),
+            const SizedBox(height: 12),
+            Center(child: Text(
+              'Theme changes apply instantly everywhere',
+              style: TextStyle(
+                  color: scheme.onSurface.withAlpha(70), fontSize: 11),
+            )),
             const SizedBox(height: 32),
           ])),
         ),
@@ -126,66 +137,77 @@ class ThemePickerScreen extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  final String label;
-  const _Section(this.label);
+// ── Section label ─────────────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
   @override
   Widget build(BuildContext context) => Text(
-    label.toUpperCase(),
+    text.toUpperCase(),
     style: TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w800,
-      letterSpacing: 1.5,
-      color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
-    ),
+        fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.8,
+        color: Theme.of(context).colorScheme.onSurface.withAlpha(100)),
   );
 }
 
-class _ModeCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ModeCard({required this.icon, required this.label,
-      required this.selected, required this.onTap});
+// ── Three-way mode row ────────────────────────────────────────────────────────
+class _ModeRow extends StatelessWidget {
+  final ThemeMode current;
+  final ValueChanged<ThemeMode> onSelect;
+  const _ModeRow({required this.current, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
+    return Row(children: [
+      _ModeBtn(Icons.dark_mode_rounded,  'Dark',   ThemeMode.dark,   current, onSelect),
+      const SizedBox(width: 10),
+      _ModeBtn(Icons.light_mode_rounded, 'Light',  ThemeMode.light,  current, onSelect),
+      const SizedBox(width: 10),
+      _ModeBtn(Icons.phone_android_rounded, 'System', ThemeMode.system, current, onSelect),
+    ]);
+  }
+}
+
+class _ModeBtn extends StatelessWidget {
+  final IconData icon; final String label;
+  final ThemeMode mode, current;
+  final ValueChanged<ThemeMode> onSelect;
+  const _ModeBtn(this.icon, this.label, this.mode, this.current, this.onSelect);
+
+  @override
+  Widget build(BuildContext context) {
+    final sel    = mode == current;
     final accent = Theme.of(context).colorScheme.primary;
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () => onSelect(mode),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: selected
-                ? accent.withAlpha(20)
-                : Theme.of(context).cardColor,
+            color: sel ? accent.withAlpha(18) : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? accent : Colors.transparent,
-              width: 2,
-            ),
-            boxShadow: selected ? [
-              BoxShadow(color: accent.withAlpha(40),
-                  blurRadius: 16, offset: const Offset(0, 4)),
+                color: sel ? accent : Theme.of(context).dividerColor,
+                width: sel ? 2 : 1.5),
+            boxShadow: sel ? [
+              BoxShadow(color: accent.withAlpha(45),
+                  blurRadius: 14, offset: const Offset(0, 3)),
             ] : kShadowSm,
           ),
-          child: Column(children: [
-            Icon(icon, color: selected ? accent : kMuted, size: 28),
-            const SizedBox(height: 8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, color: sel ? accent : kMuted, size: 22),
+            const SizedBox(height: 6),
             Text(label, style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: selected ? accent : kMuted)),
-            if (selected) ...[
+                fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
+                fontSize: 12,
+                color: sel ? accent : kMuted)),
+            if (sel) ...[
               const SizedBox(height: 4),
-              Container(
-                width: 6, height: 6,
-                decoration: BoxDecoration(
-                    color: accent, shape: BoxShape.circle),
-              ),
+              Container(width: 5, height: 5,
+                  decoration: BoxDecoration(
+                      color: accent, shape: BoxShape.circle)),
             ],
           ]),
         ),
@@ -194,88 +216,174 @@ class _ModeCard extends StatelessWidget {
   }
 }
 
-class _ThemeCard extends StatelessWidget {
-  final AppTheme theme;
-  final bool selected, isDark;
+// ── Material You card ─────────────────────────────────────────────────────────
+class _MaterialYouCard extends StatelessWidget {
+  final bool selected;
+  final ColorScheme scheme;
   final VoidCallback onTap;
-  const _ThemeCard({required this.theme, required this.selected,
-      required this.isDark, required this.onTap});
+  const _MaterialYouCard({required this.selected, required this.scheme,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDark ? kDarkCard : kCard;
-    final border = isDark ? kDarkBorder : kBorder;
-
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? theme.primary.withAlpha(15) : bg,
+          color: selected
+              ? scheme.primaryContainer.withAlpha(180)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? theme.primary : border,
-            width: selected ? 2 : 1.5,
-          ),
+              color: selected ? scheme.primary : Theme.of(context).dividerColor,
+              width: selected ? 2 : 1.5),
           boxShadow: selected ? [
-            BoxShadow(color: theme.primary.withAlpha(40),
+            BoxShadow(color: scheme.primary.withAlpha(50),
                 blurRadius: 20, offset: const Offset(0, 4)),
           ] : kShadowSm,
         ),
         child: Row(children: [
-          // Colour swatch
+          // Animated colour orbs showing the dynamic palette
+          Stack(children: [
+            // Background orb cluster
+            SizedBox(width: 60, height: 60, child: Stack(children: [
+              Positioned(left: 0, top: 0,
+                  child: _Orb(scheme.primary, 32)),
+              Positioned(right: 0, top: 0,
+                  child: _Orb(scheme.secondary, 26)),
+              Positioned(left: 10, bottom: 0,
+                  child: _Orb(scheme.tertiary, 22)),
+            ])),
+          ]),
+          const SizedBox(width: 16),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                const Text('✨', style: TextStyle(fontSize: 15)),
+                const SizedBox(width: 6),
+                Text('Material You',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+              const SizedBox(height: 4),
+              Text('Colours from your wallpaper',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withAlpha(120),
+                      fontSize: 12)),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withAlpha(120),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('Android 12+',
+                    style: TextStyle(
+                        color: scheme.onPrimaryContainer,
+                        fontSize: 10, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          )),
+          _CheckCircle(selected: selected, color: scheme.primary),
+        ]),
+      ),
+    );
+  }
+}
+
+class _Orb extends StatelessWidget {
+  final Color color; final double size;
+  const _Orb(this.color, this.size);
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size, height: size,
+    decoration: BoxDecoration(
+      color: color,
+      shape: BoxShape.circle,
+      boxShadow: [BoxShadow(
+          color: color.withAlpha(80), blurRadius: size * 0.4)],
+    ),
+  );
+}
+
+// ── Static theme card ─────────────────────────────────────────────────────────
+class _ThemeCard extends StatelessWidget {
+  final AppTheme theme;
+  final bool selected;
+  final ColorScheme scheme;
+  final VoidCallback onTap;
+  const _ThemeCard({required this.theme, required this.selected,
+      required this.scheme, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final seed = theme.seedColor;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected
+              ? seed.withAlpha(12)
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: selected ? seed : Theme.of(context).dividerColor,
+              width: selected ? 2 : 1.5),
+          boxShadow: selected ? [
+            BoxShadow(color: seed.withAlpha(45),
+                blurRadius: 16, offset: const Offset(0, 3)),
+          ] : kShadowXs,
+        ),
+        child: Row(children: [
+          // Colour preview swatch
           Container(
-            width: 56, height: 56,
+            width: 52, height: 52,
             decoration: BoxDecoration(
               gradient: theme.gradient,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: theme.primary.withAlpha(60), width: 1.5),
+                  color: seed.withAlpha(60), width: 1.5),
             ),
-            child: Center(
-              child: Text(theme.emoji,
-                  style: const TextStyle(fontSize: 24)),
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          // Label + accent strip
+            child: Center(child: Text(theme.emoji,
+                style: const TextStyle(fontSize: 22)))),
+          const SizedBox(width: 14),
+          // Info
           Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(theme.label, style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w700, fontSize: 15,
                   color: Theme.of(context).colorScheme.onSurface)),
+              const SizedBox(height: 3),
+              Text(theme.description, style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface
+                      .withAlpha(100),
+                  fontSize: 11),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 6),
+              // Colour swatches
               Row(children: [
-                _Swatch(theme.primary2),
+                _Swatch(seed),
                 const SizedBox(width: 4),
-                _Swatch(theme.primary),
+                _Swatch(Color.lerp(seed, Colors.white, 0.4)!),
+                const SizedBox(width: 4),
+                _Swatch(Color.lerp(seed, Colors.black, 0.5)!),
                 const SizedBox(width: 4),
                 _Swatch(theme.heroBg),
               ]),
             ],
           )),
-
-          // Selected indicator
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 26, height: 26,
-            decoration: BoxDecoration(
-              color: selected ? theme.primary : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? theme.primary : border,
-                width: 2,
-              ),
-            ),
-            child: selected
-                ? const Icon(Icons.check_rounded,
-                    color: Colors.white, size: 14)
-                : null,
-          ),
+          const SizedBox(width: 8),
+          _CheckCircle(selected: selected, color: seed),
         ]),
       ),
     );
@@ -287,11 +395,35 @@ class _Swatch extends StatelessWidget {
   const _Swatch(this.color);
   @override
   Widget build(BuildContext context) => Container(
-    width: 18, height: 18,
+    width: 14, height: 14,
     decoration: BoxDecoration(
       color: color,
       shape: BoxShape.circle,
-      border: Border.all(color: Colors.white.withAlpha(30), width: 1),
+      border: Border.all(
+          color: Colors.white.withAlpha(30), width: 0.5),
     ),
+  );
+}
+
+class _CheckCircle extends StatelessWidget {
+  final bool selected; final Color color;
+  const _CheckCircle({required this.selected, required this.color});
+  @override
+  Widget build(BuildContext context) => AnimatedContainer(
+    duration: const Duration(milliseconds: 200),
+    width: 24, height: 24,
+    decoration: BoxDecoration(
+      color: selected ? color : Colors.transparent,
+      shape: BoxShape.circle,
+      border: Border.all(
+          color: selected ? color : Theme.of(context).dividerColor,
+          width: 2),
+      boxShadow: selected ? [
+        BoxShadow(color: color.withAlpha(60), blurRadius: 6),
+      ] : null,
+    ),
+    child: selected
+        ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+        : null,
   );
 }

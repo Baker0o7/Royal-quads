@@ -25,11 +25,15 @@ class AppProvider extends ChangeNotifier {
 
   void initTheme() {
     final saved = StorageService.getThemeName();
-    // saved format: 'dark:desertGold' or legacy 'dark'/'light'
+    // saved format: 'dark:desertGold' | 'light:oceanBreeze' | 'system:materialYou'
     if (saved.contains(':')) {
       final parts = saved.split(':');
-      _themeMode = parts[0] == 'light' ? ThemeMode.light : ThemeMode.dark;
-      _appTheme  = AppThemeX.fromId(parts[1]);
+      _themeMode = switch (parts[0]) {
+        'light'  => ThemeMode.light,
+        'system' => ThemeMode.system,
+        _        => ThemeMode.dark,
+      };
+      _appTheme = AppThemeX.fromId(parts[1]);
     } else {
       _themeMode = saved == 'light' ? ThemeMode.light : ThemeMode.dark;
       _appTheme  = AppTheme.desertGold;
@@ -43,15 +47,28 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _saveTheme();
+    notifyListeners();
+  }
+
   void toggleTheme() {
-    _themeMode = _themeMode == ThemeMode.dark
-        ? ThemeMode.light : ThemeMode.dark;
+    _themeMode = switch (_themeMode) {
+      ThemeMode.dark   => ThemeMode.light,
+      ThemeMode.light  => ThemeMode.system,
+      ThemeMode.system => ThemeMode.dark,
+    };
     _saveTheme();
     notifyListeners();
   }
 
   void _saveTheme() {
-    final mode = _themeMode == ThemeMode.light ? 'light' : 'dark';
+    final mode = switch (_themeMode) {
+      ThemeMode.light  => 'light',
+      ThemeMode.system => 'system',
+      _                => 'dark',
+    };
     StorageService.setThemeName('$mode:${_appTheme.id}');
   }
 
