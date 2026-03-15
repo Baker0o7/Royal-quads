@@ -27,9 +27,6 @@ jobs:
           channel: stable
           cache: true
 
-      # Write local.properties right after Flutter is on PATH.
-      # settings.gradle also reads FLUTTER_ROOT env var as fallback,
-      # but flutter build apk writes it too — belt AND suspenders.
       - name: Write local.properties & create debug keystore
         run: |
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
@@ -45,12 +42,6 @@ jobs:
             -storepass android -keypass android \
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
-          echo "SHA-1 (add to GCP Console for Google Sign-In):"
-          keytool -list -v \
-            -keystore "$HOME/.android/debug.keystore" \
-            -alias androiddebugkey \
-            -storepass android -keypass android \
-            | grep "SHA1:"
 
       - name: Flutter pub get
         run: flutter pub get
@@ -62,27 +53,22 @@ jobs:
 
       - name: Build release APK
         run: |
-          # Run Gradle directly — bypass flutter's post-build APK path validator
-          # which fails when the APK lands at Gradle's standard path instead of
-          # Flutter's expected build/app/outputs/flutter-apk/ path.
-          cd android && ./gradlew assembleRelease \
-            -Pflutter.sdk="$FLUTTER_ROOT" \
-            -Pflutter.buildMode=release \
-            -Pflutter.targetPlatform=android-arm,android-arm64,android-x64 \
-            --no-daemon --stacktrace 2>&1
-          cd ..
+          flutter build apk \
+            --release \
+            --no-tree-shake-icons \
+            --android-skip-build-dependency-validation
 
       - name: Stage APK
         run: |
           mkdir -p output
-          APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
-          if [ -z "$APK" ]; then
-            echo "APK not found under build/, searching entire workspace..."
-            APK=$(find . -name "app-release.apk" 2>/dev/null | grep -v ".git" | head -1)
+          # flutter build apk outputs here in 3.27.4
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          if [ ! -f "$APK" ]; then
+            # fallback: search entire build tree
+            APK=$(find build -name "app-release.apk" 2>/dev/null | head -1)
           fi
-          echo "Found APK: $APK"
+          echo "APK: $APK  (size: $(du -sh "$APK" 2>/dev/null | cut -f1))"
           cp "$APK" output/Royal-Quads.apk
-          echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -101,31 +87,24 @@ jobs:
 
             Android APK -- install directly on any Android device.
 
-            > **Before installing:** Settings > Apps > Special app access > Install unknown apps > Allow for your file manager
+            > **Before installing:** Settings > Apps > Special app access > Install unknown apps > Allow
 
             ### What is in this build
-            - Animated splash screen + first-launch onboarding (3 slides)
-            - Booking ticket screen with live countdown + scan-to-verify QR code
-            - Ride complete screen: confetti, animated KES counter, WhatsApp share
-            - Dark / Light mode toggle (persisted across restarts)
-            - Mambrui Dunes location tab: painted map, directions, operating hours
-            - Admin: 30-day revenue line chart + revenue-by-quad pie chart
-            - Redesigned PDF receipt: gold gradient bars, total banner
-            - Phone + password auth only (Google Sign-In removed)
-            - Haptic feedback on all key interactions
+            - 6 colour themes (Desert Gold, Ocean Breeze, Forest Night, Midnight Purple, Crimson Sunset, Slate Pro)
+            - Dark / Light mode toggle
+            - Interactive offline map of Mambrui Sand Dunes (save for no-internet use)
+            - OTP verification on sign-up
+            - End-of-Day PDF report, dynamic pricing, loyalty points
+            - Peak hours heatmap, quad utilisation charts
+            - Incident reporting, emergency contacts
+            - Animated splash + onboarding, confetti ride complete screen
+            - Booking ticket with QR code, PDF receipt with gold design
+            - Live ride timer, M-Pesa capture, WhatsApp confirmation
 
-            ### Core features
-            - Live ride timer + overtime at 100 KES/min
-            - M-Pesa till number copy + confirmation code capture
-            - Security deposit tracking with one-tap return
-            - Pre-bookings, waiver flow, admin dashboard
-            - CSV export, fleet management, promo codes
-
-            ### Install steps
+            ### Install
             1. Download **Royal-Quads.apk** below
-            2. Open on your Android phone -- tap Install
+            2. Open on your Android phone and tap **Install**
             3. If blocked: Settings > Security > Install unknown apps > Allow
-
           files: output/Royal-Quads.apk
           draft: false
           prerelease: false
