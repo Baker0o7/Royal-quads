@@ -89,7 +89,11 @@ class _DunesScreenState extends State<DunesScreen> {
   Widget build(BuildContext context) => Scaffold(
     body: CustomScrollView(slivers: [
       SliverAppBar(
-        expandedHeight: 140, pinned: true,
+        expandedHeight: 160,
+        pinned: true,
+        // No title or leading — they overlap the hero content
+        // The back button and screen title are embedded in the hero
+        automaticallyImplyLeading: false,
         flexibleSpace: FlexibleSpaceBar(
           background: Stack(fit: StackFit.expand, children: [
             Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
@@ -97,11 +101,32 @@ class _DunesScreenState extends State<DunesScreen> {
             Positioned(top: 0, left: 0, right: 0,
               child: Container(height: 2,
                   decoration: const BoxDecoration(gradient: kGoldGradient))),
+            // Content pushed below status bar + toolbar so nothing overlaps
             SafeArea(child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(16, 0, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 4),
+                  // Back row
+                  Row(children: [
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 36, height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.arrow_back_rounded,
+                            color: Colors.white, size: 18)),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Location', style: TextStyle(
+                        color: Colors.white54, fontSize: 13,
+                        letterSpacing: 0.3)),
+                  ]),
+                  const SizedBox(height: 10),
                   const Text('Mambrui Sand Dunes',
                       style: TextStyle(fontFamily: 'Playfair', fontSize: 22,
                           fontWeight: FontWeight.w700, color: Colors.white)),
@@ -114,15 +139,10 @@ class _DunesScreenState extends State<DunesScreen> {
                     const Text('Kilifi County, Kenya',
                         style: TextStyle(color: Colors.white54, fontSize: 11)),
                   ]),
-                ]),
+                ],
+              ),
             )),
           ]),
-        ),
-        title: const Text('Location',
-            style: TextStyle(fontFamily: 'Playfair', color: Colors.white)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
 

@@ -192,57 +192,52 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           flexibleSpace: FlexibleSpaceBar(
             collapseMode: CollapseMode.parallax,
             stretchModes: const [StretchMode.zoomBackground],
+            // No FlexibleSpaceBar title — SliverAppBar title handles collapsed state
             background: Stack(fit: StackFit.expand, children: [
               Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
-              // Dune silhouette painter
-              Positioned.fill(child: CustomPaint(
-                painter: _DunesHeroPainter(),
-              )),
-              // Subtle logo watermark
+              Positioned.fill(child: CustomPaint(painter: _DunesHeroPainter())),
               Positioned.fill(child: Opacity(
                 opacity: 0.06,
                 child: Image.asset('assets/images/logo.png', fit: BoxFit.cover))),
-              // Gold shimmer line at top
               Positioned(top: 0, left: 0, right: 0,
                 child: Container(height: 2,
-                  decoration: const BoxDecoration(gradient: kGoldGradient))),
-              SafeArea(child: Center(child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(
-                          color: kAccent.withAlpha(60), blurRadius: 20)]),
-                    child: CircleAvatar(radius: 34,
-                        backgroundImage: const AssetImage('assets/images/logo.png'),
-                        backgroundColor: Colors.transparent)),
-                  const SizedBox(height: 10),
-                  const Text('Royal Quad Bikes', style: TextStyle(
-                      fontFamily: 'Playfair', fontSize: 22,
-                      fontWeight: FontWeight.w700, color: Colors.white,
-                      shadows: [Shadow(color: Colors.black54, blurRadius: 8)])),
-                  const SizedBox(height: 2),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Container(width: 4, height: 4,
-                        decoration: const BoxDecoration(
-                            color: kAccent, shape: BoxShape.circle)),
-                    const SizedBox(width: 6),
-                    const Text('MAMBRUI SAND DUNES · KENYA',
-                        style: TextStyle(color: Colors.white38,
-                            fontSize: 10, letterSpacing: 2)),
-                    const SizedBox(width: 6),
-                    Container(width: 4, height: 4,
-                        decoration: const BoxDecoration(
-                            color: kAccent, shape: BoxShape.circle)),
-                  ]),
-                ],
-              ))),
+                    decoration: const BoxDecoration(gradient: kGoldGradient))),
+              // Hero content — visible only in expanded state
+              Positioned.fill(
+                child: SafeArea(child: Center(child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(
+                            color: kAccent.withAlpha(60), blurRadius: 20)]),
+                      child: CircleAvatar(radius: 34,
+                          backgroundImage: const AssetImage('assets/images/logo.png'),
+                          backgroundColor: Colors.transparent)),
+                    const SizedBox(height: 10),
+                    const Text('Royal Quad Bikes', style: TextStyle(
+                        fontFamily: 'Playfair', fontSize: 22,
+                        fontWeight: FontWeight.w700, color: Colors.white,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 8)])),
+                    const SizedBox(height: 2),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(width: 4, height: 4,
+                          decoration: const BoxDecoration(
+                              color: kAccent, shape: BoxShape.circle)),
+                      const SizedBox(width: 6),
+                      const Text('MAMBRUI SAND DUNES · KENYA',
+                          style: TextStyle(color: Colors.white38,
+                              fontSize: 10, letterSpacing: 2)),
+                      const SizedBox(width: 6),
+                      Container(width: 4, height: 4,
+                          decoration: const BoxDecoration(
+                              color: kAccent, shape: BoxShape.circle)),
+                    ]),
+                  ],
+                ))),
+              ),
             ]),
-            title: const Text('Royal Quad Bikes',
-                style: TextStyle(
-                    fontFamily: 'Playfair', fontSize: 17, color: Colors.white)),
           ),
           actions: [
             if (provider.active.isNotEmpty)
