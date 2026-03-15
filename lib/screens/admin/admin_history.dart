@@ -60,7 +60,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
 
       // ── Search + filter bar ──────────────────────────────────────────
       Container(
-        color: kBg,
+        color: Theme.of(context).scaffoldBackgroundColor,
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
         child: Column(children: [
           Row(children: [
@@ -175,7 +175,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
       // ── Stats strip ──────────────────────────────────────────────────
       if (filtered || history.isNotEmpty)
         Container(
-          color: kBg,
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -520,7 +520,7 @@ class _ExportSheetState extends State<_ExportSheet> {
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: kBg, borderRadius: BorderRadius.circular(24)),
+          color: Theme.of(context).scaffoldBackgroundColor, borderRadius: BorderRadius.circular(24)),
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Column(mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -572,7 +572,7 @@ class _ExportSheetState extends State<_ExportSheet> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: kBg2, borderRadius: BorderRadius.circular(12),
+            color: Theme.of(context).dividerColor.withAlpha(60), borderRadius: BorderRadius.circular(12),
             border: Border.all(color: kBorder),
           ),
           child: Wrap(

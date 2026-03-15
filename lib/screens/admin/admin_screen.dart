@@ -216,7 +216,7 @@ class AdminOverviewTab extends StatelessWidget {
           GridView.count(
             crossAxisCount: 2, shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.7,
+            crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.3,
             children: [
               _StatCard('Live Rides', '${prov.active.length}',
                   Icons.local_fire_department_rounded, kRed,
@@ -266,13 +266,15 @@ class AdminOverviewTab extends StatelessWidget {
           SectionHeading('Live Rides', icon: Icons.local_fire_department_rounded,
             trailing: prov.active.isEmpty ? null : _LiveBadge(prov.active.length)),
           if (prov.active.isEmpty)
-            AppCard(child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 28),
+            AppCard(child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 28),
               child: Column(children: [
-                Text('🏜️', style: TextStyle(fontSize: 36)),
-                SizedBox(height: 8),
+                const Text('🏜️', style: TextStyle(fontSize: 36)),
+                const SizedBox(height: 8),
                 Text('No active rides right now',
-                    style: TextStyle(color: kMuted)),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface
+                            .withAlpha(100))),
               ]),
             ))
           else
@@ -416,7 +418,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
                                 ? [kAccent, kAccent2]
                                 : [kAccent.withAlpha(80), kAccent.withAlpha(120)],
                           ),
-                          color: isEmpty ? kBg2 : null,
+                          color: isEmpty ? Theme.of(context).dividerColor.withAlpha(60) : null,
                           borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(6)),
                           boxShadow: isToday && !isEmpty ? [
@@ -666,31 +668,62 @@ class _StatCard extends StatelessWidget {
   const _StatCard(this.label, this.value, this.icon, this.color,
       {required this.sub});
   @override
-  Widget build(BuildContext context) => AppCard(
-    shadows: [
-      BoxShadow(color: color.withAlpha(20),
-          blurRadius: 16, offset: const Offset(0, 4))
-    ],
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Container(
-          width: 36, height: 36,
-          decoration: BoxDecoration(
-              color: color.withAlpha(20),
-              borderRadius: BorderRadius.circular(11),
-              boxShadow: [BoxShadow(color: color.withAlpha(40),
-                  blurRadius: 8)]),
-          child: Icon(icon, color: color, size: 18)),
-        const Spacer(),
-      ]),
-      const SizedBox(height: 8),
-      Text(value, style: const TextStyle(
-          fontFamily: 'Playfair', fontSize: 22,
-          fontWeight: FontWeight.w900)),
-      Text('$label · $sub',
-          style: const TextStyle(color: kMuted, fontSize: 10)),
-    ]),
-  );
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textCol = isDark ? kDarkText : kText;
+    final mutedCol = isDark ? kDarkMuted : kMuted;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? kDarkCard : kCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: color.withAlpha(isDark ? 40 : 25), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: color.withAlpha(isDark ? 30 : 18),
+              blurRadius: 18, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withAlpha(isDark ? 30 : 6),
+              blurRadius: 6, offset: const Offset(0, 1)),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Icon with glow
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                color: color.withAlpha(isDark ? 28 : 18),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [BoxShadow(
+                    color: color.withAlpha(isDark ? 60 : 35),
+                    blurRadius: 10, spreadRadius: 0)],
+              ),
+              child: Icon(icon, color: color, size: 20)),
+            const SizedBox(height: 10),
+            // Value
+            Text(value, style: TextStyle(
+                fontFamily: 'Playfair', fontSize: 24,
+                fontWeight: FontWeight.w900, color: textCol)),
+            const SizedBox(height: 2),
+            // Label row
+            Row(children: [
+              Text(label, style: TextStyle(
+                  color: mutedCol, fontSize: 11,
+                  fontWeight: FontWeight.w500)),
+              Text(' · ', style: TextStyle(
+                  color: mutedCol.withAlpha(100), fontSize: 11)),
+              Text(sub, style: TextStyle(
+                  color: color.withAlpha(isDark ? 220 : 180),
+                  fontSize: 11, fontWeight: FontWeight.w600)),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ActionCard extends StatelessWidget {
@@ -809,7 +842,8 @@ class _QSSState extends State<_QuickStartSheet> {
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: kBg, borderRadius: BorderRadius.circular(24)),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(24)),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
         top: 16, left: 20, right: 20),
@@ -854,16 +888,21 @@ class _QSSState extends State<_QuickStartSheet> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: sel ? kText : kBg2,
+                color: sel
+                    ? Theme.of(context).colorScheme.primary.withAlpha(200)
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: sel ? kAccent : kBorder),
+                border: Border.all(
+                    color: sel
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).dividerColor),
               ),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(p['label'] as String, style: TextStyle(
                     fontWeight: FontWeight.w700, fontSize: 13,
-                    color: sel ? kAccent2 : kText)),
+                    color: sel ? Colors.white : Theme.of(context).colorScheme.onSurface)),
                 Text('${(p['price'] as int).kes} KES', style: TextStyle(
-                    fontSize: 10, color: sel ? Colors.white54 : kMuted)),
+                    fontSize: 10, color: sel ? Colors.white60 : kMuted)),
               ]),
             ),
           );
@@ -953,7 +992,8 @@ class _DRSState extends State<_DailyReportSheet> {
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: kBg, borderRadius: BorderRadius.circular(24)),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(24)),
       padding: const EdgeInsets.all(20),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Center(child: Container(width: 40, height: 4,
