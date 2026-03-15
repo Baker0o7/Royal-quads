@@ -140,10 +140,10 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
             // Summary stats
             pw.Container(
               padding: const pw.EdgeInsets.all(14),
-              decoration: const pw.BoxDecoration(
+              decoration: pw.BoxDecoration(
                 color: PdfColors.amber50,
-                borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
-                border: pw.BoxBorder(
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                border: const pw.Border(
                   left: pw.BorderSide(color: PdfColors.amber700, width: 3)),
               ),
               child: pw.Row(
