@@ -10,7 +10,7 @@ class AppProvider extends ChangeNotifier {
   List<Booking>  _history   = [];
   AppUser?       _user;
   bool           _loading    = false;
-  ThemeMode      _themeMode  = ThemeMode.dark;
+  ThemeMode      _themeMode  = ThemeMode.light;
   AppTheme       _appTheme   = AppTheme.desertGold;
 
   List<Quad>    get quads     => _quads;
@@ -31,11 +31,11 @@ class AppProvider extends ChangeNotifier {
       _themeMode = switch (parts[0]) {
         'light'  => ThemeMode.light,
         'system' => ThemeMode.system,
-        _        => ThemeMode.dark,
+        _        => ThemeMode.light,
       };
       _appTheme = AppThemeX.fromId(parts[1]);
     } else {
-      _themeMode = saved == 'light' ? ThemeMode.light : ThemeMode.dark;
+      _themeMode = saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
       _appTheme  = AppTheme.desertGold;
     }
     notifyListeners();
