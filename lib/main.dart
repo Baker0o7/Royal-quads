@@ -39,7 +39,7 @@ class RoyalQuadApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prov    = context.watch<AppProvider>();
-    final variant = prov.appTheme;
+    final variant = prov.resolvedTheme;
 
     return MaterialApp.router(
       title: 'Royal Quad Bikes',

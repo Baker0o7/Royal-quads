@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
@@ -12,6 +13,7 @@ class AppProvider extends ChangeNotifier {
   bool           _loading    = false;
   ThemeMode      _themeMode  = ThemeMode.light;
   AppTheme       _appTheme   = AppTheme.desertGold;
+  Timer?         _scheduleTimer;
 
   List<Quad>    get quads     => _quads;
   List<Booking> get active    => _active;
@@ -23,9 +25,14 @@ class AppProvider extends ChangeNotifier {
 
   void _set(VoidCallback fn) { fn(); notifyListeners(); }
 
+  @override
+  void dispose() {
+    _scheduleTimer?.cancel();
+    super.dispose();
+  }
+
   void initTheme() {
     final saved = StorageService.getThemeName();
-    // saved format: 'dark:desertGold' | 'light:oceanBreeze' | 'system:materialYou'
     if (saved.contains(':')) {
       final parts = saved.split(':');
       _themeMode = switch (parts[0]) {
@@ -38,11 +45,44 @@ class AppProvider extends ChangeNotifier {
       _themeMode = saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
       _appTheme  = AppTheme.desertGold;
     }
+    _applyScheduleIfNeeded();
     notifyListeners();
   }
 
+  // Called whenever setTheme() changes to/from dynamicAuto
+  void _applyScheduleIfNeeded() {
+    _scheduleTimer?.cancel();
+    _scheduleTimer = null;
+
+    if (!_appTheme.isAutoSchedule) return;
+
+    // Apply immediately
+    _applySchedule();
+
+    // Then tick every 60 seconds to catch hour transitions
+    _scheduleTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      if (_appTheme.isAutoSchedule) _applySchedule();
+    });
+  }
+
+  void _applySchedule() {
+    final sched = AppThemeX.scheduleForNow();
+    _themeMode = sched.mode;
+    // Use the scheduled theme only for mode/colour, keep dynamicAuto as the
+    // stored variant so the picker still shows it as selected
+    // We resolve the actual visual theme in main.dart
+    notifyListeners();
+  }
+
+  // Resolved theme to actually render — if dynamicAuto, use the scheduled one
+  AppTheme get resolvedTheme =>
+      _appTheme.isAutoSchedule
+          ? AppThemeX.scheduleForNow().theme
+          : _appTheme;
+
   void setTheme(AppTheme theme) {
     _appTheme = theme;
+    _applyScheduleIfNeeded();
     _saveTheme();
     notifyListeners();
   }

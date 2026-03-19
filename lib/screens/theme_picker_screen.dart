@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -90,7 +91,20 @@ class ThemePickerScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
-            // ── Material You (pinned at top) ───────────────────────────────
+            // ── Auto (Time of Day) ────────────────────────────────────────
+            _SectionLabel('Smart'),
+            const SizedBox(height: 10),
+            _AutoThemeCard(
+              selected: prov.appTheme == AppTheme.dynamicAuto,
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                prov.setTheme(AppTheme.dynamicAuto);
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── Material You ───────────────────────────────────────────────
             _SectionLabel('Dynamic Colour'),
             const SizedBox(height: 10),
             _MaterialYouCard(
@@ -109,7 +123,8 @@ class ThemePickerScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             ...AppTheme.values
-                .where((t) => t != AppTheme.materialYou)
+                .where((t) => t != AppTheme.materialYou
+                           && t != AppTheme.dynamicAuto)
                 .map((t) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: _ThemeCard(
@@ -211,6 +226,183 @@ class _ModeBtn extends StatelessWidget {
             ],
           ]),
         ),
+      ),
+    );
+  }
+}
+
+
+// ── Auto (Time of Day) card ───────────────────────────────────────────────────
+class _AutoThemeCard extends StatefulWidget {
+  final bool selected;
+  final VoidCallback onTap;
+  const _AutoThemeCard({required this.selected, required this.onTap});
+  @override State<_AutoThemeCard> createState() => _AutoThemeCardState();
+}
+
+class _AutoThemeCardState extends State<_AutoThemeCard> {
+  late Timer _timer;
+  late DateTime _now;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+  @override void dispose() { _timer.cancel(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    final sched  = AppThemeX.scheduleForNow();
+    final isDark = sched.mode == ThemeMode.dark;
+    final seed   = sched.theme.seedColor;
+    final sel    = widget.selected;
+    final scheme = Theme.of(context).colorScheme;
+
+    // Build the 24-hour schedule slots for the visual
+    final slots = [
+      (h: 0,  label: '12am', theme: AppTheme.forestNight,   dark: true),
+      (h: 5,  label: '5am',  theme: AppTheme.crimsonSunset, dark: false),
+      (h: 7,  label: '7am',  theme: AppTheme.desertGold,    dark: false),
+      (h: 11, label: '11am', theme: AppTheme.oceanBreeze,   dark: false),
+      (h: 14, label: '2pm',  theme: AppTheme.slatePro,      dark: false),
+      (h: 17, label: '5pm',  theme: AppTheme.desertGold,    dark: true),
+      (h: 19, label: '7pm',  theme: AppTheme.crimsonSunset, dark: true),
+      (h: 21, label: '9pm',  theme: AppTheme.midnightPurple,dark: true),
+    ];
+
+    final currentHour = _now.hour;
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: sel ? seed.withAlpha(14) : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: sel ? seed : Theme.of(context).dividerColor,
+              width: sel ? 2 : 1.5),
+          boxShadow: sel ? [
+            BoxShadow(color: seed.withAlpha(50),
+                blurRadius: 20, offset: const Offset(0, 4)),
+          ] : kShadowSm,
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Header row
+          Row(children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF1A0D2E),
+                    const Color(0xFFEA580C),
+                    const Color(0xFFC9972A),
+                    const Color(0xFF0EA5E9),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Center(child: Text('🌓',
+                  style: TextStyle(fontSize: 22))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Auto – Time of Day', style: TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 15,
+                    color: Theme.of(context).colorScheme.onSurface)),
+                const SizedBox(height: 2),
+                Text('Theme & mode follow the clock',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface
+                            .withAlpha(110), fontSize: 11)),
+              ],
+            )),
+            _CheckCircle(selected: sel, color: seed),
+          ]),
+
+          const SizedBox(height: 14),
+
+          // Now pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: seed.withAlpha(18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: seed.withAlpha(40)),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(isDark ? Icons.nightlight_round : Icons.wb_sunny_rounded,
+                  color: seed, size: 13),
+              const SizedBox(width: 6),
+              Text(
+                'Now ${_now.hour.toString().padLeft(2,"0")}:${_now.minute.toString().padLeft(2,"0")}  ·  '
+                '${sched.theme.emoji} ${sched.theme.label}  ·  '
+                '${isDark ? "Dark" : "Light"}',
+                style: TextStyle(color: seed,
+                    fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ]),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 24h colour timeline
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              height: 28,
+              child: Row(
+                children: slots.asMap().entries.map((entry) {
+                  final i   = entry.key;
+                  final s   = entry.value;
+                  final nextH = i + 1 < slots.length
+                      ? slots[i + 1].h : 24;
+                  final span = nextH - s.h;
+                  final isNow = currentHour >= s.h &&
+                      currentHour < nextH;
+
+                  return Expanded(
+                    flex: span,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: s.theme.seedColor
+                            .withAlpha(s.dark ? 200 : 140),
+                        border: isNow
+                            ? Border.all(color: Colors.white, width: 1.5)
+                            : null,
+                      ),
+                      child: isNow
+                          ? Center(child: Container(
+                              width: 4, height: 4,
+                              decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle)))
+                          : Align(alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 2),
+                                child: Text(s.label,
+                                    style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 7,
+                                        fontWeight: FontWeight.w600)),
+                              )),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ]),
       ),
     );
   }
