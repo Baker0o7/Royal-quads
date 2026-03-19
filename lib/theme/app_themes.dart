@@ -71,8 +71,6 @@ extension RQBuildContextX on BuildContext {
 // ─────────────────────────────────────────────────────────────────────────────
 
 enum AppTheme {
-  dynamicAuto,    // Time-of-day automatic theme
-  materialYou,    // Follows Android 12+ wallpaper colour
   desertGold,
   oceanBreeze,
   forestNight,
@@ -85,8 +83,6 @@ extension AppThemeX on AppTheme {
   String get id => name;
 
   String get label => const {
-    AppTheme.dynamicAuto:    'Auto (Time of Day)',
-    AppTheme.materialYou:    'Material You',
     AppTheme.desertGold:     'Desert Gold',
     AppTheme.oceanBreeze:    'Ocean Breeze',
     AppTheme.forestNight:    'Forest Night',
@@ -96,8 +92,6 @@ extension AppThemeX on AppTheme {
   }[this]!;
 
   String get emoji => const {
-    AppTheme.dynamicAuto:    '🌓',
-    AppTheme.materialYou:    '✨',
     AppTheme.desertGold:     '🏜️',
     AppTheme.oceanBreeze:    '🌊',
     AppTheme.forestNight:    '🌲',
@@ -107,8 +101,6 @@ extension AppThemeX on AppTheme {
   }[this]!;
 
   String get description => const {
-    AppTheme.dynamicAuto:    'Auto-switches theme and mode with the time of day',
-    AppTheme.materialYou:    'Neutral adaptive palette — harmonises with any theme',
     AppTheme.desertGold:     'Warm sand and gold — the classic Royal look',
     AppTheme.oceanBreeze:    'Cool coastal blue tones',
     AppTheme.forestNight:    'Natural forest greens',
@@ -117,13 +109,9 @@ extension AppThemeX on AppTheme {
     AppTheme.slatePro:       'Neutral professional greys',
   }[this]!;
 
-  bool get isDynamic     => this == AppTheme.materialYou;
-  bool get isAutoSchedule => this == AppTheme.dynamicAuto;
 
   // Seed colour used for ColorScheme.fromSeed()
   Color get seedColor => const {
-    AppTheme.dynamicAuto:    Color(0xFFC9972A), // resolved at runtime
-    AppTheme.materialYou:    Color(0xFFC9972A), // fallback if no dynamic
     AppTheme.desertGold:     Color(0xFFC9972A),
     AppTheme.oceanBreeze:    Color(0xFF0EA5E9),
     AppTheme.forestNight:    Color(0xFF22C55E),
@@ -134,8 +122,6 @@ extension AppThemeX on AppTheme {
 
   // Hero gradient backgrounds for app bars / headers
   Color get heroBg => const {
-    AppTheme.dynamicAuto:    Color(0xFF1A1612),
-    AppTheme.materialYou:    Color(0xFF1A1612),
     AppTheme.desertGold:     Color(0xFF2D2318),
     AppTheme.oceanBreeze:    Color(0xFF0C1A2E),
     AppTheme.forestNight:    Color(0xFF0D1F14),
@@ -145,8 +131,6 @@ extension AppThemeX on AppTheme {
   }[this]!;
 
   Color get heroMid => const {
-    AppTheme.dynamicAuto:    Color(0xFF0D0B09),
-    AppTheme.materialYou:    Color(0xFF0D0B09),
     AppTheme.desertGold:     Color(0xFF1A1008),
     AppTheme.oceanBreeze:    Color(0xFF061020),
     AppTheme.forestNight:    Color(0xFF071309),
@@ -174,29 +158,6 @@ extension AppThemeX on AppTheme {
       AppTheme.values.firstWhere((t) => t.name == id,
           orElse: () => AppTheme.desertGold);
 
-  // ── Time-of-day schedule ─────────────────────────────────────────────────
-  // Returns the theme + mode to use for the current hour
-  static ({AppTheme theme, ThemeMode mode}) scheduleForNow() {
-    final h = DateTime.now().hour;
-    return switch (h) {
-      // 5–7 am  — Early sunrise: crimson dawn, light
-      >= 5 && < 7   => (theme: AppTheme.crimsonSunset, mode: ThemeMode.light),
-      // 7–11 am — Morning: desert gold, light
-      >= 7 && < 11  => (theme: AppTheme.desertGold,    mode: ThemeMode.light),
-      // 11–14   — Midday: ocean breeze, light
-      >= 11 && < 14 => (theme: AppTheme.oceanBreeze,   mode: ThemeMode.light),
-      // 14–17   — Afternoon: slate pro, light
-      >= 14 && < 17 => (theme: AppTheme.slatePro,      mode: ThemeMode.light),
-      // 17–19   — Golden hour: desert gold, dark
-      >= 17 && < 19 => (theme: AppTheme.desertGold,    mode: ThemeMode.dark),
-      // 19–21   — Sunset: crimson sunset, dark
-      >= 19 && < 21 => (theme: AppTheme.crimsonSunset, mode: ThemeMode.dark),
-      // 21–24   — Night: midnight purple, dark
-      >= 21         => (theme: AppTheme.midnightPurple, mode: ThemeMode.dark),
-      // 0–5 am  — Deep night: forest night, dark
-      _             => (theme: AppTheme.forestNight,   mode: ThemeMode.dark),
-    };
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -249,7 +210,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
       : Color.lerp(scheme.primary, Colors.black, 0.55)!;
 
   return ThemeData(
-    useMaterial3: true,
+    useMaterial3: false,
     brightness: dark ? Brightness.dark : Brightness.light,
     colorScheme: scheme,
     fontFamily: 'DM Sans',
