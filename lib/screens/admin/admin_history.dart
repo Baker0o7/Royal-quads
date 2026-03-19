@@ -539,7 +539,7 @@ class _ExportSheetState extends State<_ExportSheet> {
             child: const Icon(Icons.table_chart_rounded,
                 color: kGreen, size: 20)),
           const SizedBox(width: 12),
-          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Export to CSV', style: TextStyle(
                 fontFamily: 'Playfair', fontSize: 20,
                 fontWeight: FontWeight.w700)),
@@ -599,7 +599,7 @@ class _ExportSheetState extends State<_ExportSheet> {
         Row(children: [
           Icon(Icons.info_outline_rounded, size: 14, color: context.rq.muted),
           const SizedBox(width: 8),
-          const Expanded(child: Text(
+          Expanded(child: Text(
             'Copy → Open Google Sheets → paste in cell A1.',
             style: TextStyle(color: context.rq.muted, fontSize: 12),
           )),

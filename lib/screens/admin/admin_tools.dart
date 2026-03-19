@@ -524,7 +524,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
     'fuel'       => kGreen,
     'repair'     => kRed,
     'inspection' => kAccent,
-    _ => context.rq.muted,
+    _ => kMuted,
   };
 
   static IconData _typeIcon(String t) => switch (t) {

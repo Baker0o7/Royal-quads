@@ -501,7 +501,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
               borderRadius: BorderRadius.circular(12)),
           child: const Icon(Icons.flag_rounded, color: kGreen, size: 20)),
         const SizedBox(width: 12),
-        const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('End Ride', style: TextStyle(
               fontFamily: 'Playfair', fontSize: 20,
               fontWeight: FontWeight.w700)),

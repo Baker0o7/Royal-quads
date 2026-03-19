@@ -243,7 +243,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
           TextSpan(text: quad.name,
               style: const TextStyle(fontWeight: FontWeight.w700)),
           const TextSpan(text: ' from the fleet?\n'),
-          const TextSpan(text: 'This cannot be undone.',
+          TextSpan(text: 'This cannot be undone.',
               style: TextStyle(color: context.rq.muted, fontSize: 12)),
         ],
       )),

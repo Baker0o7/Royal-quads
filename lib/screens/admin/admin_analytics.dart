@@ -401,7 +401,7 @@ class _UtilisationChart extends StatelessWidget {
           );
         }),
         if (sorted.isEmpty)
-          const Center(child: Padding(
+          Center(child: Padding(
             padding: EdgeInsets.all(24),
             child: Text('No rides in the last 7 days',
                 style: TextStyle(color: context.rq.muted)),
@@ -567,7 +567,7 @@ class _RideStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (history.isEmpty) return AppCard(
-      child: const Center(child: Padding(
+      child: Center(child: Padding(
         padding: EdgeInsets.all(20),
         child: Text('No ride data yet', style: TextStyle(color: context.rq.muted)),
       )),
