@@ -109,7 +109,7 @@ class _PrebookScreenState extends State<PrebookScreen>
     final bookings = StorageService.getPrebookings().reversed.toList();
 
     return Scaffold(
-      backgroundColor: kBg,
+      
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
           SliverAppBar(
@@ -392,7 +392,7 @@ class _DateTimePicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kCard,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: kBorder),
           boxShadow: kShadowSm,
@@ -649,7 +649,7 @@ class _PrebookTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: kCard,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: kBorder),
         boxShadow: kShadowSm,

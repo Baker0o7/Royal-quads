@@ -159,7 +159,7 @@ class _RoleCardState extends State<_RoleCard> {
       transform: Matrix4.identity()..scale(_pressed ? 0.97 : 1.0),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: kCard,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: kShadowMd,

@@ -180,7 +180,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: kCard,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: kBorder),
             ),
@@ -319,7 +319,7 @@ class _HistoryTile extends StatelessWidget {
     onTap: () => context.push('/receipt/${booking.id}'),
     child: Container(
       decoration: BoxDecoration(
-        color: kCard,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: kBorder),
         boxShadow: kShadowSm,
@@ -554,7 +554,7 @@ class _ExportSheetState extends State<_ExportSheet> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: kCard, borderRadius: BorderRadius.circular(14),
+            color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(14),
             border: Border.all(color: kBorder),
           ),
           child: Row(children: [
@@ -584,7 +584,7 @@ class _ExportSheetState extends State<_ExportSheet> {
             ].map((col) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: kCard, borderRadius: BorderRadius.circular(6),
+                color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: kBorder),
               ),
               child: Text(col, style: const TextStyle(

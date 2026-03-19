@@ -107,10 +107,10 @@ class AppCard extends StatelessWidget {
       child: Container(
         padding: padding,
         decoration: BoxDecoration(
-          color: color ?? (isDark ? kDarkCard : kCard),
+          color: color ?? Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(radius),
           border: border ?? Border.all(
-              color: isDark ? kDarkBorder : kBorder),
+              color: Theme.of(context).dividerColor),
           boxShadow: shadows ?? kShadowSm,
         ),
         child: child,
@@ -148,10 +148,10 @@ class _TapCardState extends State<TapCard> {
         transformAlignment: Alignment.center,
         padding: widget.padding,
         decoration: BoxDecoration(
-          color: widget.color ?? (isDark ? kDarkCard : kCard),
+          color: widget.color ?? Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(widget.radius),
           border: widget.border ?? Border.all(
-              color: isDark ? kDarkBorder : kBorder),
+              color: Theme.of(context).dividerColor),
           boxShadow: _p ? kShadowXs : kShadowSm,
         ),
         child: widget.child,
@@ -243,8 +243,7 @@ class SectionHeading extends StatelessWidget {
   const SectionHeading(this.text, {super.key, this.icon, this.trailing});
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? kDarkText : kText;
+    final textColor = Theme.of(context).colorScheme.onSurface;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
@@ -337,8 +336,8 @@ class _ShimmerBoxState extends State<ShimmerBox>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base  = isDark ? kDarkBg2 : kBg2;
-    final shine = isDark ? kDarkCard : kBg;
+    final base  = Theme.of(context).dividerColor.withAlpha(isDark ? 80 : 100);
+    final shine = Theme.of(context).cardColor;
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, __) => Container(

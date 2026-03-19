@@ -141,8 +141,8 @@ extension AppThemeX on AppTheme {
 ColorScheme _lightScheme(Color seed) => ColorScheme.fromSeed(
   seedColor: seed,
   brightness: Brightness.light,
-  // Tighten surface to warm cream regardless of seed
-  surface: const Color(0xFFFCF9F4),
+  surface: const Color(0xFFF7F2EA),          // warm cream surface
+  surfaceContainerHighest: const Color(0xFFEEE6D2), // warm card
 );
 
 ColorScheme _darkScheme(Color seed) => ColorScheme.fromSeed(
@@ -167,18 +167,20 @@ ThemeData buildDarkTheme(AppTheme t, {ColorScheme? dynamicScheme}) {
 
 ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
   // Derive surface colours from the scheme for consistency
+  // Light: warm cream bg + white cards — matches the original Royal brand feel
+  // Dark: near-black bg + slightly elevated dark card
   final scaffoldBg = dark
-      ? Color.lerp(scheme.surface, Colors.black, 0.3)!
-      : Color.lerp(scheme.surface, Colors.white, 0.4)!;
+      ? Color.lerp(scheme.surface, Colors.black, 0.35)!
+      : const Color(0xFFF7F2EA);   // warm kBg cream
   final cardBg = dark
-      ? Color.lerp(scheme.surfaceContainerHighest, Colors.black, 0.1)!
+      ? Color.lerp(scheme.surfaceContainerHighest, Colors.black, 0.15)!
       : Colors.white;
   final dividerColor = dark
-      ? scheme.outlineVariant.withAlpha(80)
-      : scheme.outlineVariant.withAlpha(120);
+      ? scheme.outlineVariant.withAlpha(60)
+      : const Color(0xFFE2D8C6);   // warm kBorder
   final heroColor = dark
       ? Color.lerp(scheme.primary, Colors.black, 0.85)!
-      : Color.lerp(scheme.primary, Colors.black, 0.8)!;
+      : Color.lerp(scheme.primary, Colors.black, 0.82)!;
 
   return ThemeData(
     useMaterial3: true,

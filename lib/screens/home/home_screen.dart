@@ -939,10 +939,10 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(vertical: 32),
     child: Column(children: [
-      Icon(icon, size: 48, color: kBorder),
+      Icon(icon, size: 48, color: Theme.of(context).dividerColor),
       const SizedBox(height: 12),
       Text(title, style: const TextStyle(
-          fontWeight: FontWeight.w700, color: kMuted)),
+          fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface.withAlpha(120))),
       const SizedBox(height: 4),
       Text(sub, style: const TextStyle(color: kMuted, fontSize: 12)),
     ]),

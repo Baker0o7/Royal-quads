@@ -61,7 +61,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
     );
 
     return Scaffold(
-      backgroundColor: kBg,
+      
       body: CustomScrollView(slivers: [
         // ── App bar ────────────────────────────────────────────────────────
         SliverAppBar(
@@ -530,7 +530,7 @@ class _PerforatedDivider extends StatelessWidget {
     child: Row(children: [
       Container(width: 10, height: 20,
           decoration: const BoxDecoration(
-              color: kBg,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.horizontal(right: Radius.circular(10)))),
       Expanded(child: LayoutBuilder(builder: (_, c) {
         final count = (c.maxWidth / 10).floor();
@@ -540,7 +540,7 @@ class _PerforatedDivider extends StatelessWidget {
       })),
       Container(width: 10, height: 20,
           decoration: const BoxDecoration(
-              color: kBg,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.horizontal(left: Radius.circular(10)))),
     ]),
   );

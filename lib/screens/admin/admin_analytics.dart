@@ -863,7 +863,7 @@ class _AddIncidentSheetState extends State<_AddIncidentSheet> {
   @override
   Widget build(BuildContext context) => Container(
     decoration: const BoxDecoration(
-      color: kCard,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     padding: EdgeInsets.fromLTRB(

@@ -400,7 +400,7 @@ class _QuadCardState extends State<_QuadCard> {
   Widget build(BuildContext context) => AnimatedContainer(
     duration: const Duration(milliseconds: 250),
     decoration: BoxDecoration(
-      color: kCard,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: _color.withAlpha(40)),
       boxShadow: kShadowMd,

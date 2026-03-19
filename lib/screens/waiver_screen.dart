@@ -295,7 +295,7 @@ class _WaiverScreenState extends State<WaiverScreen>
           child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
             decoration: BoxDecoration(
-              color: kBg,
+              color: Theme.of(context).scaffoldBackgroundColor,
               border: Border(top: BorderSide(color: kBorder)),
               boxShadow: [
                 BoxShadow(color: Colors.black.withAlpha(15),
