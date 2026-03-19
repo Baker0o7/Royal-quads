@@ -187,7 +187,7 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1612),
+                      color: Theme.of(context).colorScheme.onSurface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFF2D2820)),
                     ),
@@ -415,7 +415,7 @@ class _RatingRow extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: const Color(0xFF1A1612),
+      color: Theme.of(context).colorScheme.onSurface,
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xFF2D2820)),
     ),

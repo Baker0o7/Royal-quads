@@ -35,17 +35,21 @@ class AppProvider extends ChangeNotifier {
     final saved = StorageService.getThemeName();
     if (saved.contains(':')) {
       final parts = saved.split(':');
+      // Only honour dark if user explicitly saved it via theme picker
       _themeMode = switch (parts[0]) {
-        'light'  => ThemeMode.light,
+        'dark'   => ThemeMode.dark,
         'system' => ThemeMode.system,
         _        => ThemeMode.light,
       };
       _appTheme = AppThemeX.fromId(parts[1]);
     } else {
-      _themeMode = saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
+      // Legacy save (no colon) or first launch → light
+      _themeMode = ThemeMode.light;
       _appTheme  = AppTheme.desertGold;
+      // Migrate storage to new format
+      _saveTheme();
     }
-    _applyScheduleIfNeeded();
+    if (_appTheme.isAutoSchedule) _applyScheduleIfNeeded();
     notifyListeners();
   }
 

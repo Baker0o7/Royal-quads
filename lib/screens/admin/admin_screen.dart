@@ -474,7 +474,7 @@ class _MonthlyLineChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1612),
+        color: Theme.of(context).colorScheme.onSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF2D2820)),
       ),
@@ -580,7 +580,7 @@ class _QuadPieChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1612),
+        color: Theme.of(context).colorScheme.onSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF2D2820)),
       ),

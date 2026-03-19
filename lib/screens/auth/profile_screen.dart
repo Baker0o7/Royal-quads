@@ -127,12 +127,15 @@ class _HeroHeader extends StatelessWidget {
           'assets/images/logo.png', fit: BoxFit.cover)),
     ),
     const SizedBox(height: 16),
-    const Text('Royal Quad Bikes',
+    Text('Royal Quad Bikes',
         style: TextStyle(fontFamily: 'Playfair', fontSize: 24,
-            fontWeight: FontWeight.w700, color: kText)),
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface)),
     const SizedBox(height: 4),
-    const Text('Who are you?',
-        style: TextStyle(color: kMuted, fontSize: 14)),
+    Text('Who are you?',
+        style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(140),
+            fontSize: 14)),
   ]);
 }
 
@@ -162,7 +165,8 @@ class _RoleCardState extends State<_RoleCard> {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Theme.of(context).dividerColor),
-        boxShadow: kShadowMd,
+        boxShadow: Theme.of(context).brightness == Brightness.dark
+            ? kShadowMd : kShadowSm,
       ),
       child: Row(children: [
         Container(

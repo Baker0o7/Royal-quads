@@ -36,7 +36,7 @@ class StorageService {
   static Future<void> setOnboarded() => _p.setBool('rq:onboarded', true);
 
   // ── Theme ─────────────────────────────────────────────────────────────────
-  static String getThemeName() => _p.getString('rq:theme') ?? 'dark';
+  static String getThemeName() => _p.getString('rq:theme') ?? 'light:desertGold';
   static Future<void> setThemeName(String mode) => _p.setString('rq:theme', mode);
 
 
