@@ -68,7 +68,7 @@ class _BookingTicketScreenState extends State<BookingTicketScreen>
       backgroundColor: heroColor(context),
       body: Stack(children: [
         // Background
-        Container(decoration: const BoxDecoration(
+        Container(decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [heroBg(context), heroColor(context)],
             begin: Alignment.topCenter,
@@ -383,7 +383,7 @@ class _PerforationLine extends StatelessWidget {
     height: 20,
     child: Row(children: [
       Container(width: 12, height: 20,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
               color: heroColor(context),
               borderRadius: BorderRadius.horizontal(
                   right: Radius.circular(10)))),
@@ -395,7 +395,7 @@ class _PerforationLine extends StatelessWidget {
         )));
       })),
       Container(width: 12, height: 20,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
               color: heroColor(context),
               borderRadius: BorderRadius.horizontal(
                   left: Radius.circular(10)))),

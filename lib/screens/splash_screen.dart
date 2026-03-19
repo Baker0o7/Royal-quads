@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
     body: Stack(children: [
       // Background gradient
       Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [heroBg(context), heroColor(context)],
             begin: Alignment.topCenter,

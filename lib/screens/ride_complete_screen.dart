@@ -80,7 +80,7 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
       body: Stack(children: [
         // Background gradient
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: RadialGradient(
               center: Alignment(0, -0.6),
               radius: 1.2,
