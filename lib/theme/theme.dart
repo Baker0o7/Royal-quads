@@ -137,7 +137,6 @@ class _TapCardState extends State<TapCard> {
   bool _p = false;
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTapDown: (_) => setState(() => _p = true),
       onTapUp: (_) { setState(() => _p = false); widget.onTap?.call(); },

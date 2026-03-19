@@ -142,7 +142,6 @@ ColorScheme _lightScheme(Color seed) => ColorScheme.fromSeed(
   seedColor: seed,
   brightness: Brightness.light,
   surface: const Color(0xFFF7F2EA),          // warm cream surface
-  surfaceContainerHighest: const Color(0xFFEEE6D2), // warm card
 );
 
 ColorScheme _darkScheme(Color seed) => ColorScheme.fromSeed(
@@ -173,7 +172,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
       ? Color.lerp(scheme.surface, Colors.black, 0.35)!
       : const Color(0xFFF7F2EA);   // warm kBg cream
   final cardBg = dark
-      ? Color.lerp(scheme.surfaceContainerHighest, Colors.black, 0.15)!
+      ? Color.lerp(scheme.surface, Colors.black, 0.15)!
       : Colors.white;
   final dividerColor = dark
       ? scheme.outlineVariant.withAlpha(60)
@@ -266,8 +265,8 @@ ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
     // ── Chips ────────────────────────────────────────────────────────────────
     chipTheme: ChipThemeData(
       backgroundColor: dark
-          ? scheme.surfaceContainerHighest
-          : scheme.surfaceContainerLow,
+          ? scheme.surface.withAlpha(180)
+          : scheme.surface.withAlpha(120),
       labelStyle: TextStyle(
           color: scheme.onSurface, fontSize: 12),
       shape: RoundedRectangleBorder(
