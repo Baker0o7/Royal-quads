@@ -529,9 +529,9 @@ class _PerforatedDivider extends StatelessWidget {
     height: 20,
     child: Row(children: [
       Container(width: 10, height: 20,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.horizontal(right: Radius.circular(10)))),
+              borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)))),
       Expanded(child: LayoutBuilder(builder: (_, c) {
         final count = (c.maxWidth / 10).floor();
         return Row(children: List.generate(count, (i) => Expanded(child: Container(
@@ -539,9 +539,9 @@ class _PerforatedDivider extends StatelessWidget {
           color: i % 2 == 0 ? kBorder : Colors.transparent))));
       })),
       Container(width: 10, height: 20,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.horizontal(left: Radius.circular(10)))),
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)))),
     ]),
   );
 }

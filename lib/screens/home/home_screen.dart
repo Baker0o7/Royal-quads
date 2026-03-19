@@ -941,7 +941,7 @@ class _EmptyState extends StatelessWidget {
     child: Column(children: [
       Icon(icon, size: 48, color: Theme.of(context).dividerColor),
       const SizedBox(height: 12),
-      Text(title, style: const TextStyle(
+      Text(title, style: TextStyle(
           fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface.withAlpha(120))),
       const SizedBox(height: 4),
       Text(sub, style: const TextStyle(color: kMuted, fontSize: 12)),
