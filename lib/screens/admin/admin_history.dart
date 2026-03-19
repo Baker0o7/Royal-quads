@@ -90,7 +90,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: kBorder),
                 ),
-                child: const Icon(Icons.download_rounded, color: context.rq.muted, size: 16),
+                child: Icon(Icons.download_rounded, color: context.rq.muted, size: 16),
               ),
             ),
             const SizedBox(width: 8),
@@ -140,7 +140,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(children: [
-              const Icon(Icons.sort_rounded, color: context.rq.muted, size: 14),
+              Icon(Icons.sort_rounded, color: context.rq.muted, size: 14),
               const SizedBox(width: 6),
               ...['newest', 'oldest', 'highest', 'lowest'].map((s) {
                 final active = _sort == s;
@@ -346,12 +346,12 @@ class _HistoryTile extends StatelessWidget {
                     fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
                 const SizedBox(height: 3),
                 Row(children: [
-                  const Icon(Icons.directions_bike_rounded, size: 11, color: context.rq.muted),
+                  Icon(Icons.directions_bike_rounded, size: 11, color: context.rq.muted),
                   const SizedBox(width: 3),
                   Text(booking.quadName,
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
                   const SizedBox(width: 8),
-                  const Icon(Icons.timer_rounded, size: 11, color: context.rq.muted),
+                  Icon(Icons.timer_rounded, size: 11, color: context.rq.muted),
                   const SizedBox(width: 3),
                   Text('${booking.duration} min',
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
@@ -370,7 +370,7 @@ class _HistoryTile extends StatelessWidget {
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('${booking.totalPaid.kes}', style: const TextStyle(
                   color: kAccent, fontWeight: FontWeight.w800, fontSize: 16)),
-              const Text('KES', style: TextStyle(
+              Text('KES', style: TextStyle(
                   color: context.rq.muted, fontSize: 9, fontWeight: FontWeight.w600)),
               if (booking.overtimeCharge > 0) ...[
                 const SizedBox(height: 2),
@@ -597,7 +597,7 @@ class _ExportSheetState extends State<_ExportSheet> {
 
         // Instructions
         Row(children: [
-          const Icon(Icons.info_outline_rounded, size: 14, color: context.rq.muted),
+          Icon(Icons.info_outline_rounded, size: 14, color: context.rq.muted),
           const SizedBox(width: 8),
           const Expanded(child: Text(
             'Copy → Open Google Sheets → paste in cell A1.',

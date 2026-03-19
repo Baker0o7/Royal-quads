@@ -874,7 +874,7 @@ class _QSSState extends State<_QuickStartSheet> {
           onChanged: (v) => setState(() => _qId = v),
         ),
         const SizedBox(height: 16),
-        const Text('Duration', style: TextStyle(
+        Text('Duration', style: TextStyle(
             fontWeight: FontWeight.w700, fontSize: 13, color: context.rq.muted)),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: kPricing.map((p) {

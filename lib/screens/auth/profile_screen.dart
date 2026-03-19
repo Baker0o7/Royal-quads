@@ -98,7 +98,7 @@ class _RoleViewState extends State<_RoleView>
             const Spacer(),
             TextButton(
               onPressed: widget.onGuest,
-              child: const Text('Continue as Guest',
+              child: Text('Continue as Guest',
                   style: TextStyle(color: context.rq.muted, fontSize: 14)),
             ),
           ]),
@@ -296,7 +296,7 @@ class _AuthViewState extends State<_AuthView> {
             padding: const EdgeInsets.only(top: 4, bottom: 0),
             child: Row(children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: context.rq.muted),
+                icon: Icon(Icons.arrow_back_rounded, color: context.rq.muted),
                 onPressed: widget.onBack,
               ),
               const Spacer(),
@@ -389,7 +389,7 @@ class _AuthViewState extends State<_AuthView> {
               child: TextButton(
                 onPressed: () => showToast(
                     context, 'Contact admin to reset your password'),
-                child: const Text('Forgot password?',
+                child: Text('Forgot password?',
                     style: TextStyle(color: context.rq.muted, fontSize: 13)),
               ),
             ),
@@ -639,7 +639,7 @@ class _LoggedInView extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.w700,
                             fontSize: 15)),
                     const SizedBox(height: 4),
-                    const Text('Hit the dunes!',
+                    Text('Hit the dunes!',
                         style: TextStyle(color: context.rq.muted, fontSize: 13)),
                     const SizedBox(height: 14),
                     TextButton.icon(
@@ -731,13 +731,13 @@ class _RideHistoryTile extends StatelessWidget {
               fontSize: 14, color: context.rq.text)),
           const SizedBox(height: 3),
           Row(children: [
-            const Icon(Icons.timer_rounded,
+            Icon(Icons.timer_rounded,
                 size: 11, color: context.rq.muted),
             const SizedBox(width: 3),
             Text('${booking.duration} min',
                 style: TextStyle(color: context.rq.muted, fontSize: 12)),
             const SizedBox(width: 8),
-            const Icon(Icons.calendar_today_rounded,
+            Icon(Icons.calendar_today_rounded,
                 size: 11, color: context.rq.muted),
             const SizedBox(width: 3),
             Text(
@@ -756,7 +756,7 @@ class _RideHistoryTile extends StatelessWidget {
           Text('+${booking.overtimeCharge.kes} OT',
               style: const TextStyle(color: kRed, fontSize: 10)),
         const SizedBox(height: 2),
-        const Icon(Icons.chevron_right_rounded,
+        Icon(Icons.chevron_right_rounded,
             color: context.rq.muted, size: 14),
       ]),
     ])),
@@ -938,7 +938,7 @@ class _OtpScreenState extends State<_OtpScreen>
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: context.rq.muted),
+              icon: Icon(Icons.arrow_back_rounded, color: context.rq.muted),
               onPressed: widget.onBack,
             ),
           ),
@@ -956,7 +956,7 @@ class _OtpScreenState extends State<_OtpScreen>
           ),
           const SizedBox(height: 20),
 
-          const Text('Verify your number',
+          Text('Verify your number',
               style: TextStyle(fontFamily: 'Playfair', fontSize: 28,
                   fontWeight: FontWeight.w700, color: context.rq.text,
                   letterSpacing: -0.5)),

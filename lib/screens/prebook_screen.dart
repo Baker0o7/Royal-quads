@@ -428,7 +428,7 @@ class _DateTimePicker extends StatelessWidget {
                   fontWeight: FontWeight.w700, fontSize: 15, color: context.rq.text)),
               const SizedBox(height: 2),
               Row(children: [
-                const Icon(Icons.access_time_rounded,
+                Icon(Icons.access_time_rounded,
                     size: 12, color: context.rq.muted),
                 const SizedBox(width: 4),
                 Text(timeLabel, style: TextStyle(
@@ -540,11 +540,11 @@ class _EmptyBookings extends StatelessWidget {
         child: const Icon(Icons.calendar_month_rounded,
             color: kAccent, size: 36)),
       const SizedBox(height: 16),
-      const Text('No pre-bookings yet', style: TextStyle(
+      Text('No pre-bookings yet', style: TextStyle(
           fontFamily: 'Playfair', fontSize: 18,
           fontWeight: FontWeight.w700, color: context.rq.text)),
       const SizedBox(height: 6),
-      const Text('Schedule rides in advance for your customers',
+      Text('Schedule rides in advance for your customers',
           style: TextStyle(color: context.rq.muted, fontSize: 13),
           textAlign: TextAlign.center),
       const SizedBox(height: 20),
@@ -728,7 +728,7 @@ class _PrebookTile extends StatelessWidget {
               if (prebooking.notes != null) ...[
                 const SizedBox(height: 6),
                 Row(children: [
-                  const Icon(Icons.sticky_note_2_outlined, size: 11, color: context.rq.muted),
+                  Icon(Icons.sticky_note_2_outlined, size: 11, color: context.rq.muted),
                   const SizedBox(width: 4),
                   Expanded(child: Text(prebooking.notes!,
                       style: TextStyle(color: context.rq.muted, fontSize: 11),

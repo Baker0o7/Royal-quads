@@ -51,7 +51,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
         children: [
           const Icon(Icons.receipt_long_outlined, size: 56, color: kBorder),
           const SizedBox(height: 16),
-          const Text('Receipt not found',
+          Text('Receipt not found',
               style: TextStyle(color: context.rq.muted, fontSize: 16)),
           const SizedBox(height: 16),
           PrimaryButton(label: 'Go Home', icon: Icons.home_rounded,
@@ -481,7 +481,7 @@ class _ReceiptCard extends StatelessWidget {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Scan to verify receipt',
+                Text('Scan to verify receipt',
                     style: TextStyle(color: context.rq.muted, fontSize: 10,
                         letterSpacing: 0.5)),
                 const SizedBox(height: 4),
@@ -491,7 +491,7 @@ class _ReceiptCard extends StatelessWidget {
                         fontWeight: FontWeight.w700, color: context.rq.text,
                         letterSpacing: 1.5)),
                 const SizedBox(height: 4),
-                const Text('Royal Quad Bikes · Mambrui, Kenya',
+                Text('Royal Quad Bikes · Mambrui, Kenya',
                     style: TextStyle(color: context.rq.muted, fontSize: 10)),
               ],
             )),

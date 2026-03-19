@@ -455,7 +455,7 @@ class _QuadCardState extends State<_QuadCard> {
             AnimatedRotation(
               turns: _expanded ? 0.5 : 0,
               duration: const Duration(milliseconds: 200),
-              child: const Icon(Icons.expand_more_rounded,
+              child: Icon(Icons.expand_more_rounded,
                   color: context.rq.muted, size: 20)),
           ]),
         ),

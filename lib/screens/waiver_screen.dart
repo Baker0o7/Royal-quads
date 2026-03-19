@@ -273,7 +273,7 @@ class _WaiverScreenState extends State<WaiverScreen>
                             ),
                           ),
                           const SizedBox(height: 3),
-                          const Text(
+                          Text(
                             'I have read all terms and accept full responsibility for my safety during the ride.',
                             style: TextStyle(color: context.rq.muted, fontSize: 12, height: 1.4),
                           ),
@@ -397,7 +397,7 @@ class _RiskBanner extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12,
                   color: kRed, letterSpacing: 0.5)),
           const SizedBox(height: 5),
-          const Text(
+          Text(
             'Quad biking involves inherent risks. '
             'Please read each clause carefully. '
             'By signing you accept full responsibility for your safety.',

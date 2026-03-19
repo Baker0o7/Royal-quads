@@ -426,7 +426,7 @@ class _PeakHoursHeatmap extends StatelessWidget {
     return AppCard(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Bookings by Hour of Day',
+        Text('Bookings by Hour of Day',
             style: TextStyle(color: context.rq.muted, fontSize: 12)),
         const SizedBox(height: 12),
         SizedBox(
@@ -642,7 +642,7 @@ class _DynamicPricingCardState extends State<_DynamicPricingCard> {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Current Multiplier',
+                Text('Current Multiplier',
                     style: TextStyle(color: context.rq.muted, fontSize: 11)),
                 Text('${multiplier}x',
                     style: const TextStyle(color: kAccent,
@@ -805,7 +805,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (accounts.isEmpty)
-          const Text('No loyalty accounts yet',
+          Text('No loyalty accounts yet',
               style: TextStyle(color: context.rq.muted, fontSize: 13))
         else
           ...accounts.take(5).map((a) => Padding(

@@ -410,7 +410,7 @@ class _PinCard extends StatelessWidget {
     const SizedBox(width: 14),
     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-      const Text('Current PIN', style: TextStyle(
+      Text('Current PIN', style: TextStyle(
           color: context.rq.muted, fontSize: 11, fontWeight: FontWeight.w600)),
       const SizedBox(height: 4),
       Row(children: List.generate(pin.length, (_) => Container(

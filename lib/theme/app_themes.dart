@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RQColors — custom colour tokens registered on every ThemeData
@@ -63,8 +65,6 @@ extension RQBuildContextX on BuildContext {
   RQColors get rq => Theme.of(this).rq;
 }
 
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // App Theme Variants

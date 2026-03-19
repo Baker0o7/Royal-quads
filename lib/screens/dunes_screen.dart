@@ -168,7 +168,7 @@ class _DunesScreenState extends State<DunesScreen> {
                         fontWeight: FontWeight.w600, fontSize: 13))),
                 TextButton(
                   onPressed: _deleteMap,
-                  child: const Text('Remove',
+                  child: Text('Remove',
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ),
               ]),

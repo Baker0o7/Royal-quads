@@ -422,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
             // ── Promo code ────────────────────────────────────────────────────
             SectionHeading('Promo Code', icon: Icons.local_offer_rounded,
-              trailing: const Text('Optional',
+              trailing: Text('Optional',
                   style: TextStyle(color: context.rq.muted, fontSize: 11))),
             Row(children: [
               Expanded(child: _TextField(
@@ -846,7 +846,7 @@ class _MpesaSection extends StatelessWidget {
               ),
               child: Row(children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('TILL NUMBER', style: TextStyle(
+                  Text('TILL NUMBER', style: TextStyle(
                       color: context.rq.muted, fontSize: 10, letterSpacing: 1)),
                   Text(kTillNumber, style: TextStyle(
                       fontFamily: 'monospace', fontSize: 24,

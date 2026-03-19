@@ -146,9 +146,9 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
     if (_booking == null) return Scaffold(
       body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 48, color: context.rq.muted),
+          Icon(Icons.error_outline_rounded, size: 48, color: context.rq.muted),
           const SizedBox(height: 12),
-          const Text('Booking not found', style: TextStyle(color: context.rq.muted)),
+          Text('Booking not found', style: TextStyle(color: context.rq.muted)),
           const SizedBox(height: 16),
           TextButton(onPressed: () => context.go('/'),
               child: const Text('← Go Home')),
@@ -587,7 +587,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
           const Icon(Icons.account_balance_rounded,
               color: kGreen, size: 14),
           const SizedBox(width: 8),
-          const Text('Till: ', style: TextStyle(
+          Text('Till: ', style: TextStyle(
               color: context.rq.muted, fontSize: 12)),
           Text(kTillNumber, style: const TextStyle(
               color: kGreen, fontWeight: FontWeight.w800,
