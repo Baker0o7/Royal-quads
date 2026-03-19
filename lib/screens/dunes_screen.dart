@@ -96,7 +96,7 @@ class _DunesScreenState extends State<DunesScreen> {
         automaticallyImplyLeading: false,
         flexibleSpace: FlexibleSpaceBar(
           background: Stack(fit: StackFit.expand, children: [
-            Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
+            Container(decoration: BoxDecoration(gradient: heroGradient(context))),
             CustomPaint(painter: _DunesPainter()),
             Positioned(top: 0, left: 0, right: 0,
               child: Container(height: 2,

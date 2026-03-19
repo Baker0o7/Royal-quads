@@ -65,12 +65,12 @@ class _BookingTicketScreenState extends State<BookingTicketScreen>
     }
 
     return Scaffold(
-      backgroundColor: kHeroTo,
+      backgroundColor: heroColor(context),
       body: Stack(children: [
         // Background
         Container(decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1E160C), kHeroTo],
+            colors: [heroBg(context), heroColor(context)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -384,7 +384,7 @@ class _PerforationLine extends StatelessWidget {
     child: Row(children: [
       Container(width: 12, height: 20,
           decoration: const BoxDecoration(
-              color: kHeroTo,
+              color: heroColor(context),
               borderRadius: BorderRadius.horizontal(
                   right: Radius.circular(10)))),
       Expanded(child: LayoutBuilder(builder: (_, c) {
@@ -396,7 +396,7 @@ class _PerforationLine extends StatelessWidget {
       })),
       Container(width: 12, height: 20,
           decoration: const BoxDecoration(
-              color: kHeroTo,
+              color: heroColor(context),
               borderRadius: BorderRadius.horizontal(
                   left: Radius.circular(10)))),
     ]),

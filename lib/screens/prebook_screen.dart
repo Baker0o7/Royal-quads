@@ -116,7 +116,7 @@ class _PrebookScreenState extends State<PrebookScreen>
             expandedHeight: 130, pinned: true, stretch: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(fit: StackFit.expand, children: [
-                Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
+                Container(decoration: BoxDecoration(gradient: heroGradient(context))),
                 Positioned(top: 0, left: 0, right: 0,
                   child: Container(height: 2,
                     decoration: const BoxDecoration(gradient: kGoldGradient))),
@@ -128,7 +128,7 @@ class _PrebookScreenState extends State<PrebookScreen>
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(46),
               child: Container(
-                color: kHeroTo,
+                color: heroColor(context),
                 child: TabBar(
                   controller: _tabs,
                   indicatorColor: kAccent,
@@ -472,7 +472,7 @@ class _BookingSummary extends StatelessWidget {
     duration: const Duration(milliseconds: 300),
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: kHeroFrom,
+      color: heroBg(context),
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: kAccent.withAlpha(50)),
       boxShadow: [BoxShadow(

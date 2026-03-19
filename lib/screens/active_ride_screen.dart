@@ -172,8 +172,8 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
               center: const Alignment(0, -0.5),
               radius: 1.2,
               colors: _overtime
-                  ? [const Color(0xFF2D0A0A), kHeroTo]
-                  : [kHeroFrom, kHeroTo],
+                  ? [const Color(0xFF2D0A0A), heroColor(context)]
+                  : [heroBg(context), heroColor(context)],
             ),
           ),
         ),

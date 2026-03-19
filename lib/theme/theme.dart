@@ -399,3 +399,32 @@ extension ThemeContextX on BuildContext {
   Color get mutedColor=> isDark ? kDarkMuted: kMuted;
   Color get bordColor => isDark ? kDarkBorder: kBorder;
 }
+
+// ── Theme-aware hero helpers ─────────────────────────────────────────────────
+// Use these instead of kHeroGradient / kHeroTo / kHeroFrom in screens.
+
+LinearGradient heroGradient(BuildContext context) {
+  final isDark  = Theme.of(context).brightness == Brightness.dark;
+  final primary = Theme.of(context).colorScheme.primary;
+  if (isDark) return kHeroGradient;                        // existing dark gradient
+  // Light: rich primary → deeper primary
+  return LinearGradient(
+    colors: [
+      Color.lerp(primary, Colors.black, 0.45)!,
+      Color.lerp(primary, Colors.black, 0.60)!,
+    ],
+    begin: Alignment.topLeft, end: Alignment.bottomRight,
+  );
+}
+
+Color heroColor(BuildContext context) =>
+    Theme.of(context).appBarTheme.backgroundColor
+        ?? Color.lerp(Theme.of(context).colorScheme.primary, Colors.black, 0.55)!;
+
+Color heroBg(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final primary = Theme.of(context).colorScheme.primary;
+  return isDark
+      ? kHeroFrom
+      : Color.lerp(primary, Colors.black, 0.45)!;
+}

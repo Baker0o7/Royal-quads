@@ -177,9 +177,11 @@ ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
   final dividerColor = dark
       ? scheme.outlineVariant.withAlpha(60)
       : const Color(0xFFE2D8C6);   // warm kBorder
+  // Light: warm tint of primary — visible, branded, not black
+  // Dark: near-black with primary tint
   final heroColor = dark
       ? Color.lerp(scheme.primary, Colors.black, 0.85)!
-      : Color.lerp(scheme.primary, Colors.black, 0.82)!;
+      : Color.lerp(scheme.primary, Colors.black, 0.55)!;
 
   return ThemeData(
     useMaterial3: true,

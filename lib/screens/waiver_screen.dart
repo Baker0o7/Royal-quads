@@ -93,7 +93,7 @@ class _WaiverScreenState extends State<WaiverScreen>
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: Container(
-                decoration: const BoxDecoration(gradient: kHeroGradient),
+                decoration: BoxDecoration(gradient: heroGradient(context)),
                 child: Stack(children: [
                   // Red accent wash
                   Positioned.fill(child: Container(decoration: BoxDecoration(

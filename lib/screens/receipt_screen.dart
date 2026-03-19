@@ -69,7 +69,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
           flexibleSpace: FlexibleSpaceBar(
             stretchModes: const [StretchMode.zoomBackground],
             background: Stack(fit: StackFit.expand, children: [
-              Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
+              Container(decoration: BoxDecoration(gradient: heroGradient(context))),
               Container(decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [kGreen.withAlpha(30), Colors.transparent],
@@ -377,7 +377,7 @@ class _ReceiptCard extends StatelessWidget {
       Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: kHeroGradient,
+          gradient: heroGradient(context),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Row(children: [

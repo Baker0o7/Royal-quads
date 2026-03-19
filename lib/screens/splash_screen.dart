@@ -68,13 +68,13 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: kHeroTo,
+    backgroundColor: heroColor(context),
     body: Stack(children: [
       // Background gradient
       Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2D2318), kHeroTo],
+            colors: [heroBg(context), heroColor(context)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

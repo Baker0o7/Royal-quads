@@ -116,7 +116,7 @@ class _HeroHeader extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
-          colors: [kHeroFrom, kHeroTo],
+          colors: [heroBg(context), heroColor(context)],
           begin: Alignment.topLeft, end: Alignment.bottomRight,
         ),
         boxShadow: [BoxShadow(
@@ -496,13 +496,13 @@ class _LoggedInView extends StatelessWidget {
         slivers: [
           SliverAppBar(
             expandedHeight: 210, pinned: true, elevation: 0,
-            backgroundColor: kHeroTo,
+            backgroundColor: heroColor(context),
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [kHeroFrom, kHeroMid, kHeroTo],
+                    colors: [heroBg(context), heroColor(context), heroColor(context)],
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
                 ),

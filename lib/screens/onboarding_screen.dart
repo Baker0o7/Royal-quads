@@ -58,13 +58,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: kHeroTo,
+    backgroundColor: heroColor(context),
     body: Stack(children: [
       // Background
       Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1A120C), kHeroTo],
+            colors: [heroBg(context), heroColor(context)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

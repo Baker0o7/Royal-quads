@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             stretchModes: const [StretchMode.zoomBackground],
             // No FlexibleSpaceBar title — SliverAppBar title handles collapsed state
             background: Stack(fit: StackFit.expand, children: [
-              Container(decoration: const BoxDecoration(gradient: kHeroGradient)),
+              Container(decoration: BoxDecoration(gradient: heroGradient(context))),
               Positioned.fill(child: CustomPaint(painter: _DunesHeroPainter())),
               Positioned.fill(child: Opacity(
                 opacity: 0.06,
@@ -330,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     duration: const Duration(milliseconds: 180),
                     decoration: BoxDecoration(
                       color: sel
-                          ? Theme.of(context).colorScheme.primary.withAlpha(200)
+                          ? Theme.of(context).colorScheme.primary.withAlpha(180)
                           : Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
@@ -501,7 +501,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kHeroFrom,
+                  color: heroBg(context),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: kAccent.withAlpha(50)),
                 ),
@@ -604,7 +604,7 @@ class _QuadCardState extends State<_QuadCard>
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: sel ? kHeroFrom : kCard,
+            color: sel ? heroBg(context) : kCard,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: sel ? kAccent
@@ -695,7 +695,7 @@ class _ActiveTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: overtime ? kRed.withAlpha(10) : kHeroFrom.withAlpha(6),
+            color: overtime ? kRed.withAlpha(10) : heroBg(context).withAlpha(6),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
                 color: overtime ? kRed.withAlpha(50) : kBorder,

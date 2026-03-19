@@ -28,7 +28,7 @@ class MainShell extends StatelessWidget {
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: kHeroTo,
+          color: heroColor(context),
           boxShadow: [
             BoxShadow(color: Colors.black.withAlpha(80),
                 blurRadius: 24, offset: const Offset(0, -1)),
@@ -165,7 +165,7 @@ class _LiveBadgeState extends State<_LiveBadge>
       decoration: BoxDecoration(
         color: kRed,
         shape: BoxShape.circle,
-        border: Border.all(color: kHeroTo, width: 1.5),
+        border: Border.all(color: heroColor(context), width: 1.5),
         boxShadow: [BoxShadow(color: kRed.withAlpha(90), blurRadius: 6)],
       ),
       child: Center(child: Text(

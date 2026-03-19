@@ -54,7 +54,7 @@ class _AdminScreenState extends State<AdminScreen> {
         title: const Text('Admin Dashboard',
             style: TextStyle(fontFamily: 'Playfair',
                 fontSize: 18, color: Colors.white)),
-        backgroundColor: kHeroTo,
+        backgroundColor: heroColor(context),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => context.go('/'),
@@ -78,7 +78,7 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: kHeroTo,
+          color: heroColor(context),
           boxShadow: [BoxShadow(
               color: Colors.black.withAlpha(60),
               blurRadius: 20, offset: const Offset(0, -4))],
@@ -1151,7 +1151,7 @@ class _PinScreenState extends State<_PinScreen>
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Container(
-      decoration: const BoxDecoration(gradient: kHeroGradient),
+      decoration: BoxDecoration(gradient: heroGradient(context)),
       child: SafeArea(child: Column(children: [
 
         // Back button

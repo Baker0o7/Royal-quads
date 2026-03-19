@@ -76,7 +76,7 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
     }
 
     return Scaffold(
-      backgroundColor: kHeroTo,
+      backgroundColor: heroColor(context),
       body: Stack(children: [
         // Background gradient
         Container(
@@ -84,7 +84,7 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
             gradient: RadialGradient(
               center: Alignment(0, -0.6),
               radius: 1.2,
-              colors: [Color(0xFF2A2010), kHeroTo],
+              colors: [heroBg(context), heroColor(context)],
             ),
           ),
         ),
