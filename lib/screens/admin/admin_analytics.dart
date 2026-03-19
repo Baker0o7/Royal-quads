@@ -272,8 +272,8 @@ class _EodCard extends StatelessWidget {
           children: [
             Text(
               'Today — ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-              style: const TextStyle(fontWeight: FontWeight.w600,
-                  fontSize: 13, color: kMuted)),
+              style: TextStyle(fontWeight: FontWeight.w600,
+                  fontSize: 13, color: context.rq.muted)),
             const SizedBox(height: 4),
             Text('${todayRev.kes} KES',
                 style: const TextStyle(fontFamily: 'Playfair',
@@ -404,7 +404,7 @@ class _UtilisationChart extends StatelessWidget {
           const Center(child: Padding(
             padding: EdgeInsets.all(24),
             child: Text('No rides in the last 7 days',
-                style: TextStyle(color: kMuted)),
+                style: TextStyle(color: context.rq.muted)),
           )),
       ]),
     );
@@ -427,7 +427,7 @@ class _PeakHoursHeatmap extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Bookings by Hour of Day',
-            style: TextStyle(color: kMuted, fontSize: 12)),
+            style: TextStyle(color: context.rq.muted, fontSize: 12)),
         const SizedBox(height: 12),
         SizedBox(
           height: 60,
@@ -455,8 +455,8 @@ class _PeakHoursHeatmap extends StatelessWidget {
                   )),
                   const SizedBox(height: 3),
                   if (h % 6 == 0)
-                    Text('$h', style: const TextStyle(
-                        color: kMuted, fontSize: 7)),
+                    Text('$h', style: TextStyle(
+                        color: context.rq.muted, fontSize: 7)),
                 ],
               ));
             }),
@@ -482,7 +482,7 @@ class _Legend extends StatelessWidget {
     Container(width: 8, height: 8,
         decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
     const SizedBox(width: 4),
-    Text(label, style: const TextStyle(color: kMuted, fontSize: 10)),
+    Text(label, style: TextStyle(color: context.rq.muted, fontSize: 10)),
   ]);
 }
 
@@ -546,10 +546,10 @@ class _InsightRow extends StatelessWidget {
       Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(
-              color: kMuted, fontSize: 12)),
-          if (sub != null) Text(sub!, style: const TextStyle(
-              color: kMuted, fontSize: 10)),
+          Text(label, style: TextStyle(
+              color: context.rq.muted, fontSize: 12)),
+          if (sub != null) Text(sub!, style: TextStyle(
+              color: context.rq.muted, fontSize: 10)),
         ],
       )),
       Text(value, style: TextStyle(
@@ -569,7 +569,7 @@ class _RideStats extends StatelessWidget {
     if (history.isEmpty) return AppCard(
       child: const Center(child: Padding(
         padding: EdgeInsets.all(20),
-        child: Text('No ride data yet', style: TextStyle(color: kMuted)),
+        child: Text('No ride data yet', style: TextStyle(color: context.rq.muted)),
       )),
     );
 
@@ -643,7 +643,7 @@ class _DynamicPricingCardState extends State<_DynamicPricingCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Current Multiplier',
-                    style: TextStyle(color: kMuted, fontSize: 11)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 11)),
                 Text('${multiplier}x',
                     style: const TextStyle(color: kAccent,
                         fontSize: 18, fontWeight: FontWeight.w800)),
@@ -677,9 +677,9 @@ class _DynamicPricingCardState extends State<_DynamicPricingCard> {
               children: [
                 Text(r.label, style: TextStyle(
                     fontWeight: FontWeight.w600, fontSize: 13,
-                    color: r.active ? kText : kMuted)),
+                    color: r.active ? context.rq.text : context.rq.muted)),
                 Text('${r.startHour}:00 – ${r.endHour}:00',
-                    style: const TextStyle(color: kMuted, fontSize: 11)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 11)),
               ],
             )),
             Container(
@@ -696,7 +696,7 @@ class _DynamicPricingCardState extends State<_DynamicPricingCard> {
                       fontWeight: FontWeight.w700, fontSize: 13,
                       color: r.active
                           ? (r.multiplier > 1 ? kRed : kGreen)
-                          : kMuted)),
+                          : context.rq.muted)),
             ),
           ]),
         )),
@@ -718,7 +718,7 @@ class _IncidentsCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text('${incidents.length} incidents logged',
-              style: const TextStyle(color: kMuted, fontSize: 12))),
+              style: TextStyle(color: context.rq.muted, fontSize: 12))),
           TextButton.icon(
             icon: const Icon(Icons.add, size: 14),
             label: const Text('Log Incident'),
@@ -754,12 +754,12 @@ class _IncidentsCard extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 12)),
                   Text(inc.description,
-                      style: const TextStyle(color: kMuted, fontSize: 11),
+                      style: TextStyle(color: context.rq.muted, fontSize: 11),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               )),
               Text('${inc.date.day}/${inc.date.month}',
-                  style: const TextStyle(color: kMuted, fontSize: 10)),
+                  style: TextStyle(color: context.rq.muted, fontSize: 10)),
             ]),
           )),
         ],
@@ -806,7 +806,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
         const SizedBox(height: 12),
         if (accounts.isEmpty)
           const Text('No loyalty accounts yet',
-              style: TextStyle(color: kMuted, fontSize: 13))
+              style: TextStyle(color: context.rq.muted, fontSize: 13))
         else
           ...accounts.take(5).map((a) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),

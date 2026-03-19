@@ -105,15 +105,15 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
               const SizedBox(height: 16),
               Text(
                 allQuads.isEmpty ? 'No quads in fleet' : 'No $_filter quads',
-                style: const TextStyle(
+                style: TextStyle(
                     fontFamily: 'Playfair', fontSize: 17,
-                    fontWeight: FontWeight.w700, color: kText)),
+                    fontWeight: FontWeight.w700, color: context.rq.text)),
               const SizedBox(height: 6),
               Text(
                 allQuads.isEmpty
                     ? 'Tap "Add New Quad" to get started'
                     : 'Try a different filter',
-                style: const TextStyle(color: kMuted, fontSize: 13)),
+                style: TextStyle(color: context.rq.muted, fontSize: 13)),
             ],
           )))
 
@@ -167,7 +167,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
           boxShadow: active ? kShadowSm : null,
         ),
         child: Text(c.label, style: TextStyle(
-            color: active ? Colors.white : kMuted,
+            color: active ? Colors.white : context.rq.muted,
             fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             fontSize: 13)),
       ),
@@ -237,14 +237,14 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
             fontFamily: 'Playfair', fontWeight: FontWeight.w700)),
       ]),
       content: RichText(text: TextSpan(
-        style: const TextStyle(color: kText, fontSize: 14, height: 1.5),
+        style: TextStyle(color: context.rq.text, fontSize: 14, height: 1.5),
         children: [
           const TextSpan(text: 'Remove '),
           TextSpan(text: quad.name,
               style: const TextStyle(fontWeight: FontWeight.w700)),
           const TextSpan(text: ' from the fleet?\n'),
           const TextSpan(text: 'This cannot be undone.',
-              style: TextStyle(color: kMuted, fontSize: 12)),
+              style: TextStyle(color: context.rq.muted, fontSize: 12)),
         ],
       )),
       actions: [
@@ -393,7 +393,7 @@ class _QuadCardState extends State<_QuadCard> {
     'available'   => kGreen,
     'rented'      => kAccent,
     'maintenance' => kRed,
-    _ => kMuted,
+    _ => context.rq.muted,
   };
 
   @override
@@ -437,15 +437,15 @@ class _QuadCardState extends State<_QuadCard> {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.quad.name, style: const TextStyle(
-                    fontWeight: FontWeight.w800, fontSize: 15, color: kText)),
+                Text(widget.quad.name, style: TextStyle(
+                    fontWeight: FontWeight.w800, fontSize: 15, color: context.rq.text)),
                 const SizedBox(height: 4),
                 Row(children: [
                   StatusBadge(widget.quad.status),
                   if (widget.quad.imei != null) ...[
                     const SizedBox(width: 8),
                     Text('SN: ${widget.quad.imei}',
-                        style: const TextStyle(color: kMuted, fontSize: 10,
+                        style: TextStyle(color: context.rq.muted, fontSize: 10,
                             fontFamily: 'monospace')),
                   ],
                 ]),
@@ -456,7 +456,7 @@ class _QuadCardState extends State<_QuadCard> {
               turns: _expanded ? 0.5 : 0,
               duration: const Duration(milliseconds: 200),
               child: const Icon(Icons.expand_more_rounded,
-                  color: kMuted, size: 20)),
+                  color: context.rq.muted, size: 20)),
           ]),
         ),
       ),
@@ -521,7 +521,7 @@ class _MiniStat extends StatelessWidget {
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(value, style: TextStyle(
             color: color, fontWeight: FontWeight.w800, fontSize: 13)),
-        Text(label, style: const TextStyle(color: kMuted, fontSize: 9)),
+        Text(label, style: TextStyle(color: context.rq.muted, fontSize: 9)),
       ]),
     ]),
   ));

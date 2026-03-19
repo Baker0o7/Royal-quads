@@ -212,12 +212,12 @@ class _ModeBtn extends StatelessWidget {
             ] : kShadowSm,
           ),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(icon, color: sel ? accent : kMuted, size: 22),
+            Icon(icon, color: sel ? accent : context.rq.muted, size: 22),
             const SizedBox(height: 6),
             Text(label, style: TextStyle(
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
                 fontSize: 12,
-                color: sel ? accent : kMuted)),
+                color: sel ? accent : context.rq.muted)),
             if (sel) ...[
               const SizedBox(height: 4),
               Container(width: 5, height: 5,

@@ -1,3 +1,68 @@
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RQColors — custom colour tokens registered on every ThemeData
+// Access via: Theme.of(context).extension<RQColors>()!
+// ─────────────────────────────────────────────────────────────────────────────
+class RQColors extends ThemeExtension<RQColors> {
+  final Color muted, text, card, bg, border, bg2;
+
+  const RQColors({
+    required this.muted, required this.text, required this.card,
+    required this.bg,    required this.border, required this.bg2,
+  });
+
+  static const light = RQColors(
+    muted:  Color(0xFF7A6E60),
+    text:   Color(0xFF1A1612),
+    card:   Color(0xFFFFFFFF),
+    bg:     Color(0xFFF7F2EA),
+    bg2:    Color(0xFFEEE6D2),
+    border: Color(0xFFE2D8C6),
+  );
+  static const dark = RQColors(
+    muted:  Color(0xFF9A8E7E),
+    text:   Color(0xFFF5EFE6),
+    card:   Color(0xFF201C18),
+    bg:     Color(0xFF0F0D0A),
+    bg2:    Color(0xFF1A1612),
+    border: Color(0xFF2E2820),
+  );
+
+  @override
+  RQColors copyWith({Color? muted, Color? text, Color? card,
+      Color? bg, Color? border, Color? bg2}) => RQColors(
+    muted:  muted  ?? this.muted,
+    text:   text   ?? this.text,
+    card:   card   ?? this.card,
+    bg:     bg     ?? this.bg,
+    bg2:    bg2    ?? this.bg2,
+    border: border ?? this.border,
+  );
+
+  @override
+  RQColors lerp(RQColors? other, double t) {
+    if (other == null) return this;
+    return RQColors(
+      muted:  Color.lerp(muted,  other.muted,  t)!,
+      text:   Color.lerp(text,   other.text,   t)!,
+      card:   Color.lerp(card,   other.card,   t)!,
+      bg:     Color.lerp(bg,     other.bg,     t)!,
+      bg2:    Color.lerp(bg2,    other.bg2,    t)!,
+      border: Color.lerp(border, other.border, t)!,
+    );
+  }
+}
+
+// Shorthand: Theme.of(context).rq
+extension RQThemeX on ThemeData {
+  RQColors get rq => extension<RQColors>() ?? RQColors.light;
+}
+
+// Shorthand: context.rq
+extension RQBuildContextX on BuildContext {
+  RQColors get rq => Theme.of(this).rq;
+}
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -311,6 +376,28 @@ ThemeData _buildTheme(ColorScheme scheme, AppTheme t, bool dark) {
     // ── ListTile ─────────────────────────────────────────────────────────
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    ),
+
+    // ── RQColors extension ───────────────────────────────────────────────────
+    extensions: [dark ? RQColors.dark : RQColors.light],
+
+    // ── Text theme ───────────────────────────────────────────────────────────
+    textTheme: TextTheme(
+      displayLarge:  TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      displayMedium: TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      displaySmall:  TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      headlineLarge: TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      headlineMedium:TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      headlineSmall: TextStyle(fontFamily: 'Playfair', color: dark ? RQColors.dark.text : RQColors.light.text),
+      titleLarge:    TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text, fontWeight: FontWeight.w700),
+      titleMedium:   TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text, fontWeight: FontWeight.w600),
+      titleSmall:    TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text, fontWeight: FontWeight.w600),
+      bodyLarge:     TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text),
+      bodyMedium:    TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text),
+      bodySmall:     TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.muted: RQColors.light.muted),
+      labelLarge:    TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.text : RQColors.light.text, fontWeight: FontWeight.w600),
+      labelMedium:   TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.muted: RQColors.light.muted),
+      labelSmall:    TextStyle(fontFamily: 'DM Sans',  color: dark ? RQColors.dark.muted: RQColors.light.muted),
     ),
 
     // ── Card ─────────────────────────────────────────────────────────────

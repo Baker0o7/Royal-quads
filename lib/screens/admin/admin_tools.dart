@@ -298,9 +298,9 @@ class _ToolHeader extends StatelessWidget {
       child: Icon(icon, color: color, size: 16),
     ),
     const SizedBox(width: 10),
-    Text(label, style: const TextStyle(
+    Text(label, style: TextStyle(
         fontFamily: 'Playfair', fontSize: 16,
-        fontWeight: FontWeight.w700, color: kText)),
+        fontWeight: FontWeight.w700, color: context.rq.text)),
     const Spacer(),
     if (action != null) action!,
   ]);
@@ -361,7 +361,7 @@ class _PromoSection extends StatelessWidget {
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.w900,
                       fontSize: 14,
-                      color: p.isActive ? kGreen : kMuted)),
+                      color: p.isActive ? kGreen : context.rq.muted)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(child: Column(
@@ -372,7 +372,7 @@ class _PromoSection extends StatelessWidget {
                             fontWeight: FontWeight.w700, fontSize: 13)),
                     Text(p.isActive ? 'Active' : 'Disabled',
                         style: TextStyle(
-                            color: p.isActive ? kGreen : kMuted,
+                            color: p.isActive ? kGreen : context.rq.muted,
                             fontSize: 11)),
                   ],
                 )),
@@ -411,7 +411,7 @@ class _PinCard extends StatelessWidget {
     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
         children: [
       const Text('Current PIN', style: TextStyle(
-          color: kMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+          color: context.rq.muted, fontSize: 11, fontWeight: FontWeight.w600)),
       const SizedBox(height: 4),
       Row(children: List.generate(pin.length, (_) => Container(
         width: 10, height: 10,
@@ -484,7 +484,7 @@ class _StaffSectionState extends State<_StaffSection> {
                   Text(s.name, style: const TextStyle(
                       fontWeight: FontWeight.w700, fontSize: 14)),
                   Text('${s.role}  ·  ${s.phone}',
-                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                      style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ],
               )),
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -500,7 +500,7 @@ class _StaffSectionState extends State<_StaffSection> {
                 Text(s.isActive ? 'Active' : 'Off duty',
                     style: TextStyle(
                         fontSize: 10,
-                        color: s.isActive ? kGreen : kMuted,
+                        color: s.isActive ? kGreen : context.rq.muted,
                         fontWeight: FontWeight.w600)),
               ]),
             ]),
@@ -524,7 +524,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
     'fuel'       => kGreen,
     'repair'     => kRed,
     'inspection' => kAccent,
-    _ => kMuted,
+    _ => context.rq.muted,
   };
 
   static IconData _typeIcon(String t) => switch (t) {
@@ -561,7 +561,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
               color: kOrange, fontWeight: FontWeight.w700, fontSize: 13)),
           const Spacer(),
           Text('Total: ${totalSpend.kes} KES',
-              style: const TextStyle(color: kMuted, fontSize: 12)),
+              style: TextStyle(color: context.rq.muted, fontSize: 12)),
         ]),
       ),
       AppCard(
@@ -602,10 +602,10 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
                       ),
                     ]),
                     const SizedBox(height: 2),
-                    Text(l.description, style: const TextStyle(
-                        color: kMuted, fontSize: 12, height: 1.3)),
+                    Text(l.description, style: TextStyle(
+                        color: context.rq.muted, fontSize: 12, height: 1.3)),
                     Text(l.date.dateOnly,
-                        style: const TextStyle(color: kMuted, fontSize: 10)),
+                        style: TextStyle(color: context.rq.muted, fontSize: 10)),
                   ],
                 )),
                 if (l.cost > 0) Text('${l.cost.kes} KES',
@@ -634,7 +634,7 @@ class _EmptyCard extends StatelessWidget {
         children: [
           Icon(icon, color: kBorder, size: 20),
           const SizedBox(width: 10),
-          Text(label, style: const TextStyle(color: kMuted, fontSize: 13)),
+          Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
         ],
       )),
     ),

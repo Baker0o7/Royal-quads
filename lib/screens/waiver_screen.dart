@@ -269,13 +269,13 @@ class _WaiverScreenState extends State<WaiverScreen>
                             _agreed ? 'Agreed ✓' : 'I agree to the safety waiver',
                             style: TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 14,
-                              color: _agreed ? kGreen : kText,
+                              color: _agreed ? kGreen : context.rq.text,
                             ),
                           ),
                           const SizedBox(height: 3),
                           const Text(
                             'I have read all terms and accept full responsibility for my safety during the ride.',
-                            style: TextStyle(color: kMuted, fontSize: 12, height: 1.4),
+                            style: TextStyle(color: context.rq.muted, fontSize: 12, height: 1.4),
                           ),
                         ],
                       )),
@@ -401,7 +401,7 @@ class _RiskBanner extends StatelessWidget {
             'Quad biking involves inherent risks. '
             'Please read each clause carefully. '
             'By signing you accept full responsibility for your safety.',
-            style: TextStyle(color: kMuted, fontSize: 12, height: 1.5),
+            style: TextStyle(color: context.rq.muted, fontSize: 12, height: 1.5),
           ),
           const SizedBox(height: 10),
           Row(children: [
@@ -460,7 +460,7 @@ class _WaiverClause extends StatelessWidget {
       ),
       const SizedBox(width: 12),
       Expanded(child: Text(text,
-          style: const TextStyle(fontSize: 13, height: 1.6, color: kText))),
+          style: TextStyle(fontSize: 13, height: 1.6, color: context.rq.text))),
     ]),
   );
 }
@@ -485,7 +485,7 @@ class _ProgDot extends StatelessWidget {
     const SizedBox(height: 3),
     Text(label, style: TextStyle(
         fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 0.5,
-        color: done ? kGreen : kMuted)),
+        color: done ? kGreen : context.rq.muted)),
   ]);
 }
 

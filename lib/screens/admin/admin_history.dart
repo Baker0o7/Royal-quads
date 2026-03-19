@@ -90,7 +90,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: kBorder),
                 ),
-                child: const Icon(Icons.download_rounded, color: kMuted, size: 16),
+                child: const Icon(Icons.download_rounded, color: context.rq.muted, size: 16),
               ),
             ),
             const SizedBox(width: 8),
@@ -119,7 +119,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                       color: _date != null ? kAccent : kBorder)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.calendar_today_rounded,
-                      color: _date != null ? Colors.white : kMuted, size: 16),
+                      color: _date != null ? Colors.white : context.rq.muted, size: 16),
                   if (_date != null) ...[
                     const SizedBox(width: 6),
                     Text(_date!.dateOnly, style: const TextStyle(
@@ -140,7 +140,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(children: [
-              const Icon(Icons.sort_rounded, color: kMuted, size: 14),
+              const Icon(Icons.sort_rounded, color: context.rq.muted, size: 14),
               const SizedBox(width: 6),
               ...['newest', 'oldest', 'highest', 'lowest'].map((s) {
                 final active = _sort == s;
@@ -160,7 +160,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                             color: active ? kAccent : kBorder),
                       ),
                       child: Text(label, style: TextStyle(
-                          color: active ? Colors.white : kMuted,
+                          color: active ? Colors.white : context.rq.muted,
                           fontSize: 12,
                           fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
                     ),
@@ -257,8 +257,8 @@ class _DateHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 6),
       child: Row(children: [
-        Text(label, style: const TextStyle(
-            color: kMuted, fontSize: 11,
+        Text(label, style: TextStyle(
+            color: context.rq.muted, fontSize: 11,
             fontWeight: FontWeight.w700, letterSpacing: 0.5)),
         const SizedBox(width: 10),
         Expanded(child: Container(height: 1, color: kBorder)),
@@ -281,14 +281,14 @@ class _EmptyHistory extends StatelessWidget {
       const SizedBox(height: 14),
       Text(
         filtered ? 'No results found' : 'No ride history yet',
-        style: const TextStyle(fontFamily: 'Playfair',
-            fontSize: 17, fontWeight: FontWeight.w700, color: kText),
+        style: TextStyle(fontFamily: 'Playfair',
+            fontSize: 17, fontWeight: FontWeight.w700, color: context.rq.text),
       ),
       const SizedBox(height: 6),
       Text(
         filtered ? 'Try adjusting your search or filters'
             : 'Completed rides will appear here',
-        style: const TextStyle(color: kMuted, fontSize: 13),
+        style: TextStyle(color: context.rq.muted, fontSize: 13),
         textAlign: TextAlign.center,
       ),
       if (filtered) ...[
@@ -342,19 +342,19 @@ class _HistoryTile extends StatelessWidget {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(booking.customerName, style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14, color: kText)),
+                Text(booking.customerName, style: TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
                 const SizedBox(height: 3),
                 Row(children: [
-                  const Icon(Icons.directions_bike_rounded, size: 11, color: kMuted),
+                  const Icon(Icons.directions_bike_rounded, size: 11, color: context.rq.muted),
                   const SizedBox(width: 3),
                   Text(booking.quadName,
-                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                      style: TextStyle(color: context.rq.muted, fontSize: 12)),
                   const SizedBox(width: 8),
-                  const Icon(Icons.timer_rounded, size: 11, color: kMuted),
+                  const Icon(Icons.timer_rounded, size: 11, color: context.rq.muted),
                   const SizedBox(width: 3),
                   Text('${booking.duration} min',
-                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                      style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ]),
                 if (booking.mpesaRef != null) ...[
                   const SizedBox(height: 2),
@@ -371,7 +371,7 @@ class _HistoryTile extends StatelessWidget {
               Text('${booking.totalPaid.kes}', style: const TextStyle(
                   color: kAccent, fontWeight: FontWeight.w800, fontSize: 16)),
               const Text('KES', style: TextStyle(
-                  color: kMuted, fontSize: 9, fontWeight: FontWeight.w600)),
+                  color: context.rq.muted, fontSize: 9, fontWeight: FontWeight.w600)),
               if (booking.overtimeCharge > 0) ...[
                 const SizedBox(height: 2),
                 Container(
@@ -394,7 +394,7 @@ class _HistoryTile extends StatelessWidget {
               Text(
                 '${booking.startTime.hour.toString().padLeft(2,'0')}:'
                 '${booking.startTime.minute.toString().padLeft(2,'0')}',
-                style: const TextStyle(color: kMuted, fontSize: 10)),
+                style: TextStyle(color: context.rq.muted, fontSize: 10)),
             ]),
           ]),
         ),
@@ -452,7 +452,7 @@ class _StatPill extends StatelessWidget {
     children: [
       Text(value, style: TextStyle(
           fontWeight: FontWeight.w800, fontSize: 13, color: color)),
-      Text(label, style: const TextStyle(color: kMuted, fontSize: 10)),
+      Text(label, style: TextStyle(color: context.rq.muted, fontSize: 10)),
     ],
   ));
 }
@@ -544,7 +544,7 @@ class _ExportSheetState extends State<_ExportSheet> {
                 fontFamily: 'Playfair', fontSize: 20,
                 fontWeight: FontWeight.w700)),
             Text('Copy and paste into Google Sheets',
-                style: TextStyle(color: kMuted, fontSize: 12)),
+                style: TextStyle(color: context.rq.muted, fontSize: 12)),
           ]),
         ]),
 
@@ -587,8 +587,8 @@ class _ExportSheetState extends State<_ExportSheet> {
                 color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: kBorder),
               ),
-              child: Text(col, style: const TextStyle(
-                  color: kMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+              child: Text(col, style: TextStyle(
+                  color: context.rq.muted, fontSize: 10, fontWeight: FontWeight.w600)),
             )).toList(),
           ),
         ),
@@ -597,11 +597,11 @@ class _ExportSheetState extends State<_ExportSheet> {
 
         // Instructions
         Row(children: [
-          const Icon(Icons.info_outline_rounded, size: 14, color: kMuted),
+          const Icon(Icons.info_outline_rounded, size: 14, color: context.rq.muted),
           const SizedBox(width: 8),
           const Expanded(child: Text(
             'Copy → Open Google Sheets → paste in cell A1.',
-            style: TextStyle(color: kMuted, fontSize: 12),
+            style: TextStyle(color: context.rq.muted, fontSize: 12),
           )),
         ]),
 
@@ -663,7 +663,7 @@ class _ExStat extends StatelessWidget {
     children: [
       Text(value, style: TextStyle(
           fontWeight: FontWeight.w800, fontSize: 14, color: color)),
-      Text(label, style: const TextStyle(color: kMuted, fontSize: 10)),
+      Text(label, style: TextStyle(color: context.rq.muted, fontSize: 10)),
     ],
   ));
 }

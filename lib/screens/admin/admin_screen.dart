@@ -374,7 +374,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
         ]),
         const SizedBox(height: 6),
         Text('${total7 == 0 ? 0 : (total7 / 7).round().kes} KES avg/day',
-            style: const TextStyle(color: kMuted, fontSize: 11)),
+            style: TextStyle(color: context.rq.muted, fontSize: 11)),
         const SizedBox(height: 16),
         AnimatedBuilder(
           animation: _anim,
@@ -400,7 +400,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
                           opacity: _anim,
                           child: Text('$cnt',
                               style: TextStyle(
-                                  color: isToday ? kAccent : kMuted,
+                                  color: isToday ? kAccent : context.rq.muted,
                                   fontSize: 9, fontWeight: FontWeight.w700)),
                         )
                       else
@@ -432,7 +432,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
                       Text(dayLabels[i],
                           style: TextStyle(
                               fontSize: isToday ? 10 : 9,
-                              color: isToday ? kAccent : kMuted,
+                              color: isToday ? kAccent : context.rq.muted,
                               fontWeight: isToday
                                   ? FontWeight.w800 : FontWeight.w500)),
                     ],
@@ -670,8 +670,8 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textCol = isDark ? kDarkText : kText;
-    final mutedCol = isDark ? kDarkMuted : kMuted;
+    final textCol = isDark ? kDarkText : context.rq.text;
+    final mutedCol = isDark ? kDarkMuted : context.rq.muted;
     return Container(
       decoration: BoxDecoration(
         color: isDark ? kDarkCard : kCard,
@@ -756,8 +756,8 @@ class _ActionCard extends StatelessWidget {
         const SizedBox(height: 10),
         Text(label, style: TextStyle(
             color: color, fontWeight: FontWeight.w800, fontSize: 14)),
-        Text(sub, style: const TextStyle(
-            color: kMuted, fontSize: 11)),
+        Text(sub, style: TextStyle(
+            color: context.rq.muted, fontSize: 11)),
       ]),
     ),
   );
@@ -807,7 +807,7 @@ class _LiveRideTile extends StatelessWidget {
             Text(booking.quadName,
                 style: const TextStyle(fontWeight: FontWeight.w700)),
             Text('${booking.customerName} · ${booking.duration} min',
-                style: const TextStyle(color: kMuted, fontSize: 12)),
+                style: TextStyle(color: context.rq.muted, fontSize: 12)),
           ],
         )),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -816,7 +816,7 @@ class _LiveRideTile extends StatelessWidget {
                   color: kAccent, fontWeight: FontWeight.w700, fontSize: 13)),
           Text(overtime ? 'OVERTIME' : '${(remaining ~/ 60)} min left',
               style: TextStyle(
-                  color: overtime ? kRed : kMuted,
+                  color: overtime ? kRed : context.rq.muted,
                   fontSize: 11, fontWeight: FontWeight.w600)),
         ]),
       ]),
@@ -875,7 +875,7 @@ class _QSSState extends State<_QuickStartSheet> {
         ),
         const SizedBox(height: 16),
         const Text('Duration', style: TextStyle(
-            fontWeight: FontWeight.w700, fontSize: 13, color: kMuted)),
+            fontWeight: FontWeight.w700, fontSize: 13, color: context.rq.muted)),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: kPricing.map((p) {
           final sel = _dur == p['duration'];
@@ -902,7 +902,7 @@ class _QSSState extends State<_QuickStartSheet> {
                     fontWeight: FontWeight.w700, fontSize: 13,
                     color: sel ? Colors.white : Theme.of(context).colorScheme.onSurface)),
                 Text('${(p['price'] as int).kes} KES', style: TextStyle(
-                    fontSize: 10, color: sel ? Colors.white60 : kMuted)),
+                    fontSize: 10, color: sel ? Colors.white60 : context.rq.muted)),
               ]),
             ),
           );
@@ -1072,7 +1072,7 @@ class _DRSState extends State<_DailyReportSheet> {
               const Text('📭', style: TextStyle(fontSize: 32)),
               const SizedBox(height: 8),
               Text('No rides on ${_date.dateOnly}',
-                  style: const TextStyle(color: kMuted)),
+                  style: TextStyle(color: context.rq.muted)),
             ]),
           ),
         const SizedBox(height: 8),
@@ -1095,7 +1095,7 @@ class _MiniStat extends StatelessWidget {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(value, style: TextStyle(
           fontWeight: FontWeight.w800, fontSize: 14, color: color)),
-      Text(label, style: const TextStyle(color: kMuted, fontSize: 10)),
+      Text(label, style: TextStyle(color: context.rq.muted, fontSize: 10)),
     ]),
   );
 }

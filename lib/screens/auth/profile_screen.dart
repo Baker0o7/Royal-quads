@@ -99,7 +99,7 @@ class _RoleViewState extends State<_RoleView>
             TextButton(
               onPressed: widget.onGuest,
               child: const Text('Continue as Guest',
-                  style: TextStyle(color: kMuted, fontSize: 14)),
+                  style: TextStyle(color: context.rq.muted, fontSize: 14)),
             ),
           ]),
         )),
@@ -181,11 +181,11 @@ class _RoleCardState extends State<_RoleCard> {
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title, style: const TextStyle(
-                fontWeight: FontWeight.w700, fontSize: 16, color: kText)),
+            Text(widget.title, style: TextStyle(
+                fontWeight: FontWeight.w700, fontSize: 16, color: context.rq.text)),
             const SizedBox(height: 4),
-            Text(widget.subtitle, style: const TextStyle(
-                color: kMuted, fontSize: 12, height: 1.5)),
+            Text(widget.subtitle, style: TextStyle(
+                color: context.rq.muted, fontSize: 12, height: 1.5)),
           ],
         )),
         Icon(Icons.chevron_right_rounded,
@@ -296,7 +296,7 @@ class _AuthViewState extends State<_AuthView> {
             padding: const EdgeInsets.only(top: 4, bottom: 0),
             child: Row(children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: kMuted),
+                icon: const Icon(Icons.arrow_back_rounded, color: context.rq.muted),
                 onPressed: widget.onBack,
               ),
               const Spacer(),
@@ -323,8 +323,8 @@ class _AuthViewState extends State<_AuthView> {
             widget.mode == _Mode.signIn
                 ? 'Welcome back 👋'
                 : 'Create account',
-            style: const TextStyle(fontFamily: 'Playfair', fontSize: 28,
-                fontWeight: FontWeight.w700, color: kText,
+            style: TextStyle(fontFamily: 'Playfair', fontSize: 28,
+                fontWeight: FontWeight.w700, color: context.rq.text,
                 letterSpacing: -.5),
           ),
           const SizedBox(height: 4),
@@ -332,7 +332,7 @@ class _AuthViewState extends State<_AuthView> {
             widget.mode == _Mode.signIn
                 ? 'Sign in to manage your rides'
                 : 'Join Royal Quad Bikes today',
-            style: const TextStyle(color: kMuted, fontSize: 14),
+            style: TextStyle(color: context.rq.muted, fontSize: 14),
           ),
           const SizedBox(height: 32),
 
@@ -376,7 +376,7 @@ class _AuthViewState extends State<_AuthView> {
                 icon: Icon(
                   _showPw ? Icons.visibility_off_outlined
                            : Icons.visibility_outlined,
-                  size: 18, color: kMuted),
+                  size: 18, color: context.rq.muted),
                 onPressed: () => setState(() => _showPw = !_showPw),
               ),
             ),
@@ -390,7 +390,7 @@ class _AuthViewState extends State<_AuthView> {
                 onPressed: () => showToast(
                     context, 'Contact admin to reset your password'),
                 child: const Text('Forgot password?',
-                    style: TextStyle(color: kMuted, fontSize: 13)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 13)),
               ),
             ),
           ] else
@@ -436,7 +436,7 @@ class _AuthViewState extends State<_AuthView> {
           Center(child: TextButton(
             onPressed: widget.onToggleMode,
             child: RichText(text: TextSpan(
-              style: const TextStyle(fontSize: 13, color: kMuted),
+              style: TextStyle(fontSize: 13, color: context.rq.muted),
               children: [
                 TextSpan(text: widget.mode == _Mode.signIn
                     ? "Don't have an account? "
@@ -477,7 +477,7 @@ class _ModePill extends StatelessWidget {
       ),
       child: Text(label, style: TextStyle(
         fontSize: 13, fontWeight: FontWeight.w600,
-        color: active ? kText : kMuted,
+        color: active ? context.rq.text : context.rq.muted,
       )),
     ),
   );
@@ -640,7 +640,7 @@ class _LoggedInView extends StatelessWidget {
                             fontSize: 15)),
                     const SizedBox(height: 4),
                     const Text('Hit the dunes!',
-                        style: TextStyle(color: kMuted, fontSize: 13)),
+                        style: TextStyle(color: context.rq.muted, fontSize: 13)),
                     const SizedBox(height: 14),
                     TextButton.icon(
                       onPressed: () => context.go('/'),
@@ -667,7 +667,7 @@ class _LoggedInView extends StatelessWidget {
                   icon: const Icon(Icons.logout_rounded, size: 18),
                   label: const Text('Sign Out'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: kMuted,
+                    foregroundColor: context.rq.muted,
                     side: const BorderSide(color: kBorder),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -726,25 +726,25 @@ class _RideHistoryTile extends StatelessWidget {
       Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(booking.quadName, style: const TextStyle(
+          Text(booking.quadName, style: TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 14, color: kText)),
+              fontSize: 14, color: context.rq.text)),
           const SizedBox(height: 3),
           Row(children: [
             const Icon(Icons.timer_rounded,
-                size: 11, color: kMuted),
+                size: 11, color: context.rq.muted),
             const SizedBox(width: 3),
             Text('${booking.duration} min',
-                style: const TextStyle(color: kMuted, fontSize: 12)),
+                style: TextStyle(color: context.rq.muted, fontSize: 12)),
             const SizedBox(width: 8),
             const Icon(Icons.calendar_today_rounded,
-                size: 11, color: kMuted),
+                size: 11, color: context.rq.muted),
             const SizedBox(width: 3),
             Text(
               '${booking.startTime.day}/'
               '${booking.startTime.month}/'
               '${booking.startTime.year}',
-              style: const TextStyle(color: kMuted, fontSize: 12)),
+              style: TextStyle(color: context.rq.muted, fontSize: 12)),
           ]),
         ],
       )),
@@ -757,7 +757,7 @@ class _RideHistoryTile extends StatelessWidget {
               style: const TextStyle(color: kRed, fontSize: 10)),
         const SizedBox(height: 2),
         const Icon(Icons.chevron_right_rounded,
-            color: kMuted, size: 14),
+            color: context.rq.muted, size: 14),
       ]),
     ])),
   );
@@ -787,10 +787,10 @@ class _StatTile extends StatelessWidget {
         Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          Text(value, style: const TextStyle(fontFamily: 'Playfair',
-              fontSize: 18, fontWeight: FontWeight.w700, color: kText)),
-          Text(label, style: const TextStyle(
-              color: kMuted, fontSize: 11)),
+          Text(value, style: TextStyle(fontFamily: 'Playfair',
+              fontSize: 18, fontWeight: FontWeight.w700, color: context.rq.text)),
+          Text(label, style: TextStyle(
+              color: context.rq.muted, fontSize: 11)),
         ])),
       ]),
     )),
@@ -808,12 +808,12 @@ class _InfoRow extends StatelessWidget {
     Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(children: [
-        Icon(icon, size: 16, color: kMuted),
+        Icon(icon, size: 16, color: context.rq.muted),
         const SizedBox(width: 12),
-        Text(label, style: const TextStyle(color: kMuted, fontSize: 13)),
+        Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
         const Spacer(),
-        Text(value, style: const TextStyle(
-            fontWeight: FontWeight.w600, fontSize: 13, color: kText)),
+        Text(value, style: TextStyle(
+            fontWeight: FontWeight.w600, fontSize: 13, color: context.rq.text)),
       ]),
     ),
     if (!isLast) const Divider(height: 1, color: kBorder),
@@ -826,8 +826,8 @@ class _Heading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(fontFamily: 'Playfair',
-          fontSize: 18, fontWeight: FontWeight.w700, color: kText));
+      style: TextStyle(fontFamily: 'Playfair',
+          fontSize: 18, fontWeight: FontWeight.w700, color: context.rq.text));
 }
 
 // ── OTP Verification Screen ───────────────────────────────────────────────────
@@ -938,7 +938,7 @@ class _OtpScreenState extends State<_OtpScreen>
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: kMuted),
+              icon: const Icon(Icons.arrow_back_rounded, color: context.rq.muted),
               onPressed: widget.onBack,
             ),
           ),
@@ -958,16 +958,16 @@ class _OtpScreenState extends State<_OtpScreen>
 
           const Text('Verify your number',
               style: TextStyle(fontFamily: 'Playfair', fontSize: 28,
-                  fontWeight: FontWeight.w700, color: kText,
+                  fontWeight: FontWeight.w700, color: context.rq.text,
                   letterSpacing: -0.5)),
           const SizedBox(height: 6),
           RichText(text: TextSpan(
-            style: const TextStyle(color: kMuted, fontSize: 14,
+            style: TextStyle(color: context.rq.muted, fontSize: 14,
                 height: 1.5),
             children: [
               const TextSpan(text: 'Enter the 6-digit code sent to '),
               TextSpan(text: widget.phone,
-                  style: const TextStyle(color: kText,
+                  style: TextStyle(color: context.rq.text,
                       fontWeight: FontWeight.w700)),
             ],
           )),
@@ -1022,7 +1022,7 @@ class _OtpScreenState extends State<_OtpScreen>
           Center(child: GestureDetector(
             onTap: _resendSeconds == 0 ? _resend : null,
             child: RichText(text: TextSpan(
-              style: const TextStyle(fontSize: 13, color: kMuted),
+              style: TextStyle(fontSize: 13, color: context.rq.muted),
               children: [
                 const TextSpan(text: "Didn't receive it? "),
                 TextSpan(
@@ -1030,7 +1030,7 @@ class _OtpScreenState extends State<_OtpScreen>
                       ? 'Resend in ${_resendSeconds}s'
                       : 'Resend OTP',
                   style: TextStyle(
-                    color: _resendSeconds > 0 ? kMuted : kAccent,
+                    color: _resendSeconds > 0 ? context.rq.muted : kAccent,
                     fontWeight: _resendSeconds > 0
                         ? FontWeight.w400 : FontWeight.w700,
                   ),
@@ -1125,8 +1125,8 @@ class _OtpBoxState extends State<_OtpBox> {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 6, // Allow paste of full 6 digits
-        style: const TextStyle(
-            fontSize: 22, fontWeight: FontWeight.w800, color: kText),
+        style: TextStyle(
+            fontSize: 22, fontWeight: FontWeight.w800, color: context.rq.text),
         decoration: const InputDecoration(
           border: InputBorder.none,
           counterText: '',

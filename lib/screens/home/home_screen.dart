@@ -278,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             // ── Fleet grid ────────────────────────────────────────────────────
             SectionHeading('Select Quad', icon: Icons.directions_bike_rounded,
               trailing: Text('${available.length} available',
-                  style: const TextStyle(color: kMuted, fontSize: 12))),
+                  style: TextStyle(color: context.rq.muted, fontSize: 12))),
 
             if (provider.loading)
               GridView.count(
@@ -367,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 fontSize: 9,
                                 decoration: TextDecoration.lineThrough)),
                           Text('${actual.kes} KES', style: TextStyle(
-                              color: sel ? Colors.white54 : kMuted,
+                              color: sel ? Colors.white54 : context.rq.muted,
                               fontSize: 11)),
                         ]);
                       }),
@@ -423,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             // ── Promo code ────────────────────────────────────────────────────
             SectionHeading('Promo Code', icon: Icons.local_offer_rounded,
               trailing: const Text('Optional',
-                  style: TextStyle(color: kMuted, fontSize: 11))),
+                  style: TextStyle(color: context.rq.muted, fontSize: 11))),
             Row(children: [
               Expanded(child: _TextField(
                   ctrl: _promoCtrl, label: 'Enter promo code',
@@ -649,7 +649,7 @@ class _QuadCardState extends State<_QuadCard>
                   Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                     Text(widget.quad.name, style: TextStyle(
-                        color: sel ? Colors.white : kText,
+                        color: sel ? Colors.white : context.rq.text,
                         fontWeight: FontWeight.w800, fontSize: 13)),
                     const SizedBox(height: 5),
                     StatusBadge(widget.quad.status),
@@ -718,7 +718,7 @@ class _ActiveTile extends StatelessWidget {
                   Text(booking.quadName, style: const TextStyle(
                       fontWeight: FontWeight.w700, fontSize: 14)),
                   Text(booking.customerName,
-                      style: const TextStyle(color: kMuted, fontSize: 12)),
+                      style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ],
               )),
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -743,7 +743,7 @@ class _ActiveTile extends StatelessWidget {
                 Text(overtime ? 'overtime' : 'remaining',
                     style: TextStyle(
                         color: overtime
-                            ? kRed.withAlpha(150) : kMuted,
+                            ? kRed.withAlpha(150) : context.rq.muted,
                         fontSize: 9)),
               ]),
             ]),
@@ -847,10 +847,10 @@ class _MpesaSection extends StatelessWidget {
               child: Row(children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Text('TILL NUMBER', style: TextStyle(
-                      color: kMuted, fontSize: 10, letterSpacing: 1)),
-                  Text(kTillNumber, style: const TextStyle(
+                      color: context.rq.muted, fontSize: 10, letterSpacing: 1)),
+                  Text(kTillNumber, style: TextStyle(
                       fontFamily: 'monospace', fontSize: 24,
-                      fontWeight: FontWeight.w900, color: kText,
+                      fontWeight: FontWeight.w900, color: context.rq.text,
                       letterSpacing: 3)),
                 ]),
                 const Spacer(),
@@ -859,7 +859,7 @@ class _MpesaSection extends StatelessWidget {
                   child: Icon(
                     copied ? Icons.check_circle_rounded : Icons.copy_rounded,
                     key: ValueKey(copied),
-                    color: copied ? kGreen : kMuted, size: 22)),
+                    color: copied ? kGreen : context.rq.muted, size: 22)),
               ]),
             ),
           ),
@@ -902,7 +902,7 @@ class _Step extends StatelessWidget {
         child: Center(child: Text(num, style: const TextStyle(
             color: kGreen, fontSize: 10, fontWeight: FontWeight.w800)))),
       const SizedBox(width: 8),
-      Text(text, style: const TextStyle(color: kText, fontSize: 13)),
+      Text(text, style: TextStyle(color: context.rq.text, fontSize: 13)),
     ]),
   );
 }
@@ -944,7 +944,7 @@ class _EmptyState extends StatelessWidget {
       Text(title, style: TextStyle(
           fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface.withAlpha(120))),
       const SizedBox(height: 4),
-      Text(sub, style: const TextStyle(color: kMuted, fontSize: 12)),
+      Text(sub, style: TextStyle(color: context.rq.muted, fontSize: 12)),
     ]),
   );
 }
@@ -978,11 +978,11 @@ class _StartButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.info_outline_rounded,
-                        size: 13, color: kMuted.withAlpha(160)),
+                        size: 13, color: context.rq.muted.withAlpha(160)),
                     const SizedBox(width: 6),
                     Text(_hints[step.clamp(0, 3)],
-                        style: const TextStyle(
-                            color: kMuted, fontSize: 12)),
+                        style: TextStyle(
+                            color: context.rq.muted, fontSize: 12)),
                   ],
                 ),
               )
@@ -1026,14 +1026,14 @@ class _StartButton extends StatelessWidget {
                             ready
                                 ? Icons.play_arrow_rounded
                                 : Icons.lock_outline_rounded,
-                            color: ready ? Colors.white : kMuted,
+                            color: ready ? Colors.white : context.rq.muted,
                             size: 22,
                           ),
                           const SizedBox(width: 10),
                           Text(
                             ready ? 'Start Ride' : 'Start Ride',
                             style: TextStyle(
-                                color: ready ? Colors.white : kMuted,
+                                color: ready ? Colors.white : context.rq.muted,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 16),
                           ),
@@ -1090,13 +1090,13 @@ class _BookingStepper extends StatelessWidget {
           width: 28, height: 28,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isDone ? accent : isActive ? kText : Colors.transparent,
+            color: isDone ? accent : isActive ? context.rq.text : Colors.transparent,
             border: Border.all(
               color: isDone ? accent : isActive ? accent : kBorder,
               width: isActive ? 2 : 1.5,
             ),
             boxShadow: isActive ? [
-              BoxShadow(color: kText.withAlpha(20), blurRadius: 8),
+              BoxShadow(color: context.rq.text.withAlpha(20), blurRadius: 8),
             ] : isDone ? [
               BoxShadow(color: kAccent.withAlpha(40), blurRadius: 8),
             ] : null,
@@ -1106,7 +1106,7 @@ class _BookingStepper extends StatelessWidget {
                 ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
                 : Text('${dotIdx + 1}', style: TextStyle(
                     fontSize: 11, fontWeight: FontWeight.w800,
-                    color: isActive ? Colors.white : kMuted)),
+                    color: isActive ? Colors.white : context.rq.muted)),
           ),
         );
       })),
@@ -1121,7 +1121,7 @@ class _BookingStepper extends StatelessWidget {
           style: TextStyle(
             fontSize: 9, fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
-            color: isDone ? accent : isActive ? kText : kMuted,
+            color: isDone ? accent : isActive ? context.rq.text : context.rq.muted,
           ),
         ));
       })),

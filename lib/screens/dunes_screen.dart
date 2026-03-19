@@ -169,7 +169,7 @@ class _DunesScreenState extends State<DunesScreen> {
                 TextButton(
                   onPressed: _deleteMap,
                   child: const Text('Remove',
-                      style: TextStyle(color: kMuted, fontSize: 12)),
+                      style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ),
               ]),
             ),
@@ -367,7 +367,7 @@ class _ZoomBtn extends StatelessWidget {
       width: 34, height: 34,
       decoration: BoxDecoration(color: Colors.white,
           borderRadius: BorderRadius.circular(8), boxShadow: kShadowMd),
-      child: Icon(icon, size: 18, color: kText),
+      child: Icon(icon, size: 18, color: context.rq.text),
     ),
   );
 }
@@ -427,8 +427,8 @@ class _InfoCard extends StatelessWidget {
           Text(title, style: const TextStyle(
               fontWeight: FontWeight.w700, fontSize: 13)),
           const SizedBox(height: 4),
-          Text(body, style: const TextStyle(
-              color: kMuted, fontSize: 12, height: 1.6)),
+          Text(body, style: TextStyle(
+              color: context.rq.muted, fontSize: 12, height: 1.6)),
         ],
       )),
     ]),
@@ -444,8 +444,8 @@ class _Fact extends StatelessWidget {
     child: Row(children: [
       Text(emoji, style: const TextStyle(fontSize: 18)),
       const SizedBox(width: 12),
-      Text(label, style: const TextStyle(
-          color: kMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(
+          color: context.rq.muted, fontSize: 13, fontWeight: FontWeight.w600)),
       const Spacer(),
       Text(value, style: const TextStyle(fontSize: 12)),
     ]),

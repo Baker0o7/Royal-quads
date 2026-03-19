@@ -250,7 +250,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           decoration: BoxDecoration(
-                            color: sel ? kText : kCard,
+                            color: sel ? context.rq.text : kCard,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                                 color: sel ? kAccent : kBorder,
@@ -269,11 +269,11 @@ class _PrebookScreenState extends State<PrebookScreen>
                               if (sel) const SizedBox(height: 2),
                               Text(p['label'] as String, style: TextStyle(
                                   fontWeight: FontWeight.w800, fontSize: 13,
-                                  color: sel ? kAccent2 : kText)),
+                                  color: sel ? kAccent2 : context.rq.text)),
                               const SizedBox(height: 2),
                               Text('${(p['price'] as int).kes} KES',
                                   style: TextStyle(fontSize: 11,
-                                      color: sel ? Colors.white54 : kMuted)),
+                                      color: sel ? Colors.white54 : context.rq.muted)),
                             ],
                           ),
                         ),
@@ -365,8 +365,8 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Row(children: [
     Icon(icon, color: kAccent, size: 16),
     const SizedBox(width: 8),
-    Text(text, style: const TextStyle(fontFamily: 'Playfair',
-        fontSize: 16, fontWeight: FontWeight.w700, color: kText)),
+    Text(text, style: TextStyle(fontFamily: 'Playfair',
+        fontSize: 16, fontWeight: FontWeight.w700, color: context.rq.text)),
   ]);
 }
 
@@ -424,15 +424,15 @@ class _DateTimePicker extends StatelessWidget {
           Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(dayLabel, style: const TextStyle(
-                  fontWeight: FontWeight.w700, fontSize: 15, color: kText)),
+              Text(dayLabel, style: TextStyle(
+                  fontWeight: FontWeight.w700, fontSize: 15, color: context.rq.text)),
               const SizedBox(height: 2),
               Row(children: [
                 const Icon(Icons.access_time_rounded,
-                    size: 12, color: kMuted),
+                    size: 12, color: context.rq.muted),
                 const SizedBox(width: 4),
-                Text(timeLabel, style: const TextStyle(
-                    color: kMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(timeLabel, style: TextStyle(
+                    color: context.rq.muted, fontSize: 13, fontWeight: FontWeight.w600)),
               ]),
             ],
           )),
@@ -542,10 +542,10 @@ class _EmptyBookings extends StatelessWidget {
       const SizedBox(height: 16),
       const Text('No pre-bookings yet', style: TextStyle(
           fontFamily: 'Playfair', fontSize: 18,
-          fontWeight: FontWeight.w700, color: kText)),
+          fontWeight: FontWeight.w700, color: context.rq.text)),
       const SizedBox(height: 6),
       const Text('Schedule rides in advance for your customers',
-          style: TextStyle(color: kMuted, fontSize: 13),
+          style: TextStyle(color: context.rq.muted, fontSize: 13),
           textAlign: TextAlign.center),
       const SizedBox(height: 20),
       ElevatedButton.icon(
@@ -594,7 +594,7 @@ class _BookingsList extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (past.isNotEmpty) ...[
-          _GroupHeader('Past', kMuted, '${past.length}'),
+          _GroupHeader('Past', context.rq.muted, '${past.length}'),
           ...past.map((b) => _PrebookTile(
               prebooking: b, onStatusChange: onStatusChange)),
         ],
@@ -672,11 +672,11 @@ class _PrebookTile extends StatelessWidget {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(prebooking.customerName, style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14, color: kText)),
+                Text(prebooking.customerName, style: TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
                 const SizedBox(height: 2),
                 Text(prebooking.customerPhone,
-                    style: const TextStyle(color: kMuted, fontSize: 12)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 12)),
               ],
             )),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -704,7 +704,7 @@ class _PrebookTile extends StatelessWidget {
             children: [
               Row(children: [
             Icon(Icons.schedule_rounded, size: 13,
-                color: isPast ? kMuted : kGreen),
+                color: isPast ? context.rq.muted : kGreen),
             const SizedBox(width: 6),
             Expanded(child: Text(
               '${prebooking.duration} min  ·  '
@@ -712,7 +712,7 @@ class _PrebookTile extends StatelessWidget {
               '${prebooking.scheduledFor.hour.toString().padLeft(2,'0')}:'
               '${prebooking.scheduledFor.minute.toString().padLeft(2,'0')}',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                  color: isPast ? kMuted : kGreen),
+                  color: isPast ? context.rq.muted : kGreen),
             )),
             if (prebooking.status == 'pending') ...[
               _ActionChip('Confirm', kGreen, Icons.check_rounded,
@@ -728,10 +728,10 @@ class _PrebookTile extends StatelessWidget {
               if (prebooking.notes != null) ...[
                 const SizedBox(height: 6),
                 Row(children: [
-                  const Icon(Icons.sticky_note_2_outlined, size: 11, color: kMuted),
+                  const Icon(Icons.sticky_note_2_outlined, size: 11, color: context.rq.muted),
                   const SizedBox(width: 4),
                   Expanded(child: Text(prebooking.notes!,
-                      style: const TextStyle(color: kMuted, fontSize: 11),
+                      style: TextStyle(color: context.rq.muted, fontSize: 11),
                       maxLines: 1, overflow: TextOverflow.ellipsis)),
                 ]),
               ],

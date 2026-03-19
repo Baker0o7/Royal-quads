@@ -52,7 +52,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
           const Icon(Icons.receipt_long_outlined, size: 56, color: kBorder),
           const SizedBox(height: 16),
           const Text('Receipt not found',
-              style: TextStyle(color: kMuted, fontSize: 16)),
+              style: TextStyle(color: context.rq.muted, fontSize: 16)),
           const SizedBox(height: 16),
           PrimaryButton(label: 'Go Home', icon: Icons.home_rounded,
               onTap: () => context.go('/')),
@@ -482,17 +482,17 @@ class _ReceiptCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Scan to verify receipt',
-                    style: TextStyle(color: kMuted, fontSize: 10,
+                    style: TextStyle(color: context.rq.muted, fontSize: 10,
                         letterSpacing: 0.5)),
                 const SizedBox(height: 4),
                 Text(booking.receiptId,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: 'monospace', fontSize: 13,
-                        fontWeight: FontWeight.w700, color: kText,
+                        fontWeight: FontWeight.w700, color: context.rq.text,
                         letterSpacing: 1.5)),
                 const SizedBox(height: 4),
                 const Text('Royal Quad Bikes · Mambrui, Kenya',
-                    style: TextStyle(color: kMuted, fontSize: 10)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 10)),
               ],
             )),
           ]),
@@ -512,13 +512,13 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 7),
     child: Row(children: [
-      Icon(icon, size: 15, color: kMuted.withAlpha(140)),
+      Icon(icon, size: 15, color: context.rq.muted.withAlpha(140)),
       const SizedBox(width: 8),
-      Text(label, style: const TextStyle(color: kMuted, fontSize: 13)),
+      Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
       const Spacer(),
       Text(value, style: TextStyle(
           fontWeight: FontWeight.w600, fontSize: 13,
-          color: valueColor ?? kText)),
+          color: valueColor ?? context.rq.text)),
     ]),
   );
 }
@@ -608,7 +608,7 @@ class _RatingCard extends StatelessWidget {
       if (rating > 0) Padding(
         padding: const EdgeInsets.only(top: 8),
         child: Text(_ratingLabel(rating),
-            style: const TextStyle(color: kMuted, fontSize: 13))),
+            style: TextStyle(color: context.rq.muted, fontSize: 13))),
       const SizedBox(height: 16),
       TextFormField(
         decoration: const InputDecoration(

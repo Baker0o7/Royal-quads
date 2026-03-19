@@ -146,9 +146,9 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
     if (_booking == null) return Scaffold(
       body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 48, color: kMuted),
+          const Icon(Icons.error_outline_rounded, size: 48, color: context.rq.muted),
           const SizedBox(height: 12),
-          const Text('Booking not found', style: TextStyle(color: kMuted)),
+          const Text('Booking not found', style: TextStyle(color: context.rq.muted)),
           const SizedBox(height: 16),
           TextButton(onPressed: () => context.go('/'),
               child: const Text('← Go Home')),
@@ -506,7 +506,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
               fontFamily: 'Playfair', fontSize: 20,
               fontWeight: FontWeight.w700)),
           Text('Confirm payment and close booking',
-              style: TextStyle(color: kMuted, fontSize: 12)),
+              style: TextStyle(color: context.rq.muted, fontSize: 12)),
         ]),
       ]),
 
@@ -525,10 +525,10 @@ class _EndRideSheetState extends State<_EndRideSheet> {
               Icons.directions_bike_rounded, kAccent),
           const Divider(color: kBorder, height: 20),
           _SummaryRow('Duration', '${widget.booking.duration} min',
-              Icons.timer_rounded, kMuted),
+              Icons.timer_rounded, context.rq.muted),
           const SizedBox(height: 6),
           _SummaryRow('Base price', '${widget.booking.price.kes} KES',
-              Icons.payments_rounded, kMuted),
+              Icons.payments_rounded, context.rq.muted),
           if (widget.otMins > 0) ...[
             const SizedBox(height: 6),
             _SummaryRow('Overtime (${widget.otMins} min)',
@@ -588,7 +588,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
               color: kGreen, size: 14),
           const SizedBox(width: 8),
           const Text('Till: ', style: TextStyle(
-              color: kMuted, fontSize: 12)),
+              color: context.rq.muted, fontSize: 12)),
           Text(kTillNumber, style: const TextStyle(
               color: kGreen, fontWeight: FontWeight.w800,
               fontSize: 13, fontFamily: 'monospace')),
@@ -641,7 +641,7 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(children: [
     Icon(icon, size: 14, color: color),
     const SizedBox(width: 8),
-    Text(label, style: const TextStyle(color: kMuted, fontSize: 13)),
+    Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
     const Spacer(),
     Text(value, style: const TextStyle(
         fontWeight: FontWeight.w700, fontSize: 13)),
@@ -693,7 +693,7 @@ class _ExtendSheetState extends State<_ExtendSheet> {
               fontFamily: 'Playfair', fontSize: 20,
               fontWeight: FontWeight.w700)),
           Text('Currently ${widget.booking.duration} min',
-              style: const TextStyle(color: kMuted, fontSize: 12)),
+              style: TextStyle(color: context.rq.muted, fontSize: 12)),
         ]),
       ]),
 
@@ -726,11 +726,11 @@ class _ExtendSheetState extends State<_ExtendSheet> {
                   mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text(o['label'] as String, style: TextStyle(
                     fontWeight: FontWeight.w800, fontSize: 14,
-                    color: sel ? kAccent : kText)),
+                    color: sel ? kAccent : context.rq.text)),
                 const SizedBox(height: 2),
                 Text('${(o['price'] as int).kes} KES', style: TextStyle(
                     fontSize: 11,
-                    color: sel ? kAccent.withAlpha(180) : kMuted)),
+                    color: sel ? kAccent.withAlpha(180) : context.rq.muted)),
               ]),
             ),
           );
