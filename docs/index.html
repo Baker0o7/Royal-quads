@@ -3,754 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Quad Bikes — Book Your Ride · Mambrui Sand Dunes</title>
-<meta name="description" content="Book quad bike rides at Mambrui Sand Dunes, Kilifi County, Kenya. M-Pesa payments. Instant confirmation.">
+<title>Royal Quad Bikes — Book a Ride · Mambrui Sand Dunes</title>
+<meta name="description" content="Book quad bike rides at Mambrui Sand Dunes, Kilifi County, Kenya. Pay with M-Pesa. Instant confirmation.">
 <link rel="icon" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ TOKENS */
+/* ═══════════════════════════════════════════════ TOKENS */
 :root {
-  --ivory:    #FAF7F0;
-  --linen:    #F4EEE2;
-  --parchment:#EBE2CC;
-  --warm:     #E0D4B8;
-  --espresso: #1A1208;
-  --ink:      #2C2010;
-  --ink2:     #4A3C28;
-  --muted:    #8A7A5E;
-  --light:    #B8A880;
-  --gold:     #B8860B;
-  --goldL:    #D4A017;
-  --goldXL:   #F0BC2E;
-  --goldPale: #FDF5DC;
-  --goldBorder: rgba(184,134,11,.22);
-  --goldBorderB: rgba(184,134,11,.42);
-  --goldGlow: rgba(184,134,11,.12);
-  --green:    #1A5C38;
-  --greenL:   #2E8B57;
-  --greenPale:#EDF7F0;
-  --greenBorder: rgba(46,139,87,.28);
-  --red:      #8B1A1A;
-  --shadow-xs: 0 1px 3px rgba(26,18,8,.06);
-  --shadow-sm: 0 2px 8px rgba(26,18,8,.08), 0 1px 3px rgba(26,18,8,.04);
-  --shadow-md: 0 4px 20px rgba(26,18,8,.10), 0 1px 6px rgba(26,18,8,.06);
-  --shadow-lg: 0 12px 48px rgba(26,18,8,.14), 0 4px 12px rgba(26,18,8,.08);
-  --shadow-gold: 0 0 0 3px rgba(184,134,11,.12), 0 4px 16px rgba(184,134,11,.18);
-  --r-sm: 10px;
-  --r-md: 16px;
-  --r-lg: 24px;
-  --r-xl: 32px;
+  --ivory:      #FAF7F0;
+  --linen:      #F4EEE2;
+  --parchment:  #EBE2CC;
+  --warm:       #DDD0B0;
+  --espresso:   #1A1208;
+  --ink:        #2C2010;
+  --ink2:       #4A3C28;
+  --muted:      #8A7A5E;
+  --light:      #B8A880;
+  --gold:       #B8860B;
+  --goldL:      #D4A017;
+  --goldXL:     #F0BC2E;
+  --goldPale:   #FDF5DC;
+  --goldBorder: rgba(184,134,11,.2);
+  --goldBorderB:rgba(184,134,11,.4);
+  --goldGlow:   rgba(184,134,11,.1);
+  --green:      #166534;
+  --greenL:     #22C55E;
+  --greenPale:  #F0FDF4;
+  --greenBorder:rgba(34,197,94,.3);
+  --red:        #991B1B;
+  --sh-xs: 0 1px 3px rgba(26,18,8,.06);
+  --sh-sm: 0 2px 10px rgba(26,18,8,.08);
+  --sh-md: 0 4px 24px rgba(26,18,8,.11);
+  --sh-lg: 0 12px 48px rgba(26,18,8,.13);
+  --sh-gold: 0 0 0 3px rgba(184,134,11,.1), 0 4px 20px rgba(184,134,11,.18);
+  --r: 14px;
+  --rL: 22px;
+  --rXL: 32px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ivory);color:var(--ink);font-family:'Jost',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--goldXL);color:var(--espresso)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--linen)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
-html { scroll-behavior: smooth; font-size: 16px }
-body {
-  background: var(--ivory);
-  color: var(--ink);
-  font-family: 'Jost', sans-serif;
-  font-weight: 400;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-::selection { background: var(--goldXL); color: var(--espresso) }
-::-webkit-scrollbar { width: 4px }
-::-webkit-scrollbar-track { background: var(--linen) }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px }
+/* paper grain */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.35;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FINE GRAIN */
-body::after {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
-  opacity: .4; mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
-}
+/* ═══════════════════════════════════════════════ NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:300;height:62px;display:flex;align-items:center;padding:0 clamp(20px,5vw,64px);background:rgba(250,247,240,0);border-bottom:1px solid transparent;transition:background .4s,border-color .4s,box-shadow .4s}
+.nav.up{background:rgba(250,247,240,.96);backdrop-filter:blur(20px) saturate(160%);border-color:var(--goldBorder);box-shadow:0 1px 20px rgba(26,18,8,.07)}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--goldBorder);padding:2px;box-shadow:0 0 0 3px var(--goldGlow)}
+.nav-logo img{width:100%;height:100%;border-radius:50%}
+.nav-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--espresso);letter-spacing:.2px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.open-pill{display:flex;align-items:center;gap:6px;padding:5px 14px;background:var(--greenPale);border:1px solid var(--greenBorder);border-radius:100px;font-size:11px;font-weight:600;color:var(--green);letter-spacing:.5px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--greenL);box-shadow:0 0 0 2px rgba(34,197,94,.2);animation:dot 2s ease-in-out infinite}
+@keyframes dot{0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,.2)}50%{box-shadow:0 0 0 5px rgba(34,197,94,.05)}}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ NAV */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-  height: 64px;
-  display: flex; align-items: center;
-  padding: 0 clamp(20px, 5vw, 64px);
-  background: rgba(250,247,240,.0);
-  border-bottom: 1px solid transparent;
-  transition: background .5s, border-color .5s, box-shadow .5s;
-}
-.nav.scrolled {
-  background: rgba(250,247,240,.96);
-  backdrop-filter: blur(20px) saturate(160%);
-  border-color: var(--goldBorder);
-  box-shadow: 0 1px 24px rgba(26,18,8,.07);
-}
-.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none }
-.nav-logo-ring {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: 1.5px solid var(--goldBorder);
-  padding: 2px;
-  box-shadow: 0 0 0 4px var(--goldGlow);
-}
-.nav-logo-ring img { width: 100%; height: 100%; border-radius: 50%; display: block }
-.nav-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px; font-weight: 600;
-  color: var(--espresso); letter-spacing: .3px;
-}
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px }
-.open-pill {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 14px;
-  background: var(--greenPale);
-  border: 1px solid var(--greenBorder);
-  border-radius: 100px;
-  font-size: 11px; font-weight: 600; color: var(--green);
-  letter-spacing: .5px;
-}
-.open-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--greenL);
-  box-shadow: 0 0 0 2px rgba(46,139,87,.2);
-  animation: dot-pulse 2s ease-in-out infinite;
-}
-@keyframes dot-pulse {
-  0%,100% { box-shadow: 0 0 0 2px rgba(46,139,87,.2) }
-  50%      { box-shadow: 0 0 0 5px rgba(46,139,87,.06) }
-}
+/* ═══════════════════════════════════════════════ HERO */
+.hero{min-height:100svh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;padding:90px clamp(20px,6vw,80px) 20px;background:linear-gradient(170deg,var(--ivory) 0%,var(--linen) 55%,var(--parchment) 100%)}
+/* radial gold wash */
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 110% 70% at 50% -5%,rgba(184,134,11,.07) 0%,transparent 60%);pointer-events:none}
+/* dune silhouette */
+.hero-dunes{position:absolute;bottom:0;left:0;right:0;height:44%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 360' preserveAspectRatio='none'%3E%3Cpath fill='%23EBE2CC' d='M0,360L0,250Q120,185 240,215Q380,248 500,172Q630,96 740,142Q860,190 960,124Q1090,54 1200,88Q1320,124 1440,82L1440,360Z'/%3E%3Cpath fill='%23DDD0B0' opacity='.55' d='M0,360L0,300Q140,252 270,278Q400,308 530,248Q650,192 770,228Q900,270 1020,212Q1150,150 1280,188Q1380,220 1440,200L1440,360Z'/%3E%3C/svg%3E") no-repeat bottom/100% 100%}
+/* gold top bar */
+.hero-bar{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(184,134,11,.25) 25%,var(--goldXL) 50%,rgba(184,134,11,.25) 75%,transparent)}
+/* vertical rules */
+.hero-vl,.hero-vr{position:absolute;top:25%;width:1px;height:30%;background:linear-gradient(to bottom,transparent,var(--goldBorder),transparent)}
+.hero-vl{left:clamp(20px,4vw,52px)}
+.hero-vr{right:clamp(20px,4vw,52px)}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HERO */
-.hero {
-  min-height: 100svh;
-  position: relative; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  text-align: center;
-  padding: 100px clamp(20px,6vw,80px) 0;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(184,134,11,.06) 0%, transparent 60%),
-    linear-gradient(175deg, var(--ivory) 0%, var(--linen) 55%, var(--parchment) 100%);
-}
+.hero-inner{position:relative;z-index:2;max-width:720px;margin:0 auto;padding-bottom:clamp(80px,12vw,140px)}
+.kicker{display:inline-flex;align-items:center;gap:10px;margin-bottom:30px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;color:var(--gold);letter-spacing:3.5px;text-transform:uppercase;animation:up .7s ease both}
+.kicker::before,.kicker::after{content:'';display:block;width:24px;height:1px;background:var(--goldBorder)}
+.kicker::after{transform:scaleX(-1)}
+.hero-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(60px,11vw,124px);font-weight:300;line-height:.9;letter-spacing:-1px;color:var(--espresso);margin-bottom:8px;animation:up .7s .08s ease both}
+.hero-h1 strong{font-weight:700;display:block}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-rule{width:44px;height:1px;background:linear-gradient(90deg,var(--goldBorder),var(--gold),var(--goldBorder));margin:22px auto;animation:up .7s .16s ease both}
+.hero-sub{font-size:clamp(14px,1.6vw,17px);font-weight:300;color:var(--muted);line-height:1.85;max-width:460px;margin:0 auto 38px;animation:up .7s .2s ease both}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:up .7s .26s ease both}
+.btn-cta{display:inline-flex;align-items:center;gap:9px;background:var(--espresso);color:var(--ivory);font-family:'Jost',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:15px 32px;border-radius:2px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(26,18,8,.22),inset 0 1px 0 rgba(255,255,255,.06);transition:background .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.btn-cta::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);transition:left .5s}
+.btn-cta:hover{background:var(--ink);transform:translateY(-2px);box-shadow:0 10px 32px rgba(26,18,8,.28)}
+.btn-cta:hover::after{left:150%}
+.btn-out{display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--ink2);font-family:'Jost',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;padding:14px 28px;border-radius:2px;border:1px solid var(--goldBorderB);cursor:pointer;transition:all .2s}
+.btn-out:hover{background:var(--goldGlow);border-color:var(--gold);color:var(--espresso)}
 
-/* Decorative SVG dunes at bottom */
-.hero-dunes {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 46%;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 380' preserveAspectRatio='none'%3E%3Cpath fill='%23EBE2CC' d='M0,380L0,260Q120,190 240,220Q380,255 500,180Q620,108 720,150Q840,196 960,128Q1080,62 1200,95Q1320,128 1440,88L1440,380Z'/%3E%3Cpath fill='%23E0D4B8' opacity='.55' d='M0,380L0,320Q150,265 280,295Q410,325 540,258Q660,195 780,235Q900,278 1020,220Q1140,164 1260,198Q1380,228 1440,210L1440,380Z'/%3E%3C/svg%3E")
-    no-repeat bottom / 100% 100%;
-}
+.hero-stats{display:flex;justify-content:center;gap:clamp(28px,5vw,70px);margin-top:68px;padding-top:38px;border-top:1px solid var(--goldBorder);animation:up .7s .44s ease both;flex-wrap:wrap}
+.hs-n{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,42px);font-weight:600;color:var(--espresso);display:block;line-height:1;margin-bottom:5px}
+.hs-l{font-size:9.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--light)}
 
-/* Gold ornament line */
-.hero-ornament {
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--goldBorder) 25%, var(--goldXL) 50%, var(--goldBorder) 75%, transparent 100%);
-}
+.scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:9px;animation:up .7s 1s ease both}
+.sc-track{width:1px;height:48px;background:var(--goldBorder);position:relative;overflow:hidden}
+.sc-track::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:50%;background:linear-gradient(to bottom,transparent,var(--gold));animation:beam 2.2s ease-in-out infinite}
+@keyframes beam{0%{top:-100%;opacity:0}30%{opacity:1}100%{top:100%;opacity:0}}
+.sc-txt{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--light);text-transform:uppercase}
 
-/* Side decorative lines */
-.hero-rule-l, .hero-rule-r {
-  position: absolute; top: 30%; width: 1px; height: 28%;
-  background: linear-gradient(to bottom, transparent, var(--goldBorder), transparent);
-}
-.hero-rule-l { left: clamp(20px,4vw,56px) }
-.hero-rule-r { right: clamp(20px,4vw,56px) }
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-.hero-inner {
-  position: relative; z-index: 2;
-  max-width: 720px; margin: 0 auto;
-  padding-bottom: clamp(80px,14vw,140px);
-}
+/* ═══════════════════════════════════════════════ DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--goldBorder) 20%,var(--goldBorder) 80%,transparent)}
 
-.hero-kicker {
-  display: inline-flex; align-items: center; gap: 10px;
-  margin-bottom: 32px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9.5px; font-weight: 500;
-  color: var(--gold); letter-spacing: 3.5px; text-transform: uppercase;
-  animation: rise-in .8s ease both;
-}
-.hero-kicker::before, .hero-kicker::after {
-  content: '';
-  display: block; width: 28px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--goldBorder));
-}
-.hero-kicker::after { transform: scaleX(-1) }
+/* ═══════════════════════════════════════════════ BOOKING */
+.booking{padding:clamp(64px,8vw,100px) clamp(20px,5vw,60px) 96px;background:var(--ivory)}
+.booking-wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start}
+@media(max-width:880px){.booking-wrap{grid-template-columns:1fr}}
 
-.hero-h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(58px, 10vw, 120px);
-  font-weight: 300;
-  line-height: .92; letter-spacing: -1px;
-  color: var(--espresso);
-  margin-bottom: 10px;
-  animation: rise-in .8s .1s ease both;
-}
-.hero-h1 strong {
-  font-weight: 700; display: block;
-}
-.hero-h1 em {
-  font-style: italic; font-weight: 300;
-  color: var(--gold);
-}
+.sec-eye{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.sec-eye-line{width:28px;height:1px;background:var(--gold)}
+.sec-eye-txt{font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4.5vw,46px);font-weight:600;color:var(--espresso);letter-spacing:-.3px;line-height:1.1;margin-bottom:32px}
+.sec-title em{font-style:italic;color:var(--gold)}
 
-.hero-rule {
-  width: 48px; height: 1px;
-  background: linear-gradient(90deg, var(--goldBorder), var(--gold), var(--goldBorder));
-  margin: 24px auto;
-  animation: rise-in .8s .18s ease both;
-}
+/* ── Step bar */
+.step-bar{display:flex;align-items:center;margin-bottom:36px}
+.snode{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:var(--linen);border:1.5px solid var(--goldBorder);color:var(--light);transition:all .3s;cursor:default}
+.snode.on{background:var(--espresso);border-color:var(--espresso);color:var(--ivory)}
+.snode.done{background:var(--gold);border-color:var(--gold);color:#fff}
+.sline{flex:1;height:1px;background:var(--goldBorder);margin:0 -1px;transition:background .35s}
+.sline.done{background:var(--gold)}
+.slabels{display:flex;justify-content:space-between;margin-bottom:28px}
+.slbl{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--light);flex:1;text-align:center;transition:color .3s}
+.slbl:first-child{text-align:left}
+.slbl:last-child{text-align:right;flex:none}
+.slbl.on{color:var(--espresso)}
+.slbl.done{color:var(--gold)}
 
-.hero-sub {
-  font-size: clamp(14px, 1.6vw, 17px); font-weight: 300;
-  color: var(--muted); line-height: 1.85;
-  max-width: 460px; margin: 0 auto 40px;
-  animation: rise-in .8s .22s ease both;
-}
+/* ── Panels */
+.panels{overflow:hidden}
+.panel{display:none;animation:pin .3s cubic-bezier(.4,0,.2,1)}
+.panel.active{display:block}
+@keyframes pin{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+.panel-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,30px);font-weight:600;color:var(--espresso);letter-spacing:-.2px;margin-bottom:6px}
+.panel-sub{font-size:13.5px;font-weight:300;color:var(--muted);line-height:1.75;margin-bottom:26px}
 
-.hero-btns {
-  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-  animation: rise-in .8s .28s ease both;
-}
+/* ── Quad grid */
+.quad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:10px;margin-bottom:10px}
+.qcard{background:#fff;border:1.5px solid var(--goldBorder);border-radius:var(--r);padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;box-shadow:var(--sh-xs)}
+.qcard:hover:not(.na){border-color:var(--goldBorderB);box-shadow:var(--sh-md);transform:translateY(-3px)}
+.qcard.sel{border-color:var(--gold);background:var(--goldPale);box-shadow:var(--sh-gold);transform:translateY(-3px)}
+.qcard.na{opacity:.36;cursor:not-allowed}
+.qcheck{position:absolute;top:9px;right:9px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#fff;font-size:9px;font-weight:900;display:none;align-items:center;justify-content:center}
+.qcard.sel .qcheck{display:flex}
+.qemoji{font-size:28px;margin-bottom:8px}
+.qname{font-size:12px;font-weight:700;color:var(--espresso);margin-bottom:7px}
+.qbadge{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px}
+.q-ok{background:var(--greenPale);color:var(--green);border:1px solid var(--greenBorder)}
+.q-no{background:#FEF2F2;color:var(--red);border:1px solid rgba(153,27,27,.2)}
 
-/* Primary gold button */
-.btn-primary {
-  display: inline-flex; align-items: center; gap: 9px;
-  background: var(--espresso); color: var(--ivory);
-  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 600;
-  letter-spacing: 1.2px; text-transform: uppercase;
-  padding: 16px 34px; border-radius: 2px;
-  border: none; cursor: pointer;
-  box-shadow: 0 4px 24px rgba(26,18,8,.25), inset 0 1px 0 rgba(255,255,255,.06);
-  transition: background .25s, transform .2s, box-shadow .2s;
-  position: relative; overflow: hidden;
-}
-.btn-primary::after {
-  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
-  transition: left .5s;
-}
-.btn-primary:hover { background: var(--ink); transform: translateY(-2px); box-shadow: 0 10px 36px rgba(26,18,8,.3), inset 0 1px 0 rgba(255,255,255,.06) }
-.btn-primary:hover::after { left: 150% }
+/* ── Duration grid */
+.dur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+@media(max-width:460px){.dur-grid{grid-template-columns:repeat(2,1fr)}}
+.dcard{background:#fff;border:1.5px solid var(--goldBorder);border-radius:var(--r);padding:22px 10px 18px;text-align:center;cursor:pointer;transition:all .2s;position:relative;box-shadow:var(--sh-xs)}
+.dcard:hover{border-color:var(--goldBorderB);box-shadow:var(--sh-md);transform:translateY(-3px)}
+.dcard.sel{border-color:var(--gold);background:var(--goldPale);box-shadow:var(--sh-gold);transform:translateY(-3px)}
+.dpop{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--espresso);color:var(--ivory);font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1.5px;padding:3px 12px;border-radius:100px;white-space:nowrap}
+.dtime{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--espresso);margin-bottom:5px}
+.dprice{font-size:15px;font-weight:700;color:var(--gold)}
+.dkes{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:1px}
 
-/* Ghost outline button */
-.btn-outline {
-  display: inline-flex; align-items: center; gap: 9px;
-  background: transparent; color: var(--ink);
-  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 500;
-  letter-spacing: 1.2px; text-transform: uppercase;
-  padding: 15px 30px; border-radius: 2px;
-  border: 1px solid var(--goldBorderB); cursor: pointer;
-  transition: all .2s;
-}
-.btn-outline:hover { background: var(--goldGlow); border-color: var(--gold) }
+/* ── Promo */
+.promo-box{background:var(--linen);border:1px solid var(--goldBorder);border-radius:var(--r);padding:16px 18px;margin-top:20px}
+.flabel{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--light);margin-bottom:10px}
+.promo-row{display:flex;gap:8px}
+.promo-inp{flex:1;background:#fff;border:1px solid var(--goldBorder);border-radius:8px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:12.5px;font-weight:500;color:var(--espresso);letter-spacing:2px;text-transform:uppercase;outline:none;transition:border-color .2s,box-shadow .2s}
+.promo-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldGlow)}
+.promo-inp::placeholder{font-family:'Jost',sans-serif;letter-spacing:0;font-size:12.5px;color:var(--light);text-transform:none}
+.promo-btn{background:var(--espresso);border:none;border-radius:8px;padding:0 20px;color:var(--ivory);font-family:'Jost',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap}
+.promo-btn:hover{background:var(--ink)}
+.promo-fb{margin-top:9px;font-size:12px;font-weight:700;padding:8px 12px;border-radius:7px;display:none}
+.fb-ok{background:var(--greenPale);color:var(--green);border:1px solid var(--greenBorder);display:block}
+.fb-err{background:#FEF2F2;color:var(--red);border:1px solid rgba(153,27,27,.2);display:block}
 
-/* Stats */
-.hero-stats {
-  display: flex; justify-content: center; gap: clamp(28px,5vw,72px);
-  margin-top: 72px; padding-top: 40px;
-  border-top: 1px solid var(--goldBorder);
-  animation: rise-in .8s .45s ease both;
-  flex-wrap: wrap;
-}
-.hs-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(28px,4vw,42px); font-weight: 600;
-  color: var(--espresso); display: block; line-height: 1; margin-bottom: 5px;
-}
-.hs-lbl {
-  font-size: 9.5px; font-weight: 600; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--light);
-}
+/* ── Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--light)}
+.field input{background:#fff;border:1px solid var(--goldBorder);border-radius:8px;padding:12px 15px;font-family:'Jost',sans-serif;font-size:14px;font-weight:400;color:var(--espresso);outline:none;transition:border-color .2s,box-shadow .2s;width:100%;box-shadow:var(--sh-xs)}
+.field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldGlow)}
+.field input::placeholder{color:var(--light);font-weight:300}
+.full{grid-column:1/-1}
 
-.scroll-cue {
-  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-  z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px;
-  animation: rise-in .8s 1s ease both;
-}
-.sc-track { width: 1px; height: 52px; background: var(--goldBorder); position: relative; overflow: hidden }
-.sc-track::after {
-  content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 50%;
-  background: linear-gradient(to bottom, transparent, var(--gold));
-  animation: sc-drop 2.2s ease-in-out infinite;
-}
-@keyframes sc-drop { 0%{top:-100%;opacity:0} 30%{opacity:1} 100%{top:100%;opacity:0} }
-.sc-lbl { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:3px; color:var(--light); text-transform:uppercase }
+/* ── Waiver */
+.waiver-scroll{background:var(--linen);border:1px solid var(--goldBorder);border-radius:var(--r);padding:16px 18px;max-height:200px;overflow-y:auto;margin-bottom:14px}
+.waiver-scroll::-webkit-scrollbar{width:3px}
+.waiver-scroll::-webkit-scrollbar-thumb{background:var(--goldBorder)}
+.wclause{display:flex;gap:11px;margin-bottom:12px;font-size:13px;color:var(--ink2);line-height:1.65}
+.wnum{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:rgba(184,134,11,.09);border:1px solid var(--goldBorder);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--gold);margin-top:1px}
+.waiver-agree{display:flex;align-items:center;gap:12px;cursor:pointer;background:#fff;border:1.5px solid var(--goldBorder);border-radius:8px;padding:12px 15px;transition:all .2s;box-shadow:var(--sh-xs)}
+.waiver-agree:hover{border-color:var(--goldBorderB)}
+.waiver-agree.ok{border-color:rgba(34,197,94,.4);background:var(--greenPale)}
+.wa-box{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--goldBorder);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;transition:all .25s;background:var(--linen)}
+.waiver-agree.ok .wa-box{background:var(--green);border-color:var(--green);color:#fff}
+.wa-txt{font-size:13.5px;font-weight:600;color:var(--espresso)}
 
-@keyframes rise-in { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+/* ── Payment */
+.pay-hero{background:var(--espresso);border-radius:var(--r);padding:22px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 30px rgba(26,18,8,.26)}
+.ph-lbl{font-size:9.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(250,247,240,.38);margin-bottom:6px}
+.ph-amt{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--goldXL);line-height:1}
+.ph-detail{font-size:11px;color:rgba(250,247,240,.3);margin-top:4px}
+.ph-icon{font-size:36px;opacity:.65}
+.till-block{background:var(--greenPale);border:1.5px solid var(--greenBorder);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s;box-shadow:var(--sh-xs)}
+.till-block:hover{background:rgba(34,197,94,.07)}
+.till-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+.till-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--espresso);letter-spacing:5px}
+.till-copy{background:var(--greenPale);border:1.5px solid var(--greenBorder);color:var(--green);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'Jost',sans-serif}
+.till-copy:hover,.till-copy.ok{background:var(--greenL);border-color:var(--greenL);color:#fff}
+.mpesa-steps{background:var(--linen);border:1px solid var(--goldBorder);border-radius:var(--r);padding:16px 18px;margin-bottom:16px}
+.mstep{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13.5px;color:var(--ink2)}
+.mstep:last-child{margin-bottom:0}
+.mstep-n{width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--goldPale);border:1px solid var(--goldBorder);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--gold)}
+.mstep b{font-weight:700;color:var(--espresso)}
+.ref-inp{width:100%;background:#fff;border:1.5px solid var(--goldBorder);border-radius:8px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--espresso);letter-spacing:3px;text-transform:uppercase;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:var(--sh-xs)}
+.ref-inp:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--goldGlow)}
+.ref-inp::placeholder{font-family:'Jost',sans-serif;letter-spacing:0;font-size:13px;color:var(--light);text-transform:none}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECTION DIVIDER */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--goldBorder) 20%, var(--goldBorder) 80%, transparent);
-  margin: 0;
-}
+/* ── Buttons */
+.btn-row{display:flex;gap:12px;margin-top:26px}
+.btn-back{background:transparent;border:1px solid var(--goldBorder);border-radius:2px;padding:13px 22px;font-family:'Jost',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .2s}
+.btn-back:hover{border-color:var(--espresso);color:var(--espresso)}
+.btn-next{flex:1;background:var(--espresso);border:none;border-radius:2px;padding:14px;font-family:'Jost',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ivory);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(26,18,8,.18)}
+.btn-next:hover:not(:disabled){background:var(--ink);transform:translateY(-1px);box-shadow:0 8px 22px rgba(26,18,8,.26)}
+.btn-next:disabled{opacity:.28;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-confirm{flex:1;background:linear-gradient(135deg,var(--gold),var(--goldL));border:none;border-radius:2px;padding:15px;font-family:'Jost',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--espresso);cursor:pointer;transition:all .25s;box-shadow:0 4px 18px rgba(184,134,11,.38);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-confirm:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 32px rgba(184,134,11,.48)}
+.btn-confirm:disabled{opacity:.32;cursor:not-allowed;transform:none}
+.bspin{width:17px;height:17px;border:2px solid rgba(26,18,8,.18);border-top-color:var(--espresso);border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading .bspin{display:block}
+.loading .btxt{display:none}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BOOKING */
-.booking {
-  padding: clamp(64px,8vw,104px) clamp(20px,5vw,64px) 96px;
-  background: var(--ivory);
-}
-.booking-inner {
-  max-width: 1100px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start;
-}
-@media(max-width:880px) { .booking-inner { grid-template-columns: 1fr } }
+/* ═══════════════════════════════════════════════ SIDEBAR */
+.sidebar{position:sticky;top:76px;display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border:1px solid var(--goldBorder);border-radius:var(--rL);padding:22px;box-shadow:var(--sh-sm)}
+.card-logo-wrap{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--goldBorder)}
+.card-logo-wrap img{width:50px;height:50px;border-radius:50%;margin:0 auto 9px;border:2px solid var(--goldBorderB);box-shadow:0 0 0 4px var(--goldGlow)}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--espresso)}
+.card-sub{font-size:9.5px;color:var(--light);letter-spacing:1.5px;margin-top:2px}
+.prog-wrap{height:2px;background:var(--parchment);border-radius:100px;margin-bottom:7px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--goldL));border-radius:100px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.prog-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--light);letter-spacing:1px;margin-bottom:18px}
+.sum-rows{display:flex;flex-direction:column;gap:11px;margin-bottom:16px}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.srk{font-size:11.5px;color:var(--muted)}
+.srv{font-size:11.5px;font-weight:700;color:var(--espresso);text-align:right;max-width:160px}
+.srv.g{color:var(--gold)}
+.srv.grn{color:var(--green);font-size:11px}
+.sum-total{background:var(--goldPale);border:1.5px solid var(--goldBorderB);border-radius:10px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center}
+.stl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.sta{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:600;color:var(--gold)}
+.info-ttl{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--light);margin-bottom:14px}
+.irow{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--goldBorder)}
+.irow:last-of-type{border-bottom:none;padding-bottom:0}
+.iico{font-size:16px;flex-shrink:0;margin-top:1px}
+.irow h4{font-size:12px;font-weight:700;color:var(--espresso);margin-bottom:2px}
+.irow p{font-size:11px;color:var(--muted);line-height:1.55}
+.map-wrap{margin-top:14px;border-radius:var(--r);overflow:hidden;border:1px solid var(--goldBorder);box-shadow:var(--sh-xs)}
+.map-wrap iframe{display:block;width:100%;height:154px;border:none}
+.map-btns{display:flex;gap:7px;padding:9px 0 0}
+.mbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;transition:all .2s}
+.mbtn-gm{background:#EEF2FF;border:1px solid #C7D2FE;color:#4338CA}
+.mbtn-gm:hover{background:#E0E7FF}
+.mbtn-dir{background:var(--greenPale);border:1px solid var(--greenBorder);color:var(--green)}
+.mbtn-dir:hover{background:rgba(34,197,94,.1)}
 
-/* Section header */
-.section-eyebrow {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-}
-.se-line { width: 32px; height: 1px; background: var(--gold) }
-.se-text {
-  font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500;
-  letter-spacing: 3px; text-transform: uppercase; color: var(--gold);
-}
-.section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(28px,4vw,44px); font-weight: 600;
-  color: var(--espresso); letter-spacing: -.3px; margin-bottom: 32px;
-  line-height: 1.1;
-}
+/* ═══════════════════════════════════════════════ SUCCESS */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(26,18,8,.45);backdrop-filter:blur(18px) saturate(140%);display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.sheet{background:#fff;border:1px solid var(--goldBorderB);border-radius:var(--rXL);max-width:480px;width:100%;padding:clamp(28px,5vw,48px) clamp(22px,5vw,44px);box-shadow:var(--sh-lg),0 0 0 1px var(--goldGlow);animation:sheetup .5s cubic-bezier(.175,.885,.32,1.275) both;position:relative;overflow:hidden}
+.sheet::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--goldBorder) 25%,var(--goldXL) 50%,var(--goldBorder) 75%,transparent)}
+@keyframes sheetup{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.sheet-icon{width:62px;height:62px;border-radius:50%;background:var(--greenPale);border:2px solid var(--greenBorder);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;animation:pop .5s .25s cubic-bezier(.175,.885,.32,1.275) both}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.sheet-title{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,36px);font-weight:700;color:var(--espresso);text-align:center;margin-bottom:5px}
+.sheet-sub{font-size:13.5px;font-weight:300;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:20px}
+.ticket{background:var(--linen);border:1px solid var(--goldBorder);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.ticket-head{background:var(--espresso);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.th-brand{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ivory)}
+.th-id{font-family:'DM Mono',monospace;font-size:10px;color:var(--goldXL);background:rgba(184,134,11,.15);padding:3px 8px;border-radius:5px;border:1px solid rgba(184,134,11,.25)}
+.ticket-perf{height:2px;background:repeating-linear-gradient(90deg,var(--goldBorder) 0,var(--goldBorder) 8px,transparent 8px,transparent 16px)}
+.ticket-rows{padding:11px 16px;display:flex;flex-direction:column;gap:7px}
+.trow{display:flex;justify-content:space-between;align-items:center}
+.tk{font-size:11.5px;color:var(--muted)}
+.tv{font-size:11.5px;font-weight:700;color:var(--espresso)}
+.ticket-total{background:var(--goldPale);padding:11px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--goldBorderB)}
+.tt-l{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.tt-v{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold)}
+.sheet-acts{display:flex;gap:10px}
+.btn-wa{flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Jost',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+.btn-wa:hover{background:#1a9e4d}
+.btn-again{flex:1;background:var(--linen);color:var(--espresso);border:1px solid var(--goldBorder);border-radius:10px;padding:13px;font-family:'Jost',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-again:hover{border-color:var(--espresso)}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ STEP INDICATOR */
-.steps {
-  display: flex; align-items: center; gap: 0; margin-bottom: 36px;
-}
-.step-seg { display: flex; align-items: center; flex: 1 }
-.step-seg:last-child { flex: 0 0 auto }
-.step-node {
-  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
-  background: var(--linen); border: 1px solid var(--goldBorder);
-  color: var(--light); transition: all .35s;
-}
-.step-node.active { background: var(--espresso); border-color: var(--espresso); color: var(--ivory) }
-.step-node.done { background: var(--gold); border-color: var(--gold); color: #fff; font-size: 13px }
-.step-connector {
-  flex: 1; height: 1px; background: var(--goldBorder);
-  transition: background .4s; margin: 0 -1px;
-}
-.step-connector.done { background: var(--gold) }
-.step-labels {
-  display: flex; justify-content: space-between;
-  padding: 8px 0 28px; gap: 0;
-}
-.sl {
-  font-size: 9.5px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--light); transition: color .3s;
-  flex: 1; text-align: center;
-}
-.sl:first-child { text-align: left }
-.sl:last-child { text-align: right; flex: 0 0 auto }
-.sl.active { color: var(--espresso) }
-.sl.done { color: var(--gold) }
+/* ═══════════════════════════════════════════════ TOAST */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--espresso);color:var(--ivory);padding:12px 24px;border-radius:100px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 8px 28px rgba(26,18,8,.28);z-index:1000;transition:transform .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(250,247,240,.08)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PANELS */
-.panel-wrap { overflow: hidden }
-.panel { display: none; animation: panel-in .3s cubic-bezier(.4,0,.2,1) }
-.panel.active { display: block }
-@keyframes panel-in { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+/* ═══════════════════════════════════════════════ FOOTER */
+footer{background:var(--linen);border-top:1px solid var(--goldBorder);padding:26px;text-align:center;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--light);letter-spacing:.5px}
+footer span{color:var(--gold)}
 
-.panel-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(24px,3vw,32px); font-weight: 600;
-  color: var(--espresso); letter-spacing: -.2px; margin-bottom: 6px;
-}
-.panel-sub {
-  font-size: 14px; font-weight: 300; color: var(--muted);
-  line-height: 1.75; margin-bottom: 28px;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ QUAD GRID */
-.quad-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
-  gap: 10px; margin-bottom: 10px;
-}
-.quad-card {
-  background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-md); padding: 20px 12px; text-align: center;
-  cursor: pointer; transition: all .2s; position: relative;
-  box-shadow: var(--shadow-xs);
-}
-.quad-card:hover:not(.na) {
-  border-color: var(--goldBorderB);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
-}
-.quad-card.sel {
-  border-color: var(--gold); background: var(--goldPale);
-  box-shadow: var(--shadow-gold); transform: translateY(-3px);
-}
-.quad-card.na { opacity: .38; cursor: not-allowed }
-.quad-check {
-  position: absolute; top: 9px; right: 9px;
-  width: 19px; height: 19px; border-radius: 50%;
-  background: var(--gold); color: #fff;
-  font-size: 10px; display: none; align-items: center; justify-content: center;
-  font-weight: 800;
-}
-.quad-card.sel .quad-check { display: flex }
-.quad-emoji { font-size: 28px; margin-bottom: 8px }
-.quad-name { font-size: 12px; font-weight: 600; color: var(--espresso); margin-bottom: 6px }
-.q-badge {
-  display: inline-block; font-size: 8.5px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
-}
-.q-avail { background: var(--greenPale); color: var(--green); border: 1px solid var(--greenBorder) }
-.q-busy { background: #FEF2F2; color: var(--red); border: 1px solid rgba(139,26,26,.2) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DURATION */
-.dur-grid {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px;
-}
-@media(max-width:460px) { .dur-grid { grid-template-columns: repeat(2,1fr) } }
-.dur-card {
-  background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-md); padding: 22px 10px 18px; text-align: center;
-  cursor: pointer; transition: all .2s; position: relative;
-  box-shadow: var(--shadow-xs);
-}
-.dur-card:hover {
-  border-color: var(--goldBorderB); box-shadow: var(--shadow-md); transform: translateY(-3px);
-}
-.dur-card.sel {
-  border-color: var(--gold); background: var(--goldPale);
-  box-shadow: var(--shadow-gold); transform: translateY(-3px);
-}
-.dur-pop {
-  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-  background: var(--espresso); color: var(--ivory);
-  font-family: 'DM Mono', monospace; font-size: 7.5px; letter-spacing: 1.5px;
-  padding: 3px 12px; border-radius: 100px; white-space: nowrap;
-}
-.dur-time {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 600; color: var(--espresso); margin-bottom: 6px;
-}
-.dur-price { font-size: 15px; font-weight: 700; color: var(--gold) }
-.dur-kes { font-size: 9.5px; color: var(--muted); margin-top: 2px; letter-spacing: 1px }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PROMO */
-.promo-box {
-  background: var(--linen); border: 1px solid var(--goldBorder);
-  border-radius: var(--r-md); padding: 18px 20px; margin-top: 22px;
-}
-.field-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--light); margin-bottom: 10px;
-}
-.promo-row { display: flex; gap: 8px }
-.promo-input {
-  flex: 1; background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-sm); padding: 11px 14px;
-  font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 500;
-  color: var(--espresso); letter-spacing: 2px; text-transform: uppercase; outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-.promo-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--goldGlow) }
-.promo-input::placeholder { font-family:'Jost',sans-serif; letter-spacing:0; font-size:12.5px; color:var(--light); text-transform:none }
-.promo-btn {
-  background: var(--espresso); border: none;
-  border-radius: var(--r-sm); padding: 0 20px;
-  color: var(--ivory); font-family:'Jost',sans-serif;
-  font-size: 12.5px; font-weight: 700; letter-spacing: .5px;
-  cursor: pointer; transition: background .2s; white-space: nowrap;
-}
-.promo-btn:hover { background: var(--ink) }
-.promo-fb { margin-top: 9px; font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 8px; display: none }
-.pf-ok { background: var(--greenPale); color: var(--green); border: 1px solid var(--greenBorder); display: block }
-.pf-err { background: #FEF2F2; color: var(--red); border: 1px solid rgba(139,26,26,.2); display: block }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FORM */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px }
-@media(max-width:500px) { .form-grid { grid-template-columns: 1fr } }
-.field { display: flex; flex-direction: column; gap: 7px }
-.field label {
-  font-size: 10px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--light);
-}
-.field input {
-  background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-sm); padding: 12px 15px;
-  font-family:'Jost',sans-serif; font-size: 14px; font-weight: 400;
-  color: var(--espresso); outline: none;
-  transition: border-color .2s, box-shadow .2s; width: 100%;
-  box-shadow: var(--shadow-xs);
-}
-.field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--goldGlow) }
-.field input::placeholder { color: var(--light); font-weight: 300 }
-.field-full { grid-column: 1 / -1 }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WAIVER */
-.waiver-scroll {
-  background: var(--linen); border: 1px solid var(--goldBorder);
-  border-radius: var(--r-md); padding: 18px 20px;
-  max-height: 200px; overflow-y: auto; margin-bottom: 14px;
-}
-.waiver-scroll::-webkit-scrollbar { width: 3px }
-.waiver-scroll::-webkit-scrollbar-thumb { background: var(--goldBorder) }
-.wv-clause { display: flex; gap: 12px; margin-bottom: 12px; font-size: 13px; color: var(--ink2); line-height: 1.65 }
-.wv-num {
-  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(184,134,11,.1); border: 1px solid var(--goldBorder);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; color: var(--gold); margin-top:1px;
-}
-.waiver-agree {
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-sm); padding: 13px 16px; transition: all .2s;
-  box-shadow: var(--shadow-xs);
-}
-.waiver-agree:hover { border-color: var(--goldBorderB) }
-.waiver-agree.ok { border-color: var(--greenBorder); background: var(--greenPale) }
-.wa-box {
-  width: 20px; height: 20px; border-radius: 4px; border: 1.5px solid var(--goldBorder);
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 800; transition: all .25s; background: var(--linen);
-}
-.waiver-agree.ok .wa-box { background: var(--green); border-color: var(--green); color: #fff }
-.wa-text { font-size: 13.5px; font-weight: 600; color: var(--espresso) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PAYMENT */
-.pay-amount-card {
-  background: var(--espresso);
-  border-radius: var(--r-md); padding: 22px 24px; margin-bottom: 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 8px 32px rgba(26,18,8,.28);
-}
-.pac-label {
-  font-size: 9.5px; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase; color: rgba(250,247,240,.4); margin-bottom: 6px;
-}
-.pac-amt {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 38px; font-weight: 600; color: var(--goldXL); line-height: 1;
-}
-.pac-detail { font-size: 11px; color: rgba(250,247,240,.35); margin-top: 5px }
-.pac-icon { font-size: 36px; opacity: .7 }
-
-.till-card {
-  background: var(--greenPale); border: 1px solid var(--greenBorder);
-  border-radius: var(--r-md); padding: 16px 20px; margin-bottom: 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; transition: background .2s; box-shadow: var(--shadow-xs);
-}
-.till-card:hover { background: rgba(46,139,87,.08) }
-.till-lbl { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 4px }
-.till-num { font-family:'DM Mono',monospace; font-size: 28px; font-weight: 500; color: var(--espresso); letter-spacing: 5px }
-.till-copy {
-  background: var(--greenPale); border: 1px solid var(--greenBorder);
-  color: var(--green); border-radius: 100px;
-  padding: 8px 16px; font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: all .2s; white-space: nowrap;
-  font-family: 'Jost', sans-serif;
-}
-.till-copy:hover, .till-copy.ok { background: var(--greenL); border-color: var(--greenL); color: #fff }
-
-.mpesa-steps {
-  background: var(--linen); border: 1px solid var(--goldBorder);
-  border-radius: var(--r-md); padding: 18px 20px; margin-bottom: 16px;
-}
-.ms { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13.5px; color: var(--ink2) }
-.ms:last-child { margin-bottom: 0 }
-.ms-n {
-  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-  background: var(--goldPale); border: 1px solid var(--goldBorder);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; color: var(--gold);
-}
-.ms b { font-weight: 700; color: var(--espresso) }
-
-.ref-input {
-  width: 100%; background: #fff; border: 1.5px solid var(--goldBorder);
-  border-radius: var(--r-sm); padding: 14px 16px;
-  font-family:'DM Mono',monospace; font-size: 15px; font-weight: 500;
-  color: var(--espresso); letter-spacing: 3px; text-transform: uppercase; outline: none;
-  transition: border-color .2s, box-shadow .2s; box-shadow: var(--shadow-xs);
-}
-.ref-input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px var(--goldGlow) }
-.ref-input::placeholder { font-family:'Jost',sans-serif; letter-spacing:0; font-size:13px; color:var(--light); text-transform:none }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BUTTONS */
-.btn-row { display: flex; gap: 12px; margin-top: 28px }
-.btn-back {
-  background: transparent; border: 1px solid var(--goldBorder);
-  border-radius: 2px; padding: 13px 22px;
-  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 600;
-  letter-spacing: .8px; text-transform: uppercase;
-  color: var(--muted); cursor: pointer; transition: all .2s;
-}
-.btn-back:hover { border-color: var(--espresso); color: var(--espresso) }
-.btn-next {
-  flex: 1; background: var(--espresso); border: none;
-  border-radius: 2px; padding: 14px;
-  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--ivory); cursor: pointer; transition: all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: 0 4px 16px rgba(26,18,8,.2);
-}
-.btn-next:hover:not(:disabled) { background: var(--ink); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,18,8,.28) }
-.btn-next:disabled { opacity: .3; cursor: not-allowed; transform: none; box-shadow: none }
-.btn-confirm {
-  flex: 1; background: linear-gradient(135deg, var(--gold), var(--goldL));
-  border: none; border-radius: 2px; padding: 15px;
-  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 800;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--espresso); cursor: pointer; transition: all .25s;
-  box-shadow: 0 4px 20px rgba(184,134,11,.35);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.btn-confirm:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(184,134,11,.45) }
-.btn-confirm:disabled { opacity: .35; cursor: not-allowed; transform: none }
-.btn-spin {
-  width: 17px; height: 17px; border: 2px solid rgba(26,18,8,.18);
-  border-top-color: var(--espresso); border-radius: 50%;
-  animation: spin .7s linear infinite; display: none;
-}
-@keyframes spin { to{ transform: rotate(360deg) } }
-.loading .btn-spin { display: block }
-.loading .btn-txt { display: none }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SIDEBAR */
-.sidebar { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px }
-
-.card {
-  background: #fff; border: 1px solid var(--goldBorder);
-  border-radius: var(--r-lg); padding: 24px;
-  box-shadow: var(--shadow-sm);
-}
-
-.card-brand { text-align: center; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--goldBorder) }
-.card-brand img { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid var(--goldBorderB); box-shadow: 0 0 0 4px var(--goldGlow) }
-.card-brand-name { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:600; color:var(--espresso) }
-.card-brand-sub { font-size: 9.5px; color: var(--light); letter-spacing: 1.5px; margin-top: 3px }
-
-.prog-bar { height: 2px; background: var(--parchment); border-radius: 100px; margin-bottom: 8px; overflow: hidden }
-.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--goldL)); border-radius: 100px; transition: width .5s cubic-bezier(.4,0,.2,1) }
-.prog-text { font-family:'DM Mono',monospace; font-size: 9px; color: var(--light); letter-spacing: 1px; margin-bottom: 20px }
-
-.sum-rows { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px }
-.sum-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
-.sr-k { font-size: 12px; color: var(--muted) }
-.sr-v { font-size: 12px; font-weight: 700; color: var(--espresso); text-align: right; max-width: 160px }
-.sr-v.gold { color: var(--gold) }
-.sr-v.grn { color: var(--green); font-size: 11px }
-
-.sum-total-box {
-  background: var(--goldPale); border: 1px solid var(--goldBorderB);
-  border-radius: var(--r-sm); padding: 14px 16px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.stb-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted) }
-.stb-amt { font-family:'Cormorant Garamond',serif; font-size: 28px; font-weight: 600; color: var(--gold) }
-
-/* Info items */
-.info-title { font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--light); margin-bottom: 16px }
-.ic-row { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--goldBorder) }
-.ic-row:last-of-type { border-bottom: none; padding-bottom: 0 }
-.ic-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px }
-.ic-row h4 { font-size: 12px; font-weight: 700; color: var(--espresso); margin-bottom: 2px }
-.ic-row p { font-size: 11.5px; color: var(--muted); line-height: 1.55 }
-
-/* Map */
-.map-wrap { margin-top: 16px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--goldBorder); box-shadow: var(--shadow-xs) }
-.map-wrap iframe { display: block; width: 100%; height: 156px; border: none }
-.map-actions { display: flex; gap: 7px; padding: 10px 0 0 }
-.map-btn {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
-  padding: 8px; border-radius: var(--r-sm); font-size: 11px; font-weight: 600;
-  text-decoration: none; transition: all .2s; letter-spacing: .3px;
-}
-.map-btn.gm { background: #EEF2FF; border: 1px solid #C7D2FE; color: #4338CA }
-.map-btn.gm:hover { background: #E0E7FF }
-.map-btn.dir { background: var(--greenPale); border: 1px solid var(--greenBorder); color: var(--green) }
-.map-btn.dir:hover { background: rgba(46,139,87,.12) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SUCCESS */
-.overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(26,18,8,.5); backdrop-filter: blur(18px) saturate(140%);
-  display: none; align-items: center; justify-content: center; padding: 16px;
-}
-.overlay.show { display: flex }
-.success-sheet {
-  background: #fff; border: 1px solid var(--goldBorderB);
-  border-radius: var(--r-xl);
-  max-width: 480px; width: 100%;
-  padding: clamp(28px,5vw,48px) clamp(22px,5vw,44px);
-  box-shadow: var(--shadow-lg), 0 0 0 1px var(--goldGlow);
-  animation: sheet-up .5s cubic-bezier(.175,.885,.32,1.275) both;
-  position: relative; overflow: hidden;
-}
-.success-sheet::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--goldBorder) 25%, var(--goldXL) 50%, var(--goldBorder) 75%, transparent);
-}
-@keyframes sheet-up { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-.ss-icon {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: var(--greenPale); border: 2px solid var(--greenBorder);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 18px; font-size: 26px;
-  animation: pop .5s .25s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
-.ss-title { font-family:'Cormorant Garamond',serif; font-size:clamp(26px,4vw,36px); font-weight:700; color:var(--espresso); text-align:center; margin-bottom:6px }
-.ss-sub { font-size:13.5px; font-weight:300; color:var(--muted); text-align:center; line-height:1.7; margin-bottom:22px }
-
-.ticket { background:var(--linen); border:1px solid var(--goldBorder); border-radius:var(--r-md); overflow:hidden; margin-bottom:20px }
-.ticket-head { background:var(--espresso); padding:12px 16px; display:flex; align-items:center; justify-content:space-between }
-.th-brand { font-family:'Cormorant Garamond',serif; font-size:13px; font-weight:600; color:var(--ivory) }
-.th-id { font-family:'DM Mono',monospace; font-size:10px; color:var(--goldXL); background:rgba(184,134,11,.15); padding:3px 8px; border-radius:5px; border:1px solid rgba(184,134,11,.25) }
-.ticket-perf { height:2px; background:repeating-linear-gradient(90deg,var(--goldBorder) 0,var(--goldBorder) 8px,transparent 8px,transparent 16px) }
-.ticket-rows { padding:12px 16px; display:flex; flex-direction:column; gap:8px }
-.tr { display:flex; justify-content:space-between; align-items:center }
-.tr-k { font-size:11.5px; color:var(--muted) }
-.tr-v { font-size:11.5px; font-weight:700; color:var(--espresso) }
-.ticket-total { background:var(--goldPale); padding:11px 16px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--goldBorderB) }
-.tt-lbl { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted) }
-.tt-amt { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; color:var(--gold) }
-
-.ss-actions { display:flex; gap:10px }
-.ss-wa { flex:1; background:#25D366; color:#fff; border:none; border-radius:var(--r-sm); padding:13px; font-family:'Jost',sans-serif; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:background .2s }
-.ss-wa:hover { background:#1a9e4d }
-.ss-new { flex:1; background:var(--linen); color:var(--espresso); border:1px solid var(--goldBorder); border-radius:var(--r-sm); padding:13px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s }
-.ss-new:hover { border-color:var(--espresso) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ TOAST */
-.toast {
-  position:fixed; bottom:88px; left:50%;
-  transform:translateX(-50%) translateY(60px);
-  background:var(--espresso); color:var(--ivory);
-  padding:12px 24px; border-radius:100px;
-  font-size:13px; font-weight:600; white-space:nowrap;
-  box-shadow:0 8px 32px rgba(26,18,8,.3);
-  z-index:1000; transition:transform .3s cubic-bezier(.4,0,.2,1);
-  border:1px solid rgba(250,247,240,.1);
-}
-.toast.show { transform:translateX(-50%) translateY(0) }
-.toast.err { background:var(--red) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FOOTER */
-footer {
-  background: var(--linen); border-top:1px solid var(--goldBorder);
-  padding:28px; text-align:center;
-  font-family:'DM Mono',monospace; font-size:10.5px;
-  color:var(--light); letter-spacing:.5px;
-}
-footer span { color:var(--gold) }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FAB */
-.fab { position:fixed; bottom:24px; right:24px; z-index:400 }
-.fab a {
-  display:flex; align-items:center; justify-content:center;
-  width:52px; height:52px; border-radius:50%;
-  background:#25D366; color:#fff; font-size:22px; text-decoration:none;
-  box-shadow:0 4px 20px rgba(37,211,102,.4);
-  transition:transform .25s, box-shadow .25s;
-}
-.fab a:hover { transform:scale(1.1); box-shadow:0 8px 32px rgba(37,211,102,.5) }
+/* ═══════════════════════════════════════════════ FAB */
+.fab{position:fixed;bottom:24px;right:24px;z-index:400}
+.fab a{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#25D366;color:#fff;font-size:22px;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.38);transition:transform .25s,box-shadow .25s}
+.fab a:hover{transform:scale(1.1);box-shadow:0 8px 30px rgba(37,211,102,.48)}
 </style>
 </head>
 <body>
@@ -758,100 +324,93 @@ footer span { color:var(--gold) }
 <!-- NAV -->
 <nav class="nav" id="nav">
   <a href="#" class="nav-brand">
-    <div class="nav-logo-ring">
-      <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Royal Quad Bikes">
-    </div>
+    <div class="nav-logo"><img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Royal Quad Bikes"></div>
     <span class="nav-name">Royal Quad Bikes</span>
   </a>
   <div class="nav-right">
-    <div class="open-pill"><div class="open-dot"></div>Open · Mambrui</div>
+    <div class="open-pill"><div class="live-dot"></div>Open · Mambrui</div>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div id="particles"></div>
-  <div class="hero-ornament"></div>
-  <div class="hero-rule-l"></div>
-  <div class="hero-rule-r"></div>
+  <div class="hero-bar"></div>
+  <div class="hero-vl"></div>
+  <div class="hero-vr"></div>
   <div class="hero-dunes"></div>
   <div class="hero-inner">
-    <div class="hero-kicker">Mambrui Sand Dunes &nbsp;·&nbsp; Kilifi County &nbsp;·&nbsp; Kenya</div>
+    <div class="kicker">Mambrui Sand Dunes &nbsp;·&nbsp; Kilifi County &nbsp;·&nbsp; Kenya</div>
     <h1 class="hero-h1">
       <strong>Royal</strong>
       <em>Quad Bikes</em>
     </h1>
     <div class="hero-rule"></div>
-    <p class="hero-sub">Conquer Kenya's most breathtaking coastal dunes. Book your ride in under two minutes — pay instantly with M-Pesa, receive immediate confirmation.</p>
+    <p class="hero-sub">Conquer Kenya's most breathtaking coastal dunes. Book in under two minutes — pay with M-Pesa, get instant confirmation.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('book').scrollIntoView({behavior:'smooth'})">
-        Book a Ride &nbsp;→
-      </button>
-      <button class="btn-outline" onclick="document.getElementById('book').scrollIntoView({behavior:'smooth'})">
-        View Pricing
-      </button>
+      <button class="btn-cta" onclick="goToBook()">Book a Ride &nbsp;→</button>
+      <button class="btn-out" onclick="goToBook()">View Pricing</button>
     </div>
     <div class="hero-stats">
-      <div><span class="hs-num">6</span><span class="hs-lbl">Ride Durations</span></div>
-      <div><span class="hs-num">1,000</span><span class="hs-lbl">From KES</span></div>
-      <div><span class="hs-num">M‑Pesa</span><span class="hs-lbl">Instant Payment</span></div>
-      <div><span class="hs-num">100%</span><span class="hs-lbl">Outdoor Thrill</span></div>
+      <div><span class="hs-n">6</span><span class="hs-l">Ride Durations</span></div>
+      <div><span class="hs-n">1,000</span><span class="hs-l">From KES</span></div>
+      <div><span class="hs-n">M‑Pesa</span><span class="hs-l">Instant Pay</span></div>
+      <div><span class="hs-n">100%</span><span class="hs-l">Outdoor Thrill</span></div>
     </div>
   </div>
-  <div class="scroll-cue">
-    <div class="sc-track"></div>
-    <span class="sc-lbl">Scroll</span>
-  </div>
+  <div class="scroll-cue"><div class="sc-track"></div><span class="sc-txt">Scroll</span></div>
 </section>
 
 <div class="divider"></div>
 
 <!-- BOOKING -->
 <section class="booking" id="book">
-  <div class="booking-inner">
+  <div class="booking-wrap">
 
     <!-- Wizard -->
     <div>
-      <div class="section-eyebrow"><div class="se-line"></div><span class="se-text">Reservation</span></div>
-      <div class="section-title">Book Your<br><em style="font-style:italic;color:var(--gold)">Adventure</em></div>
+      <div class="sec-eye"><div class="sec-eye-line"></div><span class="sec-eye-txt">Reservation</span></div>
+      <div class="sec-title">Book Your<br><em>Adventure</em></div>
 
-      <!-- Steps -->
-      <div class="steps">
-        <div class="step-seg"><div class="step-node active" id="sn1">1</div><div class="step-connector" id="sc1"></div></div>
-        <div class="step-seg"><div class="step-node" id="sn2">2</div><div class="step-connector" id="sc2"></div></div>
-        <div class="step-seg"><div class="step-node" id="sn3">3</div><div class="step-connector" id="sc3"></div></div>
-        <div class="step-seg" style="flex:0 0 auto"><div class="step-node" id="sn4">4</div></div>
+      <!-- Step bar: nodes + lines -->
+      <div class="step-bar">
+        <div class="snode on"  id="n1">1</div>
+        <div class="sline"     id="l1"></div>
+        <div class="snode"     id="n2">2</div>
+        <div class="sline"     id="l2"></div>
+        <div class="snode"     id="n3">3</div>
+        <div class="sline"     id="l3"></div>
+        <div class="snode"     id="n4">4</div>
       </div>
-      <div class="step-labels">
-        <span class="sl active" id="sl1">Quad</span>
-        <span class="sl" id="sl2">Duration</span>
-        <span class="sl" id="sl3">Details</span>
-        <span class="sl" id="sl4">Pay</span>
+      <div class="slabels">
+        <span class="slbl on"   id="lb1">Quad</span>
+        <span class="slbl"      id="lb2">Duration</span>
+        <span class="slbl"      id="lb3">Details</span>
+        <span class="slbl"      id="lb4">Pay</span>
       </div>
 
-      <div class="panel-wrap">
+      <div class="panels">
 
-        <!-- P1 Quad -->
-        <div class="panel active" id="panel1">
+        <!-- P1: Choose quad -->
+        <div class="panel active" id="p1">
           <div class="panel-title">Choose your quad</div>
-          <p class="panel-sub">All bikes maintained daily. Green badge means ready to ride right now.</p>
+          <p class="panel-sub">All bikes maintained daily. Green badge means ready to ride now.</p>
           <div class="quad-grid" id="quadGrid"></div>
           <div class="btn-row">
             <button class="btn-next" id="next1" onclick="goTo(2)" disabled>
-              Continue &nbsp;<span style="opacity:.5;font-size:11px" id="quad-selected-name"></span>
+              Continue <span style="opacity:.45;font-size:11px;margin-left:3px" id="selName"></span>
             </button>
           </div>
         </div>
 
-        <!-- P2 Duration -->
-        <div class="panel" id="panel2">
+        <!-- P2: Duration -->
+        <div class="panel" id="p2">
           <div class="panel-title">Pick your duration</div>
           <p class="panel-sub">Overtime charged at 100 KES/min automatically after your session ends.</p>
           <div class="dur-grid" id="durGrid"></div>
           <div class="promo-box">
-            <div class="field-label">🎟 &nbsp;Promo Code</div>
+            <div class="flabel">🎟 &nbsp;Promo Code</div>
             <div class="promo-row">
-              <input class="promo-input" id="promoInp" placeholder="Enter code e.g. DUNES20" maxlength="20">
+              <input class="promo-inp" id="promoInp" placeholder="Enter code e.g. DUNES20" maxlength="20">
               <button class="promo-btn" onclick="applyPromo()">Apply</button>
             </div>
             <div class="promo-fb" id="promoFB"></div>
@@ -862,8 +421,8 @@ footer span { color:var(--gold) }
           </div>
         </div>
 
-        <!-- P3 Details + Waiver -->
-        <div class="panel" id="panel3">
+        <!-- P3: Details + Waiver -->
+        <div class="panel" id="p3">
           <div class="panel-title">Your details</div>
           <p class="panel-sub">We'll send your WhatsApp receipt to this number immediately after the ride.</p>
           <div class="form-grid">
@@ -871,23 +430,23 @@ footer span { color:var(--gold) }
             <div class="field"><label>Last Name *</label><input type="text" id="lName" placeholder="Kamau" oninput="checkDetails()"></div>
             <div class="field"><label>Phone Number *</label><input type="tel" id="phone" placeholder="0712 345 678" oninput="checkDetails()"></div>
             <div class="field"><label>Email <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:9px">(optional)</span></label><input type="email" id="email" placeholder="john@gmail.com"></div>
-            <div class="field field-full"><label>Special Requests <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:9px">(optional)</span></label><input type="text" id="notes" placeholder="e.g. First time rider, need extra briefing"></div>
+            <div class="field full"><label>Special Requests <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:9px">(optional)</span></label><input type="text" id="notes" placeholder="e.g. First time rider, need extra briefing"></div>
           </div>
           <div style="margin-bottom:14px">
-            <div class="field-label" style="margin-bottom:12px">📋 &nbsp;Safety Waiver</div>
+            <div class="flabel" style="margin-bottom:12px">📋 &nbsp;Safety Waiver</div>
             <div class="waiver-scroll">
-              <div class="wv-clause"><div class="wv-num">1</div><div>I confirm I am physically fit and capable of operating a quad bike safely.</div></div>
-              <div class="wv-clause"><div class="wv-num">2</div><div>I will wear all provided safety gear including helmet and protective clothing at all times.</div></div>
-              <div class="wv-clause"><div class="wv-num">3</div><div>I acknowledge that quad biking carries inherent risks and I accept full responsibility for my safety.</div></div>
-              <div class="wv-clause"><div class="wv-num">4</div><div>I will not operate the quad under the influence of alcohol, drugs or any impairing substance.</div></div>
-              <div class="wv-clause"><div class="wv-num">5</div><div>I will follow all operator instructions and stay within designated riding areas at all times.</div></div>
-              <div class="wv-clause"><div class="wv-num">6</div><div>I understand overtime beyond my session is billed at 100 KES per minute automatically.</div></div>
-              <div class="wv-clause"><div class="wv-num">7</div><div>I agree Royal Quad Bikes is not liable for any personal injury arising from my ride.</div></div>
-              <div class="wv-clause" style="margin-bottom:0"><div class="wv-num">8</div><div>I confirm all information is accurate and I am at least 16 years of age.</div></div>
+              <div class="wclause"><div class="wnum">1</div><div>I confirm I am physically fit and capable of operating a quad bike safely.</div></div>
+              <div class="wclause"><div class="wnum">2</div><div>I will wear all provided safety gear including helmet and protective clothing at all times.</div></div>
+              <div class="wclause"><div class="wnum">3</div><div>I acknowledge that quad biking carries inherent risks and accept full responsibility for my safety.</div></div>
+              <div class="wclause"><div class="wnum">4</div><div>I will not operate the quad under the influence of alcohol, drugs or any impairing substance.</div></div>
+              <div class="wclause"><div class="wnum">5</div><div>I will follow all operator instructions and stay within designated riding areas at all times.</div></div>
+              <div class="wclause"><div class="wnum">6</div><div>I understand overtime beyond my session is billed at 100 KES per minute automatically.</div></div>
+              <div class="wclause"><div class="wnum">7</div><div>I agree Royal Quad Bikes is not liable for personal injury arising from my ride.</div></div>
+              <div class="wclause" style="margin-bottom:0"><div class="wnum">8</div><div>I confirm all information is accurate and I am at least 16 years of age.</div></div>
             </div>
-            <div class="waiver-agree" id="waiverAgree" onclick="toggleWaiver()">
+            <div class="waiver-agree" id="waiverRow" onclick="toggleWaiver()">
               <div class="wa-box" id="waBox"></div>
-              <span class="wa-text">I have read and agree to the safety waiver</span>
+              <span class="wa-txt">I have read and agree to the safety waiver</span>
             </div>
           </div>
           <div class="btn-row">
@@ -896,78 +455,85 @@ footer span { color:var(--gold) }
           </div>
         </div>
 
-        <!-- P4 Payment -->
-        <div class="panel" id="panel4">
+        <!-- P4: Payment -->
+        <div class="panel" id="p4">
           <div class="panel-title">Pay via M-Pesa</div>
           <p class="panel-sub">Send the exact amount shown, then paste your M-Pesa confirmation code below.</p>
-          <div class="pay-amount-card">
-            <div><div class="pac-label">Amount to Send</div><div class="pac-amt" id="pacAmt">KES —</div><div class="pac-detail" id="pacDetail">Complete previous steps first</div></div>
-            <div class="pac-icon">📲</div>
+          <div class="pay-hero">
+            <div>
+              <div class="ph-lbl">Amount to Send</div>
+              <div class="ph-amt" id="payAmt">KES —</div>
+              <div class="ph-detail" id="payDetail">Complete previous steps first</div>
+            </div>
+            <div class="ph-icon">📲</div>
           </div>
-          <div class="till-card" onclick="copyTill()">
-            <div><div class="till-lbl">M-Pesa Buy Goods — Till Number</div><div class="till-num">6685024</div></div>
-            <button class="till-copy" id="tcCopy">⧉ Copy</button>
+          <div class="till-block" onclick="copyTill()">
+            <div>
+              <div class="till-lbl">M-Pesa Buy Goods — Till Number</div>
+              <div class="till-num">6685024</div>
+            </div>
+            <button class="till-copy" id="tillCopy">⧉ Copy</button>
           </div>
           <div class="mpesa-steps">
-            <div class="ms"><div class="ms-n">1</div><span>Open M-Pesa → <b>Lipa na M-Pesa</b></span></div>
-            <div class="ms"><div class="ms-n">2</div><span>Select <b>Buy Goods &amp; Services</b></span></div>
-            <div class="ms"><div class="ms-n">3</div><span>Enter till number: <b style="font-family:'DM Mono',monospace;color:var(--green)">6685024</b></span></div>
-            <div class="ms"><div class="ms-n">4</div><span>Enter <b id="amtInline">the exact amount</b> and confirm with PIN</span></div>
-            <div class="ms"><div class="ms-n">5</div><span>Copy the <b>confirmation code</b> from your M-Pesa SMS</span></div>
-            <div class="ms" style="margin-bottom:0"><div class="ms-n">6</div><span>Paste the code below and confirm your booking</span></div>
+            <div class="mstep"><div class="mstep-n">1</div><span>Open M-Pesa → <b>Lipa na M-Pesa</b></span></div>
+            <div class="mstep"><div class="mstep-n">2</div><span>Select <b>Buy Goods &amp; Services</b></span></div>
+            <div class="mstep"><div class="mstep-n">3</div><span>Enter till: <b style="font-family:'DM Mono',monospace;color:var(--green)">6685024</b></span></div>
+            <div class="mstep"><div class="mstep-n">4</div><span>Enter <b id="amtLine">the exact amount</b> and confirm with PIN</span></div>
+            <div class="mstep"><div class="mstep-n">5</div><span>Copy the <b>confirmation code</b> from your SMS</span></div>
+            <div class="mstep" style="margin-bottom:0"><div class="mstep-n">6</div><span>Paste the code below and confirm your booking</span></div>
           </div>
           <div class="field" style="margin-bottom:8px">
             <label>M-Pesa Confirmation Code *</label>
-            <input class="ref-input" id="mpesaRef" placeholder="e.g.  QHL2X3P8KA" maxlength="12" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');checkRef()">
-            <div style="font-size:11.5px;color:var(--muted);margin-top:5px">The 10-character code from your M-Pesa SMS confirmation</div>
+            <input class="ref-inp" id="mpesaRef" placeholder="e.g. QHL2X3P8KA" maxlength="12" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');checkRef()">
+            <div style="font-size:11.5px;color:var(--muted);margin-top:5px">10-character code from your M-Pesa SMS</div>
           </div>
           <div class="btn-row">
             <button class="btn-back" onclick="goTo(3)">← Back</button>
             <button class="btn-confirm" id="confirmBtn" onclick="confirmBooking()" disabled>
-              <div class="btn-spin"></div>
-              <span class="btn-txt">Confirm My Booking →</span>
+              <div class="bspin"></div>
+              <span class="btxt">Confirm Booking →</span>
             </button>
           </div>
-          <p style="text-align:center;font-size:11.5px;color:var(--light);margin-top:14px;line-height:1.7">By confirming you agree to the safety waiver. Overtime billed at 100 KES/min.</p>
+          <p style="text-align:center;font-size:11.5px;color:var(--light);margin-top:13px;line-height:1.7">By confirming you agree to the safety waiver. Overtime billed at 100 KES/min.</p>
         </div>
 
-      </div>
-    </div>
+      </div><!-- /panels -->
+    </div><!-- /wizard -->
 
     <!-- Sidebar -->
     <div class="sidebar">
       <div class="card">
-        <div class="card-brand">
+        <div class="card-logo-wrap">
           <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
-          <div class="card-brand-name">Royal Quad Bikes</div>
-          <div class="card-brand-sub">Mambrui · Kilifi · Kenya</div>
+          <div class="card-name">Royal Quad Bikes</div>
+          <div class="card-sub">Mambrui · Kilifi · Kenya</div>
         </div>
-        <div class="prog-bar"><div class="prog-fill" id="spFill" style="width:0%"></div></div>
-        <div class="prog-text" id="spLabel">Step 1 of 4</div>
+        <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+        <div class="prog-lbl" id="progLbl">Step 1 of 4</div>
         <div class="sum-rows">
-          <div class="sum-row"><span class="sr-k">Quad</span><span class="sr-v" id="sv-quad">—</span></div>
-          <div class="sum-row"><span class="sr-k">Duration</span><span class="sr-v" id="sv-dur">—</span></div>
-          <div class="sum-row"><span class="sr-k">Base price</span><span class="sr-v" id="sv-base">—</span></div>
-          <div class="sum-row" id="sv-promo-row" style="display:none"><span class="sr-k">Discount</span><span class="sr-v grn" id="sv-promo">—</span></div>
-          <div class="sum-row"><span class="sr-k">Name</span><span class="sr-v" id="sv-name">—</span></div>
+          <div class="sum-row"><span class="srk">Quad</span><span class="srv" id="sv-quad">—</span></div>
+          <div class="sum-row"><span class="srk">Duration</span><span class="srv" id="sv-dur">—</span></div>
+          <div class="sum-row"><span class="srk">Base price</span><span class="srv" id="sv-base">—</span></div>
+          <div class="sum-row" id="sv-promo-row" style="display:none"><span class="srk">Discount</span><span class="srv grn" id="sv-promo">—</span></div>
+          <div class="sum-row"><span class="srk">Name</span><span class="srv" id="sv-name">—</span></div>
         </div>
-        <div class="sum-total-box">
-          <span class="stb-lbl">Total</span>
-          <span class="stb-amt" id="sv-total">KES —</span>
+        <div class="sum-total">
+          <span class="stl">Total</span>
+          <span class="sta" id="sv-total">KES —</span>
         </div>
       </div>
+
       <div class="card">
-        <div class="info-title">Good to Know</div>
-        <div class="ic-row"><span class="ic-icon">⏱️</span><div><h4>Overtime Policy</h4><p>100 KES/min charged live after session ends.</p></div></div>
-        <div class="ic-row"><span class="ic-icon">🛡️</span><div><h4>Safety Gear</h4><p>Helmet + clothing provided. Briefing every ride.</p></div></div>
-        <div class="ic-row"><span class="ic-icon">🧾</span><div><h4>WhatsApp Receipt</h4><p>PDF sent to your phone after the ride.</p></div></div>
-        <div class="ic-row"><span class="ic-icon">📍</span><div><h4>Location</h4><p>Mambrui Dunes, Kilifi County — near Malindi.</p></div></div>
+        <div class="info-ttl">Good to Know</div>
+        <div class="irow"><span class="iico">⏱️</span><div><h4>Overtime Policy</h4><p>100 KES/min charged live after session ends.</p></div></div>
+        <div class="irow"><span class="iico">🛡️</span><div><h4>Safety Gear</h4><p>Helmet + clothing provided. Briefing every ride.</p></div></div>
+        <div class="irow"><span class="iico">🧾</span><div><h4>WhatsApp Receipt</h4><p>PDF sent to your phone after the ride.</p></div></div>
+        <div class="irow"><span class="iico">📍</span><div><h4>Location</h4><p>Mambrui Dunes, Kilifi County — near Malindi.</p></div></div>
         <div class="map-wrap">
-          <iframe src="https://maps.google.com/maps?q=-3.3635,40.1347&z=15&output=embed"
-            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mambrui Sand Dunes"></iframe>
-          <div class="map-actions">
-            <a class="map-btn gm" href="https://maps.google.com/?q=-3.3635,40.1347" target="_blank">🗺 Open Maps</a>
-            <a class="map-btn dir" href="https://www.google.com/maps/dir/?api=1&destination=-3.3635,40.1347" target="_blank">🧭 Directions</a>
+          <iframe src="https://maps.google.com/maps?q=-3.3635,40.1347&z=15&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mambrui Sand Dunes"></iframe>
+          <div class="map-btns">
+            <a class="mbtn mbtn-gm" href="https://maps.google.com/?q=-3.3635,40.1347" target="_blank">🗺 Open Maps</a>
+            <a class="mbtn mbtn-dir" href="https://www.google.com/maps/dir/?api=1&destination=-3.3635,40.1347" target="_blank">🧭 Directions</a>
           </div>
         </div>
       </div>
@@ -976,57 +542,55 @@ footer span { color:var(--gold) }
   </div>
 </section>
 
-<!-- SUCCESS -->
-<div class="overlay" id="successOverlay">
-  <div class="success-sheet">
-    <div class="ss-icon">✓</div>
-    <div class="ss-title">You're Booked!</div>
-    <div class="ss-sub" id="ssSub">Your quad adventure is confirmed. Show this ticket when you arrive.</div>
+<!-- SUCCESS OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-icon">✓</div>
+    <div class="sheet-title">You're Booked!</div>
+    <div class="sheet-sub" id="sheetSub">Your adventure is confirmed. Show this ticket when you arrive.</div>
     <div class="ticket">
-      <div class="ticket-head"><span class="th-brand">Royal Quad Bikes</span><span class="th-id" id="ticketId">RQ-XXXXXX</span></div>
+      <div class="ticket-head">
+        <span class="th-brand">Royal Quad Bikes</span>
+        <span class="th-id" id="ticketId">RQ-XXXXXX</span>
+      </div>
       <div class="ticket-perf"></div>
       <div class="ticket-rows">
-        <div class="tr"><span class="tr-k">Quad</span><span class="tr-v" id="tk-quad">—</span></div>
-        <div class="tr"><span class="tr-k">Customer</span><span class="tr-v" id="tk-name">—</span></div>
-        <div class="tr"><span class="tr-k">Phone</span><span class="tr-v" id="tk-phone">—</span></div>
-        <div class="tr"><span class="tr-k">Duration</span><span class="tr-v" id="tk-dur">—</span></div>
-        <div class="tr"><span class="tr-k">Date</span><span class="tr-v" id="tk-date">—</span></div>
-        <div class="tr"><span class="tr-k">M-Pesa Ref</span><span class="tr-v" id="tk-ref" style="font-family:'DM Mono',monospace;color:var(--green)">—</span></div>
+        <div class="trow"><span class="tk">Quad</span><span class="tv" id="tk-quad">—</span></div>
+        <div class="trow"><span class="tk">Customer</span><span class="tv" id="tk-name">—</span></div>
+        <div class="trow"><span class="tk">Phone</span><span class="tv" id="tk-phone">—</span></div>
+        <div class="trow"><span class="tk">Duration</span><span class="tv" id="tk-dur">—</span></div>
+        <div class="trow"><span class="tk">Date</span><span class="tv" id="tk-date">—</span></div>
+        <div class="trow"><span class="tk">M-Pesa Ref</span><span class="tv" id="tk-ref" style="font-family:'DM Mono',monospace;color:var(--green)">—</span></div>
       </div>
-      <div class="ticket-total"><span class="tt-lbl">Total Paid</span><span class="tt-amt" id="tk-total">—</span></div>
+      <div class="ticket-total">
+        <span class="tt-l">Total Paid</span>
+        <span class="tt-v" id="tk-total">—</span>
+      </div>
     </div>
-    <div class="ss-actions">
-      <button class="ss-wa" onclick="shareWA()">💬 Share on WhatsApp</button>
-      <button class="ss-new" onclick="reset()">Book Another</button>
+    <div class="sheet-acts">
+      <button class="btn-wa" onclick="shareWA()">💬 Share on WhatsApp</button>
+      <button class="btn-again" onclick="reset()">Book Another</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<footer>
-  © 2025 <span>Royal Quad Bikes</span> &nbsp;·&nbsp; Mambrui, Kilifi County, Kenya &nbsp;·&nbsp; M-Pesa Till <span>6685024</span>
-</footer>
+<footer>© 2025 <span>Royal Quad Bikes</span> &nbsp;·&nbsp; Mambrui, Kilifi County, Kenya &nbsp;·&nbsp; M-Pesa Till <span>6685024</span></footer>
 
 <div class="fab">
   <a href="https://wa.me/254784589999?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui%20Sand%20Dunes" target="_blank" title="WhatsApp us">💬</a>
 </div>
 
 <script>
-/* ── STICKY NAV ──────────────────────────────────────────────────── */
-window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>60),{passive:true});
+/* ══ NAV SCROLL ══════════════════════════════════════════════ */
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('up',scrollY>50),{passive:true});
 
-/* ── PARTICLES ───────────────────────────────────────────────────── */
-const pc=document.getElementById('particles');
-for(let i=0;i<24;i++){
-  const p=document.createElement('div');p.className='particle';
-  const s=1+Math.random()*2.5;
-  p.style.cssText=`left:${Math.random()*100}%;bottom:${Math.random()*20}%;width:${s}px;height:${s}px;animation-duration:${9+Math.random()*12}s;animation-delay:${-Math.random()*12}s;background:rgba(184,134,11,.3)`;
-  pc.appendChild(p);
-}
+/* ══ SMOOTH HERO SCROLL ══════════════════════════════════════ */
+function goToBook(){document.getElementById('book').scrollIntoView({behavior:'smooth',block:'start'})}
 
-/* ── DATA (live from data.json) ──────────────────────────────────── */
-let QUADS=[],PRICING=[],PROMOS={},OVERTIME_RATE=100;
+/* ══ DATA (live from data.json) ══════════════════════════════ */
+let QUADS=[],PRICING=[],PROMOS={},OT_RATE=100;
 
 async function loadData(){
   try{
@@ -1034,20 +598,20 @@ async function loadData(){
     const d=await r.json();
     QUADS=d.quads||[];
     PRICING=d.pricing||[];
-    OVERTIME_RATE=d.overtimeRate||100;
+    OT_RATE=d.overtimeRate||100;
     PROMOS={};
     (d.promos||[]).filter(p=>p.active).forEach(p=>PROMOS[p.code]=p.discount);
     if(d.notice){
-      const nb=document.createElement('div');
-      nb.style.cssText='background:#FEF9E7;border-bottom:1.5px solid rgba(184,134,11,.3);color:#7A5208;text-align:center;padding:13px;font-size:13px;font-weight:700;letter-spacing:.3px;font-family:Jost,sans-serif';
-      nb.textContent='📢 '+d.notice;
-      document.body.prepend(nb);
+      const b=document.createElement('div');
+      b.style.cssText='background:#FEF9E7;border-bottom:1.5px solid rgba(184,134,11,.28);color:#7A5208;text-align:center;padding:13px;font-size:13px;font-weight:700;font-family:Jost,sans-serif;position:relative;z-index:200';
+      b.textContent='📢 '+d.notice;
+      document.body.prepend(b);
     }
     if(d.business&&!d.business.open){
-      const nb=document.createElement('div');
-      nb.style.cssText='background:#FEF2F2;border-bottom:1.5px solid rgba(139,26,26,.25);color:#7F1D1D;text-align:center;padding:14px;font-size:14px;font-weight:700;font-family:Jost,sans-serif';
-      nb.textContent='⚠️  We are currently closed. Please WhatsApp us or check back later.';
-      document.body.prepend(nb);
+      const b=document.createElement('div');
+      b.style.cssText='background:#FEF2F2;border-bottom:1.5px solid rgba(153,27,27,.25);color:#7F1D1D;text-align:center;padding:14px;font-size:14px;font-weight:700;font-family:Jost,sans-serif;position:relative;z-index:200';
+      b.textContent='⚠️  We are currently closed. WhatsApp us or check back later.';
+      document.body.prepend(b);
     }
   }catch(e){
     QUADS=[
@@ -1058,7 +622,7 @@ async function loadData(){
       {id:5,name:'Quad 5',status:'available',emoji:'🏍️'},
     ];
     PRICING=[
-      {dur:5,price:1000,label:'5 min'},
+      {dur:5, price:1000,label:'5 min'},
       {dur:10,price:1800,label:'10 min'},
       {dur:15,price:2200,label:'15 min'},
       {dur:20,price:2500,label:'20 min',popular:true},
@@ -1067,104 +631,108 @@ async function loadData(){
     ];
     PROMOS={DUNES20:20,MAMBRUI10:10,WELCOME25:25};
   }
-  renderQuads();renderDurations();
+  renderQuads();
+  renderDurations();
 }
 
-/* ── STATE ───────────────────────────────────────────────────────── */
-const S={quad:null,dur:null,price:null,finalPrice:null,discount:0,promoCode:null,name:'',phone:'',waiverOk:false,step:1};
+/* ══ STATE ════════════════════════════════════════════════════ */
+const S={quad:null,dur:null,price:null,final:null,discount:0,promo:null,name:'',phone:'',waiver:false,step:1};
 
-/* ── RENDER ──────────────────────────────────────────────────────── */
+/* ══ RENDER ═══════════════════════════════════════════════════ */
 function renderQuads(){
   document.getElementById('quadGrid').innerHTML=QUADS.map(q=>`
-    <div class="quad-card${q.status==='rented'?' na':''}" id="qc${q.id}" onclick="${q.status==='rented'?'toast("This quad is currently in use","err")':('pickQuad('+q.id+')')}">
-      <div class="quad-check">✓</div>
-      <div class="quad-emoji">${q.emoji}</div>
-      <div class="quad-name">${q.name}</div>
-      <div class="q-badge ${q.status==='available'?'q-avail':'q-busy'}">${q.status==='available'?'Available':'In Use'}</div>
+    <div class="qcard${q.status==='rented'?' na':''}" id="qc${q.id}"
+         onclick="${q.status==='rented'?'toast(\'This quad is currently in use\',\'err\')':('pickQuad('+q.id+')')}">
+      <div class="qcheck">✓</div>
+      <div class="qemoji">${q.emoji||'🏍️'}</div>
+      <div class="qname">${q.name}</div>
+      <div class="qbadge ${q.status==='available'?'q-ok':'q-no'}">${q.status==='available'?'Available':'In Use'}</div>
     </div>`).join('');
 }
 function renderDurations(){
   document.getElementById('durGrid').innerHTML=PRICING.map(p=>`
-    <div class="dur-card" id="dc${p.dur}" onclick="pickDur(${p.dur},${p.price},'${p.label}')">
-      ${p.popular?'<div class="dur-pop">Most Popular</div>':''}
-      <div class="dur-time">${p.label}</div>
-      <div class="dur-price">${fmt(p.price)}</div>
-      <div class="dur-kes">KES</div>
+    <div class="dcard" id="dc${p.dur}" onclick="pickDur(${p.dur},${p.price},'${p.label}')">
+      ${p.popular?'<div class="dpop">Most Popular</div>':''}
+      <div class="dtime">${p.label}</div>
+      <div class="dprice">${fmt(p.price)}</div>
+      <div class="dkes">KES</div>
     </div>`).join('');
 }
 
-/* ── SELECTION ───────────────────────────────────────────────────── */
+/* ══ SELECTION ════════════════════════════════════════════════ */
 function pickQuad(id){
   S.quad=QUADS.find(q=>q.id===id);
-  document.querySelectorAll('.quad-card').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('sel'));
   document.getElementById('qc'+id).classList.add('sel');
   document.getElementById('next1').disabled=false;
-  document.getElementById('quad-selected-name').textContent='· '+S.quad.name;
-  refreshSummary();
+  document.getElementById('selName').textContent='· '+S.quad.name;
+  refresh();
 }
 function pickDur(dur,price,label){
-  S.dur=dur;S.price=price;S.finalPrice=applyD(price);
-  document.querySelectorAll('.dur-card').forEach(c=>c.classList.remove('sel'));
+  S.dur=dur;S.price=price;S.final=applyDisc(price);
+  document.querySelectorAll('.dcard').forEach(c=>c.classList.remove('sel'));
   document.getElementById('dc'+dur).classList.add('sel');
   document.getElementById('next2').disabled=false;
-  refreshSummary();updatePayDisplay();
+  refresh();updatePay();
 }
-function applyD(p){return S.discount?Math.round(p*(1-S.discount/100)):p}
+function applyDisc(p){return S.discount?Math.round(p*(1-S.discount/100)):p}
 
-/* ── PROMO ───────────────────────────────────────────────────────── */
+/* ══ PROMO ════════════════════════════════════════════════════ */
 function applyPromo(){
   const code=document.getElementById('promoInp').value.trim().toUpperCase();
   const fb=document.getElementById('promoFB');
   if(!code){showFB(fb,'err','Please enter a promo code');return}
   if(PROMOS[code]){
-    S.promoCode=code;S.discount=PROMOS[code];
-    if(S.price)S.finalPrice=applyD(S.price);
-    showFB(fb,'ok',`✓ "${code}" applied — ${S.discount}% off!`);
-    refreshSummary();updatePayDisplay();
+    S.promo=code;S.discount=PROMOS[code];
+    if(S.price)S.final=applyDisc(S.price);
+    showFB(fb,'ok','✓ "'+code+'" applied — '+S.discount+'% off!');
+    refresh();updatePay();
   }else{
-    S.promoCode=null;S.discount=0;
+    S.promo=null;S.discount=0;
     showFB(fb,'err','✗ Invalid or expired promo code');
   }
 }
-function showFB(el,type,msg){el.className='promo-fb pf-'+type;el.textContent=msg}
+function showFB(el,t,msg){el.className='promo-fb fb-'+t;el.textContent=msg}
 
-/* ── DETAILS ─────────────────────────────────────────────────────── */
+/* ══ DETAILS ══════════════════════════════════════════════════ */
 function checkDetails(){
   S.name=(document.getElementById('fName').value.trim()+' '+document.getElementById('lName').value.trim()).trim();
   S.phone=document.getElementById('phone').value.trim();
-  refreshSummary();tryNext3();
+  refresh();checkNext3();
 }
 function toggleWaiver(){
-  S.waiverOk=!S.waiverOk;
-  document.getElementById('waiverAgree').classList.toggle('ok',S.waiverOk);
-  document.getElementById('waBox').textContent=S.waiverOk?'✓':'';
-  tryNext3();
+  S.waiver=!S.waiver;
+  document.getElementById('waiverRow').classList.toggle('ok',S.waiver);
+  document.getElementById('waBox').textContent=S.waiver?'✓':'';
+  checkNext3();
 }
-function tryNext3(){
-  document.getElementById('next3').disabled=!(S.name.length>2&&S.phone.length>=9&&S.waiverOk);
+function checkNext3(){
+  document.getElementById('next3').disabled=!(S.name.length>2&&S.phone.length>=9&&S.waiver);
 }
 
-/* ── PAY ─────────────────────────────────────────────────────────── */
-function checkRef(){document.getElementById('confirmBtn').disabled=document.getElementById('mpesaRef').value.length<8}
-function updatePayDisplay(){
-  if(!S.finalPrice)return;
-  document.getElementById('pacAmt').textContent='KES '+fmt(S.finalPrice);
-  document.getElementById('pacDetail').textContent=(S.quad?S.quad.name:'')+' · '+(S.dur?S.dur+' min':'');
-  document.getElementById('amtInline').textContent='KES '+fmt(S.finalPrice);
+/* ══ PAYMENT ══════════════════════════════════════════════════ */
+function checkRef(){
+  document.getElementById('confirmBtn').disabled=document.getElementById('mpesaRef').value.length<8;
+}
+function updatePay(){
+  if(!S.final)return;
+  document.getElementById('payAmt').textContent='KES '+fmt(S.final);
+  document.getElementById('payDetail').textContent=(S.quad?S.quad.name:'')+' · '+(S.dur?S.dur+' min':'');
+  document.getElementById('amtLine').textContent='KES '+fmt(S.final);
 }
 function copyTill(){
   navigator.clipboard.writeText('6685024').catch(()=>{});
-  const btn=document.getElementById('tcCopy');
+  const btn=document.getElementById('tillCopy');
   btn.textContent='✓ Copied!';btn.classList.add('ok');
-  showToast('Till number copied!');
-  setTimeout(()=>{btn.textContent='⧉ Copy';btn.classList.remove('ok')},2500);
+  toast('Till number copied!');
+  setTimeout(()=>{btn.textContent='⧉ Copy';btn.classList.remove('ok')},2600);
 }
 
-/* ── CONFIRM ─────────────────────────────────────────────────────── */
+/* ══ CONFIRM ══════════════════════════════════════════════════ */
 function confirmBooking(){
   const ref=document.getElementById('mpesaRef').value.trim();
-  if(!S.quad||!S.dur||!S.name||!S.phone){showToast('Please complete all steps first','err');return}
-  if(ref.length<8){showToast('Enter a valid M-Pesa code','err');return}
+  if(!S.quad||!S.dur||!S.name||!S.phone){toast('Please complete all steps first','err');return}
+  if(ref.length<8){toast('Enter a valid M-Pesa code','err');return}
   const btn=document.getElementById('confirmBtn');
   btn.classList.add('loading');btn.disabled=true;
   setTimeout(()=>{btn.classList.remove('loading');showSuccess(ref)},2000);
@@ -1173,75 +741,77 @@ function showSuccess(ref){
   const id='RQ-'+Math.random().toString(36).substr(2,6).toUpperCase();
   const now=new Date();
   document.getElementById('ticketId').textContent=id;
-  document.getElementById('ssSub').textContent=`Hi ${S.name.split(' ')[0]}! Your ${S.dur}-min ride on ${S.quad.name} is confirmed. Show this ticket at the dunes.`;
+  document.getElementById('sheetSub').textContent='Hi '+S.name.split(' ')[0]+'! Your '+S.dur+'-min ride on '+S.quad.name+' is confirmed. Show this ticket at the dunes.';
   document.getElementById('tk-quad').textContent=S.quad.name;
   document.getElementById('tk-name').textContent=S.name;
   document.getElementById('tk-phone').textContent=S.phone;
   document.getElementById('tk-dur').textContent=S.dur+' min';
   document.getElementById('tk-date').textContent=now.toLocaleDateString('en-KE',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   document.getElementById('tk-ref').textContent=ref;
-  document.getElementById('tk-total').textContent='KES '+fmt(S.finalPrice);
-  document.getElementById('successOverlay').classList.add('show');
+  document.getElementById('tk-total').textContent='KES '+fmt(S.final);
+  document.getElementById('overlay').classList.add('show');
 }
 function shareWA(){
   const id=document.getElementById('ticketId').textContent;
+  const ref=document.getElementById('tk-ref').textContent;
   const msg=encodeURIComponent(
-    `🏍️ *BOOKING CONFIRMED — Royal Quad Bikes*\n\n`+
-    `📋 Receipt: ${id}\n👤 Customer: ${S.name}\n📞 Phone: ${S.phone}\n`+
-    `🏍️ Quad: ${S.quad.name}\n⏱️ Duration: ${S.dur} min\n`+
-    `💰 Total: KES ${fmt(S.finalPrice)}\n📱 M-Pesa: ${document.getElementById('tk-ref').textContent}\n\n`+
-    `📍 Mambrui Sand Dunes, Kilifi County, Kenya`
+    '🏍️ *BOOKING CONFIRMED — Royal Quad Bikes*\n\n'+
+    '📋 Receipt: '+id+'\n👤 Customer: '+S.name+'\n📞 Phone: '+S.phone+'\n'+
+    '🏍️ Quad: '+S.quad.name+'\n⏱️ Duration: '+S.dur+' min\n'+
+    '💰 Total: KES '+fmt(S.final)+'\n📱 M-Pesa: '+ref+'\n\n'+
+    '📍 Mambrui Sand Dunes, Kilifi County, Kenya'
   );
   window.open('https://wa.me/254784589999?text='+msg,'_blank');
   setTimeout(()=>window.open('https://wa.me/254784993996?text='+msg,'_blank'),800);
 }
-function reset(){document.getElementById('successOverlay').classList.remove('show');location.reload()}
+function reset(){document.getElementById('overlay').classList.remove('show');location.reload()}
 
-/* ── NAVIGATION ──────────────────────────────────────────────────── */
+/* ══ NAVIGATION ═══════════════════════════════════════════════ */
 function goTo(n){
   document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
   S.step=n;
   [1,2,3,4].forEach(i=>{
-    const node=document.getElementById('sn'+i);
-    const lbl =document.getElementById('sl'+i);
-    if(node){node.classList.toggle('active',i===n);node.classList.toggle('done',i<n);node.textContent=i<n?'✓':String(i);}
-    if(lbl){lbl.className='sl'+(i===n?' active':i<n?' done':'');}
-    if(i<4){const c=document.getElementById('sc'+i);if(c)c.classList.toggle('done',i<n);}
+    const node=document.getElementById('n'+i);
+    const lbl =document.getElementById('lb'+i);
+    node.classList.toggle('on',  i===n);
+    node.classList.toggle('done',i<n);
+    node.textContent=i<n?'✓':String(i);
+    lbl.className='slbl'+(i===n?' on':i<n?' done':'');
+    if(i<4){const ln=document.getElementById('l'+i);if(ln)ln.classList.toggle('done',i<n);}
   });
-  document.getElementById('spFill').style.width=((n-1)/3*100)+'%';
-  document.getElementById('spLabel').textContent='Step '+n+' of 4'+(n===4?' — Ready to pay!':'');
-  if(n===4)updatePayDisplay();
+  document.getElementById('progBar').style.width=((n-1)/3*100)+'%';
+  document.getElementById('progLbl').textContent='Step '+n+' of 4'+(n===4?' — Ready to pay!':'');
+  if(n===4)updatePay();
   document.getElementById('book').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-/* ── SUMMARY ─────────────────────────────────────────────────────── */
-function refreshSummary(){
+/* ══ SUMMARY ══════════════════════════════════════════════════ */
+function refresh(){
   set('sv-quad',S.quad?S.quad.name:'—');
   set('sv-dur',S.dur?S.dur+' min':'—');
   set('sv-base',S.price?fmt(S.price)+' KES':'—');
   set('sv-name',S.name||'—');
-  set('sv-total',S.finalPrice?'KES '+fmt(S.finalPrice):'KES —');
+  set('sv-total',S.final?'KES '+fmt(S.final):'KES —');
   const pr=document.getElementById('sv-promo-row');
   if(S.discount&&S.price){
-    document.getElementById('sv-promo').textContent='−'+fmt(S.price-S.finalPrice)+' KES ('+S.discount+'%)';
+    document.getElementById('sv-promo').textContent='−'+fmt(S.price-S.final)+' KES ('+S.discount+'%)';
     pr.style.display='flex';
   }else{pr.style.display='none'}
 }
-function set(id,val){document.getElementById(id).textContent=val}
+function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v}
 
-/* ── UTILS ───────────────────────────────────────────────────────── */
+/* ══ UTILS ════════════════════════════════════════════════════ */
 function fmt(n){return Number(n).toLocaleString()}
-let toastT;
-function showToast(msg,type=''){
+let toastTimer;
+function toast(msg,type=''){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast show'+(type==='err'?' err':'');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
 }
-window.toast=(m,t)=>showToast(m,t);
+window.toast=toast;
 
-/* ── BOOT ────────────────────────────────────────────────────────── */
+/* ══ BOOT ════════════════════════════════════════════════════ */
 loadData();
 </script>
-
 </body>
 </html>
