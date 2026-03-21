@@ -61,42 +61,55 @@ jobs:
           python3 scripts/inject-icons.py
 
       # ── 7. Build release APK ─────────────────────────────────────────────────
-      - name: Build APK
+      - name: Build and stage APK
         run: |
+          # Run build — use set +e so Flutter's "can't find APK" false-failure
+          # doesn't kill the step before we do our own search
+          set +e
           flutter build apk \
             --release \
             --no-tree-shake-icons \
             --android-skip-build-dependency-validation
-          echo "Build exit: $?"
+          FLUTTER_EXIT=$?
+          set -e
 
-      # ── 8. Locate & stage APK ────────────────────────────────────────────────
-      - name: Stage APK
-        run: |
+          echo "Flutter exit code: $FLUTTER_EXIT"
+
+          # Search for the APK regardless of flutter's exit code
+          echo "=== Searching for APK ==="
           APK=""
           for CANDIDATE in \
+            "$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk" \
+            "$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk" \
             "build/app/outputs/flutter-apk/app-release.apk" \
             "build/app/outputs/apk/release/app-release.apk"
           do
             if [ -f "$CANDIDATE" ]; then
               APK="$CANDIDATE"
+              echo "Found: $APK"
               break
             fi
           done
 
+          # Last resort — scan entire build directory
           if [ -z "$APK" ]; then
             APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
-                  2>/dev/null | grep -v intermediates | head -1)
+                  2>/dev/null | grep -v "intermediates" | head -1)
           fi
 
+          # Show output tree for debugging
+          echo "=== build/app/outputs layout ==="
+          find "$GITHUB_WORKSPACE/build/app/outputs" -type f 2>/dev/null | head -20 \
+            || echo "outputs dir not found"
+
           if [ -z "$APK" ]; then
-            echo "ERROR: APK not found"
-            find "$GITHUB_WORKSPACE/build" -type f -name "*.apk" 2>/dev/null || true
+            echo "ERROR: APK not found — Gradle build genuinely failed"
             exit 1
           fi
 
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "APK size: $(du -sh output/Royal-Quads.apk | cut -f1)"
+          echo "SUCCESS: $(du -sh output/Royal-Quads.apk | cut -f1) → output/Royal-Quads.apk"
 
       # ── 9. Upload artifact ───────────────────────────────────────────────────
       - name: Upload artifact
