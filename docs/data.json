@@ -1,0 +1,36 @@
+{
+  "_comment": "This file is managed by the Royal Quad Bikes admin app. Do not edit manually.",
+  "_updated": "2025-03-21T00:00:00Z",
+  "business": {
+    "name": "Royal Quad Bikes",
+    "location": "Mambrui Sand Dunes, Kilifi County, Kenya",
+    "tillNumber": "6685024",
+    "phone1": "254784589999",
+    "phone2": "254784993996",
+    "open": true,
+    "hours": "Sunrise to Sunset"
+  },
+  "quads": [
+    {"id": 1, "name": "Raptor 1", "status": "available", "emoji": "🏍️"},
+    {"id": 2, "name": "Raptor 2", "status": "available", "emoji": "🏍️"},
+    {"id": 3, "name": "Viper 1",  "status": "available", "emoji": "🏍️"},
+    {"id": 4, "name": "Viper 2",  "status": "available", "emoji": "🏍️"},
+    {"id": 5, "name": "Storm 1",  "status": "available", "emoji": "🏍️"},
+    {"id": 6, "name": "Storm 2",  "status": "available", "emoji": "🏍️"}
+  ],
+  "pricing": [
+    {"dur": 5,  "price": 1000, "label": "5 min",  "popular": false},
+    {"dur": 10, "price": 1800, "label": "10 min", "popular": false},
+    {"dur": 15, "price": 2200, "label": "15 min", "popular": false},
+    {"dur": 20, "price": 2500, "label": "20 min", "popular": true},
+    {"dur": 30, "price": 3500, "label": "30 min", "popular": false},
+    {"dur": 60, "price": 6000, "label": "1 hr",   "popular": false}
+  ],
+  "promos": [
+    {"code": "DUNES20",    "discount": 20, "active": true},
+    {"code": "MAMBRUI10",  "discount": 10, "active": true},
+    {"code": "WELCOME25",  "discount": 25, "active": false}
+  ],
+  "overtimeRate": 100,
+  "notice": ""
+}

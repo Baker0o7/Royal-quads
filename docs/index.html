@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Ride — Royal Quad Bikes · Mambrui Sand Dunes</title>
+<title>Royal Quad Bikes — Book a Ride · Mambrui Sand Dunes</title>
 <meta name="description" content="Book your quad bike adventure at Mambrui Sand Dunes. Select your quad, pick a duration, pay via M-Pesa.">
 <link rel="icon" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -476,7 +476,7 @@ footer a{color:rgba(196,136,12,.5)}
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="index.html" class="nav-logo">
+  <a href="/Royal-quads" class="nav-logo">
     <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
     <span class="nav-logo-name">Royal Quad Bikes</span>
   </a>
@@ -764,24 +764,59 @@ footer a{color:rgba(196,136,12,.5)}
 </footer>
 
 <script>
-/* ── DATA ─────────────────────────────────────────────────────────── */
-const QUADS=[
-  {id:1,name:'Raptor 1',status:'available',emoji:'🏍️'},
-  {id:2,name:'Raptor 2',status:'available',emoji:'🏍️'},
-  {id:3,name:'Viper 1', status:'available',emoji:'🏍️'},
-  {id:4,name:'Viper 2', status:'rented',   emoji:'🔒'},
-  {id:5,name:'Storm 1', status:'available',emoji:'🏍️'},
-  {id:6,name:'Storm 2', status:'available',emoji:'🏍️'},
-];
-const PRICING=[
-  {dur:5,  price:1000,label:'5 min'},
-  {dur:10, price:1800,label:'10 min'},
-  {dur:15, price:2200,label:'15 min'},
-  {dur:20, price:2500,label:'20 min',popular:true},
-  {dur:30, price:3500,label:'30 min'},
-  {dur:60, price:6000,label:'1 hr'},
-];
-const PROMOS={DUNES20:20,MAMBRUI10:10,QUAD15:15,WELCOME25:25,KENYA10:10,RIDE30:30};
+/* ── DATA (live from data.json) ──────────────────────────────────── */
+let QUADS=[];
+let PRICING=[];
+let PROMOS={};
+let OVERTIME_RATE=100;
+
+async function loadData(){
+  try{
+    const r=await fetch('https://raw.githubusercontent.com/Baker0o7/Royal-quads/main/docs/data.json?t='+Date.now());
+    const d=await r.json();
+    QUADS=d.quads||[];
+    PRICING=d.pricing||[];
+    OVERTIME_RATE=d.overtimeRate||100;
+    // promos array → object
+    PROMOS={};
+    (d.promos||[]).filter(p=>p.active).forEach(p=>PROMOS[p.code]=p.discount);
+    // Show notice if set
+    if(d.notice){
+      const nb=document.createElement('div');
+      nb.style.cssText='background:#2a1e0a;border:1px solid rgba(200,145,42,.4);color:#E8B44B;text-align:center;padding:12px;font-size:13px;font-weight:600;letter-spacing:.3px;position:relative;z-index:100';
+      nb.textContent='📢 '+d.notice;
+      document.querySelector('.hero').before(nb);
+    }
+    // Update open/closed status
+    if(d.business&&!d.business.open){
+      const nb=document.createElement('div');
+      nb.style.cssText='background:#1a0a0a;border:1px solid rgba(239,68,68,.4);color:#f87171;text-align:center;padding:14px;font-size:14px;font-weight:700;letter-spacing:.3px;position:relative;z-index:100';
+      nb.textContent='⚠️  We are currently closed. Please check back later or WhatsApp us.';
+      document.querySelector('.hero').before(nb);
+    }
+  }catch(e){
+    console.warn('Could not load live data, using defaults',e);
+    QUADS=[
+      {id:1,name:'Raptor 1',status:'available',emoji:'🏍️'},
+      {id:2,name:'Raptor 2',status:'available',emoji:'🏍️'},
+      {id:3,name:'Viper 1', status:'available',emoji:'🏍️'},
+      {id:4,name:'Viper 2', status:'available',emoji:'🏍️'},
+      {id:5,name:'Storm 1', status:'available',emoji:'🏍️'},
+      {id:6,name:'Storm 2', status:'available',emoji:'🏍️'},
+    ];
+    PRICING=[
+      {dur:5, price:1000,label:'5 min'},
+      {dur:10,price:1800,label:'10 min'},
+      {dur:15,price:2200,label:'15 min'},
+      {dur:20,price:2500,label:'20 min',popular:true},
+      {dur:30,price:3500,label:'30 min'},
+      {dur:60,price:6000,label:'1 hr'},
+    ];
+    PROMOS={DUNES20:20,MAMBRUI10:10,WELCOME25:25};
+  }
+  renderQuads();
+  renderDurations();
+}
 
 /* ── STATE ─────────────────────────────────────────────────────────── */
 const S={quad:null,dur:null,price:null,finalPrice:null,discount:0,promoCode:null,name:'',phone:'',waiverOk:false,step:1};
@@ -906,21 +941,17 @@ function showSuccess(ref){
 }
 function shareWA(){
   const id=document.getElementById('ticketId').textContent;
-  const ref=document.getElementById('tk-ref').textContent;
   const msg=encodeURIComponent(
-    `🏍️ *BOOKING CONFIRMED — Royal Quad Bikes*\n\n`+
-    `📋 Receipt ID: ${id}\n`+
-    `👤 Customer: ${S.name}\n`+
-    `📞 Phone: ${S.phone}\n`+
+    `🏍️ *Royal Quad Bikes — Booking Confirmed!*\n\n`+
+    `📋 Receipt: ${id}\n`+
     `🏍️ Quad: ${S.quad.name}\n`+
     `⏱️ Duration: ${S.dur} min\n`+
-    `💰 Amount Paid: KES ${fmt(S.finalPrice)}\n`+
-    `📱 M-Pesa Ref: ${ref}\n\n`+
-    `📍 Mambrui Sand Dunes, Kilifi County, Kenya`
+    `💰 Total: KES ${fmt(S.finalPrice)}\n`+
+    `📱 M-Pesa: ${document.getElementById('tk-ref').textContent}\n\n`+
+    `📍 Mambrui Sand Dunes, Kilifi County, Kenya\n`+
+    `🌐 book.royalquadbikes.ke`
   );
-  // Send to both operators
-  window.open('https://wa.me/254784589999?text='+msg,'_blank');
-  setTimeout(()=>window.open('https://wa.me/254784993996?text='+msg,'_blank'),800);
+  window.open('https://wa.me/?text='+msg,'_blank');
 }
 function reset(){document.getElementById('successOverlay').classList.remove('show');location.reload()}
 
@@ -968,9 +999,8 @@ function showToast(msg,type=''){
 window.toast=(m,t)=>showToast(m,t);
 
 /* ── BOOT ──────────────────────────────────────────────────────────── */
-renderQuads();
-renderDurations();
+loadData();
 </script>
-<div class="fab"><a href="https://wa.me/254784589999?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui%20Sand%20Dunes" target="_blank" style="background:#25D366;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s" title="Chat on WhatsApp" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a></div>
+<div class="fab"><a href="https://wa.me/254700000000?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui" target="_blank" style="background:#25D366;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s" title="Chat on WhatsApp" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a></div>
 </body>
 </html>
