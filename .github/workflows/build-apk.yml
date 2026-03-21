@@ -120,16 +120,16 @@ jobs:
             > **Before installing:** Settings › Apps › Special app access › Install unknown apps › Allow
 
             ### What's in this build
-            - **Loyalty Programme** — 4-tier points system (Bronze→Silver→Gold→Platinum)
-            - **Customer sign-in** — view loyalty balance, ride history, stats
-            - **Admin Website tab** — update quads, prices, promos live from the app
-            - 6 colour themes — Ocean Breeze light by default
-            - OTP phone verification on sign-up
-            - Live ride timer, overtime billing at 100 KES/min
-            - M-Pesa capture, PDF receipts, WhatsApp share
-            - Pre-bookings, digital safety waiver, promo codes
-            - Admin: fleet, history, analytics, daily report, incident log
-            - Interactive offline map of Mambrui Sand Dunes
+            - **Admin-only app** — PIN-protected, no customer-facing screens
+            - **Website Control** — update quads/prices/promos/open status from the app
+            - **Fleet Management** — live quad status, add/remove/rename
+            - **Live ride timer** — overtime billing at 100 KES/min
+            - **Admin Dashboard** — revenue, analytics, history, daily report
+            - **M-Pesa** capture, PDF receipts, WhatsApp share to operators
+            - **Loyalty Programme** — 4-tier points (Bronze→Silver→Gold→Platinum)
+            - **Pre-bookings**, safety waiver, promo codes, incident log
+            - **6 colour themes** — Ocean Breeze light by default
+            - **Google Maps** location view in Dunes tab
 
             ### Install
             1. Download **Royal-Quads.apk** below
