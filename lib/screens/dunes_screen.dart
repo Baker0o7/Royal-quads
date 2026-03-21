@@ -174,112 +174,23 @@ class _DunesScreenState extends State<DunesScreen> {
               ]),
             ),
 
-          // Map tile display
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: SizedBox(
-              height: 280,
-              child: Stack(children: [
-                RepaintBoundary(
-                  key: _repaintKey,
-                  child: _mapSaved && _savedPath != null
-                      ? Image.file(File(_savedPath!),
-                          fit: BoxFit.cover,
-                          width: double.infinity, height: 280)
-                      : _TileMapView(lat: _lat, lng: _lng, zoom: _zoom),
-                ),
-
-                // Live/Offline badge
-                Positioned(top: 12, left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(150),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Container(width: 6, height: 6,
-                          decoration: BoxDecoration(
-                            color: _mapSaved ? kAccent2 : kGreen,
-                            shape: BoxShape.circle)),
-                      const SizedBox(width: 5),
-                      Text(_mapSaved ? 'Offline' : 'Live',
-                          style: const TextStyle(color: Colors.white,
-                              fontSize: 10, fontWeight: FontWeight.w600)),
-                    ]),
-                  ),
-                ),
-
-                // Zoom controls
-                if (!_mapSaved)
-                  Positioned(bottom: 12, right: 12,
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      _ZoomBtn(Icons.add_rounded,
-                          () => setState(() =>
-                              _zoom = (_zoom + 1).clamp(10, 18))),
-                      const SizedBox(height: 6),
-                      _ZoomBtn(Icons.remove_rounded,
-                          () => setState(() =>
-                              _zoom = (_zoom - 1).clamp(10, 18))),
-                    ]),
-                  ),
-
-                // Location pin overlay
-                Center(child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: kAccent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [BoxShadow(
-                            color: kAccent.withAlpha(80), blurRadius: 10)],
-                      ),
-                      child: const Text('🏍️ Royal Quad Bikes',
-                          style: TextStyle(color: Colors.white,
-                              fontWeight: FontWeight.w700, fontSize: 12))),
-                    Container(width: 2, height: 12, color: kAccent),
-                    Container(width: 10, height: 10,
-                        decoration: BoxDecoration(
-                          color: kAccent, shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(
-                              color: kAccent.withAlpha(80), blurRadius: 8)],
-                        )),
-                  ],
-                )),
-              ]),
-            ),
+          // ── Google Maps embedded view ──────────────────────────────────
+          _GoogleMapCard(
+            lat: _lat, lng: _lng,
+            onOpenMaps: _openGoogleMaps,
+            onDirections: _openDirections,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
 
-          // Action buttons
-          Row(children: [
-            Expanded(child: _ActionBtn(
-              icon: _mapSaved
-                  ? Icons.download_done_rounded : Icons.download_rounded,
-              label: _mapSaved ? 'Saved' : 'Save Offline',
-              color: _mapSaved ? kGreen : kAccent,
-              loading: _downloading,
-              onTap: _mapSaved ? null : _saveMap,
-            )),
-            const SizedBox(width: 10),
-            Expanded(child: _ActionBtn(
-              icon: Icons.map_rounded,
-              label: 'Google Maps',
-              color: kIndigo,
-              onTap: _openGoogleMaps,
-            )),
-            const SizedBox(width: 10),
-            Expanded(child: _ActionBtn(
-              icon: Icons.directions_rounded,
-              label: 'Directions',
-              color: kGreen,
-              onTap: _openDirections,
-            )),
-          ]),
+          // Save offline action
+          _ActionBtn(
+            icon: _mapSaved
+                ? Icons.download_done_rounded : Icons.save_alt_rounded,
+            label: _mapSaved ? 'Map Saved Offline' : 'Save Map Offline',
+            color: _mapSaved ? kGreen : kAccent,
+            loading: _downloading,
+            onTap: _mapSaved ? null : _saveMap,
+          ),
           const SizedBox(height: 20),
 
           SectionHeading('Location Details',
@@ -318,6 +229,221 @@ class _DunesScreenState extends State<DunesScreen> {
     ]),
   );
 }
+
+// ── Google Maps Card ──────────────────────────────────────────────────────────
+// Shows an interactive-looking map preview using OSM tiles + Google Maps button
+class _GoogleMapCard extends StatefulWidget {
+  final double lat, lng;
+  final VoidCallback onOpenMaps, onDirections;
+  const _GoogleMapCard({
+    required this.lat, required this.lng,
+    required this.onOpenMaps, required this.onDirections,
+  });
+  @override State<_GoogleMapCard> createState() => _GoogleMapCardState();
+}
+
+class _GoogleMapCardState extends State<_GoogleMapCard> {
+  int _zoom = 15;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      // ── Map container ─────────────────────────────────────────────────────
+      ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(children: [
+
+          // OSM tile background (live map tiles)
+          SizedBox(
+            height: 300,
+            width: double.infinity,
+            child: _TileMapView(
+                lat: widget.lat, lng: widget.lng, zoom: _zoom),
+          ),
+
+          // Semi-transparent Google Maps branded overlay button
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: widget.onOpenMaps,
+              child: Container(
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+
+          // ── Top-left: location label ──────────────────────────────────────
+          Positioned(top: 12, left: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(
+                    color: Colors.black.withAlpha(40), blurRadius: 8)],
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Container(width: 8, height: 8,
+                    decoration: const BoxDecoration(
+                      color: kRed, shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                const Text('Royal Quad Bikes — Mambrui',
+                    style: TextStyle(color: Color(0xFF1A1612),
+                        fontWeight: FontWeight.w700, fontSize: 11)),
+              ]),
+            ),
+          ),
+
+          // ── Top-right: zoom controls ──────────────────────────────────────
+          Positioned(top: 12, right: 12,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              _MapBtn(Icons.add_rounded,
+                  () => setState(() => _zoom = (_zoom + 1).clamp(10, 18))),
+              Container(height: 1, width: 36,
+                  color: Colors.black.withAlpha(15)),
+              _MapBtn(Icons.remove_rounded,
+                  () => setState(() => _zoom = (_zoom - 1).clamp(10, 18))),
+            ]),
+          ),
+
+          // ── Centre pin ───────────────────────────────────────────────────
+          Center(child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: kRed,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(
+                      color: kRed.withAlpha(100), blurRadius: 12)],
+                ),
+                child: const Icon(Icons.place_rounded,
+                    color: Colors.white, size: 20),
+              ),
+              Container(width: 2, height: 8,
+                  color: kRed.withAlpha(150)),
+              Container(width: 6, height: 6,
+                  decoration: const BoxDecoration(
+                    color: kRed, shape: BoxShape.circle)),
+            ],
+          )),
+
+          // ── Bottom: "Tap to open Google Maps" hint ───────────────────────
+          Positioned(bottom: 0, left: 0, right: 0,
+            child: GestureDetector(
+              onTap: widget.onOpenMaps,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withAlpha(0),
+                      Colors.black.withAlpha(140),
+                    ],
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      'https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png',
+                      width: 16, height: 16,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.map_rounded,
+                              color: Colors.white, size: 16),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text('View on Google Maps',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                            shadows: [Shadow(
+                                color: Colors.black54, blurRadius: 4)])),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.open_in_new_rounded,
+                        color: Colors.white70, size: 12),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ]),
+      ),
+
+      const SizedBox(height: 10),
+
+      // ── Action buttons row ─────────────────────────────────────────────────
+      Row(children: [
+        Expanded(child: _MapActionBtn(
+          icon: Icons.map_rounded,
+          label: 'Open in Google Maps',
+          color: const Color(0xFF4285F4),
+          onTap: widget.onOpenMaps,
+        )),
+        const SizedBox(width: 10),
+        Expanded(child: _MapActionBtn(
+          icon: Icons.directions_rounded,
+          label: 'Get Directions',
+          color: kGreen,
+          onTap: widget.onDirections,
+        )),
+      ]),
+    ]);
+  }
+}
+
+class _MapBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _MapBtn(this.icon, this.onTap);
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 36, height: 36,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(
+            color: Colors.black.withAlpha(30), blurRadius: 6)],
+      ),
+      child: Icon(icon, size: 18, color: const Color(0xFF666666)),
+    ),
+  );
+}
+
+class _MapActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _MapActionBtn({required this.icon, required this.label,
+      required this.color, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 13),
+      decoration: BoxDecoration(
+        color: color.withAlpha(15),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withAlpha(50), width: 1.5),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 7),
+        Flexible(child: Text(label,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: color,
+                fontWeight: FontWeight.w700, fontSize: 12))),
+      ]),
+    ),
+  );
+}
+
 
 // OSM tile grid — 3×3 tiles centred on the location
 class _TileMapView extends StatelessWidget {
