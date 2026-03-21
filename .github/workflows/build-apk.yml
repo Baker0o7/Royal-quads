@@ -120,18 +120,16 @@ jobs:
             > **Before installing:** Settings › Apps › Special app access › Install unknown apps › Allow
 
             ### What's in this build
-            - 6 colour themes (Desert Gold, Ocean Breeze, Forest Night, Midnight Purple, Crimson Sunset, Slate Pro)
-            - Dark / Light mode, fully theme-aware UI on every screen
-            - Interactive offline map of Mambrui Sand Dunes
+            - **Loyalty Programme** — 4-tier points system (Bronze→Silver→Gold→Platinum)
+            - **Customer sign-in** — view loyalty balance, ride history, stats
+            - **Admin Website tab** — update quads, prices, promos live from the app
+            - 6 colour themes — Ocean Breeze light by default
             - OTP phone verification on sign-up
-            - End-of-Day PDF report, dynamic pricing, loyalty points
-            - Peak hours heatmap, quad utilisation charts, customer insights
-            - Incident log, emergency contacts, waiver expiry (30 days)
-            - Booking ticket with QR code, live countdown timer
-            - Confetti ride-complete screen with animated KES counter
-            - PDF receipt, WhatsApp share, M-Pesa capture
             - Live ride timer, overtime billing at 100 KES/min
-            - Pre-bookings, waiver flow, admin dashboard + analytics
+            - M-Pesa capture, PDF receipts, WhatsApp share
+            - Pre-bookings, digital safety waiver, promo codes
+            - Admin: fleet, history, analytics, daily report, incident log
+            - Interactive offline map of Mambrui Sand Dunes
 
             ### Install
             1. Download **Royal-Quads.apk** below

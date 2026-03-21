@@ -773,69 +773,178 @@ class _LoyaltyOverviewCard extends StatelessWidget {
   final List<Booking> history;
   const _LoyaltyOverviewCard({required this.history});
 
+  static const _tiers = [
+    (name: 'Bronze',   pts: 0,    icon: '\U0001f949', color: Color(0xFFCD7F32)),
+    (name: 'Silver',   pts: 200,  icon: '\U0001f948', color: Color(0xFF94A3B8)),
+    (name: 'Gold',     pts: 500,  icon: '\U0001f947', color: Color(0xFFC9972A)),
+    (name: 'Platinum', pts: 1000, icon: '\U0001f48e', color: Color(0xFF6366F1)),
+  ];
+
+  Color _tierColor(int pts) {
+    var c = _tiers[0].color;
+    for (final t in _tiers) { if (pts >= t.pts) c = t.color; }
+    return c;
+  }
+  String _tierIcon(int pts) {
+    var ic = _tiers[0].icon;
+    for (final t in _tiers) { if (pts >= t.pts) ic = t.icon; }
+    return ic;
+  }
+
   @override
   Widget build(BuildContext context) {
     final phones = history.map((b) => b.customerPhone).toSet().toList();
     final accounts = phones
         .map((p) => StorageService.getLoyaltyAccount(p))
-        .where((a) => a != null && a!.points > 0)
+        .where((a) => a != null)
         .cast<LoyaltyAccount>()
         .toList()
-      ..sort((a,b) => b.points.compareTo(a.points));
+      ..sort((a, b) => b.points.compareTo(a.points));
+
+    final totalPts  = accounts.fold(0, (s, a) => s + a.points);
+    final active    = accounts.where((a) => a.points > 0).length;
+    final platinum  = accounts.where((a) => a.points >= 1000).length;
 
     return AppCard(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+        // Gold banner
         Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: kGoldGradient,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(children: [
-            const Icon(Icons.stars_rounded, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            const Expanded(child: Text('1 point per 100 KES spent',
-                style: TextStyle(color: Colors.white,
-                    fontWeight: FontWeight.w600, fontSize: 12))),
-            const Text('Active', style: TextStyle(
-                color: Colors.white70, fontSize: 10)),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(gradient: kGoldGradient,
+              borderRadius: BorderRadius.circular(14)),
+          child: const Row(children: [
+            Text('\U0001f3c6', style: TextStyle(fontSize: 20)),
+            SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Loyalty Programme', style: TextStyle(color: Colors.white,
+                    fontWeight: FontWeight.w800, fontSize: 13)),
+                Text('1 pt per 100 KES \u00b7 Bronze\u2192Silver\u2192Gold\u2192Platinum',
+                    style: TextStyle(color: Colors.white60, fontSize: 10)),
+              ])),
           ]),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 14),
+
+        // Summary row
+        Row(children: [
+          _LStat(context, 'Members', '$active', kAccent),
+          const SizedBox(width: 8),
+          _LStat(context, 'Total Pts', '$totalPts', kGreen),
+          const SizedBox(width: 8),
+          _LStat(context, 'Platinum', '$platinum', kIndigo),
+        ]),
+
+        const SizedBox(height: 14),
+
+        // Tier breakdown
+        Row(
+          children: _tiers.map((t) {
+            final tierIdx = _tiers.indexWhere((td) => td.name == t.name);
+            final nextPts = tierIdx < _tiers.length - 1
+                ? _tiers[tierIdx + 1].pts : 999999;
+            final count = accounts
+                .where((a) => a.points >= t.pts && a.points < nextPts)
+                .length;
+            return Expanded(child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: t.color.withAlpha(10),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: t.color.withAlpha(30)),
+              ),
+              child: Column(children: [
+                Text(t.icon, style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 3),
+                Text('$count', style: TextStyle(color: t.color,
+                    fontWeight: FontWeight.w800, fontSize: 14)),
+                Text(t.name, style: TextStyle(color: t.color.withAlpha(180),
+                    fontSize: 9, fontWeight: FontWeight.w600)),
+              ]),
+            ));
+          }).toList(),
+        ),
+
+        const SizedBox(height: 14),
+
         if (accounts.isEmpty)
-          Text('No loyalty accounts yet',
-              style: TextStyle(color: context.rq.muted, fontSize: 13))
-        else
-          ...accounts.take(5).map((a) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(children: [
-              Container(
-                width: 32, height: 32,
-                decoration: BoxDecoration(
-                    color: kAccent.withAlpha(15),
-                    shape: BoxShape.circle),
-                child: Center(child: Text(
-                  a.phone.length > 4
-                      ? a.phone.substring(a.phone.length - 4) : a.phone,
-                  style: const TextStyle(color: kAccent,
-                      fontSize: 10, fontWeight: FontWeight.w700)))),
-              const SizedBox(width: 10),
-              Expanded(child: Text(a.phone,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 13))),
-              const Icon(Icons.star_rounded, color: kAccent, size: 14),
-              const SizedBox(width: 3),
-              Text('${a.points} pts',
-                  style: const TextStyle(color: kAccent,
-                      fontWeight: FontWeight.w700, fontSize: 13)),
-            ]),
-          )),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text('No loyalty accounts yet.',
+                style: TextStyle(color: context.rq.muted, fontSize: 13)),
+          )
+        else ...[
+          Text('LEADERBOARD', style: TextStyle(fontWeight: FontWeight.w800,
+              fontSize: 10, color: context.rq.muted, letterSpacing: 1.5)),
+          const SizedBox(height: 8),
+          ...accounts.take(8).toList().asMap().entries.map((entry) {
+            final rank = entry.key + 1;
+            final a    = entry.value;
+            final col  = _tierColor(a.points);
+            final icon = _tierIcon(a.points);
+            final medal = rank == 1 ? '\U0001f947'
+                        : rank == 2 ? '\U0001f948'
+                        : rank == 3 ? '\U0001f949'
+                        : '$rank.';
+            final maskedPhone = a.phone.length >= 10
+                ? '${a.phone.substring(0, 4)}****${a.phone.substring(a.phone.length - 3)}'
+                : a.phone;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              decoration: BoxDecoration(
+                color: rank <= 3 ? col.withAlpha(8) : Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: rank <= 3
+                    ? col.withAlpha(35) : Theme.of(context).dividerColor),
+              ),
+              child: Row(children: [
+                SizedBox(width: 28, child: Text(medal,
+                    style: TextStyle(
+                        fontSize: rank <= 3 ? 16 : 11,
+                        fontWeight: FontWeight.w700,
+                        color: context.rq.muted))),
+                const SizedBox(width: 4),
+                Text(icon, style: const TextStyle(fontSize: 14)),
+                const SizedBox(width: 8),
+                Expanded(child: Text(maskedPhone,
+                    style: TextStyle(fontWeight: FontWeight.w600,
+                        fontSize: 12, color: context.rq.text))),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                  Text('${a.points} pts',
+                      style: TextStyle(color: col,
+                          fontWeight: FontWeight.w800, fontSize: 12)),
+                  Text('${a.totalRides} ride${a.totalRides == 1 ? "" : "s"}',
+                      style: TextStyle(color: context.rq.muted, fontSize: 10)),
+                ]),
+              ]),
+            );
+          }),
+        ],
       ]),
     );
   }
 }
+
+Widget _LStat(BuildContext ctx, String label, String value, Color color) =>
+    Expanded(child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withAlpha(10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(30)),
+      ),
+      child: Column(children: [
+        Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w800,
+            fontSize: 18, fontFamily: 'Playfair')),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(color: ctx.rq.muted, fontSize: 10)),
+      ]),
+    ));
 
 // ── Add Incident Sheet ────────────────────────────────────────────────────────
 class _AddIncidentSheet extends StatefulWidget {
