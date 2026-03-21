@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Quad Bikes — Mambrui Sand Dunes, Kenya</title>
+<meta name="description" content="Book quad bike rides at Mambrui Sand Dunes, Kilifi County, Kenya. M-Pesa payments, live ride timer, PDF receipts, fleet management.">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#080604;--ink2:#100C07;--ink3:#18120A;--sand:#F2E8D0;--gold:#C8912A;--gL:#E8B44B;--gLL:#F5D580;--gD:#7A5510;--white:#FDFBF7;--green:#166534;--greenL:#22C55E;--bdr:rgba(200,145,42,.16);--bdrB:rgba(200,145,42,.28);--ghost:rgba(242,232,208,.05);--ghost2:rgba(242,232,208,.09)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--sand);font-family:'Manrope',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold);color:var(--ink)}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--gD);border-radius:2px}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.55;mix-blend-mode:overlay}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:900;height:64px;display:flex;align-items:center;padding:0 clamp(16px,4vw,56px);transition:background .5s,border-color .5s;border-bottom:1px solid transparent}
+.nav.stuck{background:rgba(8,6,4,.88);backdrop-filter:blur(24px) saturate(160%);border-color:var(--bdr)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-brand img{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--bdr);box-shadow:0 0 12px rgba(200,145,42,.2)}
+.nav-brand-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white)}
+.nav-links{display:flex;align-items:center;gap:28px;margin-left:auto}
+.nav-links a{font-size:11.5px;font-weight:500;color:rgba(242,232,208,.38);letter-spacing:1.1px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--gL)}
+.nav-cta{border:1px solid var(--bdr)!important;color:var(--gL)!important;padding:8px 20px;border-radius:100px;font-size:10.5px!important;font-weight:700!important;letter-spacing:1.4px!important;transition:background .2s,color .2s,border-color .2s!important}
+.nav-cta:hover{background:var(--gold)!important;color:var(--ink)!important;border-color:var(--gold)!important}
+@media(max-width:720px){.nav-links a:not(.nav-cta){display:none}.nav-links{gap:12px}}
+
+/* HERO */
+.hero{min-height:100svh;position:relative;overflow:hidden;display:flex;align-items:center;padding:100px clamp(16px,5vw,72px) 80px}
+.hero-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 70% at 60% 40%,rgba(200,145,42,.07) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 20% 80%,rgba(200,145,42,.04) 0%,transparent 50%)}
+.hero-dunes{position:absolute;bottom:0;left:0;right:0;height:48%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 360' preserveAspectRatio='none'%3E%3Cpath fill='%23100C07' d='M0,360 L0,240 C120,200 200,170 320,195 C440,220 500,160 600,140 C700,120 800,155 900,130 C1000,105 1080,70 1200,85 C1320,100 1380,60 1440,55 L1440,360Z'/%3E%3Cpath fill='%23180F08' opacity='.5' d='M0,360 L0,295 C100,270 180,250 290,265 C400,280 460,245 560,235 C660,225 770,250 880,235 C990,220 1070,190 1180,200 C1290,210 1360,180 1440,175 L1440,360Z'/%3E%3C/svg%3E") no-repeat bottom/100% 100%}
+.hero-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gD) 25%,var(--gL) 50%,var(--gD) 75%,transparent)}
+.hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 420px;gap:clamp(48px,8vw,100px);align-items:center;max-width:1240px;width:100%;margin:0 auto}
+@media(max-width:960px){.hero-grid{grid-template-columns:1fr;max-width:640px}.hero-phone-col{display:flex;justify-content:center}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--bdr);border-radius:4px;padding:6px 16px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;color:var(--gL);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .7s ease both}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--greenL);box-shadow:0 0 7px var(--greenL);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-h1{font-family:'Fraunces',serif;font-size:clamp(58px,8.5vw,110px);font-weight:900;line-height:.92;letter-spacing:-2.5px;color:var(--white);margin-bottom:10px;animation:fadeUp .7s .1s ease both}
+.hero-h1 em{font-style:italic;font-weight:300;background:linear-gradient(135deg,var(--gLL) 0%,var(--gold) 45%,var(--gD) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-subtitle{font-family:'Fraunces',serif;font-size:clamp(13px,1.6vw,17px);font-weight:300;font-style:italic;color:rgba(242,232,208,.35);letter-spacing:3px;margin-bottom:22px;animation:fadeUp .7s .18s ease both}
+.hero-desc{font-size:clamp(13.5px,1.3vw,15.5px);font-weight:300;color:rgba(242,232,208,.48);line-height:1.85;max-width:460px;margin-bottom:40px;animation:fadeUp .7s .26s ease both}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;animation:fadeUp .7s .34s ease both}
+.btn-primary{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--ink);font-size:13px;font-weight:700;padding:15px 30px;border-radius:100px;box-shadow:0 8px 28px rgba(200,145,42,.42),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.btn-primary::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .45s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(200,145,42,.52),inset 0 1px 0 rgba(255,255,255,.22)}
+.btn-primary:hover::after{left:150%}
+.btn-outline{display:inline-flex;align-items:center;gap:9px;background:transparent;color:rgba(242,232,208,.58);font-size:13px;font-weight:500;padding:14px 24px;border-radius:100px;border:1px solid rgba(242,232,208,.12);transition:border-color .2s,color .2s,background .2s}
+.btn-outline:hover{border-color:var(--bdrB);color:var(--gL);background:rgba(200,145,42,.05)}
+.hero-stats{display:flex;gap:clamp(20px,4vw,52px);margin-top:60px;padding-top:44px;border-top:1px solid rgba(200,145,42,.1);animation:fadeUp .7s .5s ease both;flex-wrap:wrap}
+.stat-val{font-family:'Fraunces',serif;font-size:clamp(26px,3.5vw,38px);font-weight:700;color:var(--gL);display:block;line-height:1;margin-bottom:5px}
+.stat-lbl{font-size:10px;font-weight:500;color:rgba(242,232,208,.28);letter-spacing:2px;text-transform:uppercase}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* PHONE */
+.phone-col{position:relative;display:flex;justify-content:center}
+.phone-glow{position:absolute;inset:-80px;border-radius:50%;background:radial-gradient(circle,rgba(200,145,42,.12) 0%,transparent 65%);pointer-events:none;animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+.phone{width:260px;background:#080604;border-radius:48px;border:1.5px solid rgba(200,145,42,.28);box-shadow:0 0 0 5px rgba(200,145,42,.05),0 40px 80px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.05);overflow:hidden;position:relative;flex-shrink:0}
+.phone-notch{width:80px;height:26px;background:#080604;border-radius:0 0 12px 12px;margin:0 auto;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:5px}
+.notch-camera{width:9px;height:9px;border-radius:50%;background:#111;border:1px solid rgba(255,255,255,.04)}
+.notch-sensor{width:3px;height:3px;border-radius:50%;background:#1a1614}
+.phone-body{padding:10px 12px 14px;min-height:540px}
+.app-screen{display:none;flex-direction:column;gap:9px;animation:fadeScreen .35s ease}
+.app-screen.on{display:flex}
+@keyframes fadeScreen{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.p-header{background:linear-gradient(135deg,#2A1E0A,#160E05);border-radius:14px;padding:12px;text-align:center;border:1px solid rgba(200,145,42,.15)}
+.p-logo{width:28px;height:28px;border-radius:50%;background:var(--gold);margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 10px rgba(200,145,42,.4)}
+.p-title{font-size:11px;font-weight:700;color:#fff;font-family:'Fraunces',serif}
+.p-sub{font-size:7.5px;color:rgba(255,255,255,.22);letter-spacing:2px;margin-top:1px}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.p-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:10px}
+.p-card.sel{background:#2C1E0A;border-color:var(--gold);box-shadow:0 0 12px rgba(200,145,42,.2)}
+.p-card-name{font-size:8.5px;font-weight:700;color:rgba(255,255,255,.7);margin-top:2px}
+.p-badge{display:inline-block;padding:2px 5px;border-radius:20px;font-size:6.5px;font-weight:700;margin-top:2px}
+.b-avail{background:rgba(22,101,52,.25);color:#4ade80}
+.b-sel{background:rgba(200,145,42,.2);color:var(--gL)}
+.b-rented{background:rgba(153,27,27,.25);color:#f87171}
+.p-dur{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:9px}
+.p-dur-label{font-size:7.5px;color:rgba(255,255,255,.22);letter-spacing:1.5px;margin-bottom:6px}
+.p-pills{display:flex;flex-wrap:wrap;gap:4px}
+.p-pill{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:4px 7px;font-size:7.5px;color:rgba(255,255,255,.45);text-align:center}
+.p-pill.sel{background:#2C1E0A;border-color:var(--gold);color:var(--gL);font-weight:700}
+.p-summary{background:rgba(200,145,42,.08);border:1px solid rgba(200,145,42,.2);border-radius:11px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center}
+.p-timer-wrap{background:linear-gradient(135deg,#0A1A0C,#060E07);border:1px solid rgba(34,197,94,.3);border-radius:16px;padding:16px;text-align:center}
+.p-timer-label{font-size:8px;color:rgba(255,255,255,.28);letter-spacing:1.5px;margin-bottom:11px}
+.p-ring{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.06);border-top-color:var(--gold);margin:0 auto 11px;position:relative;display:flex;align-items:center;justify-content:center;animation:spin 3.5s linear infinite}
+.p-ring-inner{position:absolute;inset:6px;border-radius:50%;border:1px dashed rgba(200,145,42,.14);animation:spin 7s linear infinite reverse}
+.p-time{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:#fff;position:relative;z-index:1}
+.p-timer-row{display:flex;justify-content:space-around;margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.06)}
+.p-live{background:rgba(22,101,52,.12);border:1px solid rgba(22,101,52,.3);border-radius:11px;padding:9px;display:flex;align-items:center;gap:7px}
+.p-live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 7px #4ade80;flex-shrink:0}
+.p-receipt{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden}
+.p-receipt-head{background:linear-gradient(135deg,#2C1E0A,#160E05);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,145,42,.12)}
+.p-receipt-rows{padding:9px 12px;display:flex;flex-direction:column;gap:5px}
+.p-row{display:flex;justify-content:space-between}
+.p-row span:first-child{font-size:8.5px;color:rgba(255,255,255,.28)}
+.p-row span:last-child{font-size:8.5px;font-weight:600;color:rgba(255,255,255,.75)}
+.p-total{background:linear-gradient(90deg,rgba(200,145,42,.12),rgba(232,180,75,.05));padding:9px 12px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(200,145,42,.15)}
+.p-wa{background:#25D366;border-radius:11px;padding:10px;text-align:center;font-size:9.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:5px}
+.phone-dots{display:flex;justify-content:center;gap:5px;padding:10px 0 6px}
+.dot{height:3.5px;width:7px;border-radius:2px;background:rgba(242,232,208,.1);cursor:pointer;transition:all .3s}
+.dot.on{width:20px;background:var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:14px;padding:0 clamp(16px,5vw,72px)}
+.div-line{flex:1;height:1px;background:rgba(200,145,42,.07)}
+.div-gem{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 7px rgba(200,145,42,.4)}
+
+/* SECTIONS */
+section{padding:clamp(72px,9vw,120px) clamp(16px,5vw,72px)}
+.inner{max-width:1160px;margin:0 auto}
+.section-tag{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.tag-line{height:1px;width:36px;background:linear-gradient(90deg,var(--gold),transparent)}
+.tag-text{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.section-h2{font-family:'Fraunces',serif;font-size:clamp(28px,4.5vw,52px);font-weight:900;line-height:1.08;letter-spacing:-.5px;color:var(--white)}
+.section-h2 em{font-style:italic;font-weight:300;color:var(--gL)}
+.section-p{font-size:15px;font-weight:300;color:rgba(242,232,208,.45);line-height:1.85;max-width:460px;margin-top:12px}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s,transform .65s}
+.reveal.in{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.06s}.rd2{transition-delay:.12s}.rd3{transition-delay:.18s}.rd4{transition-delay:.24s}.rd5{transition-delay:.3s}.rd6{transition-delay:.36s}
+
+/* FEATURES */
+.feat-sec{background:var(--ink2);border-top:1px solid rgba(200,145,42,.06);border-bottom:1px solid rgba(200,145,42,.06)}
+.feat-top{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:60px}
+@media(max-width:680px){.feat-top{grid-template-columns:1fr}}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:rgba(200,145,42,.07);border:1px solid rgba(200,145,42,.08);border-radius:24px;overflow:hidden}
+.feat-card{background:var(--ink2);padding:32px 28px;position:relative;overflow:hidden;transition:background .3s}
+.feat-card:hover{background:var(--ink3)}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--fg,linear-gradient(90deg,var(--gold),var(--gL)));transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.feat-card:hover::before{transform:scaleX(1)}
+.feat-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:18px;background:var(--fib,rgba(200,145,42,.07));border:1px solid var(--fbd,rgba(200,145,42,.18))}
+.feat-h{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:9px}
+.feat-p{font-size:13px;font-weight:300;color:rgba(242,232,208,.42);line-height:1.7}
+
+/* THEMES */
+.themes-sec{background:var(--ink3);border-top:1px solid rgba(200,145,42,.07);border-bottom:1px solid rgba(200,145,42,.07)}
+.themes-inner{max-width:1000px;margin:0 auto}
+.themes-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:36px}
+.theme-pill{display:flex;align-items:center;gap:9px;padding:10px 18px;background:var(--ghost);border:1px solid rgba(200,145,42,.1);border-radius:100px;transition:border-color .2s,background .2s}
+.theme-pill:hover{border-color:var(--bdrB);background:var(--ghost2)}
+.t-swatch{width:14px;height:14px;border-radius:50%}
+.theme-pill span{font-size:12.5px;font-weight:500;color:rgba(242,232,208,.55)}
+
+/* SHOWCASE */
+.showcase-sec{background:var(--ink)}
+.showcase-grid{display:grid;grid-template-columns:1fr 380px;gap:clamp(56px,8vw,100px);align-items:center}
+@media(max-width:900px){.showcase-grid{grid-template-columns:1fr}.showcase-phone{display:flex;justify-content:center}}
+.bullet-list{margin-top:32px;display:flex;flex-direction:column;gap:20px}
+.bullet{display:flex;gap:14px;align-items:flex-start}
+.bullet-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);padding-top:2px;flex-shrink:0;letter-spacing:1px}
+.bullet h4{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:3px}
+.bullet p{font-size:12.5px;font-weight:300;color:rgba(242,232,208,.38);line-height:1.65}
+
+/* PRICING */
+.pricing-sec{background:var(--ink2)}
+.pricing-wrap{max-width:960px;margin:0 auto}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(200,145,42,.09);border-radius:24px;overflow:hidden;gap:0;margin-top:52px}
+@media(max-width:560px){.price-grid{grid-template-columns:repeat(2,1fr)}}
+.price-cell{padding:28px 24px;border-right:1px solid rgba(200,145,42,.09);border-bottom:1px solid rgba(200,145,42,.09);position:relative;overflow:hidden;transition:background .3s}
+.price-cell:nth-child(3n){border-right:none}
+.price-cell:nth-child(n+4){border-bottom:none}
+@media(max-width:560px){.price-cell:nth-child(3n){border-right:1px solid rgba(200,145,42,.09)}.price-cell:nth-child(2n){border-right:none}.price-cell:nth-child(n+5){border-bottom:none}}
+.price-cell:hover{background:rgba(200,145,42,.04)}
+.price-cell.pop{background:linear-gradient(135deg,rgba(200,145,42,.1),rgba(232,180,75,.04))}
+.price-cell.pop::after{content:'POPULAR';position:absolute;top:11px;right:11px;font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:1.5px;color:var(--gold);background:rgba(200,145,42,.12);border:1px solid rgba(200,145,42,.25);padding:2px 7px;border-radius:4px}
+.price-cell:hover{background:rgba(200,145,42,.04)}
+.price-dur{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:1.5px;color:rgba(242,232,208,.3);text-transform:uppercase;margin-bottom:11px}
+.price-amt{font-family:'Fraunces',serif;font-size:36px;font-weight:700;color:var(--white);line-height:1;margin-bottom:3px}
+.pop .price-amt{color:var(--gL)}
+.price-unit{font-size:12px;color:rgba(242,232,208,.28)}
+.ot-banner{display:flex;gap:14px;align-items:flex-start;margin-top:32px;padding:18px 22px;background:rgba(153,27,27,.05);border:1px solid rgba(153,27,27,.14);border-radius:14px}
+.ot-banner p{font-size:13px;font-weight:300;color:rgba(242,232,208,.48);line-height:1.65}
+.ot-banner strong{color:rgba(242,232,208,.7);font-weight:600}
+
+/* HOW */
+.how-sec{background:var(--ink)}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-top:64px}
+@media(max-width:720px){.steps-grid{grid-template-columns:repeat(2,1fr);gap:36px}.step-line{display:none}}
+@media(max-width:440px){.steps-grid{grid-template-columns:1fr}}
+.step-line{position:absolute;top:25px;left:12%;right:12%;height:1px;background:repeating-linear-gradient(90deg,var(--gD) 0,var(--gD) 7px,transparent 7px,transparent 16px)}
+.step{text-align:center;position:relative;z-index:1;padding:0 14px}
+.step-bubble{width:52px;height:52px;border-radius:50%;background:var(--ink2);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:20px;box-shadow:0 0 18px rgba(200,145,42,.14)}
+.step h3{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:7px}
+.step p{font-size:12px;font-weight:300;color:rgba(242,232,208,.38);line-height:1.65}
+
+/* MPESA */
+.mpesa-sec{background:var(--ink2);border-top:1px solid rgba(200,145,42,.06);border-bottom:1px solid rgba(200,145,42,.06)}
+.mpesa-wrap{max-width:720px;margin:0 auto;text-align:center}
+.mpesa-card{background:var(--ink);border:1px solid rgba(22,101,52,.22);border-radius:32px;padding:clamp(28px,5vw,52px);position:relative;overflow:hidden;margin-top:40px}
+.mpesa-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),var(--greenL),var(--green),transparent)}
+.mpesa-card::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,rgba(22,101,52,.06) 0%,transparent 55%)}
+.till-block{background:rgba(22,101,52,.07);border:1px solid rgba(22,101,52,.22);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin:24px 0;cursor:pointer;transition:background .2s,border-color .2s;position:relative;z-index:1}
+.till-block:hover{background:rgba(22,101,52,.12);border-color:rgba(22,101,52,.4)}
+.till-label{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;color:rgba(242,232,208,.22);margin-bottom:5px;text-align:left}
+.till-num{font-family:'DM Mono',monospace;font-size:clamp(22px,5vw,36px);font-weight:500;color:#fff;letter-spacing:5px}
+.copy-btn{display:flex;align-items:center;gap:6px;background:rgba(22,101,52,.15);border:1px solid rgba(22,101,52,.35);border-radius:100px;padding:8px 16px;font-size:11.5px;font-weight:600;color:var(--greenL);cursor:pointer;transition:background .2s;white-space:nowrap}
+.copy-btn:hover{background:rgba(22,101,52,.25)}
+.copy-btn.done{color:#4ade80}
+.steps-row{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.mstep{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(242,232,208,.05);border:1px solid rgba(255,255,255,.06);border-radius:100px;font-size:11.5px;color:rgba(242,232,208,.42)}
+.mstep-n{width:19px;height:19px;border-radius:50%;background:rgba(22,101,52,.2);border:1px solid rgba(22,101,52,.35);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8.5px;font-weight:500;color:var(--greenL);flex-shrink:0}
+
+/* LOCATION */
+.location-sec{background:var(--ink)}
+.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,7vw,80px);align-items:center}
+@media(max-width:760px){.location-grid{grid-template-columns:1fr}}
+.map-box{aspect-ratio:4/3;background:var(--ink2);border:1px solid var(--bdr);border-radius:32px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.map-bg{position:absolute;bottom:0;left:0;right:0;height:52%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 180' preserveAspectRatio='none'%3E%3Cpath fill='%23281A08' d='M0,180 L0,110 Q80,55 160,80 Q240,105 300,60 Q360,15 440,44 Q520,73 600,35 L600,180Z'/%3E%3C/svg%3E") no-repeat bottom/100% 100%}
+.map-pin{width:48px;height:48px;background:var(--gold);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(200,145,42,.5);animation:pin-bob 2.4s ease-in-out infinite;position:relative;z-index:2}
+.map-pin span{transform:rotate(45deg);font-size:20px}
+@keyframes pin-bob{0%,100%{transform:rotate(-45deg) translateY(0)}50%{transform:rotate(-45deg) translateY(-10px)}}
+.map-label{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--white);text-align:center;position:relative;z-index:2}
+.map-coord{font-family:'DM Mono',monospace;font-size:10px;color:rgba(242,232,208,.28);text-align:center;position:relative;z-index:2}
+.loc-list{display:flex;flex-direction:column;gap:18px;margin-top:28px}
+.loc-row{display:flex;align-items:flex-start;gap:12px}
+.loc-icon{width:36px;height:36px;flex-shrink:0;border-radius:11px;background:rgba(200,145,42,.08);border:1px solid rgba(200,145,42,.14);display:flex;align-items:center;justify-content:center;font-size:16px}
+.loc-row h4{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--white);margin-bottom:3px}
+.loc-row p{font-size:12.5px;font-weight:300;color:rgba(242,232,208,.38);line-height:1.55}
+
+/* ADMIN */
+.admin-sec{background:var(--ink2)}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:11px;margin-top:52px}
+.admin-card{background:var(--ink);border:1px solid rgba(200,145,42,.07);border-radius:18px;padding:22px 20px;transition:border-color .3s,transform .3s}
+.admin-card:hover{border-color:var(--bdr);transform:translateY(-3px)}
+.admin-icon{font-size:24px;margin-bottom:11px}
+.admin-card h4{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px}
+.admin-card p{font-size:12px;font-weight:300;color:rgba(242,232,208,.36);line-height:1.65}
+
+/* DOWNLOAD */
+.dl-sec{background:var(--ink)}
+.dl-card{max-width:700px;margin:0 auto;background:var(--ink2);border:1px solid var(--bdr);border-radius:32px;padding:clamp(40px,7vw,76px) clamp(28px,6vw,72px);text-align:center;position:relative;overflow:hidden}
+.dl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gD),var(--gold),var(--gD),transparent)}
+.dl-card::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,rgba(200,145,42,.07) 0%,transparent 55%)}
+.dl-ver{display:inline-flex;align-items:center;gap:7px;background:rgba(242,232,208,.05);border:1px solid rgba(200,145,42,.1);border-radius:4px;padding:5px 14px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;color:rgba(242,232,208,.35);margin-bottom:24px;position:relative;z-index:1}
+.dl-card h2{font-family:'Fraunces',serif;font-size:clamp(26px,5vw,46px);font-weight:900;color:var(--white);line-height:1.1;margin-bottom:14px;position:relative;z-index:1}
+.dl-card h2 em{font-style:italic;font-weight:300;color:var(--gL)}
+.dl-card p{font-size:14.5px;font-weight:300;color:rgba(242,232,208,.38);line-height:1.8;max-width:400px;margin:0 auto 36px;position:relative;z-index:1}
+.dl-btn{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--ink);font-size:14.5px;font-weight:700;padding:18px 42px;border-radius:100px;box-shadow:0 12px 44px rgba(200,145,42,.48),inset 0 1px 0 rgba(255,255,255,.28);transition:transform .25s,box-shadow .25s;margin-bottom:18px;position:relative;z-index:1}
+.dl-btn:hover{transform:translateY(-3px);box-shadow:0 24px 60px rgba(200,145,42,.58),inset 0 1px 0 rgba(255,255,255,.28)}
+.dl-note{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.8px;color:rgba(242,232,208,.18);position:relative;z-index:1}
+.dl-note a{color:rgba(200,145,42,.45);text-decoration:underline}
+
+/* FOOTER */
+footer{background:var(--ink2);border-top:1px solid rgba(200,145,42,.07);padding:52px clamp(16px,5vw,72px) 32px}
+.footer-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:44px}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr;gap:32px}}
+.footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.footer-logo img{width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr)}
+.footer-logo-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white)}
+.footer-tagline{font-size:12px;font-weight:300;color:rgba(242,232,208,.28);line-height:1.75}
+.footer-col-h{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.footer-links{display:flex;flex-direction:column;gap:9px}
+.footer-links a{font-size:12.5px;font-weight:300;color:rgba(242,232,208,.42);transition:color .2s}
+.footer-links a:hover{color:var(--gL)}
+.footer-bottom{max-width:1000px;margin:32px auto 0;padding-top:22px;border-top:1px solid rgba(200,145,42,.07);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-copy{font-family:'DM Mono',monospace;font-size:9.5px;color:rgba(242,232,208,.18)}
+.footer-tech{font-family:'DM Mono',monospace;font-size:9.5px;color:rgba(200,145,42,.3)}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a href="#" class="nav-brand">
+    <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Royal Quad Bikes">
+    <span class="nav-brand-name">Royal Quad Bikes</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#location">Location</a>
+    <a href="#download" class="nav-cta">Download APK ↓</a>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-topline"></div>
+  <div class="hero-dunes"></div>
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow"><div class="eyebrow-dot"></div>Mambrui Sand Dunes · Kilifi County · Kenya</div>
+      <h1 class="hero-h1"><em>Royal</em><br>Quad<br>Bikes</h1>
+      <p class="hero-subtitle">Conquer the dunes of Mambrui</p>
+      <p class="hero-desc">The official Android app for Royal Quad Bikes — book rides, track live sessions, process M-Pesa payments, and manage the entire business from one screen.</p>
+      <div class="hero-ctas">
+        <a href="#download" class="btn-primary"><span>📲</span> Download APK</a>
+        <a href="#features" class="btn-outline"><span>✦</span> Explore Features</a>
+      </div>
+      <div class="hero-stats">
+        <div><span class="stat-val">6</span><span class="stat-lbl">Ride Durations</span></div>
+        <div><span class="stat-val">1,000</span><span class="stat-lbl">Min. KES</span></div>
+        <div><span class="stat-val">M-Pesa</span><span class="stat-lbl">Payments</span></div>
+        <div><span class="stat-val">6</span><span class="stat-lbl">Colour Themes</span></div>
+      </div>
+    </div>
+    <div class="phone-col hero-phone-col">
+      <div class="phone-glow"></div>
+      <div class="phone">
+        <div class="phone-notch"><div class="notch-camera"></div><div class="notch-sensor"></div></div>
+        <div class="phone-body">
+          <div class="app-screen on" id="s0">
+            <div class="p-header"><div class="p-logo">🏍️</div><div class="p-title">Royal Quad Bikes</div><div class="p-sub">MAMBRUI SAND DUNES</div></div>
+            <div class="p-grid">
+              <div class="p-card sel"><div style="font-size:17px">🏍️</div><div class="p-card-name">Raptor 1</div><div class="p-badge b-sel">SELECTED</div></div>
+              <div class="p-card"><div style="font-size:17px">🏍️</div><div class="p-card-name">Raptor 2</div><div class="p-badge b-avail">Available</div></div>
+              <div class="p-card"><div style="font-size:17px">🏍️</div><div class="p-card-name">Viper 1</div><div class="p-badge b-avail">Available</div></div>
+              <div class="p-card" style="opacity:.55"><div style="font-size:17px">🔒</div><div class="p-card-name">Viper 2</div><div class="p-badge b-rented">Rented</div></div>
+            </div>
+            <div class="p-dur">
+              <div class="p-dur-label">Duration</div>
+              <div class="p-pills"><div class="p-pill">5m</div><div class="p-pill">10m</div><div class="p-pill">15m</div><div class="p-pill sel">20m</div><div class="p-pill">30m</div><div class="p-pill">1h</div></div>
+            </div>
+            <div class="p-summary"><span style="font-size:9px;color:rgba(242,232,208,.38)">Raptor 1 · 20 min</span><span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#E8B44B">2,500 KES</span></div>
+          </div>
+          <div class="app-screen" id="s1">
+            <div class="p-timer-wrap">
+              <div class="p-timer-label">LIVE RIDE · RAPTOR 1</div>
+              <div class="p-ring"><div class="p-ring-inner"></div><span class="p-time" id="liveT">14:32</span></div>
+              <div class="p-timer-row">
+                <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#fff">20 min</div><div style="font-size:7px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-top:1px">DURATION</div></div>
+                <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#E8B44B">2,500</div><div style="font-size:7px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-top:1px">KES BASE</div></div>
+              </div>
+            </div>
+            <div class="p-live"><div class="p-live-dot"></div><div><div style="font-size:10px;color:#4ade80;font-weight:600">Ride in Progress</div><div style="font-size:8px;color:rgba(255,255,255,.28);margin-top:1px">Jane Auma · RQ-8C2K1P</div></div></div>
+            <div style="background:rgba(153,27,27,.08);border:1px solid rgba(153,27,27,.2);border-radius:11px;padding:10px;text-align:center;font-size:10px;font-weight:700;color:rgba(242,232,208,.65);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer"><span>🏁</span> End Ride</div>
+          </div>
+          <div class="app-screen" id="s2">
+            <div style="text-align:center"><div style="width:42px;height:42px;border-radius:50%;background:rgba(22,101,52,.15);border:2px solid rgba(22,101,52,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:18px">✓</div><div style="font-family:'Fraunces',serif;font-size:10px;color:rgba(242,232,208,.55)">Ride Complete</div></div>
+            <div class="p-receipt">
+              <div class="p-receipt-head"><span style="font-family:'Fraunces',serif;font-size:10px;color:#fff;font-weight:700">Royal Quad Bikes</span><span style="font-family:'DM Mono',monospace;font-size:7px;color:#E8B44B;background:rgba(200,145,42,.12);padding:2px 6px;border-radius:5px;border:1px solid rgba(200,145,42,.2)">RQ-8C2K1P</span></div>
+              <div class="p-receipt-rows">
+                <div class="p-row"><span>Quad</span><span>Raptor 1</span></div>
+                <div class="p-row"><span>Customer</span><span>Jane Auma</span></div>
+                <div class="p-row"><span>Duration</span><span>20 min</span></div>
+                <div class="p-row"><span>Base Price</span><span>2,500 KES</span></div>
+                <div class="p-row"><span>Overtime 2 min</span><span style="color:#f87171">+200 KES</span></div>
+              </div>
+              <div class="p-total"><span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.45)">TOTAL PAID</span><span style="font-family:'Fraunces',serif;font-size:16px;font-weight:900;color:#E8B44B">2,700 KES</span></div>
+            </div>
+            <div class="p-wa">💬 Send Receipt via WhatsApp</div>
+            <div style="display:flex;justify-content:center;gap:4px;font-size:13px">⭐⭐⭐⭐⭐</div>
+          </div>
+        </div>
+        <div class="phone-dots"><div class="dot on" onclick="toScreen(0)"></div><div class="dot" onclick="toScreen(1)"></div><div class="dot" onclick="toScreen(2)"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="feat-sec" id="features">
+  <div class="inner">
+    <div class="feat-top">
+      <div class="reveal"><div class="section-tag"><div class="tag-line"></div><span class="tag-text">App Features</span></div><h2 class="section-h2">Everything the<br>dunes <em>demand</em></h2></div>
+      <div class="reveal rd2"><p class="section-p">A complete field operations platform — from first booking to final receipt, built for harsh sun and sandy hands.</p></div>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal rd1"><div class="feat-icon">⏱️</div><h3 class="feat-h">Live Countdown Timer</h3><p class="feat-p">Full-screen ring timer tracks every session. Auto-detects overtime and charges 100 KES/min the instant the session expires — live on screen.</p></div>
+      <div class="feat-card reveal rd2" style="--fib:rgba(22,101,52,.07);--fbd:rgba(22,101,52,.2);--fg:linear-gradient(90deg,#166534,#22C55E)"><div class="feat-icon">📱</div><h3 class="feat-h">M-Pesa Payments</h3><p class="feat-p">Buy Goods to Till <span style="font-family:'DM Mono',monospace;color:rgba(242,232,208,.7)">6685024</span>. Customer enters their confirmation code; the app records it and locks the session.</p></div>
+      <div class="feat-card reveal rd3" style="--fib:rgba(99,102,241,.07);--fbd:rgba(99,102,241,.2);--fg:linear-gradient(90deg,#4F46E5,#818CF8)"><div class="feat-icon">🛡️</div><h3 class="feat-h">Admin Dashboard</h3><p class="feat-p">PIN-protected panel with live fleet overview, revenue by day/week/month, quick-start booking, full history search, and analytics charts.</p></div>
+      <div class="feat-card reveal rd4" style="--fib:rgba(153,27,27,.07);--fbd:rgba(153,27,27,.2);--fg:linear-gradient(90deg,#991B1B,#EF4444)"><div class="feat-icon">🏍️</div><h3 class="feat-h">Fleet Management</h3><p class="feat-p">Track every quad live — available, rented, maintenance. Add, rename, remove quads. Swipe to set status in seconds.</p></div>
+      <div class="feat-card reveal rd5"><div class="feat-icon">🧾</div><h3 class="feat-h">PDF Receipts</h3><p class="feat-p">Professional A5 receipts with full details, M-Pesa reference, and QR code. Print or WhatsApp in one tap after each ride.</p></div>
+      <div class="feat-card reveal rd6" style="--fib:rgba(22,101,52,.07);--fbd:rgba(22,101,52,.2);--fg:linear-gradient(90deg,#166534,#22C55E)"><div class="feat-icon">📅</div><h3 class="feat-h">Pre-Bookings</h3><p class="feat-p">Schedule rides in advance. Confirm, cancel, or convert to live sessions with one tap. Full pre-booking history included.</p></div>
+      <div class="feat-card reveal rd1" style="--fib:rgba(99,102,241,.07);--fbd:rgba(99,102,241,.2);--fg:linear-gradient(90deg,#4F46E5,#818CF8)"><div class="feat-icon">🎨</div><h3 class="feat-h">6 Colour Themes</h3><p class="feat-p">Desert Gold, Ocean Breeze, Forest Night, Midnight Purple, Crimson Sunset, Slate Pro — with Dark / Light / System mode switching.</p></div>
+      <div class="feat-card reveal rd2"><div class="feat-icon">🎟️</div><h3 class="feat-h">Promo Codes</h3><p class="feat-p">Create percentage-off codes and toggle them live. Discounts apply instantly with a strikethrough price at checkout.</p></div>
+      <div class="feat-card reveal rd3" style="--fib:rgba(153,27,27,.07);--fbd:rgba(153,27,27,.2);--fg:linear-gradient(90deg,#991B1B,#EF4444)"><div class="feat-icon">🔧</div><h3 class="feat-h">Maintenance Logs</h3><p class="feat-p">Service, fuel, repair, inspection records per quad — with cost tracking and type-coded icons for at-a-glance status.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="themes-sec" style="padding:clamp(48px,6vw,80px) clamp(16px,5vw,72px)">
+  <div class="themes-inner">
+    <div class="reveal"><div class="section-tag"><div class="tag-line"></div><span class="tag-text">Appearance</span></div><h2 class="section-h2">Six themes. <em>One app.</em></h2><p class="section-p" style="max-width:400px">Every theme supports Light, Dark, and System mode — switching is animated and instant.</p></div>
+    <div class="themes-grid reveal rd2">
+      <div class="theme-pill"><div class="t-swatch" style="background:#C9972A"></div><span>Desert Gold</span></div>
+      <div class="theme-pill"><div class="t-swatch" style="background:#0EA5E9"></div><span>Ocean Breeze ✦ default</span></div>
+      <div class="theme-pill"><div class="t-swatch" style="background:#22C55E"></div><span>Forest Night</span></div>
+      <div class="theme-pill"><div class="t-swatch" style="background:#8B5CF6"></div><span>Midnight Purple</span></div>
+      <div class="theme-pill"><div class="t-swatch" style="background:#EF4444"></div><span>Crimson Sunset</span></div>
+      <div class="theme-pill"><div class="t-swatch" style="background:#64748B"></div><span>Slate Pro</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="feat-sec" id="app" style="background:var(--ink)">
+  <div class="inner">
+    <div class="showcase-grid" style="display:grid;grid-template-columns:1fr 380px;gap:clamp(56px,8vw,100px);align-items:center">
+      <div class="reveal">
+        <div class="section-tag"><div class="tag-line"></div><span class="tag-text">Native Android</span></div>
+        <h2 class="section-h2">Built for the<br>field, not <em>a desk</em></h2>
+        <p class="section-p">No loading screens. No browser. Fully offline-capable Flutter app — instant even at 40 °C.</p>
+        <div class="bullet-list">
+          <div class="bullet"><span class="bullet-num">01 —</span><div><h4>Works completely offline</h4><p>All data stored locally — bookings, fleet, history and settings persist with zero internet.</p></div></div>
+          <div class="bullet"><span class="bullet-num">02 —</span><div><h4>Ocean Breeze light by default</h4><p>Crisp, legible light theme out of the box. Six colour themes to choose from in Settings.</p></div></div>
+          <div class="bullet"><span class="bullet-num">03 —</span><div><h4>10-second quick start</h4><p>Admin can launch a ride, set the timer, and hand off the device in under 10 seconds.</p></div></div>
+          <div class="bullet"><span class="bullet-num">04 —</span><div><h4>Waiver + loyalty + analytics</h4><p>Digital safety waiver, per-customer loyalty points, incident reporting, peak hours heatmap, and more.</p></div></div>
+        </div>
+      </div>
+      <div class="showcase-phone reveal rd3" style="display:flex;justify-content:center">
+        <div class="phone-glow"></div>
+        <div class="phone" style="width:240px">
+          <div class="phone-notch"><div class="notch-camera"></div><div class="notch-sensor"></div></div>
+          <div class="phone-body" style="min-height:480px">
+            <div class="app-screen on">
+              <div style="background:linear-gradient(135deg,#0C1A2E,#061020);border-radius:14px;padding:14px;border:1px solid rgba(14,165,233,.15)">
+                <div style="font-size:8px;color:rgba(255,255,255,.25);letter-spacing:2px;margin-bottom:8px">OVERVIEW · OCEAN BREEZE</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+                  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:10px"><div style="font-size:7px;color:rgba(255,255,255,.3);letter-spacing:1px">LIVE RIDES</div><div style="font-size:18px;font-weight:900;color:#fff;font-family:'DM Mono',monospace">2</div><div style="font-size:7px;color:#4ade80">On track</div></div>
+                  <div style="background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);border-radius:10px;padding:10px"><div style="font-size:7px;color:rgba(255,255,255,.3);letter-spacing:1px">FLEET</div><div style="font-size:18px;font-weight:900;color:#fff;font-family:'DM Mono',monospace">4/5</div><div style="font-size:7px;color:rgba(255,255,255,.3)">available</div></div>
+                  <div style="background:rgba(22,101,52,.1);border:1px solid rgba(22,101,52,.25);border-radius:10px;padding:10px"><div style="font-size:7px;color:rgba(255,255,255,.3);letter-spacing:1px">TODAY</div><div style="font-size:18px;font-weight:900;color:#fff;font-family:'DM Mono',monospace">7</div><div style="font-size:7px;color:rgba(255,255,255,.3)">completed</div></div>
+                  <div style="background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.25);border-radius:10px;padding:10px"><div style="font-size:7px;color:rgba(255,255,255,.3);letter-spacing:1px">REVENUE</div><div style="font-size:14px;font-weight:900;color:#E8B44B;font-family:'DM Mono',monospace">18k</div><div style="font-size:7px;color:rgba(255,255,255,.3)">KES today</div></div>
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:10px">
+                <div style="font-size:7.5px;color:rgba(255,255,255,.25);letter-spacing:1.5px;margin-bottom:8px">LIVE RIDES</div>
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;flex-shrink:0"></div><div style="flex:1"><div style="font-size:9px;color:#fff;font-weight:600">Raptor 1 · Jane</div><div style="font-size:7.5px;color:rgba(255,255,255,.28)">14:32 remaining</div></div><div style="font-size:9px;color:#E8B44B;font-weight:700">2,500</div></div>
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0"><div style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;flex-shrink:0"></div><div style="flex:1"><div style="font-size:9px;color:#fff;font-weight:600">Viper 1 · John</div><div style="font-size:7.5px;color:rgba(255,255,255,.28)">08:45 remaining</div></div><div style="font-size:9px;color:#E8B44B;font-weight:700">3,500</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="pricing-sec" id="pricing">
+  <div class="inner pricing-wrap">
+    <div class="reveal"><div class="section-tag"><div class="tag-line"></div><span class="tag-text">Rates</span></div><h2 class="section-h2">Simple, honest <em>pricing</em></h2><p class="section-p">Pay via M-Pesa. No hidden fees. Overtime tracked to the exact minute.</p></div>
+    <div class="price-grid reveal rd2">
+      <div class="price-cell"><div class="price-dur">5 min</div><div class="price-amt">1,000</div><div class="price-unit">KES</div></div>
+      <div class="price-cell"><div class="price-dur">10 min</div><div class="price-amt">1,800</div><div class="price-unit">KES</div></div>
+      <div class="price-cell"><div class="price-dur">15 min</div><div class="price-amt">2,200</div><div class="price-unit">KES</div></div>
+      <div class="price-cell pop"><div class="price-dur">20 min</div><div class="price-amt">2,500</div><div class="price-unit">KES</div></div>
+      <div class="price-cell"><div class="price-dur">30 min</div><div class="price-amt">3,500</div><div class="price-unit">KES</div></div>
+      <div class="price-cell"><div class="price-dur">1 hour</div><div class="price-amt">6,000</div><div class="price-unit">KES</div></div>
+    </div>
+    <div class="ot-banner reveal rd3"><span>⚠️</span><p><strong>Overtime billing:</strong> Once your session ends the app automatically charges <strong>100 KES per minute</strong> until the ride is closed. Running total shown live on screen.</p></div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="how-sec" id="how">
+  <div class="inner">
+    <div class="reveal"><div class="section-tag"><div class="tag-line"></div><span class="tag-text">Process</span></div><h2 class="section-h2">Ride in <em>four steps</em></h2></div>
+    <div class="steps-grid">
+      <div class="step-line"></div>
+      <div class="step reveal rd1"><div class="step-bubble">🏍️</div><h3>Choose Your Quad</h3><p>Pick any available bike from the live fleet grid. Status updates the moment a ride starts or ends.</p></div>
+      <div class="step reveal rd2"><div class="step-bubble">⏱️</div><h3>Pick a Duration</h3><p>Select 5 min to 1 hour. Apply a promo code for a discount. Price updates instantly.</p></div>
+      <div class="step reveal rd3"><div class="step-bubble">📱</div><h3>Pay via M-Pesa</h3><p>Send to Till <span style="font-family:'DM Mono',monospace;color:#E8B44B">6685024</span>. Enter the confirmation code and tap Start Ride.</p></div>
+      <div class="step reveal rd4"><div class="step-bubble">🧾</div><h3>Get Your Receipt</h3><p>Live countdown runs on screen. When done, print or WhatsApp a PDF receipt with full details.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="mpesa-sec" id="pay">
+  <div class="inner mpesa-wrap">
+    <div class="reveal"><div class="section-tag" style="justify-content:center"><div class="tag-line" style="background:linear-gradient(90deg,transparent,var(--gold))"></div><span class="tag-text">Payment</span><div class="tag-line" style="background:linear-gradient(270deg,transparent,var(--gold))"></div></div><h2 class="section-h2" style="text-align:center">Pay instantly with <em>M-Pesa</em></h2><p class="section-p" style="margin:12px auto 0;text-align:center;max-width:340px">Buy Goods & Services. Instant, traceable, and secure — no cash needed.</p></div>
+    <div class="mpesa-card reveal rd2">
+      <div class="till-block" onclick="copyTill()"><div><div class="till-label">M-Pesa Till Number — Buy Goods & Services</div><div class="till-num">6685024</div></div><button class="copy-btn" id="copyBtn"><span>⧉</span> Copy</button></div>
+      <div class="steps-row">
+        <div class="mstep"><div class="mstep-n">1</div> Open M-Pesa</div>
+        <div class="mstep"><div class="mstep-n">2</div> Lipa na M-Pesa</div>
+        <div class="mstep"><div class="mstep-n">3</div> Buy Goods & Services</div>
+        <div class="mstep"><div class="mstep-n">4</div> Enter Till: 6685024</div>
+        <div class="mstep"><div class="mstep-n">5</div> Enter amount</div>
+        <div class="mstep"><div class="mstep-n">6</div> Paste reference in app</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="admin-sec" id="admin">
+  <div class="inner">
+    <div class="reveal"><div class="section-tag"><div class="tag-line"></div><span class="tag-text">For Operators</span></div><h2 class="section-h2">Professional <em>admin tools</em></h2><p class="section-p">PIN-protected. Everything to run the business from a single screen.</p></div>
+    <div class="admin-grid">
+      <div class="admin-card reveal rd1"><div class="admin-icon">📊</div><h4>Revenue Dashboard</h4><p>All-time, monthly, weekly and daily totals. Daily report with date picker and ride-by-ride breakdown.</p></div>
+      <div class="admin-card reveal rd2"><div class="admin-icon">⚡</div><h4>Quick-Start Booking</h4><p>Select quad, duration, customer — launch a live session in under 10 seconds from the dashboard.</p></div>
+      <div class="admin-card reveal rd3"><div class="admin-icon">🔍</div><h4>History Search</h4><p>Search full booking history by name, phone, M-Pesa reference, or receipt ID.</p></div>
+      <div class="admin-card reveal rd4"><div class="admin-icon">📈</div><h4>Analytics Charts</h4><p>Utilisation charts, peak hours heatmap, customer return rate, loyalty leaderboard, and incident log.</p></div>
+      <div class="admin-card reveal rd5"><div class="admin-icon">👥</div><h4>Staff Management</h4><p>Add staff with phone, PIN, and role. Toggle active/inactive. Shift clock-in/out included.</p></div>
+      <div class="admin-card reveal rd6"><div class="admin-icon">🔐</div><h4>PIN Access Control</h4><p>4-digit admin PIN with circular keypad, shake-on-wrong animation, and lockout protection.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="location-sec" id="location">
+  <div class="inner"><div class="location-grid">
+    <div class="map-box reveal"><div class="map-bg"></div><div class="map-pin"><span>🏜️</span></div><div class="map-label" style="margin-top:12px">Mambrui Sand Dunes</div><div class="map-coord">3.2959° S, 40.1226° E</div></div>
+    <div class="reveal rd2">
+      <div class="section-tag"><div class="tag-line"></div><span class="tag-text">Location</span></div>
+      <h2 class="section-h2">Find us in<br>Mambrui, <em>Kilifi</em></h2>
+      <p class="section-p">We operate at the famous Mambrui sand dunes — Kenya's Indian Ocean coast, minutes from Malindi.</p>
+      <div class="loc-list">
+        <div class="loc-row"><div class="loc-icon">📍</div><div><h4>Mambrui, Kilifi County</h4><p>Kenya's northern coast — between Malindi and Kilifi towns</p></div></div>
+        <div class="loc-row"><div class="loc-icon">🌅</div><div><h4>Daily Operations</h4><p>Open sunrise to sunset. Pre-book through the app to secure your slot.</p></div></div>
+        <div class="loc-row"><div class="loc-icon">📱</div><div><h4>M-Pesa Till 6685024</h4><p>Pay on-site or before you arrive. Receipt sent via WhatsApp instantly.</p></div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+
+<section class="dl-sec" id="download"><div class="inner">
+  <div class="dl-card reveal">
+    <div class="dl-ver">Version 4.0.0 · Flutter 3.27 · Android 5.0+</div>
+    <h2>Download the App.<br>Start Your <em>Adventure.</em></h2>
+    <p>Free to install. Sideload the APK directly — no Play Store required. Works on all Android running Lollipop and above.</p>
+    <div>
+      <a href="https://github.com/Baker0o7/Royal-quads/releases/latest" class="dl-btn" target="_blank"><span style="font-size:19px">📲</span> Download Royal Quads APK</a><br>
+      <span class="dl-note">Android 5.0 (API 21) and above &nbsp;·&nbsp; <a href="https://github.com/Baker0o7/Royal-quads" target="_blank">View source on GitHub ↗</a></span>
+    </div>
+  </div>
+</div></section>
+
+<footer>
+  <div class="footer-grid">
+    <div><div class="footer-logo"><img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo"><span class="footer-logo-name">Royal Quad Bikes</span></div><p class="footer-tagline">The official booking app for quad biking at Mambrui Sand Dunes, Kilifi County, Kenya.</p></div>
+    <div><div class="footer-col-h">Navigate</div><div class="footer-links"><a href="#features">App Features</a><a href="#pricing">Pricing</a><a href="#how">How It Works</a><a href="#pay">M-Pesa Payment</a><a href="#location">Location</a><a href="#download">Download APK</a></div></div>
+    <div><div class="footer-col-h">Built With</div><div class="footer-links"><a href="https://flutter.dev" target="_blank">Flutter 3.27</a><a href="https://pub.dev/packages/go_router" target="_blank">go_router</a><a href="https://pub.dev/packages/provider" target="_blank">Provider</a><a href="https://pub.dev/packages/pdf" target="_blank">pdf + printing</a><a href="https://pub.dev/packages/fl_chart" target="_blank">fl_chart</a><a href="https://github.com/Baker0o7/Royal-quads" target="_blank">Source on GitHub ↗</a></div></div>
+  </div>
+  <div class="footer-bottom"><span class="footer-copy">© 2025 Royal Quad Bikes · Mambrui, Kenya</span><span class="footer-tech">Flutter · Dart · GitHub Pages</span></div>
+</footer>
+
+<script>
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('stuck',window.scrollY>40),{passive:true});
+
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+let cur=0,autoTimer;
+function toScreen(i){
+  document.querySelectorAll('.app-screen').forEach((s,j)=>s.classList.toggle('on',j===i));
+  document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('on',j===i));
+  cur=i;
+  if(i===1)startLiveTimer();
+  clearInterval(autoTimer);
+  autoTimer=setInterval(()=>toScreen((cur+1)%3),4000);
+}
+autoTimer=setInterval(()=>toScreen((cur+1)%3),4000);
+
+let timerInterval;
+function startLiveTimer(){
+  clearInterval(timerInterval);
+  let s=872;
+  timerInterval=setInterval(()=>{
+    const el=document.getElementById('liveT');
+    if(!el){clearInterval(timerInterval);return;}
+    s=Math.max(0,s-1);
+    el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+}
+
+function copyTill(){
+  const btn=document.getElementById('copyBtn');
+  navigator.clipboard.writeText('6685024').catch(()=>{});
+  btn.innerHTML='<span>✓</span> Copied!';btn.classList.add('done');
+  setTimeout(()=>{btn.innerHTML='<span>⧉</span> Copy';btn.classList.remove('done');},2800);
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}}));
+</script>
+</body>
+</html>
