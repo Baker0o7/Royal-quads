@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../models/models.dart';
+import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../services/storage.dart';
 import '../../theme/theme.dart';
@@ -64,7 +65,7 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
     super.dispose();
   }
 
-  // ── Fetch current data.json ───────────────────────────────────────────────
+  // ── Fetch current data.json + merge with live app fleet ─────────────────
   Future<void> _loadFromGitHub() async {
     setState(() => _loading = true);
     try {
@@ -80,19 +81,34 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
           _open         = biz['open'] as bool? ?? true;
           _notice       = d['notice'] as String? ?? '';
           _overtimeRate = (d['overtimeRate'] as num?)?.toInt() ?? 100;
-          _quads        = List<Map<String,dynamic>>.from(d['quads'] ?? []);
           _pricing      = List<Map<String,dynamic>>.from(d['pricing'] ?? []);
           _promos       = List<Map<String,dynamic>>.from(d['promos'] ?? []);
           _noticeCtrl.text = _notice;
         });
+        // Always sync quads from the live app fleet (real names + real status)
+        _syncQuadsFromApp();
       }
-      // Also get the file SHA needed for the API update
       await _fetchSha();
     } catch (e) {
       _toast('Could not load website data: $e', error: true);
+      // Even on error, still load local app quads
+      _syncQuadsFromApp();
     } finally {
       setState(() { _loading = false; _dirty = false; });
     }
+  }
+
+  // ── Sync quad list from the app's live fleet ──────────────────────────────
+  void _syncQuadsFromApp() {
+    final appQuads = StorageService.getQuads();
+    setState(() {
+      _quads = appQuads.map((q) => {
+        'id':     q.id,
+        'name':   q.name,
+        'status': q.status,
+        'emoji':  '🏍️',
+      }).toList();
+    });
   }
 
   Future<void> _fetchSha() async {
@@ -191,6 +207,13 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
           status == 'available' ? 'maintenance' : 'available';
       _dirty = true;
     });
+  }
+
+  // ── Sync from app button ──────────────────────────────────────────────────
+  void _syncAndMark() {
+    _syncQuadsFromApp();
+    setState(() => _dirty = true);
+    _toast('Synced ${_quads.length} quads from fleet');
   }
 
   // ── Promo management ──────────────────────────────────────────────────────
@@ -400,8 +423,16 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
 
                 // ── Quad availability ───────────────────────────────────────
                 _SectionCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  SectionHeading('Quad Availability', icon: Icons.directions_bike_rounded),
-                  Text('Tap to toggle available / maintenance.',
+                  Row(children: [
+                    Expanded(child: SectionHeading(
+                        'Quad Availability', icon: Icons.directions_bike_rounded)),
+                    TextButton.icon(
+                      onPressed: _syncAndMark,
+                      icon: const Icon(Icons.sync_rounded, size: 16),
+                      label: const Text('Sync from App'),
+                    ),
+                  ]),
+                  Text('Quad names and list sync automatically from your fleet.',
                       style: TextStyle(fontSize: 12, color: context.rq.muted)),
                   const SizedBox(height: 14),
                   ..._quads.asMap().entries.map((e) {
