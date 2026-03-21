@@ -80,11 +80,52 @@ class _RoleViewState extends State<_RoleView>
           child: Column(children: [
             _HeroHeader(),
             const SizedBox(height: 40),
+            // Loyalty teaser pill
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [kAccent.withAlpha(18), kAccent.withAlpha(8)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: kAccent.withAlpha(50)),
+              ),
+              child: Row(children: [
+                const Text('🏆', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 10),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Loyalty Points',
+                        style: TextStyle(fontWeight: FontWeight.w700,
+                            fontSize: 13, color: kAccent2)),
+                    Text('Sign in to earn 1 pt per 100 KES — '
+                        'redeem for discounts',
+                        style: TextStyle(fontSize: 11,
+                            color: kAccent.withAlpha(180),
+                            height: 1.4)),
+                  ],
+                )),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: kAccent.withAlpha(20),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text('FREE',
+                      style: TextStyle(fontSize: 9,
+                          fontWeight: FontWeight.w800, color: kAccent2)),
+                ),
+              ]),
+            ),
+
             _RoleCard(
               icon: Icons.person_rounded,
               color: kAccent,
               title: 'Customer',
-              subtitle: 'Track your rides, view receipts\nand manage your profile',
+              subtitle: 'Sign in to see your rides, loyalty points\nand manage your profile',
               onTap: widget.onCustomer,
             ),
             const SizedBox(height: 14),
@@ -613,6 +654,10 @@ class _LoggedInView extends StatelessWidget {
               ]),
               const SizedBox(height: 20),
 
+              // ── Loyalty Points Card ─────────────────────────────────
+              _LoyaltyCard(phone: user.phone),
+              const SizedBox(height: 20),
+
               // Account card
               _Heading('Account'),
               const SizedBox(height: 10),
@@ -1138,5 +1183,250 @@ class _OtpBoxState extends State<_OtpBox> {
         ],
       ),
     ),
+  );
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Loyalty Points Card
+// ─────────────────────────────────────────────────────────────────────────────
+class _LoyaltyCard extends StatelessWidget {
+  final String phone;
+  const _LoyaltyCard({required this.phone});
+
+  // Tier thresholds
+  static const _tiers = [
+    (name: 'Bronze',   pts: 0,    icon: '🥉', color: Color(0xFFCD7F32)),
+    (name: 'Silver',   pts: 200,  icon: '🥈', color: Color(0xFF94A3B8)),
+    (name: 'Gold',     pts: 500,  icon: '🥇', color: Color(0xFFC9972A)),
+    (name: 'Platinum', pts: 1000, icon: '💎', color: Color(0xFF6366F1)),
+  ];
+
+  static ({String name, String icon, Color color, int next}) _tier(int pts) {
+    var idx = 0;
+    for (var i = 0; i < _tiers.length; i++) {
+      if (pts >= _tiers[i].pts) idx = i;
+    }
+    final next = idx < _tiers.length - 1 ? _tiers[idx + 1].pts : -1;
+    return (
+      name:  _tiers[idx].name,
+      icon:  _tiers[idx].icon,
+      color: _tiers[idx].color,
+      next:  next,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final acc    = StorageService.getLoyaltyAccount(phone);
+    final pts    = acc?.points ?? 0;
+    final earned = acc?.totalEarned ?? 0;
+    final rides  = acc?.totalRides ?? 0;
+    final tier   = _tier(pts);
+    final accent = Theme.of(context).colorScheme.primary;
+
+    // Progress to next tier
+    final tierIdx = _tiers.indexWhere((t) => t.name == tier.name);
+    final prevPts = _tiers[tierIdx].pts;
+    final nextPts = tier.next;
+    final progress = nextPts == -1
+        ? 1.0
+        : ((pts - prevPts) / (nextPts - prevPts)).clamp(0.0, 1.0);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            tier.color.withAlpha(30),
+            Theme.of(context).cardColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: tier.color.withAlpha(60), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: tier.color.withAlpha(25),
+              blurRadius: 16, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+          // ── Header ────────────────────────────────────────────────────────
+          Row(children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: tier.color.withAlpha(20),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: tier.color.withAlpha(50), width: 1.5),
+              ),
+              child: Center(child: Text(tier.icon,
+                  style: const TextStyle(fontSize: 22))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Text('Loyalty Points',
+                      style: TextStyle(
+                          fontFamily: 'Playfair',
+                          fontSize: 16, fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: tier.color.withAlpha(18),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: tier.color.withAlpha(50)),
+                    ),
+                    child: Text(tier.name,
+                        style: TextStyle(
+                            fontSize: 10, fontWeight: FontWeight.w800,
+                            color: tier.color, letterSpacing: .5)),
+                  ),
+                ]),
+                const SizedBox(height: 2),
+                Text('Earn 1 pt per 100 KES spent',
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurface
+                            .withAlpha(110))),
+              ],
+            )),
+          ]),
+
+          const SizedBox(height: 20),
+
+          // ── Big points number ──────────────────────────────────────────────
+          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text('$pts',
+                style: TextStyle(
+                    fontFamily: 'Playfair',
+                    fontSize: 52, fontWeight: FontWeight.w900,
+                    color: tier.color, height: 1)),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text('pts',
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600,
+                      color: tier.color.withAlpha(160))),
+            ),
+            const Spacer(),
+            // Mini stats
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              _MiniStat('Total earned', '$earned pts'),
+              const SizedBox(height: 4),
+              _MiniStat('Total rides', '$rides'),
+            ]),
+          ]),
+
+          const SizedBox(height: 16),
+
+          // ── Progress bar ───────────────────────────────────────────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 7,
+              backgroundColor: tier.color.withAlpha(15),
+              valueColor: AlwaysStoppedAnimation<Color>(tier.color),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(children: [
+            Text(nextPts == -1
+                ? '🏆 Maximum tier reached!'
+                : '${nextPts - pts} pts to ${_tiers[tierIdx + 1].name}',
+                style: TextStyle(
+                    fontSize: 11, fontWeight: FontWeight.w600,
+                    color: tier.color.withAlpha(180))),
+            const Spacer(),
+            Text(nextPts == -1
+                ? 'Platinum'
+                : '$pts / $nextPts',
+                style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(80))),
+          ]),
+
+          const SizedBox(height: 16),
+          Divider(color: Theme.of(context).dividerColor),
+          const SizedBox(height: 12),
+
+          // ── Tier ladder ────────────────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: _tiers.map((t) {
+              final reached = pts >= t.pts;
+              return Column(children: [
+                Text(t.icon, style: TextStyle(
+                    fontSize: 18,
+                    color: reached ? null : const Color(0x33000000))),
+                const SizedBox(height: 3),
+                Text(t.name, style: TextStyle(
+                    fontSize: 9, fontWeight: FontWeight.w700,
+                    color: reached
+                        ? t.color
+                        : Theme.of(context).colorScheme.onSurface.withAlpha(40))),
+                const SizedBox(height: 2),
+                Text(t.pts == 0 ? 'Start' : '${t.pts}',
+                    style: TextStyle(
+                        fontSize: 8,
+                        color: Theme.of(context).colorScheme.onSurface.withAlpha(60))),
+              ]);
+            }).toList(),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Redeem info ────────────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: accent.withAlpha(8),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: accent.withAlpha(20)),
+            ),
+            child: Row(children: [
+              Icon(Icons.info_outline_rounded, size: 14, color: accent),
+              const SizedBox(width: 8),
+              Expanded(child: Text(
+                  'Show your points to staff at the dunes '
+                  'to redeem — 100 pts = 100 KES discount.',
+                  style: TextStyle(
+                      fontSize: 11, color: accent.withAlpha(200),
+                      height: 1.5))),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label, value;
+  const _MiniStat(this.label, this.value);
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      Text(value, style: TextStyle(
+          fontSize: 13, fontWeight: FontWeight.w800,
+          color: Theme.of(context).colorScheme.onSurface)),
+      Text(label, style: TextStyle(
+          fontSize: 9,
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(80))),
+    ],
   );
 }

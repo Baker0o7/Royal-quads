@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/models.dart';
 import '../services/storage.dart';
+import '../models/models.dart';
 import '../theme/theme.dart';
 
 class RideCompleteScreen extends StatefulWidget {
@@ -179,7 +180,62 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+
+                // ── Loyalty points earned ─────────────────────────────────
+                Builder(builder: (ctx) {
+                  final acc = StorageService.getLoyaltyAccount(
+                      booking.customerPhone);
+                  final currentPts = acc?.points ?? 0;
+                  final earned = (booking.totalPaid / 100).floor();
+                  if (earned == 0) return const SizedBox(height: 4);
+                  return AnimatedOpacity(
+                    opacity: 1.0, duration: const Duration(milliseconds: 600),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: kAccent.withAlpha(12),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: kAccent.withAlpha(45)),
+                      ),
+                      child: Row(children: [
+                        const Text('🏆', style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 10),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('+$earned pts earned this ride!',
+                                style: const TextStyle(
+                                    color: kAccent2,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13)),
+                            Text('Your balance: $currentPts pts',
+                                style: TextStyle(
+                                    color: kAccent.withAlpha(160),
+                                    fontSize: 11)),
+                          ],
+                        )),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: kAccent.withAlpha(22),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text('$currentPts pts',
+                              style: const TextStyle(
+                                  color: kAccent2,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11)),
+                        ),
+                      ]),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 4),
 
                 // ── QR Code ───────────────────────────────────────────────
                 SlideTransition(
