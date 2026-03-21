@@ -4,7 +4,6 @@ import 'screens/home/home_screen.dart';
 import 'screens/active_ride_screen.dart';
 import 'screens/receipt_screen.dart';
 import 'screens/ride_complete_screen.dart';
-import 'screens/auth/profile_screen.dart';
 import 'screens/waiver_screen.dart';
 import 'screens/prebook_screen.dart';
 import 'screens/dunes_screen.dart';
@@ -24,9 +23,9 @@ final appRouter = GoRouter(
       builder: (ctx, state, child) => MainShell(child: child),
       routes: [
         GoRoute(path: '/',        builder: (_, __) => const HomeScreen()),
-        GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
         GoRoute(path: '/prebook', builder: (_, __) => const PrebookScreen()),
         GoRoute(path: '/dunes',   builder: (_, __) => const DunesScreen()),
+        GoRoute(path: '/admin',   builder: (_, __) => const AdminScreen()),
       ],
     ),
     GoRoute(
@@ -53,10 +52,6 @@ final appRouter = GoRouter(
       path: '/waiver/:id',
       builder: (ctx, s) => WaiverScreen(
           bookingId: int.parse(s.pathParameters['id']!)),
-    ),
-    GoRoute(
-      path: '/admin',
-      builder: (_, __) => const AdminScreen(),
     ),
   ],
 );

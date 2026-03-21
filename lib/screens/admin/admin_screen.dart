@@ -31,7 +31,7 @@ class _AdminScreenState extends State<AdminScreen> {
     });
     // Keep live-ride timers ticking
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted && _pinVerified) setState(() {});
+      if (mounted) setState(() {});
     });
   }
 

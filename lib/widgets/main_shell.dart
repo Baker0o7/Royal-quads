@@ -12,7 +12,7 @@ class MainShell extends StatelessWidget {
 
   static const _tabs = [
     (path: '/',        icon: Icons.directions_bike_rounded, label: 'Book'),
-    (path: '/profile', icon: Icons.person_rounded,          label: 'Profile'),
+    (path: '/admin',   icon: Icons.admin_panel_settings_rounded, label: 'Admin'),
     (path: '/prebook', icon: Icons.calendar_month_rounded,  label: 'Pre-book'),
     (path: '/dunes',   icon: Icons.terrain_rounded,         label: 'Dunes'),
   ];
