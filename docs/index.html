@@ -3,770 +3,880 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Quad Bikes — Book a Ride · Mambrui Sand Dunes</title>
-<meta name="description" content="Book your quad bike adventure at Mambrui Sand Dunes. Select your quad, pick a duration, pay via M-Pesa.">
+<title>Royal Quad Bikes — Book Your Ride · Mambrui Sand Dunes</title>
+<meta name="description" content="Book quad bike rides at Mambrui Sand Dunes, Kilifi County, Kenya. M-Pesa payments. Instant confirmation.">
 <link rel="icon" href="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#12100D;--ink2:#1E1A14;--ink3:#2C261C;
-  --cream:#FAF6EE;--cream2:#F3EDE0;--cream3:#EAE0CC;
-  --gold:#C4880C;--goldL:#E8A820;--goldXL:#F5C842;--goldDim:#8A5F08;
-  --goldBg:rgba(196,136,12,.09);--goldBr:rgba(196,136,12,.22);
-  --green:#166534;--greenL:#16A34A;--greenBg:rgba(22,101,52,.08);--greenBr:rgba(22,163,74,.28);
-  --red:#9F1239;--redBg:rgba(159,18,57,.07);
-  --muted:#9A8F7E;--border:rgba(18,16,13,.10);--borderGold:rgba(196,136,12,.18);
-  --card:#FFFFFF;--shadow:0 1px 3px rgba(18,16,13,.06),0 4px 16px rgba(18,16,13,.07);
-  --shadowLg:0 8px 40px rgba(18,16,13,.13);
-  --r:16px;--rLg:24px;--rXl:32px;
+/* ── TOKENS ─────────────────────────────────────────────────────────────── */
+:root {
+  --ink:    #0A0806;
+  --ink2:   #12100C;
+  --ink3:   #1C1712;
+  --sand:   #F2E6CC;
+  --sand2:  #C8B48A;
+  --gold:   #C8911A;
+  --goldL:  #E8AD38;
+  --goldXL: #F5CC5A;
+  --goldDim:#7A580C;
+  --glow:   rgba(200,145,26,.18);
+  --green:  #15623A;
+  --greenL: #22C55E;
+  --red:    #991B1B;
+  --muted:  rgba(242,230,204,.45);
+  --border: rgba(200,145,26,.14);
+  --borderB:rgba(200,145,26,.28);
+  --glass:  rgba(255,255,255,.04);
+  --glassB: rgba(255,255,255,.08);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--cream);color:var(--ink);font-family:'Instrument Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-::selection{background:var(--goldL);color:#fff}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:var(--cream2)}
-::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
 
-/* NAV */
-.nav{
-  position:sticky;top:0;z-index:200;
-  background:rgba(250,246,238,.95);backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:1px solid var(--border);
-  height:62px;display:flex;align-items:center;
-  padding:0 clamp(16px,4vw,48px);gap:16px;
-}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo img{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--goldBr)}
-.nav-logo-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
-.nav-tag{
-  margin-left:auto;display:flex;align-items:center;gap:7px;
-  font-size:11px;font-weight:600;color:var(--green);letter-spacing:.8px;
-}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--greenL);box-shadow:0 0 0 2px rgba(22,163,74,.2);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(22,163,74,.2)}50%{box-shadow:0 0 0 5px rgba(22,163,74,.08)}}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html { scroll-behavior: smooth; font-size: 16px }
 
-/* HERO */
-.hero{
-  background:var(--ink);
-  padding:clamp(52px,8vw,88px) clamp(16px,5vw,60px) 0;
-  text-align:center;position:relative;overflow:hidden;
+body {
+  background: var(--ink);
+  color: var(--sand);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
-.hero-bg{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(196,136,12,.14) 0%,transparent 70%),
-    radial-gradient(ellipse 40% 40% at 20% 80%,rgba(196,136,12,.06) 0%,transparent 60%);
-}
-.hero-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--goldDim),var(--goldXL),var(--goldDim),transparent)}
-.hero-wave{position:absolute;bottom:-1px;left:0;right:0;line-height:0}
-.hero-wave svg{width:100%;height:auto;display:block}
-.hero-inner{position:relative;z-index:1;max-width:660px;margin:0 auto;padding-bottom:clamp(56px,10vw,96px)}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(196,136,12,.12);border:1px solid rgba(196,136,12,.25);
-  border-radius:100px;padding:6px 16px;
-  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
-  color:var(--goldXL);letter-spacing:2.5px;text-transform:uppercase;
-  margin-bottom:22px;animation:fadeUp .5s ease both;
-}
-.hero h1{
-  font-family:'Fraunces',serif;
-  font-size:clamp(44px,7.5vw,88px);font-weight:900;
-  color:#fff;line-height:.95;letter-spacing:-1.5px;
-  margin-bottom:18px;animation:fadeUp .5s .08s ease both;
-}
-.hero h1 i{font-style:italic;font-weight:300;color:var(--goldXL)}
-.hero-sub{
-  font-size:clamp(14px,1.6vw,17px);font-weight:400;
-  color:rgba(255,255,255,.45);line-height:1.75;
-  max-width:440px;margin:0 auto;
-  animation:fadeUp .5s .16s ease both;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+::selection { background: var(--gold); color: var(--ink) }
+::-webkit-scrollbar { width: 3px }
+::-webkit-scrollbar-track { background: var(--ink) }
+::-webkit-scrollbar-thumb { background: var(--goldDim); border-radius: 2px }
 
-/* WIZARD SHELL */
-.wizard{
-  max-width:1080px;margin:0 auto;
-  padding:clamp(24px,4vw,48px) clamp(16px,4vw,40px) 80px;
-  display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;
+/* ── GRAIN ──────────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  opacity: .6; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
 }
-@media(max-width:860px){.wizard{grid-template-columns:1fr}}
 
-/* STEP INDICATOR */
-.step-bar{
-  display:flex;align-items:center;gap:0;
-  margin-bottom:28px;
+/* ── NAV ────────────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 62px; display: flex; align-items: center;
+  padding: 0 clamp(16px,4vw,52px);
+  background: rgba(10,8,6,.0); border-bottom: 1px solid transparent;
+  transition: background .5s, border-color .5s, backdrop-filter .5s;
 }
-.step-item{display:flex;align-items:center;gap:0;flex:1}
-.step-item:last-child{flex:0 0 auto}
-.step-dot{
-  width:34px;height:34px;border-radius:50%;
-  border:2px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'DM Mono',monospace;font-size:12px;font-weight:500;
-  color:var(--muted);background:var(--card);
-  transition:all .35s ease;flex-shrink:0;position:relative;z-index:1;
+.nav.scrolled {
+  background: rgba(10,8,6,.88);
+  backdrop-filter: blur(24px) saturate(160%);
+  border-color: var(--border);
 }
-.step-dot.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px var(--goldBg)}
-.step-dot.done{background:var(--gold);border-color:var(--gold);color:#fff}
-.step-dot.done::after{content:'✓';font-size:13px}
-.step-dot.done .dot-num{display:none}
-.step-line{flex:1;height:2px;background:var(--border);transition:background .4s ease;margin:0 -1px}
-.step-line.done{background:var(--gold)}
-.step-label-row{display:flex;justify-content:space-between;margin-bottom:24px;padding:0 4px}
-.sl{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:center;transition:color .3s}
-.sl.active{color:var(--gold)}
-.sl.done{color:var(--goldDim)}
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none }
+.nav-brand img {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 0 12px var(--glow);
+}
+.nav-brand-name {
+  font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700;
+  color: #fff; letter-spacing: -.2px;
+}
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 14px }
+.nav-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10.5px; font-weight: 700; color: var(--greenL);
+  letter-spacing: .6px;
+}
+.nav-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--greenL);
+  box-shadow: 0 0 0 2px rgba(34,197,94,.2);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{ box-shadow:0 0 0 2px rgba(34,197,94,.2) } 50%{ box-shadow:0 0 0 5px rgba(34,197,94,.06) } }
 
-/* PANELS */
-.panels{position:relative;overflow:hidden}
-.panel{display:none;animation:slideIn .35s cubic-bezier(.4,0,.2,1) both}
-.panel.active{display:block}
-@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-24px)}}
+/* ── HERO ───────────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100svh; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 80px clamp(16px,5vw,60px) 0;
+}
+.hero-canvas {
+  position: absolute; inset: 0; pointer-events: none;
+}
+/* Layered dune SVGs */
+.hero-dune1 {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 420' preserveAspectRatio='none'%3E%3Cpath fill='%2318120A' d='M0,420L0,280Q100,200 200,230Q320,262 440,190Q560,118 660,155Q780,196 880,130Q1000,60 1100,95Q1200,128 1320,80Q1380,56 1440,70L1440,420Z'/%3E%3C/svg%3E") no-repeat bottom / 100% 100%;
+  height: 55%;
+}
+.hero-dune2 {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23120E08' opacity='.7' d='M0,320L0,240Q120,180 240,210Q360,240 480,175Q600,110 720,145Q840,180 940,130Q1060,76 1180,105Q1300,132 1440,100L1440,320Z'/%3E%3C/svg%3E") no-repeat bottom / 100% 100%;
+  height: 42%;
+}
+/* Glow orb */
+.hero-orb {
+  position: absolute;
+  width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,145,26,.14) 0%, transparent 65%);
+  top: 50%; left: 50%; transform: translate(-50%, -55%);
+  animation: orb-breathe 6s ease-in-out infinite;
+}
+@keyframes orb-breathe { 0%,100%{transform:translate(-50%,-55%) scale(1);opacity:.8} 50%{transform:translate(-50%,-55%) scale(1.08);opacity:1} }
+.hero-topline {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--goldDim) 30%, var(--goldXL) 50%, var(--goldDim) 70%, transparent);
+}
+/* Particles */
+.particle {
+  position: absolute; border-radius: 50%; background: var(--goldXL);
+  animation: rise linear infinite; opacity: 0; pointer-events: none;
+}
+@keyframes rise { 0%{opacity:0;transform:translateY(0) scale(1)} 15%{opacity:.6} 85%{opacity:.15} 100%{opacity:0;transform:translateY(-120vh) scale(.2)} }
 
-.panel-title{
-  font-family:'Fraunces',serif;
-  font-size:clamp(22px,3.5vw,32px);font-weight:700;
-  color:var(--ink);letter-spacing:-.3px;margin-bottom:6px;
+.hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding-bottom: clamp(70px,12vw,120px) }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: 100px;
+  padding: 6px 18px; margin-bottom: 28px;
+  font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500;
+  color: var(--goldL); letter-spacing: 3px; text-transform: uppercase;
+  animation: fade-up .7s ease both;
 }
-.panel-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.ey-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--greenL);
+  box-shadow: 0 0 6px var(--greenL); animation: pulse-dot 1.8s ease-in-out infinite;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(56px,10vw,120px);
+  font-weight: 900; line-height: .9; letter-spacing: -3px;
+  color: #fff; margin-bottom: 14px;
+  animation: fade-up .7s .1s ease both;
+}
+.hero h1 em {
+  font-style: italic; font-weight: 300;
+  background: linear-gradient(135deg, var(--goldXL) 0%, var(--gold) 50%, var(--goldDim) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(14px,1.6vw,17px); font-weight: 400;
+  color: var(--muted); line-height: 1.8; max-width: 460px; margin: 0 auto 36px;
+  animation: fade-up .7s .18s ease both;
+}
+.hero-cta-row {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  animation: fade-up .7s .26s ease both;
+}
+.btn-gold {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: linear-gradient(135deg, var(--gold), var(--goldL));
+  color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: .3px;
+  padding: 15px 30px; border-radius: 100px;
+  box-shadow: 0 8px 30px rgba(200,145,26,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  transition: transform .2s, box-shadow .2s; cursor: pointer; border: none;
+  position: relative; overflow: hidden;
+}
+.btn-gold::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  transition: left .5s;
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(200,145,26,.55), inset 0 1px 0 rgba(255,255,255,.25) }
+.btn-gold:hover::after { left: 150% }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: transparent; color: rgba(242,230,204,.55);
+  font-size: 13px; font-weight: 600; padding: 14px 26px;
+  border-radius: 100px; border: 1px solid rgba(242,230,204,.14);
+  transition: border-color .2s, color .2s, background .2s; cursor: pointer;
+}
+.btn-ghost:hover { border-color: var(--borderB); color: var(--goldL); background: rgba(200,145,26,.05) }
+/* Stats strip */
+.hero-stats {
+  display: flex; justify-content: center; gap: clamp(24px,5vw,64px);
+  margin-top: 64px; padding-top: 40px;
+  border-top: 1px solid rgba(200,145,26,.1);
+  animation: fade-up .7s .4s ease both; flex-wrap: wrap;
+}
+.hs-val {
+  font-family: 'Fraunces', serif; font-size: clamp(26px,3.5vw,36px);
+  font-weight: 700; color: var(--goldL); display: block; line-height: 1; margin-bottom: 5px;
+}
+.hs-lbl { font-size: 9.5px; font-weight: 600; color: var(--muted); letter-spacing: 2px; text-transform: uppercase }
 
-/* QUAD CARDS */
-.quad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:8px}
-.quad-card{
-  background:var(--card);border:2px solid var(--border);
-  border-radius:var(--r);padding:20px 14px;text-align:center;
-  cursor:pointer;transition:all .2s ease;position:relative;
-  box-shadow:var(--shadow);
+.scroll-hint {
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: fade-up .7s .8s ease both;
 }
-.quad-card:hover:not(.na){border-color:var(--goldBr);transform:translateY(-3px);box-shadow:var(--shadowLg)}
-.quad-card.sel{border-color:var(--gold);background:var(--goldBg);box-shadow:0 0 0 4px var(--goldBg),var(--shadowLg);transform:translateY(-3px)}
-.quad-card.na{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
-.quad-check{
-  position:absolute;top:10px;right:10px;
-  width:20px;height:20px;border-radius:50%;
-  background:var(--gold);color:#fff;
-  font-size:11px;display:none;align-items:center;justify-content:center;
+.scroll-track { width: 1px; height: 48px; background: rgba(242,230,204,.07); position: relative; overflow: hidden }
+.scroll-track::after {
+  content: ''; position: absolute; top: -50%; left: 0; width: 100%; height: 50%;
+  background: linear-gradient(to bottom, transparent, var(--gold));
+  animation: scroll-drop 2s ease-in-out infinite;
 }
-.quad-card.sel .quad-check{display:flex}
-.quad-emoji{font-size:32px;margin-bottom:10px}
-.quad-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
-.q-badge{
-  display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;
-  text-transform:uppercase;padding:3px 8px;border-radius:20px;
-}
-.q-avail{background:var(--greenBg);color:var(--green);border:1px solid var(--greenBr)}
-.q-busy{background:var(--redBg);color:var(--red);border:1px solid rgba(159,18,57,.15)}
-.quad-card.sel .quad-name{color:var(--gold)}
+@keyframes scroll-drop { 0%{top:-50%;opacity:0} 30%{opacity:1} 100%{top:100%;opacity:0} }
+.scroll-lbl { font-family:'DM Mono',monospace; font-size:8.5px; letter-spacing:2.5px; color:rgba(242,230,204,.2); text-transform:uppercase }
 
-/* DURATION CARDS */
-.dur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
-@media(max-width:480px){.dur-grid{grid-template-columns:repeat(2,1fr)}}
-.dur-card{
-  background:var(--card);border:2px solid var(--border);
-  border-radius:var(--r);padding:22px 14px 18px;text-align:center;
-  cursor:pointer;transition:all .2s ease;position:relative;
-  box-shadow:var(--shadow);
-}
-.dur-card:hover{border-color:var(--goldBr);transform:translateY(-3px);box-shadow:var(--shadowLg)}
-.dur-card.sel{border-color:var(--gold);background:var(--goldBg);box-shadow:0 0 0 4px var(--goldBg),var(--shadowLg);transform:translateY(-3px)}
-.dur-pop{
-  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,var(--gold),var(--goldL));color:#fff;
-  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
-  padding:3px 12px;border-radius:100px;white-space:nowrap;
-}
-.dur-time{font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1}
-.dur-price{font-size:16px;font-weight:700;color:var(--gold)}
-.dur-kes{font-size:10px;color:var(--muted);margin-top:2px}
-.dur-card.sel .dur-time,.dur-card.sel .dur-price{color:var(--goldDim)}
+@keyframes fade-up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
 
-/* PROMO */
-.promo-section{
-  background:var(--cream2);border:1.5px solid var(--border);
-  border-radius:var(--r);padding:18px;margin-top:20px;
+/* ── BOOKING SECTION ─────────────────────────────────────────────────────── */
+.booking-section {
+  padding: clamp(60px,8vw,100px) clamp(16px,4vw,48px) 80px;
+  background: linear-gradient(to bottom, var(--ink), var(--ink2));
 }
-.promo-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.promo-row{display:flex;gap:8px}
-.promo-input{
-  flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:10px;
-  padding:11px 14px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
-  color:var(--ink);letter-spacing:2px;text-transform:uppercase;outline:none;
-  transition:border-color .2s,box-shadow .2s;
+.booking-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start;
 }
-.promo-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldBg)}
-.promo-input::placeholder{letter-spacing:1px;font-family:'Instrument Sans',sans-serif;font-size:12px;color:var(--muted);text-transform:none}
-.promo-apply{
-  background:var(--ink);color:#fff;border:none;border-radius:10px;
-  padding:0 20px;font-family:'Instrument Sans',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap;
-}
-.promo-apply:hover{background:var(--gold)}
-.promo-feedback{
-  margin-top:10px;font-size:12px;font-weight:600;padding:8px 12px;
-  border-radius:8px;display:none;
-}
-.pf-ok{background:var(--greenBg);color:var(--green);border:1px solid var(--greenBr);display:block}
-.pf-err{background:var(--redBg);color:var(--red);border:1px solid rgba(159,18,57,.18);display:block}
+@media(max-width:900px) { .booking-inner { grid-template-columns: 1fr } }
 
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:520px){.form-grid{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:7px}
-.field label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.field input,.field select,.field textarea{
-  background:var(--card);border:1.5px solid var(--border);border-radius:12px;
-  padding:12px 15px;font-family:'Instrument Sans',sans-serif;
-  font-size:14px;font-weight:500;color:var(--ink);outline:none;
-  transition:border-color .2s,box-shadow .2s;width:100%;
+/* ── STEP TRACKER ─────────────────────────────────────────────────────────── */
+.step-tracker {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; margin-bottom: 32px;
 }
-.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldBg)}
-.field input::placeholder{color:var(--muted);font-weight:400}
-.field-full{grid-column:1/-1}
-.field-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.st-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 14px; transition: all .3s; cursor: default;
+}
+.st-item.active {
+  background: rgba(200,145,26,.1); border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,145,26,.08);
+}
+.st-item.done { background: rgba(34,197,94,.06); border-color: rgba(34,197,94,.3) }
+.st-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700;
+  background: rgba(242,230,204,.06); color: var(--muted);
+  border: 1px solid rgba(242,230,204,.1); transition: all .3s;
+}
+.st-item.active .st-num { background: var(--gold); color: var(--ink); border-color: var(--gold) }
+.st-item.done .st-num { background: var(--green); color: #fff; border-color: var(--green); font-size: 13px }
+.st-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; transition: color .3s }
+.st-item.active .st-label { color: var(--goldL) }
+.st-item.done .st-label { color: var(--greenL) }
+@media(max-width:600px) { .step-tracker { grid-template-columns: repeat(2,1fr) } }
 
-/* WAIVER */
-.waiver-box{
-  background:var(--cream2);border:1.5px solid var(--border);
-  border-radius:var(--r);padding:20px;max-height:220px;overflow-y:auto;margin-bottom:16px;
-}
-.waiver-box::-webkit-scrollbar{width:3px}
-.waiver-box::-webkit-scrollbar-thumb{background:var(--goldBr)}
-.waiver-clause{display:flex;gap:12px;margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.6}
-.waiver-num{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  background:var(--goldBg);border:1px solid var(--goldBr);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--gold);
-  margin-top:1px;
-}
-.waiver-agree{
-  display:flex;align-items:center;gap:12px;cursor:pointer;
-  background:var(--card);border:2px solid var(--border);
-  border-radius:12px;padding:14px 16px;transition:all .2s;
-}
-.waiver-agree:hover{border-color:var(--goldBr)}
-.waiver-agree.agreed{border-color:var(--green);background:var(--greenBg)}
-.wa-box{
-  width:22px;height:22px;border-radius:6px;border:2px solid var(--border);
-  flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:13px;transition:all .25s;background:var(--cream2);
-}
-.waiver-agree.agreed .wa-box{background:var(--green);border-color:var(--green);color:#fff}
-.wa-text{font-size:13px;font-weight:600;color:var(--ink)}
+/* ── PANELS ───────────────────────────────────────────────────────────────── */
+.panel-wrap { position: relative; overflow: hidden }
+.panel { display: none; animation: panel-in .35s cubic-bezier(.4,0,.2,1) both }
+.panel.active { display: block }
+@keyframes panel-in { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
-/* PAYMENT */
-.pay-amount-card{
-  background:linear-gradient(135deg,var(--ink2),var(--ink));
-  border-radius:var(--r);padding:22px 24px;margin-bottom:18px;
-  display:flex;align-items:center;justify-content:space-between;
-  border:1px solid rgba(255,255,255,.06);
+.panel-head { margin-bottom: 24px }
+.panel-title {
+  font-family: 'Fraunces', serif; font-size: clamp(22px,3vw,30px);
+  font-weight: 700; color: #fff; letter-spacing: -.3px; margin-bottom: 6px;
 }
-.pac-left{}
-.pac-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px}
-.pac-amount{font-family:'Fraunces',serif;font-size:38px;font-weight:700;color:var(--goldXL);line-height:1}
-.pac-detail{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}
-.pac-right{font-size:36px}
+.panel-sub { font-size: 13.5px; font-weight: 400; color: var(--muted); line-height: 1.7 }
 
-.till-card{
-  background:var(--greenBg);border:1.5px solid var(--greenBr);
-  border-radius:var(--r);padding:18px 20px;margin-bottom:18px;
-  display:flex;align-items:center;justify-content:space-between;
-  cursor:pointer;transition:background .2s;
+/* ── QUAD GRID ────────────────────────────────────────────────────────────── */
+.quad-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap: 10px; margin-bottom: 8px }
+.quad-card {
+  background: var(--glass); border: 1.5px solid var(--border);
+  border-radius: 18px; padding: 18px 12px; text-align: center;
+  cursor: pointer; transition: all .22s; position: relative;
 }
-.till-card:hover{background:rgba(22,101,52,.13)}
-.tc-left{}
-.tc-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:4px}
-.tc-num{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--ink);letter-spacing:5px}
-.tc-copy{
-  background:var(--greenBg);border:1.5px solid var(--greenBr);
-  color:var(--green);border-radius:100px;
-  padding:9px 18px;font-size:12px;font-weight:700;
-  cursor:pointer;transition:all .2s;white-space:nowrap;
-  font-family:'Instrument Sans',sans-serif;flex-shrink:0;
+.quad-card:hover:not(.na) { border-color: var(--borderB); background: var(--glassB); transform: translateY(-3px) }
+.quad-card.sel {
+  border-color: var(--gold); background: rgba(200,145,26,.1);
+  box-shadow: 0 0 0 3px rgba(200,145,26,.1), 0 8px 24px rgba(200,145,26,.2);
+  transform: translateY(-3px);
 }
-.tc-copy:hover,.tc-copy.ok{background:var(--greenL);border-color:var(--greenL);color:#fff}
+.quad-card.na { opacity: .4; cursor: not-allowed }
+.quad-check {
+  position: absolute; top: 10px; right: 10px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--gold); color: var(--ink);
+  font-size: 11px; display: none; align-items: center; justify-content: center; font-weight: 800;
+}
+.quad-card.sel .quad-check { display: flex }
+.quad-emoji { font-size: 30px; margin-bottom: 8px }
+.quad-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 6px }
+.q-badge {
+  display: inline-block; font-size: 8.5px; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+}
+.q-avail { background: rgba(34,197,94,.12); color: var(--greenL); border: 1px solid rgba(34,197,94,.25) }
+.q-busy { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2) }
 
-.pay-steps{
-  background:var(--cream2);border:1.5px solid var(--border);
-  border-radius:var(--r);padding:18px 20px;margin-bottom:18px;
+/* ── DURATION GRID ────────────────────────────────────────────────────────── */
+.dur-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 8px }
+@media(max-width:480px) { .dur-grid { grid-template-columns: repeat(2,1fr) } }
+.dur-card {
+  background: var(--glass); border: 1.5px solid var(--border);
+  border-radius: 18px; padding: 22px 12px 18px; text-align: center;
+  cursor: pointer; transition: all .22s; position: relative;
 }
-.pay-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;font-size:13px;color:var(--muted)}
-.pay-step:last-child{margin-bottom:0}
-.ps-n{
-  width:24px;height:24px;border-radius:50%;flex-shrink:0;
-  background:var(--goldBg);border:1px solid var(--goldBr);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--gold);
+.dur-card:hover { border-color: var(--borderB); background: var(--glassB); transform: translateY(-3px) }
+.dur-card.sel {
+  border-color: var(--gold); background: rgba(200,145,26,.1);
+  box-shadow: 0 0 0 3px rgba(200,145,26,.1), 0 8px 24px rgba(200,145,26,.2);
+  transform: translateY(-3px);
 }
-.ps-bold{font-weight:700;color:var(--ink)}
+.dur-pop {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold), var(--goldL)); color: var(--ink);
+  font-family: 'DM Mono', monospace; font-size: 7.5px; letter-spacing: 1.5px;
+  padding: 3px 12px; border-radius: 100px; white-space: nowrap; font-weight: 700;
+}
+.dur-time { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 5px }
+.dur-price { font-size: 15px; font-weight: 800; color: var(--goldL) }
+.dur-kes { font-size: 9.5px; color: var(--muted); margin-top: 2px; letter-spacing: 1px }
 
-.ref-input{
-  width:100%;background:var(--card);border:2px solid var(--border);border-radius:12px;
-  padding:14px 16px;font-family:'DM Mono',monospace;
-  font-size:16px;font-weight:500;color:var(--ink);
-  letter-spacing:3px;text-transform:uppercase;outline:none;
-  transition:border-color .2s,box-shadow .2s;
+/* ── PROMO ────────────────────────────────────────────────────────────────── */
+.promo-box {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 18px; margin-top: 20px;
 }
-.ref-input:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--goldBg)}
-.ref-input::placeholder{font-family:'Instrument Sans',sans-serif;letter-spacing:0;font-size:13px;color:var(--muted);text-transform:none}
+.promo-lbl { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px }
+.promo-row { display: flex; gap: 8px }
+.promo-input {
+  flex: 1; background: rgba(0,0,0,.3); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 11px 14px;
+  font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 500;
+  color: #fff; letter-spacing: 2px; text-transform: uppercase; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.promo-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,145,26,.12) }
+.promo-input::placeholder { font-family:'Syne',sans-serif; letter-spacing:0; font-size:12px; color:var(--muted); text-transform:none }
+.promo-btn {
+  background: rgba(242,230,204,.08); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 0 18px; color: var(--sand);
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.promo-btn:hover { background: var(--gold); color: var(--ink); border-color: var(--gold) }
+.promo-fb { margin-top: 10px; font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: 8px; display: none }
+.pf-ok { background: rgba(34,197,94,.1); color: var(--greenL); border: 1px solid rgba(34,197,94,.25); display: block }
+.pf-err { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2); display: block }
 
-/* NAVIGATION BUTTONS */
-.btn-row{display:flex;gap:12px;margin-top:28px}
-.btn-back{
-  background:transparent;border:2px solid var(--border);
-  border-radius:12px;padding:14px 24px;
-  font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:700;
-  color:var(--muted);cursor:pointer;transition:all .2s;
+/* ── FORM ─────────────────────────────────────────────────────────────────── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px }
+@media(max-width:520px) { .form-grid { grid-template-columns: 1fr } }
+.field { display: flex; flex-direction: column; gap: 7px }
+.field label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted) }
+.field input, .field select {
+  background: rgba(0,0,0,.35); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 15px;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 500; color: #fff; outline: none;
+  transition: border-color .2s, box-shadow .2s; width: 100%;
 }
-.btn-back:hover{border-color:var(--ink);color:var(--ink)}
-.btn-next{
-  flex:1;background:var(--ink);color:#fff;border:none;border-radius:12px;
-  padding:15px;font-family:'Instrument Sans',sans-serif;
-  font-size:14px;font-weight:700;cursor:pointer;
-  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
-}
-.btn-next:hover{background:var(--ink2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(18,16,13,.2)}
-.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.btn-confirm{
-  flex:1;background:linear-gradient(135deg,var(--gold),var(--goldL));
-  color:var(--ink);border:none;border-radius:12px;
-  padding:16px;font-family:'Instrument Sans',sans-serif;
-  font-size:15px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 20px rgba(196,136,12,.4);
-  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;
-}
-.btn-confirm:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 32px rgba(196,136,12,.5)}
-.btn-confirm:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,145,26,.12) }
+.field input::placeholder { color: var(--muted); font-weight: 400 }
+.field-full { grid-column: 1 / -1 }
 
-/* Spinner */
-.btn-spin{width:18px;height:18px;border:2.5px solid rgba(18,16,13,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading .btn-spin{display:block}
-.loading .btn-txt{display:none}
-
-/* SIDEBAR */
-.sidebar{position:sticky;top:80px;display:flex;flex-direction:column;gap:16px}
-
-.summary-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--rLg);padding:24px;box-shadow:var(--shadow);
+/* ── WAIVER ───────────────────────────────────────────────────────────────── */
+.waiver-scroll {
+  background: rgba(0,0,0,.3); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; max-height: 200px; overflow-y: auto; margin-bottom: 14px;
 }
-.sum-brand{text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border)}
-.sum-brand img{width:52px;height:52px;border-radius:50%;margin:0 auto 10px;border:2px solid var(--goldBr)}
-.sum-brand-name{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--ink)}
-.sum-brand-sub{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-top:2px}
+.waiver-scroll::-webkit-scrollbar { width: 3px }
+.waiver-scroll::-webkit-scrollbar-thumb { background: var(--borderB) }
+.wv-clause { display: flex; gap: 10px; margin-bottom: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.6 }
+.wv-num {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(200,145,26,.1); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; color: var(--goldL); margin-top: 1px;
+}
+.waiver-check {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  background: var(--glass); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 13px 16px; transition: all .2s;
+}
+.waiver-check:hover { border-color: var(--borderB) }
+.waiver-check.ok { border-color: rgba(34,197,94,.4); background: rgba(34,197,94,.06) }
+.wc-box {
+  width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; transition: all .25s; background: rgba(0,0,0,.3);
+}
+.waiver-check.ok .wc-box { background: var(--green); border-color: var(--green); color: #fff }
+.wc-text { font-size: 13px; font-weight: 700; color: #fff }
 
-.sum-progress{margin-bottom:20px}
-.sp-track{height:4px;background:var(--cream3);border-radius:100px;overflow:hidden;margin-bottom:8px}
-.sp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--goldL));border-radius:100px;transition:width .5s ease}
-.sp-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px}
+/* ── PAYMENT ──────────────────────────────────────────────────────────────── */
+.pay-amount {
+  background: linear-gradient(135deg, #1C1510, #0E0A06);
+  border: 1px solid rgba(200,145,26,.25); border-radius: 18px;
+  padding: 20px 22px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pa-lbl { font-size: 9.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px }
+.pa-amt { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: var(--goldXL); line-height: 1 }
+.pa-detail { font-size: 11px; color: var(--muted); margin-top: 4px }
+.pa-icon { font-size: 34px; opacity: .7 }
 
-.sum-rows{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
-.sum-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.sr-k{font-size:12px;color:var(--muted)}
-.sr-v{font-size:12px;font-weight:700;color:var(--ink);text-align:right;max-width:160px}
-.sr-v.gold{color:var(--gold)}
-.sr-v.green{color:var(--green);font-size:11px}
+.till-row {
+  background: rgba(34,197,94,.06); border: 1.5px solid rgba(34,197,94,.22);
+  border-radius: 16px; padding: 16px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  transition: background .2s;
+}
+.till-row:hover { background: rgba(34,197,94,.1) }
+.till-lbl { font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--greenL); margin-bottom: 4px }
+.till-num { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: #fff; letter-spacing: 5px }
+.till-copy {
+  background: rgba(34,197,94,.1); border: 1.5px solid rgba(34,197,94,.3);
+  color: var(--greenL); border-radius: 100px; padding: 8px 16px;
+  font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all .2s; white-space: nowrap;
+  font-family: 'Syne', sans-serif;
+}
+.till-copy:hover, .till-copy.ok { background: var(--greenL); border-color: var(--greenL); color: var(--ink) }
+.mpesa-steps {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;
+}
+.ms { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--muted) }
+.ms:last-child { margin-bottom: 0 }
+.ms-n {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(200,145,26,.1); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; color: var(--goldL);
+}
+.ms b { font-weight: 800; color: #fff }
+.ref-input {
+  width: 100%; background: rgba(0,0,0,.4); border: 2px solid var(--border);
+  border-radius: 12px; padding: 14px 16px;
+  font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: #fff;
+  letter-spacing: 3px; text-transform: uppercase; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ref-input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(200,145,26,.12) }
+.ref-input::placeholder { font-family:'Syne',sans-serif; letter-spacing:0; font-size:12px; color:var(--muted); text-transform:none }
 
-.sum-divider{height:1px;background:var(--border);margin:4px 0 16px}
-.sum-total-box{
-  background:linear-gradient(135deg,var(--goldBg),rgba(196,136,12,.04));
-  border:1.5px solid var(--goldBr);border-radius:14px;
-  padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+/* ── BUTTONS ──────────────────────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 12px; margin-top: 28px }
+.btn-back {
+  background: transparent; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 13px 22px;
+  font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 700;
+  color: var(--muted); cursor: pointer; transition: all .2s;
 }
-.stb-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.stb-amount{font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--gold)}
+.btn-back:hover { border-color: rgba(242,230,204,.3); color: #fff }
+.btn-next {
+  flex: 1; background: rgba(242,230,204,.07); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 14px;
+  font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 700;
+  color: #fff; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-next:hover:not(:disabled) { background: rgba(242,230,204,.12); border-color: rgba(242,230,204,.3) }
+.btn-next:disabled { opacity: .3; cursor: not-allowed }
+.btn-confirm {
+  flex: 1; background: linear-gradient(135deg, var(--gold), var(--goldL));
+  border: none; border-radius: 12px; padding: 15px;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--ink);
+  cursor: pointer; transition: all .25s;
+  box-shadow: 0 4px 20px rgba(200,145,26,.4);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-confirm:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(200,145,26,.5) }
+.btn-confirm:disabled { opacity: .35; cursor: not-allowed; transform: none }
+.btn-spin { width: 18px; height: 18px; border: 2.5px solid rgba(18,16,13,.25); border-top-color: var(--ink); border-radius: 50%; animation: spin .7s linear infinite; display: none }
+@keyframes spin { to { transform: rotate(360deg) } }
+.loading .btn-spin { display: block }
+.loading .btn-txt { display: none }
 
-.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rLg);padding:20px;box-shadow:var(--shadow)}
-.ic-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
-.ic-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
-.ic-item:last-child{border-bottom:none;padding-bottom:0}
-.ic-icon{font-size:18px;flex-shrink:0;margin-top:1px}
-.ic-text h4{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
-.ic-text p{font-size:11px;color:var(--muted);line-height:1.5}
+/* ── SIDEBAR ──────────────────────────────────────────────────────────────── */
+.sidebar { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px }
 
-/* SUCCESS OVERLAY */
-.success-overlay{
-  position:fixed;inset:0;z-index:500;
-  background:rgba(18,16,13,.8);backdrop-filter:blur(16px);
-  display:none;align-items:center;justify-content:center;padding:16px;
+.glass-card {
+  background: rgba(255,255,255,.03); backdrop-filter: blur(20px);
+  border: 1px solid var(--border); border-radius: 24px; padding: 22px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
 }
-.success-overlay.show{display:flex}
-.success-sheet{
-  background:var(--card);border-radius:28px;max-width:500px;width:100%;
-  padding:clamp(28px,5vw,52px) clamp(24px,5vw,44px);
-  box-shadow:0 32px 80px rgba(18,16,13,.4);
-  animation:sheetUp .5s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes sheetUp{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-.ss-check{
-  width:72px;height:72px;border-radius:50%;
-  background:var(--greenBg);border:3px solid var(--greenBr);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;font-size:30px;
-  animation:checkPop .5s .25s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes checkPop{from{transform:scale(0)}to{transform:scale(1)}}
-.ss-title{font-family:'Fraunces',serif;font-size:clamp(26px,4vw,36px);font-weight:900;color:var(--ink);text-align:center;margin-bottom:6px}
-.ss-sub{font-size:14px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:24px}
+.gc-brand { text-align: center; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border) }
+.gc-brand img { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid var(--borderB); box-shadow: 0 0 18px var(--glow) }
+.gc-brand-name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: #fff }
+.gc-brand-sub { font-size: 9.5px; color: var(--muted); letter-spacing: 1.5px; margin-top: 2px }
 
-.ticket{
-  background:var(--cream2);border:1px solid var(--border);
-  border-radius:16px;overflow:hidden;margin-bottom:22px;
-}
-.ticket-head{
-  background:var(--ink);padding:14px 18px;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.th-brand{font-family:'Fraunces',serif;font-size:13px;font-weight:700;color:#fff}
-.th-id{font-family:'DM Mono',monospace;font-size:10px;color:var(--goldXL);background:rgba(196,136,12,.15);padding:3px 9px;border-radius:6px;border:1px solid rgba(196,136,12,.25)}
-.ticket-perf{height:2px;background:repeating-linear-gradient(90deg,var(--border) 0,var(--border) 8px,transparent 8px,transparent 16px)}
-.ticket-body{padding:14px 18px;display:flex;flex-direction:column;gap:8px}
-.tr{display:flex;justify-content:space-between;align-items:center}
-.tr-k{font-size:11px;color:var(--muted)}
-.tr-v{font-size:11px;font-weight:700;color:var(--ink)}
-.ticket-total{
-  background:linear-gradient(90deg,var(--goldBg),rgba(196,136,12,.04));
-  padding:12px 18px;display:flex;justify-content:space-between;align-items:center;
-  border-top:1px solid var(--goldBr);
-}
-.tt-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.tt-val{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.prog-track { height: 3px; background: rgba(242,230,204,.07); border-radius: 100px; margin-bottom: 8px; overflow: hidden }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--goldL)); border-radius: 100px; transition: width .5s cubic-bezier(.4,0,.2,1) }
+.prog-lbl { font-family: 'DM Mono', monospace; font-size: 9.5px; color: var(--muted); letter-spacing: 1px; margin-bottom: 18px }
 
-.ss-actions{display:flex;gap:10px}
-.ss-wa{
-  flex:1;background:#25D366;color:#fff;border:none;border-radius:12px;
-  padding:14px;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:700;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;
-}
-.ss-wa:hover{background:#1a9e4d}
-.ss-new{
-  flex:1;background:var(--cream2);color:var(--ink);border:1.5px solid var(--border);
-  border-radius:12px;padding:14px;font-family:'Instrument Sans',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
-}
-.ss-new:hover{border-color:var(--ink)}
+.sum-rows { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px }
+.sum-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
+.sr-k { font-size: 11.5px; color: var(--muted) }
+.sr-v { font-size: 11.5px; font-weight: 800; color: #fff; text-align: right; max-width: 160px }
+.sr-v.gold { color: var(--goldL) }
+.sr-v.green { color: var(--greenL); font-size: 10.5px }
 
-/* TOAST */
-.toast{
-  position:fixed;bottom:24px;left:50%;
-  transform:translateX(-50%) translateY(80px);
-  background:var(--ink);color:#fff;
-  padding:12px 22px;border-radius:100px;
-  font-size:13px;font-weight:600;
-  box-shadow:0 8px 32px rgba(18,16,13,.3);
-  z-index:1000;white-space:nowrap;
-  transition:transform .3s cubic-bezier(.4,0,.2,1);
+.sum-total {
+  background: linear-gradient(135deg, rgba(200,145,26,.12), rgba(200,145,26,.04));
+  border: 1.5px solid var(--borderB); border-radius: 14px;
+  padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
 }
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.err{background:var(--red)}
+.st-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted) }
+.st-amt { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--goldL) }
 
-/* FOOTER */
-footer{background:var(--ink2);padding:24px;text-align:center;border-top:1px solid rgba(255,255,255,.05);font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.2);letter-spacing:.5px}
-footer a{color:rgba(196,136,12,.5)}
-.fab{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+/* Info card */
+.info-card-title { font-size: 9.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px }
+.ic-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border) }
+.ic-row:last-child { border-bottom: none; padding-bottom: 0 }
+.ic-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px }
+.ic-row h4 { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 2px }
+.ic-row p { font-size: 11px; color: var(--muted); line-height: 1.5 }
+
+/* Map card */
+.map-iframe { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); margin-top: 12px }
+.map-iframe iframe { display: block; width: 100%; height: 160px; border: none }
+.map-actions { display: flex; gap: 7px; padding: 10px }
+.map-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 700;
+  text-decoration: none; transition: all .2s;
+}
+.map-btn.gm { background: rgba(66,133,244,.1); border: 1px solid rgba(66,133,244,.25); color: #4285F4 }
+.map-btn.gm:hover { background: rgba(66,133,244,.2) }
+.map-btn.dir { background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.22); color: var(--greenL) }
+.map-btn.dir:hover { background: rgba(34,197,94,.16) }
+
+/* ── SUCCESS OVERLAY ──────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(20px) saturate(150%);
+  display: none; align-items: center; justify-content: center; padding: 16px;
+}
+.overlay.show { display: flex }
+.success-sheet {
+  background: var(--ink2); border: 1px solid var(--borderB); border-radius: 28px;
+  max-width: 480px; width: 100%;
+  padding: clamp(28px,5vw,48px) clamp(22px,5vw,42px);
+  box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(200,145,26,.1);
+  animation: sheet-up .5s cubic-bezier(.175,.885,.32,1.275) both;
+  position: relative; overflow: hidden;
+}
+.success-sheet::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--goldDim), var(--goldXL), var(--goldDim), transparent);
+}
+@keyframes sheet-up { from{opacity:0;transform:translateY(36px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+.ss-icon {
+  width: 68px; height: 68px; border-radius: 50%;
+  background: rgba(34,197,94,.1); border: 2.5px solid rgba(34,197,94,.35);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px; font-size: 28px;
+  animation: icon-pop .5s .25s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes icon-pop { from{transform:scale(0)} to{transform:scale(1)} }
+.ss-title { font-family: 'Fraunces', serif; font-size: clamp(24px,4vw,34px); font-weight: 900; color: #fff; text-align: center; margin-bottom: 6px }
+.ss-sub { font-size: 13.5px; color: var(--muted); text-align: center; line-height: 1.65; margin-bottom: 22px }
+
+/* Ticket */
+.ticket { background: rgba(0,0,0,.4); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; margin-bottom: 20px }
+.ticket-head { background: linear-gradient(135deg,var(--ink3),var(--ink)); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border) }
+.th-brand { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 700; color: #fff }
+.th-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--goldXL); background: rgba(200,145,26,.12); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border) }
+.ticket-perf { height: 2px; background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 8px, transparent 8px, transparent 16px) }
+.ticket-rows { padding: 12px 16px; display: flex; flex-direction: column; gap: 7px }
+.tr { display: flex; justify-content: space-between; align-items: center }
+.tr-k { font-size: 11px; color: var(--muted) }
+.tr-v { font-size: 11px; font-weight: 700; color: #fff }
+.ticket-total { background: linear-gradient(90deg,rgba(200,145,26,.1),rgba(200,145,26,.03)); padding: 11px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--borderB) }
+.tt-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted) }
+.tt-amt { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--goldL) }
+
+.ss-actions { display: flex; gap: 10px }
+.ss-wa { flex: 1; background: #25D366; color: #fff; border: none; border-radius: 12px; padding: 13px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: background .2s }
+.ss-wa:hover { background: #1a9e4d }
+.ss-new { flex: 1; background: var(--glass); color: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 13px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s }
+.ss-new:hover { border-color: rgba(242,230,204,.3) }
+
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 88px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: rgba(20,16,10,.95); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); color: #fff;
+  padding: 12px 24px; border-radius: 100px;
+  font-size: 13px; font-weight: 700; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  z-index: 1000; transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.toast.show { transform: translateX(-50%) translateY(0) }
+.toast.err { background: rgba(153,27,27,.95); border-color: rgba(239,68,68,.3) }
+
+/* ── FOOTER ───────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--ink2); border-top: 1px solid var(--border);
+  padding: 24px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 10.5px;
+  color: rgba(242,230,204,.22); letter-spacing: .5px;
+}
+
+/* ── FAB ──────────────────────────────────────────────────────────────────── */
+.fab {
+  position: fixed; bottom: 24px; right: 24px; z-index: 400;
+}
+.fab a {
+  display: flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #25D366; color: #fff; font-size: 22px; text-decoration: none;
+  box-shadow: 0 4px 20px rgba(37,211,102,.4);
+  transition: transform .25s, box-shadow .25s;
+}
+.fab a:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,.5) }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="nav">
-  <a href="/Royal-quads" class="nav-logo">
-    <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
-    <span class="nav-logo-name">Royal Quad Bikes</span>
+<nav class="nav" id="nav">
+  <a href="#" class="nav-brand">
+    <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Royal Quad Bikes">
+    <span class="nav-brand-name">Royal Quad Bikes</span>
   </a>
-  <div class="nav-tag">
-    <div class="nav-dot"></div>
-    Open · Mambrui Dunes
+  <div class="nav-right">
+    <div class="nav-badge"><div class="nav-dot"></div>Open · Mambrui</div>
   </div>
 </nav>
 
 <!-- HERO -->
-<div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-topline"></div>
+<section class="hero" id="hero">
+  <div class="hero-canvas">
+    <div class="hero-orb"></div>
+    <div class="hero-dune1"></div>
+    <div class="hero-dune2"></div>
+    <div class="hero-topline"></div>
+    <div id="particles"></div>
+  </div>
   <div class="hero-inner">
-    <div class="hero-eyebrow"><span>⚡</span> Instant M-Pesa Booking</div>
-    <h1>Book Your<br><i>Adventure</i></h1>
-    <p class="hero-sub">Four easy steps — choose your quad, pick your duration, share your details, and pay via M-Pesa. Done in under 2 minutes.</p>
-  </div>
-  <div class="hero-wave">
-    <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-      <path fill="#FAF6EE" d="M0,80 L0,40 Q180,0 360,25 Q540,50 720,20 Q900,-10 1080,28 Q1260,60 1440,30 L1440,80 Z"/>
-    </svg>
-  </div>
-</div>
-
-<!-- WIZARD -->
-<div class="wizard">
-  <div>
-    <!-- Step indicator -->
-    <div class="step-bar">
-      <div class="step-item">
-        <div class="step-dot active" id="sd1"><span class="dot-num">1</span></div>
-        <div class="step-line" id="sl1"></div>
-      </div>
-      <div class="step-item">
-        <div class="step-dot" id="sd2"><span class="dot-num">2</span></div>
-        <div class="step-line" id="sl2"></div>
-      </div>
-      <div class="step-item">
-        <div class="step-dot" id="sd3"><span class="dot-num">3</span></div>
-        <div class="step-line" id="sl3"></div>
-      </div>
-      <div class="step-dot" id="sd4"><span class="dot-num">4</span></div>
+    <div class="hero-eyebrow"><div class="ey-dot"></div>Mambrui Sand Dunes · Kilifi County · Kenya</div>
+    <h1><em>Royal</em><br>Quad Bikes</h1>
+    <p class="hero-sub">Conquer the dunes of Kenya's Indian Ocean coast. Book your ride in under two minutes — pay with M-Pesa, receive instant confirmation.</p>
+    <div class="hero-cta-row">
+      <button class="btn-gold" onclick="document.getElementById('book').scrollIntoView({behavior:'smooth'})">
+        <span>🏍️</span> Book a Ride Now
+      </button>
+      <button class="btn-ghost" onclick="document.getElementById('book').scrollIntoView({behavior:'smooth'})">
+        <span>✦</span> See Pricing
+      </button>
     </div>
-    <div class="step-label-row">
-      <span class="sl active" id="sl-lbl1">Quad</span>
-      <span class="sl" id="sl-lbl2">Duration</span>
-      <span class="sl" id="sl-lbl3">Details</span>
-      <span class="sl" id="sl-lbl4">Pay</span>
-    </div>
-
-    <!-- PANELS -->
-    <div class="panels">
-
-      <!-- PANEL 1: Quad -->
-      <div class="panel active" id="panel1">
-        <div class="panel-title">Choose your quad</div>
-        <p class="panel-sub">All quads are maintained daily. Pick one that's available — the green badge means ready to ride.</p>
-        <div class="quad-grid" id="quadGrid"></div>
-        <div class="btn-row">
-          <button class="btn-next" id="next1" onclick="goTo(2)" disabled>
-            Continue → Duration <span style="opacity:.5;font-weight:400;font-size:12px;margin-left:4px" id="quad-selected-name"></span>
-          </button>
-        </div>
-      </div>
-
-      <!-- PANEL 2: Duration -->
-      <div class="panel" id="panel2">
-        <div class="panel-title">Pick your duration</div>
-        <p class="panel-sub">Choose how long you want to ride. Overtime is charged at 100 KES/min automatically after your session ends.</p>
-        <div class="dur-grid" id="durGrid"></div>
-        <div class="promo-section">
-          <div class="promo-label">🎟️ &nbsp;Promo Code (Optional)</div>
-          <div class="promo-row">
-            <input class="promo-input" id="promoInp" placeholder="Enter code e.g. DUNES20" maxlength="20">
-            <button class="promo-apply" onclick="applyPromo()">Apply</button>
-          </div>
-          <div class="promo-feedback" id="promoFB"></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-back" onclick="goTo(1)">← Back</button>
-          <button class="btn-next" id="next2" onclick="goTo(3)" disabled>Continue → Your Details</button>
-        </div>
-      </div>
-
-      <!-- PANEL 3: Details + Waiver -->
-      <div class="panel" id="panel3">
-        <div class="panel-title">Your details</div>
-        <p class="panel-sub">We need your name and phone so we can send your receipt via WhatsApp after the ride.</p>
-        <div class="form-grid">
-          <div class="field">
-            <label>First Name *</label>
-            <input type="text" id="fName" placeholder="John" oninput="checkDetails()">
-          </div>
-          <div class="field">
-            <label>Last Name *</label>
-            <input type="text" id="lName" placeholder="Kamau" oninput="checkDetails()">
-          </div>
-          <div class="field">
-            <label>Phone Number *</label>
-            <input type="tel" id="phone" placeholder="0712 345 678" oninput="checkDetails()">
-          </div>
-          <div class="field">
-            <label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-            <input type="email" id="email" placeholder="john@gmail.com">
-          </div>
-          <div class="field field-full">
-            <label>Special Requests <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-            <input type="text" id="notes" placeholder="e.g. First time rider, need extra guidance">
-          </div>
-        </div>
-
-        <!-- Safety Waiver -->
-        <div style="margin-top:8px;margin-bottom:14px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">📋 &nbsp;Safety Waiver</div>
-          <div class="waiver-box" id="waiverBox">
-            <div class="waiver-clause"><div class="waiver-num">1</div><div>I confirm I am physically fit and capable of operating a quad bike safely.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">2</div><div>I will wear all provided safety gear including helmet and protective clothing at all times.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">3</div><div>I acknowledge that quad biking carries inherent risks and I accept full responsibility for my safety.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">4</div><div>I will not operate the quad under the influence of alcohol, drugs or any impairing substance.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">5</div><div>I will follow all operator instructions and stay within designated riding areas at all times.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">6</div><div>I understand that overtime beyond my booked session is billed at 100 KES per minute automatically.</div></div>
-            <div class="waiver-clause"><div class="waiver-num">7</div><div>I agree that Royal Quad Bikes is not liable for any personal injury or property damage arising from my ride.</div></div>
-            <div class="waiver-clause" style="margin-bottom:0"><div class="waiver-num">8</div><div>I confirm all information provided is accurate and I am at least 16 years of age.</div></div>
-          </div>
-          <div class="waiver-agree" id="waiverAgree" onclick="toggleWaiver()">
-            <div class="wa-box" id="waBox"></div>
-            <span class="wa-text">I have read and agree to the safety waiver</span>
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn-back" onclick="goTo(2)">← Back</button>
-          <button class="btn-next" id="next3" onclick="goTo(4)" disabled>Continue → Payment</button>
-        </div>
-      </div>
-
-      <!-- PANEL 4: Pay -->
-      <div class="panel" id="panel4">
-        <div class="panel-title">Pay via M-Pesa</div>
-        <p class="panel-sub">Send the exact amount to our till number, then paste your M-Pesa confirmation code below to confirm your booking.</p>
-
-        <div class="pay-amount-card">
-          <div class="pac-left">
-            <div class="pac-label">Amount to Send</div>
-            <div class="pac-amount" id="pacAmt">KES —</div>
-            <div class="pac-detail" id="pacDetail">Complete previous steps first</div>
-          </div>
-          <div class="pac-right">📲</div>
-        </div>
-
-        <div class="till-card" onclick="copyTill()">
-          <div class="tc-left">
-            <div class="tc-tag">M-Pesa Buy Goods — Till Number</div>
-            <div class="tc-num">6685024</div>
-          </div>
-          <div class="tc-copy" id="tcCopy">⧉ Copy</div>
-        </div>
-
-        <div class="pay-steps">
-          <div class="pay-step"><div class="ps-n">1</div><span>Open M-Pesa → <span class="ps-bold">Lipa na M-Pesa</span></span></div>
-          <div class="pay-step"><div class="ps-n">2</div><span>Select <span class="ps-bold">Buy Goods & Services</span></span></div>
-          <div class="pay-step"><div class="ps-n">3</div><span>Enter till number: <span class="ps-bold" style="font-family:'DM Mono',monospace;color:var(--green)">6685024</span></span></div>
-          <div class="pay-step"><div class="ps-n">4</div><span>Enter <span class="ps-bold" id="amtInline">the exact amount</span> and complete with your PIN</span></div>
-          <div class="pay-step"><div class="ps-n">5</div><span>Copy the <span class="ps-bold">confirmation code</span> from the M-Pesa SMS</span></div>
-          <div class="pay-step" style="margin-bottom:0"><div class="ps-n">6</div><span>Paste the code in the field below and confirm</span></div>
-        </div>
-
-        <div class="field" style="margin-bottom:8px">
-          <label>M-Pesa Confirmation Code *</label>
-          <input class="ref-input" id="mpesaRef" placeholder="e.g.  QHL2X3P8KA" maxlength="12" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');checkRef()">
-          <div class="field-hint">The 10-character alphanumeric code from your M-Pesa SMS</div>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn-back" onclick="goTo(3)">← Back</button>
-          <button class="btn-confirm" id="confirmBtn" onclick="confirmBooking()" disabled>
-            <div class="btn-spin"></div>
-            <span class="btn-txt">🏍️ &nbsp;Confirm My Booking</span>
-          </button>
-        </div>
-        <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
-          By confirming you agree to our safety waiver.<br>
-          Overtime is billed at 100 KES/min after your session ends.
-        </p>
-      </div>
-
-    </div><!-- /panels -->
-  </div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="summary-card">
-      <div class="sum-brand">
-        <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
-        <div class="sum-brand-name">Royal Quad Bikes</div>
-        <div class="sum-brand-sub">Mambrui · Kilifi · Kenya</div>
-      </div>
-
-      <div class="sum-progress">
-        <div class="sp-track"><div class="sp-fill" id="spFill" style="width:0%"></div></div>
-        <div class="sp-label" id="spLabel">Step 1 of 4</div>
-      </div>
-
-      <div class="sum-rows">
-        <div class="sum-row"><span class="sr-k">Quad</span><span class="sr-v" id="sv-quad">—</span></div>
-        <div class="sum-row"><span class="sr-k">Duration</span><span class="sr-v" id="sv-dur">—</span></div>
-        <div class="sum-row"><span class="sr-k">Base price</span><span class="sr-v" id="sv-base">—</span></div>
-        <div class="sum-row" id="sv-promo-row" style="display:none">
-          <span class="sr-k">Promo discount</span>
-          <span class="sr-v green" id="sv-promo">—</span>
-        </div>
-        <div class="sum-row"><span class="sr-k">Name</span><span class="sr-v" id="sv-name">—</span></div>
-      </div>
-
-      <div class="sum-divider"></div>
-      <div class="sum-total-box">
-        <div class="stb-label">Total</div>
-        <div class="stb-amount" id="sv-total">KES —</div>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">Good to know</div>
-      <div class="ic-item">
-        <span class="ic-icon">⏱️</span>
-        <div class="ic-text"><h4>Overtime Policy</h4><p>100 KES/min charged automatically after your session ends.</p></div>
-      </div>
-      <div class="ic-item">
-        <span class="ic-icon">🛡️</span>
-        <div class="ic-text"><h4>Safety Gear</h4><p>Helmet + protective clothing provided. Briefing before every ride.</p></div>
-      </div>
-      <div class="ic-item">
-        <span class="ic-icon">🧾</span>
-        <div class="ic-text"><h4>WhatsApp Receipt</h4><p>PDF receipt sent to your phone immediately after the ride.</p></div>
-      </div>
-      <div class="ic-item">
-        <span class="ic-icon">📍</span>
-        <div class="ic-text"><h4>Location</h4><p>Mambrui Sand Dunes, Kilifi County, Kenya — near Malindi.</p></div>
-      </div>
-    </div>
-
-    <!-- Google Maps embed -->
-    <div style="margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid var(--border);position:relative">
-      <iframe
-        src="https://maps.google.com/maps?q=-3.3635,40.1347&z=15&output=embed"
-        width="100%" height="180"
-        style="border:0;display:block"
-        allowfullscreen="" loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="Mambrui Sand Dunes"></iframe>
-      <div style="display:flex;gap:8px;padding:10px">
-        <a href="https://maps.google.com/?q=-3.3635,40.1347" target="_blank"
-           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.25);color:#4285F4;font-size:11px;font-weight:700;padding:8px;border-radius:10px;text-decoration:none">
-          🗺️ Open in Maps
-        </a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=-3.3635,40.1347" target="_blank"
-           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--greenBg);border:1px solid var(--greenBr);color:var(--green);font-size:11px;font-weight:700;padding:8px;border-radius:10px;text-decoration:none">
-          🧭 Get Directions
-        </a>
-      </div>
+    <div class="hero-stats">
+      <div><span class="hs-val">6</span><span class="hs-lbl">Ride Options</span></div>
+      <div><span class="hs-val">1,000</span><span class="hs-lbl">From KES</span></div>
+      <div><span class="hs-val">M-Pesa</span><span class="hs-lbl">Instant Pay</span></div>
+      <div><span class="hs-val">100%</span><span class="hs-lbl">Outdoor Thrill</span></div>
     </div>
   </div>
+  <div class="scroll-hint">
+    <div class="scroll-track"></div>
+    <span class="scroll-lbl">Scroll</span>
+  </div>
+</section>
 
-</div><!-- /wizard -->
+<!-- BOOKING WIZARD -->
+<section class="booking-section" id="book">
+  <div class="booking-inner">
+
+    <!-- Main wizard -->
+    <div>
+      <!-- Step tracker -->
+      <div class="step-tracker">
+        <div class="st-item active" id="st1"><div class="st-num" id="sn1">1</div><span class="st-label">Quad</span></div>
+        <div class="st-item" id="st2"><div class="st-num" id="sn2">2</div><span class="st-label">Duration</span></div>
+        <div class="st-item" id="st3"><div class="st-num" id="sn3">3</div><span class="st-label">Details</span></div>
+        <div class="st-item" id="st4"><div class="st-num" id="sn4">4</div><span class="st-label">Pay</span></div>
+      </div>
+
+      <div class="panel-wrap">
+
+        <!-- PANEL 1 — Choose Quad -->
+        <div class="panel active" id="panel1">
+          <div class="panel-head">
+            <div class="panel-title">Choose your quad</div>
+            <p class="panel-sub">All bikes maintained daily. Green badge means ready to ride right now.</p>
+          </div>
+          <div class="quad-grid" id="quadGrid"></div>
+          <div class="btn-row">
+            <button class="btn-next" id="next1" onclick="goTo(2)" disabled>
+              Continue <span style="opacity:.5;font-size:11px;margin-left:4px" id="quad-selected-name"></span> →
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL 2 — Duration -->
+        <div class="panel" id="panel2">
+          <div class="panel-head">
+            <div class="panel-title">Pick your duration</div>
+            <p class="panel-sub">Overtime charged at 100 KES/min automatically after session ends.</p>
+          </div>
+          <div class="dur-grid" id="durGrid"></div>
+          <div class="promo-box">
+            <div class="promo-lbl">🎟️ &nbsp;Promo Code</div>
+            <div class="promo-row">
+              <input class="promo-input" id="promoInp" placeholder="Enter code e.g. DUNES20" maxlength="20">
+              <button class="promo-btn" onclick="applyPromo()">Apply</button>
+            </div>
+            <div class="promo-fb" id="promoFB"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-back" onclick="goTo(1)">← Back</button>
+            <button class="btn-next" id="next2" onclick="goTo(3)" disabled>Continue →</button>
+          </div>
+        </div>
+
+        <!-- PANEL 3 — Details + Waiver -->
+        <div class="panel" id="panel3">
+          <div class="panel-head">
+            <div class="panel-title">Your details</div>
+            <p class="panel-sub">We'll send your WhatsApp receipt to this number immediately after the ride.</p>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>First Name *</label><input type="text" id="fName" placeholder="John" oninput="checkDetails()"></div>
+            <div class="field"><label>Last Name *</label><input type="text" id="lName" placeholder="Kamau" oninput="checkDetails()"></div>
+            <div class="field"><label>Phone *</label><input type="tel" id="phone" placeholder="0712 345 678" oninput="checkDetails()"></div>
+            <div class="field"><label>Email <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(optional)</span></label><input type="email" id="email" placeholder="john@gmail.com"></div>
+            <div class="field field-full"><label>Special Requests</label><input type="text" id="notes" placeholder="e.g. First time rider, need extra briefing"></div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <div class="promo-lbl" style="margin-bottom:12px">📋 &nbsp;Safety Waiver</div>
+            <div class="waiver-scroll">
+              <div class="wv-clause"><div class="wv-num">1</div><div>I confirm I am physically fit and capable of operating a quad bike safely.</div></div>
+              <div class="wv-clause"><div class="wv-num">2</div><div>I will wear all provided safety gear including helmet and protective clothing at all times.</div></div>
+              <div class="wv-clause"><div class="wv-num">3</div><div>I acknowledge that quad biking carries inherent risks and I accept full responsibility for my safety.</div></div>
+              <div class="wv-clause"><div class="wv-num">4</div><div>I will not operate the quad under the influence of alcohol, drugs or any impairing substance.</div></div>
+              <div class="wv-clause"><div class="wv-num">5</div><div>I will follow all operator instructions and stay within designated riding areas at all times.</div></div>
+              <div class="wv-clause"><div class="wv-num">6</div><div>I understand overtime beyond my booked session is billed at 100 KES per minute automatically.</div></div>
+              <div class="wv-clause"><div class="wv-num">7</div><div>I agree Royal Quad Bikes is not liable for any personal injury arising from my ride.</div></div>
+              <div class="wv-clause" style="margin-bottom:0"><div class="wv-num">8</div><div>I confirm all information provided is accurate and I am at least 16 years of age.</div></div>
+            </div>
+            <div class="waiver-check" id="waiverAgree" onclick="toggleWaiver()">
+              <div class="wc-box" id="waBox"></div>
+              <span class="wc-text">I have read and agree to the safety waiver</span>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-back" onclick="goTo(2)">← Back</button>
+            <button class="btn-next" id="next3" onclick="goTo(4)" disabled>Continue →</button>
+          </div>
+        </div>
+
+        <!-- PANEL 4 — Payment -->
+        <div class="panel" id="panel4">
+          <div class="panel-head">
+            <div class="panel-title">Pay via M-Pesa</div>
+            <p class="panel-sub">Send the exact amount, then paste your M-Pesa confirmation code below.</p>
+          </div>
+
+          <div class="pay-amount">
+            <div>
+              <div class="pa-lbl">Amount to Send</div>
+              <div class="pa-amt" id="pacAmt">KES —</div>
+              <div class="pa-detail" id="pacDetail">Complete previous steps first</div>
+            </div>
+            <div class="pa-icon">📲</div>
+          </div>
+
+          <div class="till-row" onclick="copyTill()">
+            <div>
+              <div class="till-lbl">M-Pesa Buy Goods — Till Number</div>
+              <div class="till-num">6685024</div>
+            </div>
+            <button class="till-copy" id="tcCopy">⧉ Copy</button>
+          </div>
+
+          <div class="mpesa-steps">
+            <div class="ms"><div class="ms-n">1</div><span>Open M-Pesa → <b>Lipa na M-Pesa</b></span></div>
+            <div class="ms"><div class="ms-n">2</div><span>Select <b>Buy Goods & Services</b></span></div>
+            <div class="ms"><div class="ms-n">3</div><span>Enter till number: <b style="font-family:'DM Mono',monospace;color:var(--greenL)">6685024</b></span></div>
+            <div class="ms"><div class="ms-n">4</div><span>Enter <b id="amtInline">the exact amount</b> and confirm with PIN</span></div>
+            <div class="ms"><div class="ms-n">5</div><span>Copy the <b>confirmation code</b> from your M-Pesa SMS</span></div>
+            <div class="ms" style="margin-bottom:0"><div class="ms-n">6</div><span>Paste the code below and confirm your booking</span></div>
+          </div>
+
+          <div class="field" style="margin-bottom:8px">
+            <label>M-Pesa Confirmation Code *</label>
+            <input class="ref-input" id="mpesaRef" placeholder="e.g.  QHL2X3P8KA" maxlength="12" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');checkRef()">
+            <div style="font-size:11px;color:var(--muted);margin-top:5px">10-character alphanumeric code from your M-Pesa SMS</div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-back" onclick="goTo(3)">← Back</button>
+            <button class="btn-confirm" id="confirmBtn" onclick="confirmBooking()" disabled>
+              <div class="btn-spin"></div>
+              <span class="btn-txt">🏍️ &nbsp;Confirm My Booking</span>
+            </button>
+          </div>
+          <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:12px;line-height:1.7">
+            By confirming you agree to the safety waiver above.<br>
+            Overtime billed at 100 KES/min after session ends.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Booking summary -->
+      <div class="glass-card">
+        <div class="gc-brand">
+          <img src="https://raw.githubusercontent.com/Baker0o7/Royal-quads/flutter/assets/images/logo.png" alt="Logo">
+          <div class="gc-brand-name">Royal Quad Bikes</div>
+          <div class="gc-brand-sub">Mambrui · Kilifi · Kenya</div>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="spFill" style="width:0%"></div></div>
+        <div class="prog-lbl" id="spLabel">Step 1 of 4</div>
+        <div class="sum-rows">
+          <div class="sum-row"><span class="sr-k">Quad</span><span class="sr-v" id="sv-quad">—</span></div>
+          <div class="sum-row"><span class="sr-k">Duration</span><span class="sr-v" id="sv-dur">—</span></div>
+          <div class="sum-row"><span class="sr-k">Base price</span><span class="sr-v" id="sv-base">—</span></div>
+          <div class="sum-row" id="sv-promo-row" style="display:none"><span class="sr-k">Discount</span><span class="sr-v green" id="sv-promo">—</span></div>
+          <div class="sum-row"><span class="sr-k">Name</span><span class="sr-v" id="sv-name">—</span></div>
+        </div>
+        <div class="sum-total">
+          <span class="st-lbl">Total</span>
+          <span class="st-amt" id="sv-total">KES —</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="glass-card">
+        <div class="info-card-title">Good to Know</div>
+        <div class="ic-row"><span class="ic-icon">⏱️</span><div><h4>Overtime</h4><p>100 KES/min charged live after session ends.</p></div></div>
+        <div class="ic-row"><span class="ic-icon">🛡️</span><div><h4>Safety Gear</h4><p>Helmet + protective clothing provided. Briefing every ride.</p></div></div>
+        <div class="ic-row"><span class="ic-icon">🧾</span><div><h4>WhatsApp Receipt</h4><p>PDF sent to your phone right after the ride.</p></div></div>
+        <div class="ic-row"><span class="ic-icon">📍</span><div><h4>Location</h4><p>Mambrui Sand Dunes, Kilifi County — near Malindi.</p></div></div>
+        <!-- Google Maps embed -->
+        <div class="map-iframe">
+          <iframe src="https://maps.google.com/maps?q=-3.3635,40.1347&z=15&output=embed"
+            width="100%" height="160" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade" title="Mambrui Sand Dunes"></iframe>
+          <div class="map-actions">
+            <a class="map-btn gm" href="https://maps.google.com/?q=-3.3635,40.1347" target="_blank">🗺️ Open Maps</a>
+            <a class="map-btn dir" href="https://www.google.com/maps/dir/?api=1&destination=-3.3635,40.1347" target="_blank">🧭 Directions</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 
 <!-- SUCCESS OVERLAY -->
-<div class="success-overlay" id="successOverlay">
+<div class="overlay" id="successOverlay">
   <div class="success-sheet">
-    <div class="ss-check">✓</div>
-    <div class="ss-title">You're booked!</div>
+    <div class="ss-icon">✓</div>
+    <div class="ss-title">You're Booked!</div>
     <div class="ss-sub" id="ssSub">Your quad adventure is confirmed. Show this ticket when you arrive.</div>
     <div class="ticket">
-      <div class="ticket-head">
-        <span class="th-brand">Royal Quad Bikes</span>
-        <span class="th-id" id="ticketId">RQ-XXXXXX</span>
-      </div>
+      <div class="ticket-head"><span class="th-brand">Royal Quad Bikes</span><span class="th-id" id="ticketId">RQ-XXXXXX</span></div>
       <div class="ticket-perf"></div>
-      <div class="ticket-body">
+      <div class="ticket-rows">
         <div class="tr"><span class="tr-k">Quad</span><span class="tr-v" id="tk-quad">—</span></div>
         <div class="tr"><span class="tr-k">Customer</span><span class="tr-v" id="tk-name">—</span></div>
         <div class="tr"><span class="tr-k">Phone</span><span class="tr-v" id="tk-phone">—</span></div>
         <div class="tr"><span class="tr-k">Duration</span><span class="tr-v" id="tk-dur">—</span></div>
         <div class="tr"><span class="tr-k">Date</span><span class="tr-v" id="tk-date">—</span></div>
-        <div class="tr"><span class="tr-k">M-Pesa Ref</span><span class="tr-v" id="tk-ref" style="font-family:'DM Mono',monospace;color:var(--green)">—</span></div>
+        <div class="tr"><span class="tr-k">M-Pesa</span><span class="tr-v" id="tk-ref" style="font-family:'DM Mono',monospace;color:var(--greenL)">—</span></div>
       </div>
-      <div class="ticket-total">
-        <span class="tt-label">Total Paid</span>
-        <span class="tt-val" id="tk-total">—</span>
-      </div>
+      <div class="ticket-total"><span class="tt-lbl">Total Paid</span><span class="tt-amt" id="tk-total">—</span></div>
     </div>
     <div class="ss-actions">
       <button class="ss-wa" onclick="shareWA()">💬 Share on WhatsApp</button>
@@ -780,16 +890,29 @@ footer a{color:rgba(196,136,12,.5)}
 
 <!-- FOOTER -->
 <footer>
-  © 2025 Royal Quad Bikes · Mambrui, Kenya · M-Pesa Till 6685024 &nbsp;·&nbsp;
-
+  © 2025 Royal Quad Bikes · Mambrui, Kilifi County, Kenya · M-Pesa Till 6685024
 </footer>
 
+<!-- FAB -->
+<div class="fab">
+  <a href="https://wa.me/254784589999?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui%20Sand%20Dunes" target="_blank" title="Chat on WhatsApp">💬</a>
+</div>
+
 <script>
+/* ── STICKY NAV ──────────────────────────────────────────────────── */
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>60),{passive:true});
+
+/* ── PARTICLES ───────────────────────────────────────────────────── */
+const pc=document.getElementById('particles');
+for(let i=0;i<24;i++){
+  const p=document.createElement('div');p.className='particle';
+  const s=1+Math.random()*2.5;
+  p.style.cssText=`left:${Math.random()*100}%;bottom:${Math.random()*20}%;width:${s}px;height:${s}px;animation-duration:${9+Math.random()*12}s;animation-delay:${-Math.random()*12}s`;
+  pc.appendChild(p);
+}
+
 /* ── DATA (live from data.json) ──────────────────────────────────── */
-let QUADS=[];
-let PRICING=[];
-let PROMOS={};
-let OVERTIME_RATE=100;
+let QUADS=[],PRICING=[],PROMOS={},OVERTIME_RATE=100;
 
 async function loadData(){
   try{
@@ -798,35 +921,31 @@ async function loadData(){
     QUADS=d.quads||[];
     PRICING=d.pricing||[];
     OVERTIME_RATE=d.overtimeRate||100;
-    // promos array → object
     PROMOS={};
     (d.promos||[]).filter(p=>p.active).forEach(p=>PROMOS[p.code]=p.discount);
-    // Show notice if set
     if(d.notice){
       const nb=document.createElement('div');
-      nb.style.cssText='background:#2a1e0a;border:1px solid rgba(200,145,42,.4);color:#E8B44B;text-align:center;padding:12px;font-size:13px;font-weight:600;letter-spacing:.3px;position:relative;z-index:100';
+      nb.style.cssText='background:rgba(200,145,26,.12);border-bottom:1px solid rgba(200,145,26,.3);color:#E8AD38;text-align:center;padding:12px;font-size:13px;font-weight:700;letter-spacing:.3px';
       nb.textContent='📢 '+d.notice;
-      document.querySelector('.hero').before(nb);
+      document.body.prepend(nb);
     }
-    // Update open/closed status
     if(d.business&&!d.business.open){
       const nb=document.createElement('div');
-      nb.style.cssText='background:#1a0a0a;border:1px solid rgba(239,68,68,.4);color:#f87171;text-align:center;padding:14px;font-size:14px;font-weight:700;letter-spacing:.3px;position:relative;z-index:100';
-      nb.textContent='⚠️  We are currently closed. Please check back later or WhatsApp us.';
-      document.querySelector('.hero').before(nb);
+      nb.style.cssText='background:rgba(153,27,27,.18);border-bottom:1px solid rgba(239,68,68,.3);color:#fca5a5;text-align:center;padding:14px;font-size:14px;font-weight:700';
+      nb.textContent='⚠️  We are currently closed. Please WhatsApp us or check back later.';
+      document.body.prepend(nb);
     }
   }catch(e){
-    console.warn('Could not load live data, using defaults',e);
     QUADS=[
       {id:1,name:'Raptor 1',status:'available',emoji:'🏍️'},
       {id:2,name:'Raptor 2',status:'available',emoji:'🏍️'},
-      {id:3,name:'Viper 1', status:'available',emoji:'🏍️'},
-      {id:4,name:'Viper 2', status:'available',emoji:'🏍️'},
-      {id:5,name:'Storm 1', status:'available',emoji:'🏍️'},
-      {id:6,name:'Storm 2', status:'available',emoji:'🏍️'},
+      {id:3,name:'Viper 1',status:'available',emoji:'🏍️'},
+      {id:4,name:'Viper 2',status:'available',emoji:'🏍️'},
+      {id:5,name:'Storm 1',status:'available',emoji:'🏍️'},
+      {id:6,name:'Storm 2',status:'available',emoji:'🏍️'},
     ];
     PRICING=[
-      {dur:5, price:1000,label:'5 min'},
+      {dur:5,price:1000,label:'5 min'},
       {dur:10,price:1800,label:'10 min'},
       {dur:15,price:2200,label:'15 min'},
       {dur:20,price:2500,label:'20 min',popular:true},
@@ -835,14 +954,13 @@ async function loadData(){
     ];
     PROMOS={DUNES20:20,MAMBRUI10:10,WELCOME25:25};
   }
-  renderQuads();
-  renderDurations();
+  renderQuads();renderDurations();
 }
 
-/* ── STATE ─────────────────────────────────────────────────────────── */
+/* ── STATE ───────────────────────────────────────────────────────── */
 const S={quad:null,dur:null,price:null,finalPrice:null,discount:0,promoCode:null,name:'',phone:'',waiverOk:false,step:1};
 
-/* ── RENDER ─────────────────────────────────────────────────────────── */
+/* ── RENDER ──────────────────────────────────────────────────────── */
 function renderQuads(){
   document.getElementById('quadGrid').innerHTML=QUADS.map(q=>`
     <div class="quad-card${q.status==='rented'?' na':''}" id="qc${q.id}" onclick="${q.status==='rented'?'toast("This quad is currently in use","err")':('pickQuad('+q.id+')')}">
@@ -854,7 +972,7 @@ function renderQuads(){
 }
 function renderDurations(){
   document.getElementById('durGrid').innerHTML=PRICING.map(p=>`
-    <div class="dur-card${p.popular?' ':''}${p.popular?'':''}${p.popular?'pop':''}" id="dc${p.dur}" onclick="pickDur(${p.dur},${p.price},'${p.label}')">
+    <div class="dur-card" id="dc${p.dur}" onclick="pickDur(${p.dur},${p.price},'${p.label}')">
       ${p.popular?'<div class="dur-pop">Most Popular</div>':''}
       <div class="dur-time">${p.label}</div>
       <div class="dur-price">${fmt(p.price)}</div>
@@ -862,7 +980,7 @@ function renderDurations(){
     </div>`).join('');
 }
 
-/* ── SELECTION ─────────────────────────────────────────────────────── */
+/* ── SELECTION ───────────────────────────────────────────────────── */
 function pickQuad(id){
   S.quad=QUADS.find(q=>q.id===id);
   document.querySelectorAll('.quad-card').forEach(c=>c.classList.remove('sel'));
@@ -880,7 +998,7 @@ function pickDur(dur,price,label){
 }
 function applyD(p){return S.discount?Math.round(p*(1-S.discount/100)):p}
 
-/* ── PROMO ─────────────────────────────────────────────────────────── */
+/* ── PROMO ───────────────────────────────────────────────────────── */
 function applyPromo(){
   const code=document.getElementById('promoInp').value.trim().toUpperCase();
   const fb=document.getElementById('promoFB');
@@ -888,16 +1006,16 @@ function applyPromo(){
   if(PROMOS[code]){
     S.promoCode=code;S.discount=PROMOS[code];
     if(S.price)S.finalPrice=applyD(S.price);
-    showFB(fb,'ok',`✓ Code "${code}" applied — ${S.discount}% discount!`);
+    showFB(fb,'ok',`✓ "${code}" applied — ${S.discount}% off!`);
     refreshSummary();updatePayDisplay();
-  } else {
+  }else{
     S.promoCode=null;S.discount=0;
     showFB(fb,'err','✗ Invalid or expired promo code');
   }
 }
-function showFB(el,type,msg){el.className='promo-feedback pf-'+type;el.textContent=msg}
+function showFB(el,type,msg){el.className='promo-fb pf-'+type;el.textContent=msg}
 
-/* ── DETAILS + WAIVER ──────────────────────────────────────────────── */
+/* ── DETAILS ─────────────────────────────────────────────────────── */
 function checkDetails(){
   S.name=(document.getElementById('fName').value.trim()+' '+document.getElementById('lName').value.trim()).trim();
   S.phone=document.getElementById('phone').value.trim();
@@ -905,20 +1023,16 @@ function checkDetails(){
 }
 function toggleWaiver(){
   S.waiverOk=!S.waiverOk;
-  document.getElementById('waiverAgree').classList.toggle('agreed',S.waiverOk);
+  document.getElementById('waiverAgree').classList.toggle('ok',S.waiverOk);
   document.getElementById('waBox').textContent=S.waiverOk?'✓':'';
   tryNext3();
 }
 function tryNext3(){
-  const ok=S.name.length>2&&S.phone.length>=9&&S.waiverOk;
-  document.getElementById('next3').disabled=!ok;
+  document.getElementById('next3').disabled=!(S.name.length>2&&S.phone.length>=9&&S.waiverOk);
 }
 
-/* ── PAY ───────────────────────────────────────────────────────────── */
-function checkRef(){
-  const ref=document.getElementById('mpesaRef').value;
-  document.getElementById('confirmBtn').disabled=ref.length<8;
-}
+/* ── PAY ─────────────────────────────────────────────────────────── */
+function checkRef(){document.getElementById('confirmBtn').disabled=document.getElementById('mpesaRef').value.length<8}
 function updatePayDisplay(){
   if(!S.finalPrice)return;
   document.getElementById('pacAmt').textContent='KES '+fmt(S.finalPrice);
@@ -933,7 +1047,7 @@ function copyTill(){
   setTimeout(()=>{btn.textContent='⧉ Copy';btn.classList.remove('ok')},2500);
 }
 
-/* ── CONFIRM ───────────────────────────────────────────────────────── */
+/* ── CONFIRM ─────────────────────────────────────────────────────── */
 function confirmBooking(){
   const ref=document.getElementById('mpesaRef').value.trim();
   if(!S.quad||!S.dur||!S.name||!S.phone){showToast('Please complete all steps first','err');return}
@@ -946,7 +1060,7 @@ function showSuccess(ref){
   const id='RQ-'+Math.random().toString(36).substr(2,6).toUpperCase();
   const now=new Date();
   document.getElementById('ticketId').textContent=id;
-  document.getElementById('ssSub').textContent=`Hi ${S.name.split(' ')[0]}! Your ${S.dur}-minute ride on ${S.quad.name} is confirmed. Show this ticket at Mambrui Sand Dunes.`;
+  document.getElementById('ssSub').textContent=`Hi ${S.name.split(' ')[0]}! Your ${S.dur}-min ride on ${S.quad.name} is confirmed. Show this ticket at the dunes.`;
   document.getElementById('tk-quad').textContent=S.quad.name;
   document.getElementById('tk-name').textContent=S.name;
   document.getElementById('tk-phone').textContent=S.phone;
@@ -955,45 +1069,39 @@ function showSuccess(ref){
   document.getElementById('tk-ref').textContent=ref;
   document.getElementById('tk-total').textContent='KES '+fmt(S.finalPrice);
   document.getElementById('successOverlay').classList.add('show');
-  // Save to local storage
-  const b=JSON.parse(localStorage.getItem('rq_bookings')||'[]');
-  b.push({id,quad:S.quad.name,name:S.name,phone:S.phone,dur:S.dur,total:S.finalPrice,ref,date:now.toISOString()});
-  localStorage.setItem('rq_bookings',JSON.stringify(b));
 }
 function shareWA(){
   const id=document.getElementById('ticketId').textContent;
   const msg=encodeURIComponent(
-    `🏍️ *Royal Quad Bikes — Booking Confirmed!*\n\n`+
-    `📋 Receipt: ${id}\n`+
-    `🏍️ Quad: ${S.quad.name}\n`+
-    `⏱️ Duration: ${S.dur} min\n`+
-    `💰 Total: KES ${fmt(S.finalPrice)}\n`+
-    `📱 M-Pesa: ${document.getElementById('tk-ref').textContent}\n\n`+
-    `📍 Mambrui Sand Dunes, Kilifi County, Kenya\n`+
-    `🌐 book.royalquadbikes.ke`
+    `🏍️ *BOOKING CONFIRMED — Royal Quad Bikes*\n\n`+
+    `📋 Receipt: ${id}\n👤 Customer: ${S.name}\n📞 Phone: ${S.phone}\n`+
+    `🏍️ Quad: ${S.quad.name}\n⏱️ Duration: ${S.dur} min\n`+
+    `💰 Total: KES ${fmt(S.finalPrice)}\n📱 M-Pesa: ${document.getElementById('tk-ref').textContent}\n\n`+
+    `📍 Mambrui Sand Dunes, Kilifi County, Kenya`
   );
-  window.open('https://wa.me/?text='+msg,'_blank');
+  window.open('https://wa.me/254784589999?text='+msg,'_blank');
+  setTimeout(()=>window.open('https://wa.me/254784993996?text='+msg,'_blank'),800);
 }
 function reset(){document.getElementById('successOverlay').classList.remove('show');location.reload()}
 
-/* ── NAVIGATION ────────────────────────────────────────────────────── */
+/* ── NAVIGATION ──────────────────────────────────────────────────── */
 function goTo(n){
   document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
   S.step=n;
   [1,2,3,4].forEach(i=>{
-    const d=document.getElementById('sd'+i);
-    d.classList.toggle('active',i===n);
-    d.classList.toggle('done',i<n);
-    document.getElementById('sl-lbl'+i).className='sl'+(i===n?' active':i<n?' done':'');
-    if(i<4)document.getElementById('sl'+i).classList.toggle('done',i<n);
+    const item=document.getElementById('st'+i);
+    const num=document.getElementById('sn'+i);
+    item.classList.toggle('active',i===n);
+    item.classList.toggle('done',i<n);
+    if(i<n){num.textContent='✓'}else{num.textContent=i}
   });
   document.getElementById('spFill').style.width=((n-1)/3*100)+'%';
   document.getElementById('spLabel').textContent='Step '+n+' of 4'+(n===4?' — Ready to pay!':'');
   if(n===4)updatePayDisplay();
-  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('book').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-/* ── SUMMARY ───────────────────────────────────────────────────────── */
+/* ── SUMMARY ─────────────────────────────────────────────────────── */
 function refreshSummary(){
   set('sv-quad',S.quad?S.quad.name:'—');
   set('sv-dur',S.dur?S.dur+' min':'—');
@@ -1004,11 +1112,11 @@ function refreshSummary(){
   if(S.discount&&S.price){
     document.getElementById('sv-promo').textContent='−'+fmt(S.price-S.finalPrice)+' KES ('+S.discount+'%)';
     pr.style.display='flex';
-  } else { pr.style.display='none'; }
+  }else{pr.style.display='none'}
 }
 function set(id,val){document.getElementById(id).textContent=val}
 
-/* ── UTILS ─────────────────────────────────────────────────────────── */
+/* ── UTILS ───────────────────────────────────────────────────────── */
 function fmt(n){return Number(n).toLocaleString()}
 let toastT;
 function showToast(msg,type=''){
@@ -1016,12 +1124,10 @@ function showToast(msg,type=''){
   t.textContent=msg;t.className='toast show'+(type==='err'?' err':'');
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);
 }
-// expose for inline usage
 window.toast=(m,t)=>showToast(m,t);
 
-/* ── BOOT ──────────────────────────────────────────────────────────── */
+/* ── BOOT ────────────────────────────────────────────────────────── */
 loadData();
 </script>
-<div class="fab"><a href="https://wa.me/254700000000?text=Hi%2C%20I%20want%20to%20book%20a%20quad%20ride%20at%20Mambrui" target="_blank" style="background:#25D366;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s" title="Chat on WhatsApp" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a></div>
 </body>
 </html>
