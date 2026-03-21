@@ -35,6 +35,11 @@ class StorageService {
   static bool isOnboarded() => _p.getBool('rq:onboarded') ?? false;
   static Future<void> setOnboarded() => _p.setBool('rq:onboarded', true);
 
+  // ── Generic key-value (used by admin_website for GitHub token) ───────────
+  static String? getString(String key) => _p.getString(key);
+  static Future<void> setString(String key, String value) =>
+      _p.setString(key, value);
+
   // ── Theme ─────────────────────────────────────────────────────────────────
   static String getThemeName() => _p.getString('rq:theme') ?? 'light:oceanBreeze';
   static Future<void> setThemeName(String mode) => _p.setString('rq:theme', mode);
