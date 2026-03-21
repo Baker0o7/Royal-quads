@@ -11,6 +11,7 @@ import 'admin_fleet.dart';
 import 'admin_history.dart';
 import 'admin_tools.dart';
 import 'admin_analytics.dart';
+import 'admin_website.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -74,6 +75,7 @@ class _AdminScreenState extends State<AdminScreen> {
           AdminHistoryTab(),
           AdminToolsTab(),
           AdminAnalyticsTab(),
+          const AdminWebsiteTab(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -90,6 +92,7 @@ class _AdminScreenState extends State<AdminScreen> {
             _NavItem(Icons.history_rounded,        'History',   2, _tab, () => setState(() => _tab = 2)),
             _NavItem(Icons.settings_rounded,       'Tools',     3, _tab, () => setState(() => _tab = 3)),
             _NavItem(Icons.analytics_rounded,      'Analytics', 4, _tab, () => setState(() => _tab = 4)),
+            _NavItem(Icons.language_rounded,           'Website',   5, _tab, () => setState(() => _tab = 5)),
           ]),
         )),
       ),

@@ -1,7 +1,7 @@
 name: royal_quad_bikes
 description: Royal Quad Bikes — Mambrui Sand Dunes booking app
 publish_to: none
-version: 4.0.0+63
+version: 4.1.0+64
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -26,6 +26,7 @@ dependencies:
 
   # WhatsApp / URL opening
   url_launcher: ^6.3.1
+  http: ^1.1.0
 
   # Charts (admin dashboard)
   fl_chart: ^0.66.2
