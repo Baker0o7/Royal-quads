@@ -56,29 +56,29 @@ jobs:
       - name: Build release APK
         run: |
           set +e
-          flutter build apk --release --no-tree-shake-icons
+          flutter build apk --release --no-tree-shake-icons --verbose 2>&1 | tail -60
           FEXIT=$?
           set -e
 
           echo "flutter exit: $FEXIT"
-          echo "--- build tree ---"
-          find "$GITHUB_WORKSPACE/build/app" -name "*.apk" 2>/dev/null || echo "(empty)"
-          echo "------------------"
+          echo "=== Searching entire workspace ==="
+          find "$GITHUB_WORKSPACE" -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test || echo "(none in workspace)"
+          echo "=== Searching entire runner home ==="
+          find /home/runner -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test | head -10 || echo "(none in /home/runner)"
 
-          # Primary path (flutter-apk output dir)
-          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk"
-          [ ! -f "$APK" ] && APK="$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk"
-          [ ! -f "$APK" ] && APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
-              2>/dev/null | grep -v intermediates | head -1)
+          APK=$(find "$GITHUB_WORKSPACE" /home/runner -name "app-release.apk" \
+                2>/dev/null | grep -v intermediates | head -1)
 
           if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: APK not found — flutter exited $FEXIT"
+            echo "ERROR: APK not found anywhere"
+            echo "Disk usage:"
+            df -h
             exit 1
           fi
 
+          echo "Found: $APK ($(du -sh "$APK" | cut -f1))"
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
