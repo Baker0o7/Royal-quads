@@ -834,14 +834,24 @@ class _QuickStartSheet extends StatefulWidget {
 }
 
 class _QSSState extends State<_QuickStartSheet> {
-  int? _qId, _dur, _price;
-  String _name = '', _phone = '', _mpesa = '';
+  int? _qId;
+  final _durCtrl   = TextEditingController();
+  final _priceCtrl = TextEditingController();
   bool _loading = false;
+
+  @override
+  void dispose() {
+    _durCtrl.dispose();
+    _priceCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final available = context.watch<AppProvider>().quads
         .where((q) => q.status == 'available').toList();
+    final accent = Theme.of(context).colorScheme.primary;
+
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -866,6 +876,8 @@ class _QSSState extends State<_QuickStartSheet> {
               fontFamily: 'Playfair', fontSize: 20, fontWeight: FontWeight.w700)),
         ]),
         const SizedBox(height: 20),
+
+        // ── Quad selector ────────────────────────────────────────────────────
         DropdownButtonFormField<int>(
           decoration: const InputDecoration(
               labelText: 'Select Quad',
@@ -876,86 +888,62 @@ class _QSSState extends State<_QuickStartSheet> {
               child: Text(q.name))).toList(),
           onChanged: (v) => setState(() => _qId = v),
         ),
-        const SizedBox(height: 16),
-        Text('Duration', style: TextStyle(
-            fontWeight: FontWeight.w700, fontSize: 13, color: context.rq.muted)),
-        const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 8, children: kPricing.map((p) {
-          final sel = _dur == p['duration'];
-          return GestureDetector(
-            onTap: () => setState(() {
-              _dur = p['duration'] as int;
-              _price = p['price'] as int;
-            }),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: sel
-                    ? Theme.of(context).colorScheme.primary.withAlpha(200)
-                    : Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: sel
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).dividerColor),
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(p['label'] as String, style: TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13,
-                    color: sel ? Colors.white : Theme.of(context).colorScheme.onSurface)),
-                Text('${(p['price'] as int).kes} KES', style: TextStyle(
-                    fontSize: 10, color: sel ? Colors.white60 : context.rq.muted)),
-              ]),
-            ),
-          );
-        }).toList()),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+
+        // ── Duration (manual) ────────────────────────────────────────────────
         TextFormField(
-          decoration: const InputDecoration(
-              labelText: 'Customer Name',
-              prefixIcon: Icon(Icons.person_outline, size: 18)),
-          textCapitalization: TextCapitalization.words,
-          onChanged: (v) => _name = v,
+          controller: _durCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Duration (minutes)',
+            prefixIcon: const Icon(Icons.timer_outlined, size: 18),
+            suffixText: 'min',
+            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 13),
+          ),
+          onChanged: (_) => setState(() {}),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
+
+        // ── Amount (manual) ──────────────────────────────────────────────────
         TextFormField(
-          decoration: const InputDecoration(
-              labelText: 'Phone',
-              prefixIcon: Icon(Icons.phone_outlined, size: 18)),
-          keyboardType: TextInputType.phone,
-          onChanged: (v) => _phone = v,
+          controller: _priceCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Amount (KES)',
+            prefixIcon: const Icon(Icons.payments_outlined, size: 18),
+            suffixText: 'KES',
+            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 13),
+          ),
+          onChanged: (_) => setState(() {}),
         ),
-        const SizedBox(height: 12),
-        TextFormField(
-          decoration: const InputDecoration(
-              labelText: 'M-Pesa Ref (optional)',
-              prefixIcon: Icon(Icons.confirmation_number_outlined, size: 18)),
-          textCapitalization: TextCapitalization.characters,
-          onChanged: (v) => _mpesa = v,
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
+
+        // ── Start button ─────────────────────────────────────────────────────
         PrimaryButton(
-          label: _price != null
-              ? 'Start Ride  ·  ${_price!.kes} KES'
-              : 'Start Ride',
+          label: () {
+            final p = int.tryParse(_priceCtrl.text.trim());
+            return p != null ? 'Start Ride  ·  ${p.kes} KES' : 'Start Ride';
+          }(),
           icon: Icons.play_arrow_rounded,
           color: kGreen,
           loading: _loading,
           onTap: () async {
-            if (_qId == null || _dur == null ||
-                _name.trim().isEmpty || _phone.trim().isEmpty) {
-              showToast(context, 'Please fill all required fields',
+            final dur   = int.tryParse(_durCtrl.text.trim());
+            final price = int.tryParse(_priceCtrl.text.trim());
+            if (_qId == null || dur == null || dur <= 0 ||
+                price == null || price <= 0) {
+              showToast(context, 'Select a quad, enter duration and amount',
                   error: true);
               return;
             }
             setState(() => _loading = true);
             try {
               final b = await context.read<AppProvider>().createBooking(
-                quadId: _qId!, customerName: _name.trim(),
-                customerPhone: _phone.trim(),
-                duration: _dur!, price: _price!,
-                mpesaRef: _mpesa.trim().isEmpty ? null : _mpesa.trim(),
+                quadId: _qId!,
+                customerName: 'Walk-in',
+                customerPhone: '0000000000',
+                duration: dur,
+                price: price,
               );
               if (!context.mounted) return;
               Navigator.pop(context);
@@ -963,7 +951,7 @@ class _QSSState extends State<_QuickStartSheet> {
             } catch (e) {
               if (context.mounted)
                 showToast(context,
-                    e.toString().replaceFirst('Exception: ',''), error: true);
+                    e.toString().replaceFirst('Exception: ', ''), error: true);
               setState(() => _loading = false);
             }
           },
