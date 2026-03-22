@@ -2,7 +2,6 @@ name: Build & Release Flutter APK
 
 on:
   push:
-    branches: [flutter]
     tags: ["v*"]
   workflow_dispatch:
 
@@ -13,21 +12,18 @@ jobs:
       contents: write
 
     steps:
-      # ── 1. Checkout flutter branch ──────────────────────────────────────────
       - name: Checkout flutter branch
         uses: actions/checkout@v4
         with:
           ref: flutter
           fetch-depth: 0
 
-      # ── 2. Java 17 ──────────────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # ── 3. Flutter 3.27.4 ───────────────────────────────────────────────────
       - name: Set up Flutter 3.27.4
         uses: subosito/flutter-action@v2
         with:
@@ -35,7 +31,6 @@ jobs:
           channel: stable
           cache: true
 
-      # ── 4. Android environment ───────────────────────────────────────────────
       - name: Prepare Android environment
         run: |
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
@@ -50,68 +45,64 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
 
-      # ── 5. Flutter dependencies ──────────────────────────────────────────────
       - name: Flutter pub get
         run: flutter pub get
 
-      # ── 6. App icons ─────────────────────────────────────────────────────────
       - name: Inject app icons
         run: |
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      # ── 7. Build release APK ─────────────────────────────────────────────────
-      - name: Build and stage APK
+      - name: Build APK
         run: |
-          # Run build — use set +e so Flutter's "can't find APK" false-failure
-          # doesn't kill the step before we do our own search
+          # Flutter sometimes reports "can't find APK" even when Gradle succeeded.
+          # We catch the exit code ourselves and do our own search.
           set +e
-          flutter build apk \
-            --release \
-            --no-tree-shake-icons \
-            --android-skip-build-dependency-validation
-          FLUTTER_EXIT=$?
+          flutter build apk --release --no-tree-shake-icons
+          BUILD_EXIT=$?
           set -e
+          echo "flutter build exit: $BUILD_EXIT"
 
-          echo "Flutter exit code: $FLUTTER_EXIT"
+      - name: Locate and stage APK
+        run: |
+          echo "=== Searching build tree ==="
+          find "$GITHUB_WORKSPACE/build" -name "*.apk" 2>/dev/null \
+            | grep -v intermediates | grep -v test || echo "(none found yet)"
 
-          # Search for the APK regardless of flutter's exit code
-          echo "=== Searching for APK ==="
           APK=""
-          for CANDIDATE in \
-            "$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk" \
-            "$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk" \
+
+          # Primary paths Flutter 3.x uses
+          for TRY in \
             "build/app/outputs/flutter-apk/app-release.apk" \
-            "build/app/outputs/apk/release/app-release.apk"
+            "build/app/outputs/apk/release/app-release.apk" \
+            "$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk" \
+            "$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk"
           do
-            if [ -f "$CANDIDATE" ]; then
-              APK="$CANDIDATE"
-              echo "Found: $APK"
+            if [ -f "$TRY" ]; then
+              APK="$TRY"
+              echo "Found at: $APK"
               break
             fi
           done
 
-          # Last resort — scan entire build directory
+          # Fallback: any release APK in build tree
           if [ -z "$APK" ]; then
             APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
-                  2>/dev/null | grep -v "intermediates" | head -1)
+                  2>/dev/null | grep -v intermediates | head -1)
+            [ -n "$APK" ] && echo "Fallback found: $APK"
           fi
 
-          # Show output tree for debugging
-          echo "=== build/app/outputs layout ==="
-          find "$GITHUB_WORKSPACE/build/app/outputs" -type f 2>/dev/null | head -20 \
-            || echo "outputs dir not found"
-
           if [ -z "$APK" ]; then
-            echo "ERROR: APK not found — Gradle build genuinely failed"
+            echo "ERROR: No APK found — build failed"
+            echo "=== Full build/app/outputs layout ==="
+            find "$GITHUB_WORKSPACE/build/app" -type f 2>/dev/null || echo "build/app missing"
             exit 1
           fi
 
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "SUCCESS: $(du -sh output/Royal-Quads.apk | cut -f1) → output/Royal-Quads.apk"
+          echo "Staged: $(du -sh output/Royal-Quads.apk | cut -f1)"
 
-      # ── 9. Upload artifact ───────────────────────────────────────────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -119,7 +110,6 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      # ── 10. GitHub Release (tags only) ───────────────────────────────────────
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
