@@ -294,9 +294,9 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
         fontSize: 9, fontWeight: pw.FontWeight.bold)),
   );
 
-  pw.Widget _pdfTd(String t) => pw.Container(
+  pw.Widget _pdfTd(String t, {PdfColor? color}) => pw.Container(
     padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-    child: pw.Text(t, style: const pw.TextStyle(fontSize: 9)),
+    child: pw.Text(t, style: pw.TextStyle(fontSize: 9, color: color)),
   );
 
   void _addIncident(BuildContext context) {
@@ -852,7 +852,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
     for (final t in _tiers) { if (pts >= t.pts) c = t.color; }
     return c;
   }
-  String _tierIcon(int pts) {
+  IconData _tierIcon(int pts) {
     var ic = _tiers[0].icon;
     for (final t in _tiers) { if (pts >= t.pts) ic = t.icon; }
     return ic;
@@ -957,7 +957,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
             final medalIcon = rank == 1 ? Icons.looks_one_rounded
                         : rank == 2 ? Icons.looks_two_rounded
                         : rank == 3 ? Icons.looks_3_rounded
-                        : '$rank.';
+                        : Icons.tag_rounded;
             final maskedPhone = a.phone.length >= 10
                 ? '${a.phone.substring(0, 4)}****${a.phone.substring(a.phone.length - 3)}'
                 : a.phone;
@@ -971,13 +971,16 @@ class _LoyaltyOverviewCard extends StatelessWidget {
                     ? col.withAlpha(35) : Theme.of(context).dividerColor),
               ),
               child: Row(children: [
-                SizedBox(width: 28, child: Text(medal,
-                    style: TextStyle(
-                        fontSize: rank <= 3 ? 16 : 11,
-                        fontWeight: FontWeight.w700,
+                SizedBox(width: 28, child: rank <= 3
+                    ? Icon(medalIcon, size: 16,
+                        color: rank == 1 ? const Color(0xFFC9972A)
+                             : rank == 2 ? const Color(0xFF94A3B8)
+                             : const Color(0xFFCD7F32))
+                    : Text('$rank.', style: TextStyle(
+                        fontSize: 11, fontWeight: FontWeight.w700,
                         color: context.rq.muted))),
                 const SizedBox(width: 4),
-                Text(icon, style: const TextStyle(fontSize: 14)),
+                Icon(icon, size: 16, color: col),
                 const SizedBox(width: 8),
                 Expanded(child: Text(maskedPhone,
                     style: TextStyle(fontWeight: FontWeight.w600,
