@@ -832,6 +832,9 @@ class _QSSEntry {
   void dispose() { durCtrl.dispose(); priceCtrl.dispose(); }
 }
 
+// Commission rate (20%)
+const double kGuideCommission = 0.20;
+
 class _QuickStartSheet extends StatefulWidget {
   const _QuickStartSheet();
   @override State<_QuickStartSheet> createState() => _QSSState();
@@ -839,11 +842,13 @@ class _QuickStartSheet extends StatefulWidget {
 
 class _QSSState extends State<_QuickStartSheet> {
   final List<_QSSEntry> _entries = [_QSSEntry()];
+  final _guideCtrl = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
     for (final e in _entries) e.dispose();
+    _guideCtrl.dispose();
     super.dispose();
   }
 
@@ -890,6 +895,25 @@ class _QSSState extends State<_QuickStartSheet> {
           ]),
         ),
         const SizedBox(height: 14),
+
+        // ── Guide name ───────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+          child: TextFormField(
+            controller: _guideCtrl,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              labelText: 'Guide Name',
+              hintText: 'e.g. Hassan',
+              prefixIcon: const Icon(Icons.person_rounded, size: 18),
+              suffixIcon: _guideCtrl.text.isNotEmpty
+                ? GestureDetector(
+                    onTap: () { _guideCtrl.clear(); setState(() {}); },
+                    child: const Icon(Icons.close_rounded, size: 16))
+                : null,
+            ),
+          ),
+        ),
 
         // ── Scrollable entries ────────────────────────────────────────────────
         ConstrainedBox(
@@ -943,6 +967,51 @@ class _QSSState extends State<_QuickStartSheet> {
           ),
         ),
 
+        // ── Commission summary ────────────────────────────────────────────────
+        Builder(builder: (ctx) {
+          final total = _entries.fold<int>(0,
+              (s, e) => s + (int.tryParse(e.priceCtrl.text.trim()) ?? 0));
+          final comm  = (total * kGuideCommission).round();
+          final guide = _guideCtrl.text.trim();
+          if (total == 0) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: kAccent.withAlpha(12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: kAccent.withAlpha(40)),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Icon(Icons.receipt_long_rounded, size: 14, color: kAccent2),
+                  const SizedBox(width: 6),
+                  Text('Revenue Breakdown',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+                          color: context.rq.muted, letterSpacing: .4)),
+                ]),
+                const SizedBox(height: 10),
+                _CommRow('Total charged', total.kes + ' KES', context.rq.text),
+                const SizedBox(height: 6),
+                _CommRow(
+                  guide.isNotEmpty
+                      ? 'Guide ($guide) 20%'
+                      : 'Guide commission 20%',
+                  comm.kes + ' KES',
+                  kGreen,
+                ),
+                const SizedBox(height: 6),
+                const Divider(height: 1),
+                const SizedBox(height: 6),
+                _CommRow('Business keeps',
+                    (total - comm).kes + ' KES',
+                    kAccent2, bold: true),
+              ]),
+            ),
+          );
+        }),
+
         // ── Start all ─────────────────────────────────────────────────────────
         Padding(
           padding: EdgeInsets.fromLTRB(
@@ -950,15 +1019,19 @@ class _QSSState extends State<_QuickStartSheet> {
           child: PrimaryButton(
             label: _loading
                 ? 'Starting...'
-                : _entries.length == 1
-                    ? () {
-                        final p = int.tryParse(
-                            _entries[0].priceCtrl.text.trim());
-                        return p != null
-                            ? 'Start Ride · ${p.kes} KES'
-                            : 'Start Ride';
-                      }()
-                    : 'Start ${_entries.length} Rides',
+                : () {
+                    final total = _entries.fold<int>(0, (s, e) {
+                      return s + (int.tryParse(e.priceCtrl.text.trim()) ?? 0);
+                    });
+                    final comm = (total * kGuideCommission).round();
+                    if (total == 0) {
+                      return _entries.length == 1
+                          ? 'Start Ride' : 'Start ${_entries.length} Rides';
+                    }
+                    final guide = _guideCtrl.text.trim();
+                    return '${_entries.length == 1 ? 'Start Ride' : 'Start ${_entries.length} Rides'}'
+                        '  ·  ${total.kes} KES';
+                  }(),
             icon: Icons.play_arrow_rounded,
             color: kGreen,
             loading: _loading,
@@ -1098,6 +1171,16 @@ class _EntryRow extends StatelessWidget {
       ]),
     ]);
   }
+}
+
+// ── Commission row helper ──────────────────────────────────────────────────────
+Widget _CommRow(String label, String value, Color valueColor, {bool bold = false}) {
+  return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+    Text(label, style: TextStyle(fontSize: 12, color: const Color(0xFF888888))),
+    Text(value, style: TextStyle(fontSize: 12,
+        fontWeight: bold ? FontWeight.w800 : FontWeight.w700,
+        color: valueColor)),
+  ]);
 }
 
 // ── Daily Report ───────────────────────────────────────────────────────────────
