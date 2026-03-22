@@ -843,6 +843,7 @@ class _QuickStartSheet extends StatefulWidget {
 class _QSSState extends State<_QuickStartSheet> {
   final List<_QSSEntry> _entries = [_QSSEntry()];
   final _guideCtrl = TextEditingController();
+  String _payMethod = 'cash'; // 'cash' or 'mpesa'
   bool _loading = false;
 
   @override
@@ -913,6 +914,26 @@ class _QSSState extends State<_QuickStartSheet> {
                 : null,
             ),
           ),
+        ),
+
+        // ── Payment method ───────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+          child: Row(children: [
+            Expanded(child: _PayChip(
+              label: 'Cash',
+              icon: Icons.payments_rounded,
+              selected: _payMethod == 'cash',
+              onTap: () => setState(() => _payMethod = 'cash'),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: _PayChip(
+              label: 'M-Pesa',
+              icon: Icons.phone_android_rounded,
+              selected: _payMethod == 'mpesa',
+              onTap: () => setState(() => _payMethod = 'mpesa'),
+            )),
+          ]),
         ),
 
         // ── Scrollable entries ────────────────────────────────────────────────
@@ -1007,6 +1028,20 @@ class _QSSState extends State<_QuickStartSheet> {
                 _CommRow('Business keeps',
                     (total - comm).kes + ' KES',
                     kAccent2, bold: true),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Icon(
+                    _payMethod == 'cash'
+                        ? Icons.payments_rounded
+                        : Icons.phone_android_rounded,
+                    size: 13, color: kAccent),
+                  const SizedBox(width: 5),
+                  Text(
+                    'Payment: ${_payMethod == 'cash' ? 'Cash' : 'M-Pesa'}',
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700,
+                        color: kAccent)),
+                ]),
               ]),
             ),
           );
@@ -1059,6 +1094,7 @@ class _QSSState extends State<_QuickStartSheet> {
                     customerPhone: '0000000000',
                     duration: int.parse(e.durCtrl.text.trim()),
                     price: int.parse(e.priceCtrl.text.trim()),
+                    mpesaRef: _payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
                   );
                   bookings.add(b.id);
                 }
@@ -1173,7 +1209,41 @@ class _EntryRow extends StatelessWidget {
   }
 }
 
-// ── Commission row helper ──────────────────────────────────────────────────────
+// ── Payment method chip ────────────────────────────────────────────────────────
+class _PayChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  const _PayChip({required this.label, required this.icon,
+      required this.selected, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(vertical: 13),
+      decoration: BoxDecoration(
+        color: selected ? kGreen.withAlpha(18) : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: selected ? kGreen : kBorder,
+          width: selected ? 2 : 1.5,
+        ),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icon, size: 17,
+            color: selected ? kGreen : context.rq.muted),
+        const SizedBox(width: 7),
+        Text(label, style: TextStyle(
+            fontSize: 13, fontWeight: FontWeight.w700,
+            color: selected ? kGreen : context.rq.muted)),
+      ]),
+    ),
+  );
+}
+
+// ── Commission row helper ────────────────────────────────────────────────────────
 Widget _CommRow(String label, String value, Color valueColor, {bool bold = false}) {
   return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
     Text(label, style: TextStyle(fontSize: 12, color: const Color(0xFF888888))),
