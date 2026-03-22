@@ -170,23 +170,24 @@ class AdminOverviewTab extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
           // ── Revenue strip ─────────────────────────────────────────────────
-          HeroCard(
-            padding: const EdgeInsets.all(20),
+          AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Row(children: [
-                Icon(Icons.bar_chart_rounded, color: kAccent2, size: 18),
-                SizedBox(width: 8),
+              Row(children: [
+                Icon(Icons.bar_chart_rounded, color: kAccent, size: 18),
+                const SizedBox(width: 8),
                 Text('Revenue Overview',
-                    style: TextStyle(color: Colors.white54,
-                        fontSize: 12, letterSpacing: 0.5)),
+                    style: TextStyle(
+                        color: context.rq.muted,
+                        fontSize: 12, fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5)),
               ]),
               const SizedBox(height: 10),
               Text('${sales['total']!.kes} KES',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: 'Playfair', fontSize: 32,
-                      fontWeight: FontWeight.w900, color: Colors.white)),
-              const Text('All-time revenue',
-                  style: TextStyle(color: Colors.white30, fontSize: 12)),
+                      fontWeight: FontWeight.w900, color: context.rq.text)),
+              Text('All-time revenue',
+                  style: TextStyle(color: context.rq.muted, fontSize: 12)),
               const SizedBox(height: 16),
               Row(children: [
                 _RevPill('Today',  '${sales['today']!.kes}',  kGreen),
@@ -474,19 +475,14 @@ class _MonthlyLineChart extends StatelessWidget {
     final maxY = days.map((s) => s.y).reduce((a, b) => a > b ? a : b);
     final safeMax = maxY < 100 ? 5000.0 : maxY * 1.15;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2D2820)),
-      ),
+    final muted = context.rq.muted;
+    return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Row(children: [
-          Icon(Icons.show_chart_rounded, color: kIndigo, size: 16),
-          SizedBox(width: 8),
+        Row(children: [
+          const Icon(Icons.show_chart_rounded, color: kIndigo, size: 16),
+          const SizedBox(width: 8),
           Text('30-Day Revenue',
-              style: TextStyle(color: Colors.white70,
+              style: TextStyle(color: muted,
                   fontWeight: FontWeight.w700, fontSize: 13)),
         ]),
         const SizedBox(height: 16),
@@ -498,7 +494,7 @@ class _MonthlyLineChart extends StatelessWidget {
               drawVerticalLine: false,
               horizontalInterval: safeMax / 4,
               getDrawingHorizontalLine: (_) => FlLine(
-                color: Colors.white.withAlpha(12),
+                color: Colors.black.withAlpha(10),
                 strokeWidth: 1,
               ),
             ),
@@ -510,7 +506,7 @@ class _MonthlyLineChart extends StatelessWidget {
                   interval: safeMax / 4,
                   getTitlesWidget: (v, _) => Text(
                     v >= 1000 ? '${(v / 1000).toStringAsFixed(0)}k' : v.toInt().toString(),
-                    style: const TextStyle(color: Colors.white38, fontSize: 9),
+                    style: TextStyle(color: muted, fontSize: 9),
                   ),
                 ),
               ),
@@ -525,7 +521,7 @@ class _MonthlyLineChart extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         '${day.day}/${day.month}',
-                        style: const TextStyle(color: Colors.white38, fontSize: 9),
+                        style: TextStyle(color: muted, fontSize: 9),
                       ),
                     );
                   },
@@ -547,7 +543,7 @@ class _MonthlyLineChart extends StatelessWidget {
                 belowBarData: BarAreaData(
                   show: true,
                   gradient: LinearGradient(
-                    colors: [kIndigo.withAlpha(70), kIndigo.withAlpha(0)],
+                    colors: [kIndigo.withAlpha(50), kIndigo.withAlpha(0)],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
