@@ -142,7 +142,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         mpesaRef: _mpesaRef.trim().isEmpty ? null : _mpesaRef.trim(),
         depositAmount: _deposit,
       );
-      // Store emergency contact + waiver state per phone
       if (_emergencyContact.trim().isNotEmpty) {
         await StorageService.setEmergencyContact(
             _phone.trim(), _emergencyContact.trim());
@@ -165,8 +164,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         _name = ''; _phone = ''; _promo = ''; _mpesaRef = ''; _deposit = 0;
         _emergencyContact = '';
       });
-      // Route through waiver screen first, then to ride
-      context.push('/waiver/${booking.id}');
+      // Go directly to ride
+      context.push('/ride/${booking.id}');
     } catch (e) {
       if (!mounted) return;
       showToast(context, e.toString().replaceFirst('Exception: ', ''), error: true);

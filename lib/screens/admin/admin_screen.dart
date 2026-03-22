@@ -993,7 +993,7 @@ class _QSSState extends State<_QuickStartSheet> {
                 Navigator.pop(context);
                 // Navigate to first booking waiver; rider can handle the rest
                 if (bookings.isNotEmpty) {
-                  context.push('/waiver/${bookings.first}');
+                  context.push('/ride/${bookings.first}');
                 }
               } catch (e) {
                 if (context.mounted)

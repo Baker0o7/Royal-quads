@@ -809,7 +809,7 @@ class _StartRideChipState extends State<_StartRideChip> {
 
       widget.onStarted(); // mark prebooking completed
       if (!mounted) return;
-      context.push('/waiver/${booking.id}');
+      context.push('/ride/${booking.id}');
     } catch (e) {
       if (mounted) {
         showToast(context, e.toString().replaceFirst('Exception: ', ''), error: true);

@@ -4,7 +4,6 @@ import 'screens/home/home_screen.dart';
 import 'screens/active_ride_screen.dart';
 import 'screens/receipt_screen.dart';
 import 'screens/ride_complete_screen.dart';
-import 'screens/waiver_screen.dart';
 import 'screens/prebook_screen.dart';
 import 'screens/dunes_screen.dart';
 import 'screens/admin/admin_screen.dart';
@@ -48,10 +47,6 @@ final appRouter = GoRouter(
       builder: (ctx, s) => ReceiptScreen(
           bookingId: int.parse(s.pathParameters['id']!)),
     ),
-    GoRoute(
-      path: '/waiver/:id',
-      builder: (ctx, s) => WaiverScreen(
-          bookingId: int.parse(s.pathParameters['id']!)),
-    ),
+
   ],
 );
