@@ -577,19 +577,13 @@ class _QuadPieChart extends StatelessWidget {
     final colors = [kAccent, kGreen, kIndigo, kRed, kOrange,
                     const Color(0xFF06B6D4), const Color(0xFFA855F7)];
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2D2820)),
-      ),
+    return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Row(children: [
-          Icon(Icons.pie_chart_rounded, color: kAccent, size: 16),
-          SizedBox(width: 8),
+        Row(children: [
+          const Icon(Icons.pie_chart_rounded, color: kIndigo, size: 16),
+          const SizedBox(width: 8),
           Text('Revenue by Quad',
-              style: TextStyle(color: Colors.white70,
+              style: TextStyle(color: context.rq.muted,
                   fontWeight: FontWeight.w700, fontSize: 13)),
         ]),
         const SizedBox(height: 16),
@@ -617,18 +611,20 @@ class _QuadPieChart extends StatelessWidget {
           Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: sorted.asMap().entries.map((e) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(children: [
                 Container(width: 8, height: 8,
                     decoration: BoxDecoration(
                         color: colors[e.key % colors.length],
                         shape: BoxShape.circle)),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(child: Text(e.value.key,
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
+                    style: TextStyle(color: context.rq.text,
+                        fontSize: 11, fontWeight: FontWeight.w600),
                     overflow: TextOverflow.ellipsis)),
                 Text('${e.value.value.kes}',
-                    style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 10,
+                        fontWeight: FontWeight.w500)),
               ]),
             )).toList(),
           )),
