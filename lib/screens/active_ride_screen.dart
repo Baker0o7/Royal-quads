@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/models.dart';
@@ -20,7 +21,14 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
   bool     _overtime = false;
   int      _otMins   = 0;
   bool     _ending   = false;
+  bool     _paused   = false;
+  DateTime? _pausedAt;
+  int      _pausedSecs = 0;  // total seconds paused
   Booking? _booking;
+
+  static final _notif = FlutterLocalNotificationsPlugin();
+  static const _notifId = 888;
+  static bool _notifInit = false;
 
   late AnimationController _pulseCtrl;
   late AnimationController _rotateCtrl;
@@ -52,6 +60,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
     _entryCtrl.forward();
 
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+    _initNotif();
   }
 
   void _tick(Timer t) {
@@ -61,12 +70,14 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
       final durationSecs = (_booking?.duration ?? 0) * 60;
       _overtime = _elapsed > durationSecs;
       if (_overtime) _otMins = (_elapsed - durationSecs) ~/ 60;
+      if (_elapsed % 5 == 0) _updateNotif();
     });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _cancelNotif();
     _pulseCtrl.dispose();
     _rotateCtrl.dispose();
     _entryCtrl.dispose();
@@ -78,6 +89,75 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
     final m = (s ~/ 60).toString().padLeft(2, '0');
     final sec = (s % 60).toString().padLeft(2, '0');
     return '$m:$sec';
+  }
+
+  // ── Notifications ──────────────────────────────────────────────────────
+  Future<void> _initNotif() async {
+    if (_notifInit) return;
+    await _notif.initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      ),
+    );
+    _notifInit = true;
+    _updateNotif();
+  }
+
+  void _updateNotif() {
+    if (_booking == null) return;
+    final durationSecs = _booking!.duration * 60;
+    final remaining = durationSecs - _elapsed;
+    final isOT = remaining < 0;
+    final mins = isOT
+        ? _otMins
+        : (remaining ~/ 60);
+    final secs = isOT
+        ? 0
+        : (remaining % 60);
+    final timeStr = '${mins.toString().padLeft(2,'0')}:${secs.toString().padLeft(2,'0')}';
+    final title = '${_booking!.quadName} — ${_paused ? '⏸ Paused' : isOT ? '⚠️ Overtime' : '🏍️ Riding'}';
+    final body = _paused
+        ? 'Ride paused · ${_booking!.duration} min session'
+        : isOT
+            ? 'Overtime: +$_otMins min · ${_booking!.totalPaid.kes} KES base'
+            : '$timeStr remaining · ${_booking!.duration} min session';
+
+    _notif.show(
+      _notifId,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'rq_ride', 'Active Ride',
+          channelDescription: 'Live quad ride timer',
+          importance: Importance.low,
+          priority: Priority.low,
+          ongoing: true,
+          playSound: false,
+          enableVibration: false,
+          showWhen: false,
+          icon: '@mipmap/ic_launcher',
+          color: const Color(0xFF22C55E),
+        ),
+      ),
+    );
+  }
+
+  void _cancelNotif() => _notif.cancel(_notifId);
+
+  // ── Pause / Resume ──────────────────────────────────────────────────────
+  void _togglePause() {
+    setState(() {
+      _paused = !_paused;
+      if (_paused) {
+        _timer?.cancel();
+        _pausedAt = DateTime.now();
+      } else {
+        _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+        _pausedAt = null;
+      }
+    });
+    _updateNotif();
   }
 
   // ── Extend ride ─────────────────────────────────────────────────────────
@@ -280,7 +360,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
                       Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                         Text(
-                          _overtime ? 'OVERTIME' : 'REMAINING',
+                          _paused ? 'PAUSED' : _overtime ? 'OVERTIME' : 'REMAINING',
                           style: TextStyle(
                               color: _overtime
                                   ? kRed : Colors.white24,
@@ -392,9 +472,38 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
 
               // ── Action buttons ─────────────────────────────────────────
               Row(children: [
+                // Pause button
+                Expanded(child: GestureDetector(
+                  onTap: _togglePause,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: _paused
+                          ? kAccent.withAlpha(30)
+                          : Colors.white.withAlpha(8),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _paused
+                          ? kAccent.withAlpha(80)
+                          : Colors.white.withAlpha(15)),
+                    ),
+                    child: Column(children: [
+                      Icon(_paused
+                          ? Icons.play_circle_rounded
+                          : Icons.pause_circle_rounded,
+                          color: _paused ? kAccent : Colors.white70, size: 24),
+                      const SizedBox(height: 4),
+                      Text(_paused ? 'Resume' : 'Pause',
+                          style: TextStyle(
+                              color: _paused ? kAccent : Colors.white54,
+                              fontSize: 12, fontWeight: FontWeight.w700)),
+                    ]),
+                  ),
+                )),
+                const SizedBox(width: 8),
                 // Extend ride
                 Expanded(child: GestureDetector(
-                  onTap: _showExtend,
+                  onTap: _paused ? null : _showExtend,
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
@@ -403,12 +512,13 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
                       border: Border.all(color: Colors.white.withAlpha(15)),
                     ),
                     child: Column(children: [
-                      const Icon(Icons.add_circle_outline_rounded,
-                          color: Colors.white70, size: 22),
+                      Icon(Icons.add_circle_outline_rounded,
+                          color: _paused ? Colors.white24 : Colors.white70,
+                          size: 22),
                       const SizedBox(height: 4),
-                      const Text('Extend', style: TextStyle(
-                          color: Colors.white54, fontSize: 12,
-                          fontWeight: FontWeight.w600)),
+                      Text('Extend', style: TextStyle(
+                          color: _paused ? Colors.white24 : Colors.white54,
+                          fontSize: 12, fontWeight: FontWeight.w600)),
                     ]),
                   ),
                 )),
