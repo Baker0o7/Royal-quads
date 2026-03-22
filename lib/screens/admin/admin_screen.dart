@@ -824,137 +824,279 @@ class _LiveRideTile extends StatelessWidget {
   }
 }
 
-// ── Quick Start Sheet ──────────────────────────────────────────────────────────
+// ── Quick Start Sheet — unlimited quads ──────────────────────────────────────
+class _QSSEntry {
+  int?   quadId;
+  final  durCtrl   = TextEditingController();
+  final  priceCtrl = TextEditingController();
+  void dispose() { durCtrl.dispose(); priceCtrl.dispose(); }
+}
+
 class _QuickStartSheet extends StatefulWidget {
   const _QuickStartSheet();
   @override State<_QuickStartSheet> createState() => _QSSState();
 }
 
 class _QSSState extends State<_QuickStartSheet> {
-  int? _qId;
-  final _durCtrl   = TextEditingController();
-  final _priceCtrl = TextEditingController();
+  final List<_QSSEntry> _entries = [_QSSEntry()];
   bool _loading = false;
 
   @override
   void dispose() {
-    _durCtrl.dispose();
-    _priceCtrl.dispose();
+    for (final e in _entries) e.dispose();
     super.dispose();
+  }
+
+  void _addEntry() => setState(() => _entries.add(_QSSEntry()));
+
+  void _removeEntry(int i) {
+    _entries[i].dispose();
+    setState(() => _entries.removeAt(i));
   }
 
   @override
   Widget build(BuildContext context) {
     final available = context.watch<AppProvider>().quads
         .where((q) => q.status == 'available').toList();
-    final accent = Theme.of(context).colorScheme.primary;
+    final usedIds = _entries.map((e) => e.quadId).whereType<int>().toSet();
 
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(24)),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        top: 16, left: 20, right: 20),
-      child: Column(mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        // ── Handle ───────────────────────────────────────────────────────────
+        const SizedBox(height: 12),
         Center(child: Container(width: 40, height: 4,
             decoration: BoxDecoration(
                 color: kBorder, borderRadius: BorderRadius.circular(2)))),
         const SizedBox(height: 16),
-        Row(children: [
-          Container(width: 36, height: 36,
-            decoration: BoxDecoration(
-                color: kGreen, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 20)),
-          const SizedBox(width: 10),
-          const Text('Quick Start', style: TextStyle(
-              fontFamily: 'Playfair', fontSize: 20, fontWeight: FontWeight.w700)),
-        ]),
-        const SizedBox(height: 20),
 
-        // ── Quad selector ────────────────────────────────────────────────────
-        DropdownButtonFormField<int>(
-          decoration: const InputDecoration(
-              labelText: 'Select Quad',
-              prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
-          value: _qId,
-          items: available.map((q) => DropdownMenuItem(
-              value: q.id,
-              child: Text(q.name))).toList(),
-          onChanged: (v) => setState(() => _qId = v),
+        // ── Header ───────────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(children: [
+            Container(width: 36, height: 36,
+              decoration: BoxDecoration(
+                  color: kGreen, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 20)),
+            const SizedBox(width: 10),
+            const Expanded(child: Text('Quick Start', style: TextStyle(
+                fontFamily: 'Playfair', fontSize: 20, fontWeight: FontWeight.w700))),
+            Text('${_entries.length} quad${_entries.length == 1 ? "" : "s"}',
+                style: TextStyle(
+                    color: kGreen, fontSize: 12, fontWeight: FontWeight.w700)),
+          ]),
         ),
         const SizedBox(height: 14),
 
-        // ── Duration (manual) ────────────────────────────────────────────────
-        TextFormField(
-          controller: _durCtrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: 'Duration (minutes)',
-            prefixIcon: const Icon(Icons.timer_outlined, size: 18),
-            suffixText: 'min',
-            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 13),
+        // ── Scrollable entries ────────────────────────────────────────────────
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.52,
           ),
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 14),
-
-        // ── Amount (manual) ──────────────────────────────────────────────────
-        TextFormField(
-          controller: _priceCtrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: 'Amount (KES)',
-            prefixIcon: const Icon(Icons.payments_outlined, size: 18),
-            suffixText: 'KES',
-            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 13),
-          ),
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 22),
-
-        // ── Start button ─────────────────────────────────────────────────────
-        PrimaryButton(
-          label: () {
-            final p = int.tryParse(_priceCtrl.text.trim());
-            return p != null ? 'Start Ride  ·  ${p.kes} KES' : 'Start Ride';
-          }(),
-          icon: Icons.play_arrow_rounded,
-          color: kGreen,
-          loading: _loading,
-          onTap: () async {
-            final dur   = int.tryParse(_durCtrl.text.trim());
-            final price = int.tryParse(_priceCtrl.text.trim());
-            if (_qId == null || dur == null || dur <= 0 ||
-                price == null || price <= 0) {
-              showToast(context, 'Select a quad, enter duration and amount',
-                  error: true);
-              return;
-            }
-            setState(() => _loading = true);
-            try {
-              final b = await context.read<AppProvider>().createBooking(
-                quadId: _qId!,
-                customerName: 'Walk-in',
-                customerPhone: '0000000000',
-                duration: dur,
-                price: price,
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            itemCount: _entries.length,
+            separatorBuilder: (_, __) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(children: [
+                Expanded(child: Divider(color: kBorder)),
+              ]),
+            ),
+            itemBuilder: (ctx, i) {
+              final e = _entries[i];
+              // quads available to this entry = all available minus others chosen
+              final localAvail = available.where(
+                  (q) => q.id == e.quadId || !usedIds.contains(q.id)).toList();
+              return _EntryRow(
+                entry: e,
+                index: i,
+                available: localAvail,
+                canRemove: _entries.length > 1,
+                onRemove: () => _removeEntry(i),
+                onChanged: () => setState(() {}),
               );
-              if (!context.mounted) return;
-              Navigator.pop(context);
-              context.push('/waiver/${b.id}');
-            } catch (e) {
-              if (context.mounted)
-                showToast(context,
-                    e.toString().replaceFirst('Exception: ', ''), error: true);
-              setState(() => _loading = false);
-            }
-          },
+            },
+          ),
+        ),
+
+        // ── Add another ───────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: available.length > _entries.length ? _addEntry : null,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add Another Quad'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: kGreen,
+                side: BorderSide(color: kGreen.withAlpha(60)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+            ),
+          ),
+        ),
+
+        // ── Start all ─────────────────────────────────────────────────────────
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+              20, 8, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          child: PrimaryButton(
+            label: _loading
+                ? 'Starting...'
+                : _entries.length == 1
+                    ? () {
+                        final p = int.tryParse(
+                            _entries[0].priceCtrl.text.trim());
+                        return p != null
+                            ? 'Start Ride · ${p.kes} KES'
+                            : 'Start Ride';
+                      }()
+                    : 'Start ${_entries.length} Rides',
+            icon: Icons.play_arrow_rounded,
+            color: kGreen,
+            loading: _loading,
+            onTap: () async {
+              // Validate all entries
+              for (int i = 0; i < _entries.length; i++) {
+                final e = _entries[i];
+                final dur   = int.tryParse(e.durCtrl.text.trim());
+                final price = int.tryParse(e.priceCtrl.text.trim());
+                if (e.quadId == null || dur == null || dur <= 0 ||
+                    price == null || price <= 0) {
+                  showToast(context,
+                      'Complete all fields for quad ${i + 1}', error: true);
+                  return;
+                }
+              }
+              setState(() => _loading = true);
+              try {
+                final prov = context.read<AppProvider>();
+                final bookings = <int>[];
+                for (final e in _entries) {
+                  final b = await prov.createBooking(
+                    quadId: e.quadId!,
+                    customerName: 'Walk-in',
+                    customerPhone: '0000000000',
+                    duration: int.parse(e.durCtrl.text.trim()),
+                    price: int.parse(e.priceCtrl.text.trim()),
+                  );
+                  bookings.add(b.id);
+                }
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                // Navigate to first booking waiver; rider can handle the rest
+                if (bookings.isNotEmpty) {
+                  context.push('/waiver/${bookings.first}');
+                }
+              } catch (e) {
+                if (context.mounted)
+                  showToast(context,
+                      e.toString().replaceFirst('Exception: ', ''), error: true);
+                setState(() => _loading = false);
+              }
+            },
+          ),
         ),
       ]),
     );
+  }
+}
+
+// ── Single quad entry row ──────────────────────────────────────────────────────
+class _EntryRow extends StatelessWidget {
+  final _QSSEntry     entry;
+  final int           index;
+  final List<Quad>    available;
+  final bool          canRemove;
+  final VoidCallback  onRemove;
+  final VoidCallback  onChanged;
+  const _EntryRow({
+    required this.entry, required this.index,
+    required this.available, required this.canRemove,
+    required this.onRemove, required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Container(
+          width: 22, height: 22,
+          decoration: BoxDecoration(
+              color: kGreen.withAlpha(18),
+              borderRadius: BorderRadius.circular(6)),
+          child: Center(child: Text('${index + 1}',
+              style: const TextStyle(
+                  color: kGreen, fontSize: 11, fontWeight: FontWeight.w800))),
+        ),
+        const SizedBox(width: 8),
+        Text('Quad ${index + 1}',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        const Spacer(),
+        if (canRemove)
+          GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                  color: kRed.withAlpha(10),
+                  borderRadius: BorderRadius.circular(8)),
+              child: Icon(Icons.close_rounded, size: 16,
+                  color: kRed.withAlpha(160)),
+            ),
+          ),
+      ]),
+      const SizedBox(height: 10),
+
+      // Quad picker
+      DropdownButtonFormField<int>(
+        decoration: const InputDecoration(
+            isDense: true,
+            labelText: 'Select Quad',
+            prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
+        value: entry.quadId,
+        items: available.map((q) => DropdownMenuItem(
+            value: q.id, child: Text(q.name))).toList(),
+        onChanged: (v) { entry.quadId = v; onChanged(); },
+      ),
+      const SizedBox(height: 10),
+
+      // Duration + Amount side by side
+      Row(children: [
+        Expanded(child: TextFormField(
+          controller: entry.durCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            isDense: true,
+            labelText: 'Duration',
+            prefixIcon: const Icon(Icons.timer_outlined, size: 18),
+            suffixText: 'min',
+            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 12),
+          ),
+          onChanged: (_) => onChanged(),
+        )),
+        const SizedBox(width: 10),
+        Expanded(child: TextFormField(
+          controller: entry.priceCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            isDense: true,
+            labelText: 'Amount',
+            prefixIcon: const Icon(Icons.payments_outlined, size: 18),
+            suffixText: 'KES',
+            suffixStyle: TextStyle(color: context.rq.muted, fontSize: 12),
+          ),
+          onChanged: (_) => onChanged(),
+        )),
+      ]),
+    ]);
   }
 }
 
