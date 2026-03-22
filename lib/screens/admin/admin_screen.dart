@@ -655,8 +655,8 @@ class _RevPill extends StatelessWidget {
       Text(value, style: TextStyle(
           color: color, fontWeight: FontWeight.w800, fontSize: 14)),
       const SizedBox(height: 1),
-      Text(label, style: const TextStyle(
-          color: Colors.white38, fontSize: 10)),
+      Text(label, style: TextStyle(
+          color: context.rq.muted, fontSize: 10, fontWeight: FontWeight.w600)),
     ]),
   ));
 }
