@@ -33,14 +33,9 @@ jobs:
 
       - name: Prepare Android environment
         run: |
-          # Write local.properties
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
-
-          # Ensure gradlew is executable
           chmod +x android/gradlew
-
-          # Create debug keystore for signing
           mkdir -p "$HOME/.android"
           keytool -genkeypair \
             -keystore "$HOME/.android/debug.keystore" \
@@ -50,11 +45,6 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US" \
             2>/dev/null
 
-          # Confirm setup
-          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          cat android/local.properties
-
       - name: Flutter pub get
         run: flutter pub get
 
@@ -63,32 +53,45 @@ jobs:
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      - name: Build APK (Gradle direct)
-        working-directory: android
+      - name: Build release APK
         run: |
-          # Run Gradle assembleRelease directly — more reliable than
-          # flutter build apk which has a broken post-build APK finder
-          ./gradlew assembleRelease --stacktrace --info 2>&1 | grep -E \
-            "BUILD|FAILED|ERROR|error:|warning:|\.apk|assembleRelease|Task :|Exception" \
-            | tail -60
+          # Use flutter build apk. Capture exit code manually so
+          # Flutter's false "APK not found" doesn't kill the step.
+          set +e
+          flutter build apk --release --no-tree-shake-icons
+          BUILD_EXIT=$?
+          set -e
 
-      - name: Copy APK to output
-        run: |
-          echo "=== APK search ==="
-          find . -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test
-          echo "=================="
+          echo "Flutter exit: $BUILD_EXIT"
 
-          APK=$(find . -name "app-release.apk" 2>/dev/null \
-                | grep -v intermediates | head -1)
+          # Flutter 3.x writes APK here regardless of what its
+          # internal scanner reports
+          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk"
 
-          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: No APK produced"
-            exit 1
+          if [ ! -f "$APK" ]; then
+            APK="$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk"
           fi
 
-          echo "Found: $APK ($(du -sh "$APK" | cut -f1))"
+          if [ ! -f "$APK" ]; then
+            APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
+                  2>/dev/null | grep -v intermediates | head -1)
+          fi
+
+          # Show build tree for diagnosis
+          echo "--- build/app tree ---"
+          find "$GITHUB_WORKSPACE/build/app" -name "*.apk" 2>/dev/null \
+            | grep -v intermediates || echo "(no apks)"
+          echo "----------------------"
+
+          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
+            echo "ERROR: No APK found. Flutter exit was $BUILD_EXIT."
+            # If flutter actually failed (real compile error), exit with its code
+            [ "$BUILD_EXIT" -ne 0 ] && exit "$BUILD_EXIT" || exit 1
+          fi
+
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
+          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -114,13 +117,12 @@ jobs:
             - **Admin-only** — PIN-protected operator tool
             - **Website Control** — update quads, prices, promos & open status from app
             - **Fleet Management** — live quad status, add / remove / rename bikes
-            - **Live Ride Timer** — overtime billing at 100 KES/min
+            - **Live Ride Timer** — pause button + live notification
+            - **Quick Start** — guide name, commission breakdown, Cash/M-Pesa selector
             - **Dashboard** — revenue, analytics, history, daily PDF report
             - **M-Pesa** capture, WhatsApp receipts to both operators
             - **Loyalty Programme** — Bronze → Silver → Gold → Platinum
-            - **Pre-bookings**, safety waiver, promo codes, incident log
             - **6 colour themes** — Ocean Breeze light by default
-            - **Google Maps** location view in Dunes tab
 
             ### Install
             1. Download **Royal-Quads.apk** below
