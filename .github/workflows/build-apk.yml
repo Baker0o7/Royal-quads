@@ -12,21 +12,18 @@ jobs:
       contents: write
 
     steps:
-      # ── 1. Source ────────────────────────────────────────────────────────────
       - name: Checkout flutter branch
         uses: actions/checkout@v4
         with:
           ref: flutter
           fetch-depth: 0
 
-      # ── 2. Java ──────────────────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # ── 3. Flutter ───────────────────────────────────────────────────────────
       - name: Set up Flutter 3.27.4
         uses: subosito/flutter-action@v2
         with:
@@ -34,7 +31,6 @@ jobs:
           channel: stable
           cache: true
 
-      # ── 4. Android env ───────────────────────────────────────────────────────
       - name: Prepare Android environment
         run: |
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
@@ -49,52 +45,39 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US" \
             > /dev/null 2>&1
 
-      # ── 5. Dependencies ──────────────────────────────────────────────────────
       - name: Flutter pub get
         run: flutter pub get
 
-      # ── 6. Icons ─────────────────────────────────────────────────────────────
       - name: Inject app icons
         run: |
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      # ── 7. Build ─────────────────────────────────────────────────────────────
-      - name: Build release APK
+      - name: Build APK via Gradle
         run: |
-          # Run flutter build apk. Capture exit so we can search for the APK
-          # even if Flutter's internal scanner reports a false "not found".
-          set +e
-          flutter build apk --release --no-tree-shake-icons
-          FEXIT=$?
-          set -e
+          # Run Gradle directly — avoids Flutter's broken APK path scanner
+          cd android
+          ./gradlew assembleRelease \
+            -Pflutter.sdk="$FLUTTER_ROOT" \
+            -Pflutter.versionCode=1 \
+            -Pflutter.versionName="$(grep '^version:' ../pubspec.yaml | sed 's/version: //' | sed 's/+.*//')" \
+            --no-daemon \
+            --stacktrace
+          cd ..
 
-          echo "flutter exit: $FEXIT"
+          # Gradle always puts the APK here
+          APK="android/app/build/outputs/apk/release/app-release.apk"
 
-          # Flutter 3.x puts APK here; confirm it exists
-          APK="build/app/outputs/flutter-apk/app-release.apk"
           if [ ! -f "$APK" ]; then
-            # Try alternate Gradle output path
-            APK="build/app/outputs/apk/release/app-release.apk"
-          fi
-          if [ ! -f "$APK" ]; then
-            # Exhaustive search
-            APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
-                  2>/dev/null | grep -v intermediates | head -1)
-          fi
-
-          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "APK not found after build — dumping outputs tree:"
-            find "$GITHUB_WORKSPACE/build/app" -type f 2>/dev/null | head -30 || true
-            # If flutter failed for a real reason (compile error), propagate it
-            exit ${FEXIT:-1}
+            echo "ERROR: APK not found at $APK"
+            find android/app/build -name "*.apk" 2>/dev/null | head -20 || true
+            exit 1
           fi
 
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "✅ APK ready: $(du -sh output/Royal-Quads.apk | cut -f1)"
+          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
-      # ── 8. Artifact ──────────────────────────────────────────────────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -102,7 +85,6 @@ jobs:
           path: output/Royal-Quads.apk
           retention-days: 30
 
-      # ── 9. Release ───────────────────────────────────────────────────────────
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
