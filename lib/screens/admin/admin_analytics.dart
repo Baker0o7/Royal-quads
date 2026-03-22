@@ -97,6 +97,14 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
       final ot   = rides.fold(0, (s, b) => s + b.overtimeCharge);
       final dep  = rides.fold(0, (s, b) =>
           b.depositAmount > 0 && !b.depositReturned ? s + b.depositAmount : s);
+      const double kComm = 0.20;
+      final commAmt   = (totalRev * kComm).round();
+      final netAmt    = totalRev - commAmt;
+      // Extract guide name from mpesaRef or customerName fields
+      // Quick-start rides store guide in customerName as 'Walk-in' — check mpesaRef notes
+      // We aggregate: if any ride has a guide, show the name
+      final guideRides = rides.where((b) =>
+          b.customerName.startsWith('Walk-in')).toList();
 
       doc.addPage(pw.Page(
         pageFormat: PdfPageFormat.a5,
@@ -156,7 +164,45 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
                 ],
               ),
             ),
-            pw.SizedBox(height: 16),
+            pw.SizedBox(height: 12),
+
+            // Commission breakdown
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: pw.BoxDecoration(
+                border: const pw.Border(
+                  left: pw.BorderSide(color: PdfColors.green700, width: 3)),
+                color: const PdfColor.fromInt(0xFFF0FDF4),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('Commission Breakdown (20%)',
+                      style: pw.TextStyle(fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.green900)),
+                  pw.SizedBox(height: 6),
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          _pdfCommRow('Total Revenue:', '${totalRev.kes} KES',
+                              PdfColors.grey800),
+                          pw.SizedBox(height: 3),
+                          _pdfCommRow('Guide Commission (20%):', '${commAmt.kes} KES',
+                              PdfColors.green800),
+                          pw.SizedBox(height: 3),
+                          _pdfCommRow('Business Keeps (80%):', '${netAmt.kes} KES',
+                              PdfColors.amber900),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 12),
 
             // Ride table
             pw.Text('Ride Details', style: pw.TextStyle(
@@ -173,12 +219,25 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
                 children: [
                   pw.TableRow(children: [
                     _pdfTh('Customer'), _pdfTh('Quad'),
-                    _pdfTh('Duration'), _pdfTh('Total'),
+                    _pdfTh('Dur'), _pdfTh('Base'),
+                    _pdfTh('Comm'), _pdfTh('Net'), _pdfTh('Pay'),
                   ]),
-                  ...rides.take(15).map((b) => pw.TableRow(children: [
-                    _pdfTd(b.customerName), _pdfTd(b.quadName),
-                    _pdfTd('${b.duration}m'), _pdfTd('${b.totalPaid.kes}'),
-                  ])),
+                  ...rides.take(15).map((b) {
+                    final comm = (b.totalPaid * 0.20).round();
+                    final net  = b.totalPaid - comm;
+                    final pay  = b.mpesaRef == 'CASH'
+                        ? 'Cash'
+                        : b.mpesaRef == 'MPESA-PENDING'
+                            ? 'M-Pesa'
+                            : b.mpesaRef ?? '-';
+                    return pw.TableRow(children: [
+                      _pdfTd(b.customerName), _pdfTd(b.quadName),
+                      _pdfTd('${b.duration}m'), _pdfTd(b.totalPaid.kes),
+                      _pdfTd(comm.kes, color: PdfColors.green800),
+                      _pdfTd(net.kes, color: PdfColors.amber900),
+                      _pdfTd(pay),
+                    ]);
+                  }),
                 ],
               ),
 
@@ -209,6 +268,14 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
       if (mounted) setState(() => _generating = false);
     }
   }
+
+  pw.Widget _pdfCommRow(String label, String value, PdfColor color) =>
+    pw.Row(children: [
+      pw.Expanded(child: pw.Text(label,
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
+      pw.Text(value, style: pw.TextStyle(fontSize: 9,
+          fontWeight: pw.FontWeight.bold, color: color)),
+    ]);
 
   pw.Widget _pdfStat(String label, String value) => pw.Column(
     children: [
