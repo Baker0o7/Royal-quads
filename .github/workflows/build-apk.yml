@@ -33,9 +33,14 @@ jobs:
 
       - name: Prepare Android environment
         run: |
+          # Write local.properties
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" \
             > android/local.properties
+
+          # Ensure gradlew is executable
           chmod +x android/gradlew
+
+          # Create debug keystore for signing
           mkdir -p "$HOME/.android"
           keytool -genkeypair \
             -keystore "$HOME/.android/debug.keystore" \
@@ -43,7 +48,12 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android \
             -dname "CN=Android Debug,O=Android,C=US" \
-            > /dev/null 2>&1
+            2>/dev/null
+
+          # Confirm setup
+          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          cat android/local.properties
 
       - name: Flutter pub get
         run: flutter pub get
@@ -53,26 +63,26 @@ jobs:
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      - name: Build release APK
+      - name: Build APK (Gradle direct)
+        working-directory: android
         run: |
-          set +e
-          flutter build apk --release --no-tree-shake-icons --verbose 2>&1 | tail -60
-          FEXIT=$?
-          set -e
+          # Run Gradle assembleRelease directly — more reliable than
+          # flutter build apk which has a broken post-build APK finder
+          ./gradlew assembleRelease --stacktrace --info 2>&1 | grep -E \
+            "BUILD|FAILED|ERROR|error:|warning:|\.apk|assembleRelease|Task :|Exception" \
+            | tail -60
 
-          echo "flutter exit: $FEXIT"
-          echo "=== Searching entire workspace ==="
-          find "$GITHUB_WORKSPACE" -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test || echo "(none in workspace)"
-          echo "=== Searching entire runner home ==="
-          find /home/runner -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test | head -10 || echo "(none in /home/runner)"
+      - name: Copy APK to output
+        run: |
+          echo "=== APK search ==="
+          find . -name "*.apk" 2>/dev/null | grep -v intermediates | grep -v test
+          echo "=================="
 
-          APK=$(find "$GITHUB_WORKSPACE" /home/runner -name "app-release.apk" \
-                2>/dev/null | grep -v intermediates | head -1)
+          APK=$(find . -name "app-release.apk" 2>/dev/null \
+                | grep -v intermediates | head -1)
 
           if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: APK not found anywhere"
-            echo "Disk usage:"
-            df -h
+            echo "ERROR: No APK produced"
             exit 1
           fi
 
