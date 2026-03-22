@@ -841,10 +841,10 @@ class _LoyaltyOverviewCard extends StatelessWidget {
   const _LoyaltyOverviewCard({required this.history});
 
   static const _tiers = [
-    (name: 'Bronze',   pts: 0,    icon: '\U0001f949', color: Color(0xFFCD7F32)),
-    (name: 'Silver',   pts: 200,  icon: '\U0001f948', color: Color(0xFF94A3B8)),
-    (name: 'Gold',     pts: 500,  icon: '\U0001f947', color: Color(0xFFC9972A)),
-    (name: 'Platinum', pts: 1000, icon: '\U0001f48e', color: Color(0xFF6366F1)),
+    (name: 'Bronze',   pts: 0,    icon: Icons.workspace_premium_rounded, color: Color(0xFFCD7F32)),
+    (name: 'Silver',   pts: 200,  icon: Icons.workspace_premium_rounded, color: Color(0xFF94A3B8)),
+    (name: 'Gold',     pts: 500,  icon: Icons.workspace_premium_rounded, color: Color(0xFFC9972A)),
+    (name: 'Platinum', pts: 1000, icon: Icons.diamond_rounded,           color: Color(0xFF6366F1)),
   ];
 
   Color _tierColor(int pts) {
@@ -882,7 +882,8 @@ class _LoyaltyOverviewCard extends StatelessWidget {
           decoration: BoxDecoration(gradient: kGoldGradient,
               borderRadius: BorderRadius.circular(14)),
           child: const Row(children: [
-            Text('\U0001f3c6', style: TextStyle(fontSize: 20)),
+            const Icon(Icons.workspace_premium_rounded,
+                color: Colors.white, size: 22),
             SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -925,7 +926,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
                 border: Border.all(color: t.color.withAlpha(30)),
               ),
               child: Column(children: [
-                Text(t.icon, style: const TextStyle(fontSize: 16)),
+                Icon(t.icon, color: t.color, size: 18),
                 const SizedBox(height: 3),
                 Text('$count', style: TextStyle(color: t.color,
                     fontWeight: FontWeight.w800, fontSize: 14)),
@@ -953,9 +954,9 @@ class _LoyaltyOverviewCard extends StatelessWidget {
             final a    = entry.value;
             final col  = _tierColor(a.points);
             final icon = _tierIcon(a.points);
-            final medal = rank == 1 ? '\U0001f947'
-                        : rank == 2 ? '\U0001f948'
-                        : rank == 3 ? '\U0001f949'
+            final medalIcon = rank == 1 ? Icons.looks_one_rounded
+                        : rank == 2 ? Icons.looks_two_rounded
+                        : rank == 3 ? Icons.looks_3_rounded
                         : '$rank.';
             final maskedPhone = a.phone.length >= 10
                 ? '${a.phone.substring(0, 4)}****${a.phone.substring(a.phone.length - 3)}'
