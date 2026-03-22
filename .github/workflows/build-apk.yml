@@ -53,30 +53,32 @@ jobs:
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      - name: Build APK via Gradle
+      - name: Build and release APK
         run: |
-          # Run Gradle directly — avoids Flutter's broken APK path scanner
-          cd android
-          ./gradlew assembleRelease \
-            -Pflutter.sdk="$FLUTTER_ROOT" \
-            -Pflutter.versionCode=1 \
-            -Pflutter.versionName="$(grep '^version:' ../pubspec.yaml | sed 's/version: //' | sed 's/+.*//')" \
-            --no-daemon \
-            --stacktrace
-          cd ..
+          # flutter build apk exits 1 with "can't find APK" even when Gradle
+          # succeeds. Flutter itself says the APK is in build/. We look there.
+          set +e
+          flutter build apk --release --no-tree-shake-icons
+          set -e
 
-          # Gradle always puts the APK here
-          APK="android/app/build/outputs/apk/release/app-release.apk"
+          # Flutter puts it here — this is what its own error message points to
+          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk"
 
           if [ ! -f "$APK" ]; then
-            echo "ERROR: APK not found at $APK"
-            find android/app/build -name "*.apk" 2>/dev/null | head -20 || true
+            echo "Not at primary path, scanning..."
+            APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
+                  2>/dev/null | grep -v intermediates | head -1)
+          fi
+
+          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
+            echo "ERROR: APK not found. Build tree:"
+            find "$GITHUB_WORKSPACE/build" -name "*.apk" 2>/dev/null || true
             exit 1
           fi
 
+          echo "APK: $APK ($(du -sh "$APK" | cut -f1))"
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
