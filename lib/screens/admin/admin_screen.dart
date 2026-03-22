@@ -169,6 +169,28 @@ class AdminOverviewTab extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
+          // ── Quick actions ─────────────────────────────────────────────────
+          SectionHeading('Quick Actions', icon: Icons.bolt_rounded),
+          Row(children: [
+            Expanded(child: _ActionCard(
+              icon: Icons.play_circle_rounded,
+              label: 'Quick Start',
+              sub: 'Start a ride fast',
+              color: kGreen,
+              onTap: () => _showQuickStart(context),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: _ActionCard(
+              icon: Icons.analytics_rounded,
+              label: 'Daily Report',
+              sub: 'View today\'s stats',
+              color: kIndigo,
+              onTap: () => _showDailyReport(context),
+            )),
+          ]),
+
+          const SizedBox(height: 20),
+
           // ── Revenue strip ─────────────────────────────────────────────────
           AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -242,29 +264,8 @@ class AdminOverviewTab extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 20),
 
-          // ── Quick actions ─────────────────────────────────────────────────
-          SectionHeading('Quick Actions', icon: Icons.bolt_rounded),
-          Row(children: [
-            Expanded(child: _ActionCard(
-              icon: Icons.play_circle_rounded,
-              label: 'Quick Start',
-              sub: 'Start a ride fast',
-              color: kGreen,
-              onTap: () => _showQuickStart(context),
-            )),
-            const SizedBox(width: 12),
-            Expanded(child: _ActionCard(
-              icon: Icons.analytics_rounded,
-              label: 'Daily Report',
-              sub: 'View today\'s stats',
-              color: kIndigo,
-              onTap: () => _showDailyReport(context),
-            )),
-          ]),
-
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // ── Live rides ────────────────────────────────────────────────────
           SectionHeading('Live Rides', icon: Icons.local_fire_department_rounded,
