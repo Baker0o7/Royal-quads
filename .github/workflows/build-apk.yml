@@ -53,32 +53,32 @@ jobs:
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      - name: Build and release APK
+      - name: Build release APK
         run: |
-          # flutter build apk exits 1 with "can't find APK" even when Gradle
-          # succeeds. Flutter itself says the APK is in build/. We look there.
           set +e
           flutter build apk --release --no-tree-shake-icons
+          FEXIT=$?
           set -e
 
-          # Flutter puts it here — this is what its own error message points to
-          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk"
+          echo "flutter exit: $FEXIT"
+          echo "--- build tree ---"
+          find "$GITHUB_WORKSPACE/build/app" -name "*.apk" 2>/dev/null || echo "(empty)"
+          echo "------------------"
 
-          if [ ! -f "$APK" ]; then
-            echo "Not at primary path, scanning..."
-            APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
-                  2>/dev/null | grep -v intermediates | head -1)
-          fi
+          # Primary path (flutter-apk output dir)
+          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk"
+          [ ! -f "$APK" ] && APK="$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk"
+          [ ! -f "$APK" ] && APK=$(find "$GITHUB_WORKSPACE/build" -name "app-release.apk" \
+              2>/dev/null | grep -v intermediates | head -1)
 
           if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: APK not found. Build tree:"
-            find "$GITHUB_WORKSPACE/build" -name "*.apk" 2>/dev/null || true
+            echo "ERROR: APK not found — flutter exited $FEXIT"
             exit 1
           fi
 
-          echo "APK: $APK ($(du -sh "$APK" | cut -f1))"
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
+          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
