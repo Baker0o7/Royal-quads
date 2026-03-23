@@ -111,6 +111,24 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
               child: Column(children: [
 
+                // ── Back button ───────────────────────────────────────────
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.arrow_back_rounded,
+                          color: Colors.white, size: 22),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
                 // ── Checkmark header ──────────────────────────────────────
                 const _CheckHeader(),
                 const SizedBox(height: 8),
