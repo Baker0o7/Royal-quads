@@ -120,6 +120,7 @@ class AppProvider extends ChangeNotifier {
     required String customerPhone, required int duration, required int price,
     int? originalPrice, String? promoCode, int groupSize = 1,
     int depositAmount = 0, String? mpesaRef, bool waiverSigned = false,
+    String? guideName,
   }) async {
     final booking = await StorageService.createBooking(
       quadId: quadId, userId: _user?.id,
