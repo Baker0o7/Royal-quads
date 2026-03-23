@@ -61,41 +61,43 @@ jobs:
           set -e
           echo "Flutter exit: $BUILD_EXIT"
 
-          # Gradle succeeded — search everywhere for the APK
-          echo "=== All APKs on runner ==="
-          find /home/runner /root 2>/dev/null \
-            -name "app-release.apk" \
-            | grep -v intermediates \
-            | grep -v test \
-            || echo "(none found)"
-          echo "=========================="
+          # Search ALL possible APK locations:
+          # 1. Flutter's output dir (where it copies after Gradle)
+          # 2. Gradle's native output dir (android/app/build/) — often missed!
+          echo "=== APK search ==="
+          find "$GITHUB_WORKSPACE" -name "app-release.apk" 2>/dev/null \
+            | grep -v intermediates | grep -v "test" || echo "(none in workspace)"
+          echo "=================="
 
-          # Try every known path
           APK=""
           for TRY in \
             "$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-release.apk" \
             "$GITHUB_WORKSPACE/build/app/outputs/apk/release/app-release.apk" \
-            "build/app/outputs/flutter-apk/app-release.apk" \
-            "build/app/outputs/apk/release/app-release.apk"
+            "$GITHUB_WORKSPACE/android/app/build/outputs/apk/release/app-release.apk" \
+            "$GITHUB_WORKSPACE/android/app/build/outputs/flutter-apk/app-release.apk"
           do
-            [ -f "$TRY" ] && APK="$TRY" && echo "Found: $APK" && break
+            if [ -f "$TRY" ]; then
+              APK="$TRY"
+              echo "Found: $APK"
+              break
+            fi
           done
 
-          # Exhaustive search
+          # Fallback: any release APK in the whole workspace
           if [ -z "$APK" ]; then
-            APK=$(find / -name "app-release.apk" 2>/dev/null \
-                  | grep -v intermediates | grep -v test | head -1)
-            [ -n "$APK" ] && echo "Found via global search: $APK"
+            APK=$(find "$GITHUB_WORKSPACE" -name "app-release.apk" 2>/dev/null \
+                  | grep -v intermediates | head -1)
+            [ -n "$APK" ] && echo "Fallback: $APK"
           fi
 
           if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: APK not found anywhere"
+            echo "ERROR: No APK found. Flutter exited $BUILD_EXIT."
             exit "${BUILD_EXIT:-1}"
           fi
 
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
-          echo "✅ Staged: $(du -sh output/Royal-Quads.apk | cut -f1)"
+          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -123,8 +125,8 @@ jobs:
             - **Fleet Management** — live quad status, add / remove / rename bikes
             - **Live Ride Timer** — pause button + live notification
             - **Quick Start** — guide name, commission breakdown, Cash/M-Pesa selector
+            - **History** — guide payment toggle (✅/🚫) + commission per ride
             - **Dashboard** — revenue, analytics, history, daily PDF report
-            - **M-Pesa** capture, WhatsApp receipts to both operators
             - **6 colour themes** — Ocean Breeze light by default
 
             ### Install
