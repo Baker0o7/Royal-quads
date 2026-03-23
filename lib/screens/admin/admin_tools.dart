@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../models/models.dart';
@@ -64,6 +67,16 @@ class _AdminToolsTabState extends State<AdminToolsTab> {
         ),
         const SizedBox(height: 10),
         _MaintenanceSection(onChanged: () => setState(() {})),
+
+        const SizedBox(height: 24),
+
+        // ── Backup & Restore ───────────────────────────────────────────────
+        _ToolHeader(
+          icon: Icons.backup_rounded, label: 'Backup & Restore',
+          color: kIndigo,
+        ),
+        const SizedBox(height: 10),
+        const _BackupRestoreCard(),
       ]),
     );
   }
@@ -717,4 +730,198 @@ class _ToolDialogState extends State<_ToolDialog> {
       ),
     ]),
   );
+}
+
+// ── Backup & Restore Card ─────────────────────────────────────────────────────
+class _BackupRestoreCard extends StatefulWidget {
+  const _BackupRestoreCard();
+  @override State<_BackupRestoreCard> createState() => _BRCState();
+}
+
+class _BRCState extends State<_BackupRestoreCard> {
+  bool _busy = false;
+  String? _lastBackupPath;
+  String? _status;
+
+  Future<Directory> _getDir() async {
+    final base = await getApplicationDocumentsDirectory();
+    return base;
+  }
+
+  // ── Export ─────────────────────────────────────────────────────────────────
+  Future<void> _backup() async {
+    setState(() { _busy = true; _status = null; });
+    try {
+      final data = StorageService.exportBackup();
+      final json = const JsonEncoder.withIndent('  ').convert(data);
+      final dir  = await _getDir();
+      final ts   = DateTime.now();
+      final name = 'rq_backup_${ts.year}${ts.month.toString().padLeft(2,'0')}${ts.day.toString().padLeft(2,'0')}_${ts.hour.toString().padLeft(2,'0')}${ts.minute.toString().padLeft(2,'0')}.json';
+      final file = File('${dir.path}/$name');
+      await file.writeAsString(json);
+      setState(() {
+        _lastBackupPath = file.path;
+        _status = '✅ Saved to Documents/$name';
+        _busy = false;
+      });
+    } catch (e) {
+      setState(() { _status = '❌ Error: $e'; _busy = false; });
+    }
+  }
+
+  // ── List backups ───────────────────────────────────────────────────────────
+  Future<List<File>> _listBackups() async {
+    final dir = await _getDir();
+    final all = dir.listSync()
+        .whereType<File>()
+        .where((f) => f.path.contains('rq_backup') && f.path.endsWith('.json'))
+        .toList()
+      ..sort((a, b) => b.path.compareTo(a.path));
+    return all;
+  }
+
+  // ── Restore ────────────────────────────────────────────────────────────────
+  Future<void> _restore(File file) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Restore Backup?'),
+        content: Text('This will replace ALL current data with the backup from ${file.uri.pathSegments.last}.\n\nThis cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: kRed),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restore', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    setState(() { _busy = true; _status = null; });
+    try {
+      final json = await file.readAsString();
+      final data = jsonDecode(json) as Map<String, dynamic>;
+      final keys = await StorageService.importBackup(data);
+      if (context.mounted) {
+        await context.read<AppProvider>().loadAll();
+        setState(() {
+          _status = '✅ Restored ${keys.length} items. Restart recommended.';
+          _busy = false;
+        });
+      }
+    } catch (e) {
+      setState(() { _status = '❌ Error: $e'; _busy = false; });
+    }
+  }
+
+  // ── Delete backup file ─────────────────────────────────────────────────────
+  Future<void> _delete(File file) async {
+    await file.delete();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+        // Export button
+        Row(children: [
+          Expanded(child: ElevatedButton.icon(
+            icon: const Icon(Icons.upload_rounded, size: 18),
+            label: Text(_busy ? 'Working…' : 'Create Backup'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kIndigo, foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            onPressed: _busy ? null : _backup,
+          )),
+        ]),
+
+        if (_status != null) ...[
+          const SizedBox(height: 10),
+          Text(_status!, style: TextStyle(fontSize: 12, color: context.rq.muted)),
+        ],
+
+        const SizedBox(height: 16),
+        Text('Saved Backups',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                color: context.rq.muted, letterSpacing: .5)),
+        const SizedBox(height: 8),
+
+        FutureBuilder<List<File>>(
+          future: _listBackups(),
+          builder: (ctx, snap) {
+            final files = snap.data ?? [];
+            if (files.isEmpty) {
+              return Text('No backups yet',
+                  style: TextStyle(fontSize: 12, color: context.rq.muted));
+            }
+            return Column(
+              children: files.map((f) {
+                final name = f.uri.pathSegments.last
+                    .replaceAll('rq_backup_', '')
+                    .replaceAll('.json', '');
+                // Parse date from filename
+                final datePart = name.length >= 8 ? name.substring(0, 8) : name;
+                final timePart = name.length >= 13 ? name.substring(9) : '';
+                final display = datePart.length == 8
+                    ? '${datePart.substring(6)}/${datePart.substring(4,6)}/${datePart.substring(0,4)}'
+                        + (timePart.length == 4 ? '  ${timePart.substring(0,2)}:${timePart.substring(2)}' : '')
+                    : name;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: context.rq.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: context.rq.border),
+                  ),
+                  child: Row(children: [
+                    const Icon(Icons.description_rounded, size: 16, color: kIndigo),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(display,
+                        style: TextStyle(fontSize: 12,
+                            fontWeight: FontWeight.w600, color: context.rq.text))),
+                    // Restore
+                    GestureDetector(
+                      onTap: () => _restore(f),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: kGreen.withAlpha(18),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text('Restore',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                                color: kGreen)),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    // Delete
+                    GestureDetector(
+                      onTap: () => _delete(f).then((_) => setState(() {})),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: kRed.withAlpha(12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.delete_outline_rounded,
+                            size: 15, color: kRed),
+                      ),
+                    ),
+                  ]),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ]),
+    );
+  }
 }

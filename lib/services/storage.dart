@@ -455,4 +455,46 @@ class StorageService {
     final raw = _p.getString('rq:shift_start:$staffId');
     return raw != null ? DateTime.tryParse(raw) : null;
   }
+  // ── Backup & Restore ──────────────────────────────────────────────────────
+  static const List<String> _backupKeys = [
+    'rq:quads', 'rq:bookings', 'rq:prebookings', 'rq:promotions',
+    'rq:incidents', 'rq:staff', 'rq:maintenance', 'rq:loyalty',
+    'rq:admin_pin', 'rq:theme', 'rq:onboarded',
+    'rq:quad_seq', 'rq:booking_seq', 'rq:incident_seq', 'rq:user_seq',
+    'rq:dynamic_pricing',
+  ];
+
+  /// Export all app data as a JSON string
+  static Map<String, dynamic> exportBackup() {
+    final data = <String, dynamic>{};
+    for (final key in _backupKeys) {
+      final val = _p.getString(key);
+      if (val != null) data[key] = val;
+    }
+    data['_version'] = 1;
+    data['_exported'] = DateTime.now().toIso8601String();
+    return data;
+  }
+
+  /// Import data from a JSON backup map. Returns list of restored keys.
+  static Future<List<String>> importBackup(Map<String, dynamic> data) async {
+    final restored = <String>[];
+    for (final key in _backupKeys) {
+      final val = data[key];
+      if (val is String) {
+        await _p.setString(key, val);
+        restored.add(key);
+      }
+    }
+    return restored;
+  }
+
+  /// Reset all app data (keeps PIN and theme)
+  static Future<void> resetAllData() async {
+    const keepKeys = {'rq:admin_pin', 'rq:theme', 'rq:onboarded'};
+    for (final key in _backupKeys) {
+      if (!keepKeys.contains(key)) await _p.remove(key);
+    }
+  }
+
 }
