@@ -877,7 +877,7 @@ class _BRCState extends State<_BackupRestoreCard> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: context.rq.surface,
+                    color: context.rq.card,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.rq.border),
                   ),

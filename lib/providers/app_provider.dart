@@ -128,6 +128,7 @@ class AppProvider extends ChangeNotifier {
       promoCode: promoCode, groupSize: groupSize,
       depositAmount: depositAmount, mpesaRef: mpesaRef,
       waiverSigned: waiverSigned,
+      guideName: guideName,
     );
     await loadAll();
     return booking;
