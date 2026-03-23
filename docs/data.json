@@ -1,6 +1,6 @@
 {
-  "_comment": "Managed by Royal Quad Bikes admin app. Quad names sync from live fleet.",
-  "_updated": "2025-03-21T00:00:00Z",
+  "_comment": "Managed by Royal Quad Bikes admin app.",
+  "_updated": "2026-03-23T15:24:56.688637Z",
   "business": {
     "name": "Royal Quad Bikes",
     "location": "Mambrui Sand Dunes, Kilifi County, Kenya",
@@ -13,33 +13,39 @@
   "quads": [
     {
       "id": 1,
-      "name": "Quad 1",
+      "name": "BARRACUDA 200CC",
       "status": "available",
-      "emoji": "\ud83c\udfcd\ufe0f"
+      "emoji": "🏍️"
     },
     {
       "id": 2,
-      "name": "Quad 2",
+      "name": "BLACK SHAFT 200CC",
       "status": "available",
-      "emoji": "\ud83c\udfcd\ufe0f"
+      "emoji": "🏍️"
     },
     {
       "id": 3,
-      "name": "Quad 3",
+      "name": "BLACK CHAIN 200CC",
       "status": "available",
-      "emoji": "\ud83c\udfcd\ufe0f"
+      "emoji": "🏍️"
     },
     {
       "id": 4,
-      "name": "Quad 4",
+      "name": "RED 200CC",
       "status": "available",
-      "emoji": "\ud83c\udfcd\ufe0f"
+      "emoji": "🏍️"
     },
     {
       "id": 5,
-      "name": "Quad 5",
+      "name": "BUGGY RED",
       "status": "available",
-      "emoji": "\ud83c\udfcd\ufe0f"
+      "emoji": "🏍️"
+    },
+    {
+      "id": 6,
+      "name": "BUGGY ORG",
+      "status": "available",
+      "emoji": "🏍️"
     }
   ],
   "pricing": [
