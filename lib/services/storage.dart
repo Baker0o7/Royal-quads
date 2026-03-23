@@ -103,6 +103,7 @@ class StorageService {
     required int duration, required int price, int? originalPrice,
     String? promoCode, int groupSize = 1, int depositAmount = 0,
     String? mpesaRef, bool waiverSigned = false,
+    String? guideName,
   }) async {
     final quads = getQuads();
     final quad = quads.firstWhere((q) => q.id == quadId,
@@ -121,11 +122,20 @@ class StorageService {
       waiverSigned: waiverSigned, groupSize: groupSize,
       depositAmount: depositAmount,
       mpesaRef: mpesaRef?.trim().toUpperCase(),
+      guideName: guideName?.trim().isEmpty == true ? null : guideName?.trim(),
     );
 
     await saveBookings([...getBookings(), booking]);
     await saveQuads(quads.map((q) => q.id == quadId ? q.copyWith(status: 'rented') : q).toList());
     return booking;
+  }
+
+  static Future<void> toggleGuidePaid(int id) async {
+    final bookings = getBookings().map((b) {
+      if (b.id != id) return b;
+      return b.copyWith(guidePaid: !b.guidePaid);
+    }).toList();
+    await saveBookings(bookings);
   }
 
   static Future<void> completeBooking(int id, int overtimeMins) async {

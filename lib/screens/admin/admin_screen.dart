@@ -1091,6 +1091,7 @@ class _QSSState extends State<_QuickStartSheet> {
                     duration: int.parse(e.durCtrl.text.trim()),
                     price: int.parse(e.priceCtrl.text.trim()),
                     mpesaRef: _payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
+                    guideName: _guideCtrl.text.trim().isEmpty ? null : _guideCtrl.text.trim(),
                   );
                   bookings.add(b.id);
                 }

@@ -55,6 +55,8 @@ class Booking {
   final int overtimeMinutes;
   final int overtimeCharge;
   final String? mpesaRef;
+  final String? guideName;
+  final bool guidePaid;
 
   const Booking({
     required this.id, required this.quadId, this.userId,
@@ -66,12 +68,14 @@ class Booking {
     this.waiverSigned = false, this.groupSize = 1, this.depositAmount = 0,
     this.depositReturned = false, this.overtimeMinutes = 0,
     this.overtimeCharge = 0, this.mpesaRef,
+    this.guideName, this.guidePaid = false,
   });
 
   int get totalPaid => price + overtimeCharge;
 
   Booking copyWith({String? status, DateTime? endTime, int? rating, String? feedback,
-    int? overtimeMinutes, int? overtimeCharge, bool? depositReturned, bool? waiverSigned}) =>
+    int? overtimeMinutes, int? overtimeCharge, bool? depositReturned, bool? waiverSigned,
+    bool? guidePaid}) =>
     Booking(id: id, quadId: quadId, userId: userId,
       customerName: customerName, customerPhone: customerPhone,
       duration: duration, price: price, originalPrice: originalPrice,
@@ -83,7 +87,8 @@ class Booking {
       groupSize: groupSize, depositAmount: depositAmount,
       depositReturned: depositReturned ?? this.depositReturned,
       overtimeMinutes: overtimeMinutes ?? this.overtimeMinutes,
-      overtimeCharge: overtimeCharge ?? this.overtimeCharge, mpesaRef: mpesaRef);
+      overtimeCharge: overtimeCharge ?? this.overtimeCharge, mpesaRef: mpesaRef,
+      guideName: guideName, guidePaid: guidePaid ?? this.guidePaid);
 
   Map<String, dynamic> toJson() => {
     'id': id, 'quadId': quadId, 'userId': userId,
@@ -96,6 +101,7 @@ class Booking {
     'waiverSigned': waiverSigned, 'groupSize': groupSize,
     'depositAmount': depositAmount, 'depositReturned': depositReturned,
     'overtimeMinutes': overtimeMinutes, 'overtimeCharge': overtimeCharge, 'mpesaRef': mpesaRef,
+    'guideName': guideName, 'guidePaid': guidePaid,
   };
 
   factory Booking.fromJson(Map<String, dynamic> j) => Booking(
@@ -117,7 +123,9 @@ class Booking {
     depositReturned: (j['depositReturned'] as bool?) ?? false,
     overtimeMinutes: (j['overtimeMinutes'] as int?) ?? 0,
     overtimeCharge: (j['overtimeCharge'] as int?) ?? 0,
-    mpesaRef: j['mpesaRef'] as String?);
+    mpesaRef: j['mpesaRef'] as String?,
+    guideName: j['guideName'] as String?,
+    guidePaid: (j['guidePaid'] as bool?) ?? false);
 }
 
 class AppUser {

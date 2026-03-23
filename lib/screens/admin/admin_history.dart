@@ -376,6 +376,40 @@ class _HistoryTile extends StatelessWidget {
                           fontWeight: FontWeight.w700)),
                   ]),
                 ],
+                // Guide row
+                if (booking.guideName != null && booking.guideName!.isNotEmpty) ...[
+                  const SizedBox(height: 5),
+                  Row(children: [
+                    Icon(Icons.person_rounded, size: 11,
+                        color: context.rq.muted),
+                    const SizedBox(width: 3),
+                    Text(booking.guideName!,
+                        style: TextStyle(fontSize: 11,
+                            color: context.rq.muted,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 6),
+                    // Commission amount
+                    Text('·  ${(booking.totalPaid * 0.20).round().kes} KES',
+                        style: TextStyle(fontSize: 10,
+                            color: context.rq.muted)),
+                    const Spacer(),
+                    // Guide paid toggle
+                    GestureDetector(
+                      onTap: () => context.read<AppProvider>()
+                          .toggleGuidePaid(booking.id),
+                      child: Row(children: [
+                        Text(
+                          booking.guidePaid ? '✅ Paid' : '🚫 Unpaid',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: booking.guidePaid ? kGreen : kRed,
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                ],
               ],
             )),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [

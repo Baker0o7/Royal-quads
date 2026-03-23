@@ -133,6 +133,11 @@ class AppProvider extends ChangeNotifier {
     return booking;
   }
 
+  Future<void> toggleGuidePaid(int id) async {
+    await StorageService.toggleGuidePaid(id);
+    await loadAll();
+  }
+
   Future<void> completeBooking(int id, int overtimeMins) async {
     await StorageService.completeBooking(id, overtimeMins);
     await loadAll();
