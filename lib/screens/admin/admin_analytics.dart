@@ -181,22 +181,19 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
                       style: pw.TextStyle(fontSize: 9,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.green900)),
-                  pw.SizedBox(height: 6),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  pw.SizedBox(height: 8),
+                  pw.Table(
+                    columnWidths: {
+                      0: const pw.FlexColumnWidth(3),
+                      1: const pw.FlexColumnWidth(2),
+                    },
                     children: [
-                      pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          _pdfCommRow('Total Revenue:', '${totalRev.kes} KES',
-                              PdfColors.grey800),
-                          pw.SizedBox(height: 3),
-                          _pdfCommRow('Guide Commission (20%):', '${commAmt.kes} KES',
-                              PdfColors.green800),
-                          pw.SizedBox(height: 3),
-                          _pdfCommRow('Business Keeps (80%):', '${netAmt.kes} KES',
-                              PdfColors.amber900),
-                        ],
-                      ),
+                      _pdfCommRow2('Total Revenue', '${totalRev.kes} KES',
+                          PdfColors.grey800),
+                      _pdfCommRow2('Guide Commission (20%)', '${commAmt.kes} KES',
+                          PdfColors.green800),
+                      _pdfCommRow2('Business Keeps (80%)', '${netAmt.kes} KES',
+                          PdfColors.amber900),
                     ],
                   ),
                 ],
@@ -269,12 +266,17 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab> {
     }
   }
 
-  pw.Widget _pdfCommRow(String label, String value, PdfColor color) =>
-    pw.Row(children: [
-      pw.Expanded(child: pw.Text(label,
-          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
-      pw.Text(value, style: pw.TextStyle(fontSize: 9,
-          fontWeight: pw.FontWeight.bold, color: color)),
+  pw.TableRow _pdfCommRow2(String label, String value, PdfColor color) =>
+    pw.TableRow(children: [
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 3),
+        child: pw.Text(label,
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 3),
+        child: pw.Text(value, textAlign: pw.TextAlign.right,
+            style: pw.TextStyle(fontSize: 9,
+                fontWeight: pw.FontWeight.bold, color: color))),
     ]);
 
   pw.Widget _pdfStat(String label, String value) => pw.Column(
