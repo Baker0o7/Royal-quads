@@ -468,8 +468,9 @@ class StorageService {
   static Map<String, dynamic> exportBackup() {
     final data = <String, dynamic>{};
     for (final key in _backupKeys) {
-      final val = _p.getString(key);
-      if (val != null) data[key] = val;
+      // Keys may be stored as String, int, bool or double
+      final val = _p.get(key);
+      if (val != null) data[key] = val.toString();
     }
     data['_version'] = 1;
     data['_exported'] = DateTime.now().toIso8601String();
