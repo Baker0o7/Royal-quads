@@ -331,7 +331,7 @@ class _QuadDialogState extends State<_QuadDialog> {
             autofocus: true,
             decoration: const InputDecoration(
                 labelText: 'Quad Name', hintText: 'e.g. Raptor 1',
-                prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
+                prefixIcon: QuadIcon(size: 18, color: kAccent)),
           ),
           const SizedBox(height: 14),
           TextField(
@@ -421,8 +421,7 @@ class _QuadCardState extends State<_QuadCard> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: _color.withAlpha(30)),
                 ),
-                child: Icon(Icons.directions_bike_rounded,
-                    color: _color, size: 26)),
+                child: QuadIcon(color: _color, size: 26)),
               Positioned(bottom: 2, right: 2,
                 child: Container(
                   width: 12, height: 12,

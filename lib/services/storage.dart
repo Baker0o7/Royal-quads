@@ -130,6 +130,15 @@ class StorageService {
     return booking;
   }
 
+  static Future<void> deleteBooking(int id) async {
+    final bookings = getBookings().where((b) => b.id != id).toList();
+    await saveBookings(bookings);
+    // Free the quad if booking was active
+    final deleted = getBookings().firstWhere((b) => b.id == id,
+        orElse: () => throw Exception());
+    await updateQuad(deleted.quadId, status: 'available');
+  }
+
   static Future<void> toggleGuidePaid(int id) async {
     final bookings = getBookings().map((b) {
       if (b.id != id) return b;

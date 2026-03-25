@@ -346,7 +346,7 @@ class _HistoryTile extends StatelessWidget {
                     fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
                 const SizedBox(height: 3),
                 Row(children: [
-                  Icon(Icons.directions_bike_rounded, size: 11, color: context.rq.muted),
+                  QuadIcon(size: 11, color: context.rq.muted),
                   const SizedBox(width: 3),
                   Text(booking.quadName,
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
@@ -440,6 +440,42 @@ class _HistoryTile extends StatelessWidget {
                 '${booking.startTime.hour.toString().padLeft(2,'0')}:'
                 '${booking.startTime.minute.toString().padLeft(2,'0')}',
                 style: TextStyle(color: context.rq.muted, fontSize: 10)),
+              const SizedBox(height: 6),
+              GestureDetector(
+                onTap: () async {
+                  final ok = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Delete Booking?'),
+                      content: Text(
+                          'Delete ${booking.quadName} · '
+                          '${booking.duration} min · '
+                          '${booking.totalPaid.kes} KES?'),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel')),
+                        TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete',
+                                style: TextStyle(color: kRed))),
+                      ],
+                    ),
+                  );
+                  if (ok == true && context.mounted) {
+                    await context.read<AppProvider>().deleteBooking(booking.id);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: kRed.withAlpha(12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.delete_outline_rounded,
+                      size: 15, color: kRed),
+                ),
+              ),
             ]),
           ]),
         ),

@@ -135,6 +135,20 @@ class AppProvider extends ChangeNotifier {
     return booking;
   }
 
+  Future<void> deleteBooking(int id) async {
+    // Remove from history — get booking before deleting for quad release
+    final bookings = StorageService.getBookings();
+    final b = bookings.firstWhere((b) => b.id == id,
+        orElse: () => throw Exception('Booking not found'));
+    final remaining = bookings.where((x) => x.id != id).toList();
+    await StorageService.saveBookings(remaining);
+    // Free quad if needed
+    if (b.status == 'active') {
+      await StorageService.updateQuad(b.quadId, status: 'available');
+    }
+    await loadAll();
+  }
+
   Future<void> toggleGuidePaid(int id) async {
     await StorageService.toggleGuidePaid(id);
     await loadAll();

@@ -794,8 +794,7 @@ class _LiveRideTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: overtime ? kRed.withAlpha(15) : kAccent.withAlpha(12),
             borderRadius: BorderRadius.circular(12)),
-          child: Icon(Icons.directions_bike_rounded,
-              color: overtime ? kRed : kAccent, size: 22)),
+          child: QuadIcon(color: overtime ? kRed : kAccent, size: 22)),
         const SizedBox(width: 12),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1148,7 +1147,7 @@ class _EntryRow extends StatelessWidget {
         decoration: const InputDecoration(
             isDense: true,
             labelText: 'Select Quad',
-            prefixIcon: Icon(Icons.directions_bike_rounded, size: 18)),
+            prefixIcon: QuadIcon(size: 18, color: kAccent)),
         value: entry.quadId,
         items: available.map((q) => DropdownMenuItem(
             value: q.id, child: Text(q.name))).toList(),

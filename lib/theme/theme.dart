@@ -429,3 +429,17 @@ Color heroBg(BuildContext context) {
       ? kHeroFrom
       : Color.lerp(primary, Colors.black, 0.45)!;
 }
+
+// ── Quad Icon (replaces bike icon throughout app) ─────────────────────────────
+class QuadIcon extends StatelessWidget {
+  final Color color;
+  final double size;
+  const QuadIcon({super.key, required this.color, this.size = 24});
+  @override
+  Widget build(BuildContext context) => Image.asset(
+    'assets/images/quad_icon.png',
+    width: size, height: size,
+    color: color,
+    colorBlendMode: BlendMode.srcIn,
+  );
+}

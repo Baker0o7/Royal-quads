@@ -632,8 +632,7 @@ class _QuadCardState extends State<_QuadCard>
                             : kAccent.withAlpha(12),
                         borderRadius: BorderRadius.circular(11),
                       ),
-                      child: Icon(Icons.directions_bike_rounded,
-                          color: sel ? kAccent2 : kAccent, size: 20)),
+                      child: QuadIcon(color: sel ? kAccent2 : kAccent, size: 20)),
                     const Spacer(),
                     if (!isAvail && !sel)
                       Container(
@@ -708,8 +707,7 @@ class _ActiveTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: overtime ? kRed.withAlpha(20) : kAccent.withAlpha(15),
                   borderRadius: BorderRadius.circular(13)),
-                child: Icon(Icons.directions_bike_rounded,
-                    color: overtime ? kRed : kAccent, size: 22)),
+                child: QuadIcon(color: overtime ? kRed : kAccent, size: 22)),
               const SizedBox(width: 12),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
