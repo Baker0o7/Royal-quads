@@ -742,6 +742,7 @@ class _BRCState extends State<_BackupRestoreCard> {
   bool _busy = false;
   String? _lastBackupPath;
   String? _status;
+  int _refreshKey = 0;
 
   Future<Directory> _getDir() async {
     final base = await getApplicationDocumentsDirectory();
@@ -763,6 +764,7 @@ class _BRCState extends State<_BackupRestoreCard> {
         _lastBackupPath = file.path;
         _status = '✅ Saved to Documents/$name';
         _busy = false;
+        _refreshKey++;
       });
     } catch (e) {
       setState(() { _status = '❌ Error: $e'; _busy = false; });
@@ -819,7 +821,7 @@ class _BRCState extends State<_BackupRestoreCard> {
   // ── Delete backup file ─────────────────────────────────────────────────────
   Future<void> _delete(File file) async {
     await file.delete();
-    setState(() {});
+    setState(() => _refreshKey++);
   }
 
   @override
@@ -854,6 +856,7 @@ class _BRCState extends State<_BackupRestoreCard> {
         const SizedBox(height: 8),
 
         FutureBuilder<List<File>>(
+          key: ValueKey(_refreshKey),
           future: _listBackups(),
           builder: (ctx, snap) {
             final files = snap.data ?? [];

@@ -88,7 +88,7 @@ class _AdminScreenState extends State<AdminScreen> {
         child: SafeArea(top: false, child: SizedBox(height: 64,
           child: Row(children: [
             _NavItem(Icons.dashboard_rounded,     'Overview',  0, _tab, () => setState(() => _tab = 0)),
-            _NavItem(Icons.directions_bike_rounded,'Fleet',     1, _tab, () => setState(() => _tab = 1)),
+            _NavItem(null,'Fleet',1,_tab,()=>setState(()=>_tab=1),iconWidget: const SizedBox()),
             _NavItem(Icons.history_rounded,        'History',   2, _tab, () => setState(() => _tab = 2)),
             _NavItem(Icons.settings_rounded,       'Tools',     3, _tab, () => setState(() => _tab = 3)),
             _NavItem(Icons.analytics_rounded,      'Analytics', 4, _tab, () => setState(() => _tab = 4)),
@@ -101,11 +101,13 @@ class _AdminScreenState extends State<AdminScreen> {
 }
 
 class _NavItem extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget?   iconWidget;
   final String label;
   final int index, current;
   final VoidCallback onTap;
-  const _NavItem(this.icon, this.label, this.index, this.current, this.onTap);
+  const _NavItem(this.icon, this.label, this.index, this.current, this.onTap,
+      {this.iconWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -127,9 +129,12 @@ class _NavItem extends StatelessWidget {
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Icon(icon,
-                  color: active ? kAccent : Colors.white38,
-                  size: 22),
+              child: iconWidget != null
+                  ? QuadIcon(size: 22,
+                      color: active ? kAccent : Colors.white38)
+                  : Icon(icon!,
+                      color: active ? kAccent : Colors.white38,
+                      size: 22),
             ),
             const SizedBox(height: 2),
             AnimatedDefaultTextStyle(

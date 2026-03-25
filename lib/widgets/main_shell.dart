@@ -68,9 +68,12 @@ class MainShell extends StatelessWidget {
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Icon(t.icon,
-                              color: isActive ? accent : Colors.white38,
-                              size: 21),
+                          child: t.quad
+                              ? QuadIcon(size: 21,
+                                  color: isActive ? accent : Colors.white38)
+                              : Icon(t.icon,
+                                  color: isActive ? accent : Colors.white38,
+                                  size: 21),
                         ),
                         if (showBadge)
                           Positioned(top: -3, right: -3,
