@@ -823,6 +823,7 @@ class _LiveRideTile extends StatelessWidget {
 // ── Quick Start Sheet — unlimited quads ──────────────────────────────────────
 class _QSSEntry {
   int?   quadId;
+  String payMethod = 'cash'; // per-quad payment method
   final  durCtrl   = TextEditingController();
   final  priceCtrl = TextEditingController();
   void dispose() { durCtrl.dispose(); priceCtrl.dispose(); }
@@ -839,7 +840,6 @@ class _QuickStartSheet extends StatefulWidget {
 class _QSSState extends State<_QuickStartSheet> {
   final List<_QSSEntry> _entries = [_QSSEntry()];
   final _guideCtrl = TextEditingController();
-  String _payMethod = 'cash'; // 'cash' or 'mpesa'
   bool _loading = false;
 
   @override
@@ -910,26 +910,6 @@ class _QSSState extends State<_QuickStartSheet> {
                 : null,
             ),
           ),
-        ),
-
-        // ── Payment method ───────────────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-          child: Row(children: [
-            Expanded(child: _PayChip(
-              label: 'Cash',
-              icon: Icons.payments_rounded,
-              selected: _payMethod == 'cash',
-              onTap: () => setState(() => _payMethod = 'cash'),
-            )),
-            const SizedBox(width: 10),
-            Expanded(child: _PayChip(
-              label: 'M-Pesa',
-              icon: Icons.phone_android_rounded,
-              selected: _payMethod == 'mpesa',
-              onTap: () => setState(() => _payMethod = 'mpesa'),
-            )),
-          ]),
         ),
 
         // ── Scrollable entries ────────────────────────────────────────────────
@@ -1025,19 +1005,21 @@ class _QSSState extends State<_QuickStartSheet> {
                     (total - comm).kes + ' KES',
                     kAccent2, bold: true),
                 const SizedBox(height: 8),
-                Row(children: [
-                  Icon(
-                    _payMethod == 'cash'
+                ..._entries.map((e) => Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Row(children: [
+                    Icon(e.payMethod == 'cash'
                         ? Icons.payments_rounded
                         : Icons.phone_android_rounded,
-                    size: 13, color: kAccent),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Payment: ${_payMethod == 'cash' ? 'Cash' : 'M-Pesa'}',
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700,
-                        color: kAccent)),
-                ]),
+                        size: 13, color: kAccent),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Quad ${_entries.indexOf(e)+1}: ${e.payMethod == 'cash' ? 'Cash' : 'M-Pesa'}',
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w700,
+                          color: kAccent)),
+                  ]),
+                )).toList(),
               ]),
             ),
           );
@@ -1090,7 +1072,7 @@ class _QSSState extends State<_QuickStartSheet> {
                     customerPhone: '0000000000',
                     duration: int.parse(e.durCtrl.text.trim()),
                     price: int.parse(e.priceCtrl.text.trim()),
-                    mpesaRef: _payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
+                    mpesaRef: e.payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
                     guideName: _guideCtrl.text.trim().isEmpty ? null : _guideCtrl.text.trim(),
                   );
                   bookings.add(b.id);
@@ -1200,6 +1182,23 @@ class _EntryRow extends StatelessWidget {
             suffixStyle: TextStyle(color: context.rq.muted, fontSize: 12),
           ),
           onChanged: (_) => onChanged(),
+        )),
+      ]),
+      const SizedBox(height: 10),
+      // Per-quad payment method
+      Row(children: [
+        Expanded(child: _PayChip(
+          label: 'Cash',
+          icon: Icons.payments_rounded,
+          selected: entry.payMethod == 'cash',
+          onTap: () { entry.payMethod = 'cash'; onChanged(); },
+        )),
+        const SizedBox(width: 8),
+        Expanded(child: _PayChip(
+          label: 'M-Pesa',
+          icon: Icons.phone_android_rounded,
+          selected: entry.payMethod == 'mpesa',
+          onTap: () { entry.payMethod = 'mpesa'; onChanged(); },
         )),
       ]),
     ]);
