@@ -68,7 +68,7 @@ class MainShell extends StatelessWidget {
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: t.quad
+                          child: (t.path == '/' || t.path == '/admin' && false)
                               ? QuadIcon(size: 21,
                                   color: isActive ? accent : Colors.white38)
                               : Icon(t.icon,
