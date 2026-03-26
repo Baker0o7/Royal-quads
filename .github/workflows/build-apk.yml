@@ -53,34 +53,51 @@ jobs:
           pip install Pillow --quiet --break-system-packages
           python3 scripts/inject-icons.py
 
-      - name: Build APK (Gradle direct)
-        working-directory: android
+      - name: Build release APK
         run: |
-          ./gradlew assembleRelease \
-            -Pflutter.sdk="$FLUTTER_ROOT" \
-            --no-daemon \
-            --stacktrace 2>&1 | tail -40
+          # Capture ALL flutter output — success line says exactly where APK is
+          set +e
+          flutter build apk --release --no-tree-shake-icons 2>&1 | tee /tmp/flutter_build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          set -e
 
-      - name: Stage APK
-        run: |
-          # Gradle always writes here — no Flutter scanner involved
-          APK="android/app/build/outputs/apk/release/app-release.apk"
+          echo "Flutter exit: $BUILD_EXIT"
 
-          if [ ! -f "$APK" ]; then
-            echo "Scanning for APK..."
-            APK=$(find . -name "app-release.apk" 2>/dev/null \
+          # Flutter prints: "Built build/app/outputs/flutter-apk/app-release.apk"
+          APK_LINE=$(grep -o 'Built [^ ]*app-release\.apk' /tmp/flutter_build.log | head -1 || true)
+          if [ -n "$APK_LINE" ]; then
+            APK="${APK_LINE#Built }"
+            echo "Flutter reported: $APK"
+          fi
+
+          # Try known paths if not found in output
+          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
+            for TRY in \
+              "build/app/outputs/flutter-apk/app-release.apk" \
+              "build/app/outputs/apk/release/app-release.apk" \
+              "android/app/build/outputs/apk/release/app-release.apk"
+            do
+              if [ -f "$TRY" ]; then APK="$TRY"; echo "Found: $APK"; break; fi
+            done
+          fi
+
+          # Last resort
+          if [ -z "$APK" ] || [ ! -f "$APK" ]; then
+            APK=$(find "$GITHUB_WORKSPACE" -name "app-release.apk" 2>/dev/null \
                   | grep -v intermediates | head -1)
           fi
 
           if [ -z "$APK" ] || [ ! -f "$APK" ]; then
-            echo "ERROR: No APK found"
-            find . -name "*.apk" 2>/dev/null | grep -v intermediates || true
-            exit 1
+            echo "=== Build log tail ==="
+            tail -30 /tmp/flutter_build.log
+            echo "=== Disk usage ==="
+            df -h
+            exit "${BUILD_EXIT:-1}"
           fi
 
-          echo "Found: $APK ($(du -sh "$APK" | cut -f1))"
           mkdir -p output
           cp "$APK" output/Royal-Quads.apk
+          echo "✅ $(du -sh output/Royal-Quads.apk | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -105,11 +122,11 @@ jobs:
             ### What's in this build
             - **Admin-only** — PIN-protected operator tool
             - **Backup & Restore** — export/import all data as JSON
-            - **Quick Start** — guide name, commission, Cash/M-Pesa selector
-            - **History** — guide payment toggle (✅/🚫) + commission per ride
+            - **Quick Start** — per-quad Cash/M-Pesa, guide name + commission
+            - **History** — delete booking + guide payment toggle
             - **Live Ride Timer** — pause button + live notification
             - **Website Control** — manage quads, prices, promos from app
-            - **Dashboard** — revenue, analytics, daily PDF report
+            - **Quad icon** throughout the app
             - **6 colour themes** — Ocean Breeze light by default
 
             ### Install
