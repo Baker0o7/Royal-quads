@@ -827,10 +827,11 @@ class _LiveRideTile extends StatelessWidget {
 // ── Quick Start Sheet — unlimited quads ──────────────────────────────────────
 class _QSSEntry {
   int?   quadId;
-  String payMethod = 'cash'; // per-quad payment method
+  String payMethod = 'cash';
   final  durCtrl   = TextEditingController();
   final  priceCtrl = TextEditingController();
-  void dispose() { durCtrl.dispose(); priceCtrl.dispose(); }
+  final  guideCtrl = TextEditingController();
+  void dispose() { durCtrl.dispose(); priceCtrl.dispose(); guideCtrl.dispose(); }
 }
 
 // Commission rate (20%)
@@ -843,13 +844,11 @@ class _QuickStartSheet extends StatefulWidget {
 
 class _QSSState extends State<_QuickStartSheet> {
   final List<_QSSEntry> _entries = [_QSSEntry()];
-  final _guideCtrl = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
     for (final e in _entries) e.dispose();
-    _guideCtrl.dispose();
     super.dispose();
   }
 
@@ -896,25 +895,6 @@ class _QSSState extends State<_QuickStartSheet> {
           ]),
         ),
         const SizedBox(height: 14),
-
-        // ── Guide name ───────────────────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-          child: TextFormField(
-            controller: _guideCtrl,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: 'Guide Name',
-              hintText: 'e.g. Hassan',
-              prefixIcon: const Icon(Icons.person_rounded, size: 18),
-              suffixIcon: _guideCtrl.text.isNotEmpty
-                ? GestureDetector(
-                    onTap: () { _guideCtrl.clear(); setState(() {}); },
-                    child: const Icon(Icons.close_rounded, size: 16))
-                : null,
-            ),
-          ),
-        ),
 
         // ── Scrollable entries ────────────────────────────────────────────────
         ConstrainedBox(
@@ -996,9 +976,7 @@ class _QSSState extends State<_QuickStartSheet> {
                 _CommRow('Total charged', total.kes + ' KES', context.rq.text),
                 const SizedBox(height: 6),
                 _CommRow(
-                  guide.isNotEmpty
-                      ? 'Guide ($guide) 20%'
-                      : 'Guide commission 20%',
+                  'Guide commission 20%',
                   comm.kes + ' KES',
                   kGreen,
                 ),
@@ -1045,8 +1023,7 @@ class _QSSState extends State<_QuickStartSheet> {
                       return _entries.length == 1
                           ? 'Start Ride' : 'Start ${_entries.length} Rides';
                     }
-                    final guide = _guideCtrl.text.trim();
-                    return '${_entries.length == 1 ? 'Start Ride' : 'Start ${_entries.length} Rides'}'
+                      return '${_entries.length == 1 ? 'Start Ride' : 'Start ${_entries.length} Rides'}'
                         '  ·  ${total.kes} KES';
                   }(),
             icon: Icons.play_arrow_rounded,
@@ -1077,7 +1054,7 @@ class _QSSState extends State<_QuickStartSheet> {
                     duration: int.parse(e.durCtrl.text.trim()),
                     price: int.parse(e.priceCtrl.text.trim()),
                     mpesaRef: e.payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
-                    guideName: _guideCtrl.text.trim().isEmpty ? null : _guideCtrl.text.trim(),
+                    guideName: e.guideCtrl.text.trim().isEmpty ? null : e.guideCtrl.text.trim(),
                   );
                   bookings.add(b.id);
                 }
@@ -1157,6 +1134,18 @@ class _EntryRow extends StatelessWidget {
         items: available.map((q) => DropdownMenuItem(
             value: q.id, child: Text(q.name))).toList(),
         onChanged: (v) { entry.quadId = v; onChanged(); },
+      ),
+      const SizedBox(height: 10),
+
+      // Guide name per quad
+      TextFormField(
+        controller: entry.guideCtrl,
+        onChanged: (_) => onChanged(),
+        decoration: InputDecoration(
+          isDense: true,
+          labelText: 'Guide Name (optional)',
+          prefixIcon: const Icon(Icons.person_rounded, size: 18),
+        ),
       ),
       const SizedBox(height: 10),
 

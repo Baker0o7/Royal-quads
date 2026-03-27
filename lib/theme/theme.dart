@@ -77,15 +77,23 @@ class HeroCard extends StatelessWidget {
   const HeroCard({super.key, required this.child,
       this.padding, this.radius = 24, this.shadows});
   @override
-  Widget build(BuildContext context) => Container(
-    padding: padding,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(radius),
-      gradient: kHeroGradient,
-      boxShadow: shadows ?? kShadowLg,
-    ),
-    child: child,
-  );
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: isDark ? kHeroGradient : LinearGradient(
+          colors: [context.rq.card, context.rq.bg2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: isDark ? null : Border.all(color: context.rq.border),
+        boxShadow: shadows ?? (isDark ? kShadowLg : kShadowSm),
+      ),
+      child: child,
+    );
+  }
 }
 
 class AppCard extends StatelessWidget {
