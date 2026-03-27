@@ -447,7 +447,7 @@ class _PinCard extends StatelessWidget {
               color: kIndigo.withAlpha(50), blurRadius: 8,
               offset: const Offset(0, 3))],
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.edit_rounded, color: context.rq.text, size: 14),
           SizedBox(width: 6),
           Text('Change', style: TextStyle(
@@ -614,7 +614,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
                             letterSpacing: 0.3)),
                       ),
                     ]),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(l.description, style: TextStyle(
                         color: context.rq.muted, fontSize: 12, height: 1.3)),
                     Text(l.date.dateOnly,
@@ -720,7 +720,7 @@ class _ToolDialogState extends State<_ToolDialog> {
               else setState(() => _loading = false);
             },
             child: _loading
-                ? const SizedBox(width: 18, height: 18,
+                ? SizedBox(width: 18, height: 18,
                     child: CircularProgressIndicator(
                         color: context.rq.text, strokeWidth: 2))
                 : const Text('Save',
@@ -864,7 +864,7 @@ class _BRCState extends State<_BackupRestoreCard> {
           Text(_status!, style: TextStyle(fontSize: 12, color: context.rq.muted)),
         ],
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Text('Saved Backups',
             style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
                 color: context.rq.muted, letterSpacing: .5)),
@@ -900,7 +900,7 @@ class _BRCState extends State<_BackupRestoreCard> {
                     border: Border.all(color: context.rq.border),
                   ),
                   child: Row(children: [
-                    const Icon(Icons.description_rounded, size: 16, color: kIndigo),
+                    Icon(Icons.description_rounded, size: 16, color: kIndigo),
                     SizedBox(width: 8),
                     Expanded(child: Text(display,
                         style: TextStyle(fontSize: 12,

@@ -125,7 +125,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                     Text(_date!.dateOnly, style: const TextStyle(
                         color: context.rq.text, fontSize: 11,
                         fontWeight: FontWeight.w700)),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     GestureDetector(
                       onTap: () => setState(() => _date = null),
                       child: Icon(Icons.close_rounded,
@@ -284,7 +284,7 @@ class _EmptyHistory extends StatelessWidget {
         style: TextStyle(fontFamily: 'Playfair',
             fontSize: 17, fontWeight: FontWeight.w700, color: context.rq.text),
       ),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       Text(
         filtered ? 'Try adjusting your search or filters'
             : 'Completed rides will appear here',
@@ -344,15 +344,15 @@ class _HistoryTile extends StatelessWidget {
               children: [
                 Text(booking.customerName, style: TextStyle(
                     fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Row(children: [
                   QuadIcon(size: 11, color: context.rq.muted),
-                  const SizedBox(width: 3),
+                  SizedBox(width: 3),
                   Text(booking.quadName,
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Icon(Icons.timer_rounded, size: 11, color: context.rq.muted),
-                  const SizedBox(width: 3),
+                  SizedBox(width: 3),
                   Text('${booking.duration} min',
                       style: TextStyle(color: context.rq.muted, fontSize: 12)),
                 ]),
@@ -378,16 +378,16 @@ class _HistoryTile extends StatelessWidget {
                 ],
                 // Guide row
                 if (booking.guideName != null && booking.guideName!.isNotEmpty) ...[
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   Row(children: [
                     Icon(Icons.person_rounded, size: 11,
                         color: context.rq.muted),
-                    const SizedBox(width: 3),
+                    SizedBox(width: 3),
                     Text(booking.guideName!,
                         style: TextStyle(fontSize: 11,
                             color: context.rq.muted,
                             fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     // Commission amount
                     Text('·  ${(booking.totalPaid * 0.20).round().kes} KES',
                         style: TextStyle(fontSize: 10,
@@ -435,7 +435,7 @@ class _HistoryTile extends StatelessWidget {
                     children: List.generate(booking.rating!, (_) =>
                         const Icon(Icons.star_rounded, color: kAccent, size: 10))),
               ],
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 '${booking.startTime.hour.toString().padLeft(2,'0')}:'
                 '${booking.startTime.minute.toString().padLeft(2,'0')}',
@@ -674,12 +674,12 @@ class _ExportSheetState extends State<_ExportSheet> {
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Instructions
         Row(children: [
           Icon(Icons.info_outline_rounded, size: 14, color: context.rq.muted),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(child: Text(
             'Copy → Open Google Sheets → paste in cell A1.',
             style: TextStyle(color: context.rq.muted, fontSize: 12),

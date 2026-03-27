@@ -266,11 +266,11 @@ class _PrebookScreenState extends State<PrebookScreen>
                               if (sel)
                                 const Icon(Icons.check_circle_rounded,
                                     color: kAccent, size: 12),
-                              if (sel) const SizedBox(height: 2),
+                              if (sel) SizedBox(height: 2),
                               Text(p['label'] as String, style: TextStyle(
                                   fontWeight: FontWeight.w800, fontSize: 13,
                                   color: sel ? kAccent2 : context.rq.text)),
-                              const SizedBox(height: 2),
+                              SizedBox(height: 2),
                               Text('${(p['price'] as int).kes} KES',
                                   style: TextStyle(fontSize: 11,
                                       color: sel ? context.rq.muted : context.rq.muted)),
@@ -318,7 +318,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                         elevation: 0,
                       ),
                       child: _loading
-                          ? const SizedBox(width: 22, height: 22,
+                          ? SizedBox(width: 22, height: 22,
                               child: CircularProgressIndicator(
                                   color: context.rq.text, strokeWidth: 2.5))
                           : const Row(
@@ -364,7 +364,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(children: [
     Icon(icon, color: kAccent, size: 16),
-    const SizedBox(width: 8),
+    SizedBox(width: 8),
     Text(text, style: TextStyle(fontFamily: 'Playfair',
         fontSize: 16, fontWeight: FontWeight.w700, color: context.rq.text)),
   ]);
@@ -426,11 +426,11 @@ class _DateTimePicker extends StatelessWidget {
             children: [
               Text(dayLabel, style: TextStyle(
                   fontWeight: FontWeight.w700, fontSize: 15, color: context.rq.text)),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Row(children: [
                 Icon(Icons.access_time_rounded,
                     size: 12, color: context.rq.muted),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(timeLabel, style: TextStyle(
                     color: context.rq.muted, fontSize: 13, fontWeight: FontWeight.w600)),
               ]),
@@ -486,8 +486,8 @@ class _BookingSummary extends StatelessWidget {
             color: kAccent.withAlpha(20),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(Icons.bookmark_rounded, color: kAccent, size: 18)),
-        const SizedBox(width: 10),
+          child: Icon(Icons.bookmark_rounded, color: kAccent, size: 18)),
+        SizedBox(width: 10),
         Text('Booking Summary', style: TextStyle(
             color: context.rq.muted, fontSize: 12,
             fontWeight: FontWeight.w600, letterSpacing: 0.5)),
@@ -518,8 +518,8 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(children: [
     Icon(icon, size: 14, color: context.rq.muted),
-    const SizedBox(width: 8),
-    Text(text, style: const TextStyle(color: context.rq.text, fontSize: 13)),
+    SizedBox(width: 8),
+    Text(text, style: TextStyle(color: context.rq.text, fontSize: 13)),
   ]);
 }
 
@@ -539,11 +539,11 @@ class _EmptyBookings extends StatelessWidget {
         ),
         child: const Icon(Icons.calendar_month_rounded,
             color: kAccent, size: 36)),
-      const SizedBox(height: 16),
+      SizedBox(height: 16),
       Text('No pre-bookings yet', style: TextStyle(
           fontFamily: 'Playfair', fontSize: 18,
           fontWeight: FontWeight.w700, color: context.rq.text)),
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       Text('Schedule rides in advance for your customers',
           style: TextStyle(color: context.rq.muted, fontSize: 13),
           textAlign: TextAlign.center),
@@ -591,7 +591,7 @@ class _BookingsList extends StatelessWidget {
           _GroupHeader('Upcoming', kAccent, '${upcoming.length}'),
           ...upcoming.map((b) => _PrebookTile(
               prebooking: b, onStatusChange: onStatusChange)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
         ],
         if (past.isNotEmpty) ...[
           _GroupHeader('Past', context.rq.muted, '${past.length}'),
@@ -674,7 +674,7 @@ class _PrebookTile extends StatelessWidget {
               children: [
                 Text(prebooking.customerName, style: TextStyle(
                     fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(prebooking.customerPhone,
                     style: TextStyle(color: context.rq.muted, fontSize: 12)),
               ],
@@ -726,10 +726,10 @@ class _PrebookTile extends StatelessWidget {
                   onStarted: () => onStatusChange(prebooking.id, 'completed')),
           ]),
               if (prebooking.notes != null) ...[
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Row(children: [
                   Icon(Icons.sticky_note_2_outlined, size: 11, color: context.rq.muted),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   Expanded(child: Text(prebooking.notes!,
                       style: TextStyle(color: context.rq.muted, fontSize: 11),
                       maxLines: 1, overflow: TextOverflow.ellipsis)),

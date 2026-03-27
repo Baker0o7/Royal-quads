@@ -374,7 +374,7 @@ class _EodCard extends StatelessWidget {
         width: double.infinity,
         child: ElevatedButton.icon(
           icon: generating
-              ? const SizedBox(width: 18, height: 18,
+              ? SizedBox(width: 18, height: 18,
                   child: CircularProgressIndicator(
                       color: context.rq.text, strokeWidth: 2))
               : const Icon(Icons.picture_as_pdf_rounded, size: 18),
@@ -522,7 +522,7 @@ class _PeakHoursHeatmap extends StatelessWidget {
                           borderRadius: BorderRadius.circular(2)),
                     ),
                   )),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   if (h % 6 == 0)
                     Text('$h', style: TextStyle(
                         color: context.rq.muted, fontSize: 7)),
@@ -550,7 +550,7 @@ class _Legend extends StatelessWidget {
       children: [
     Container(width: 8, height: 8,
         decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-    const SizedBox(width: 4),
+    SizedBox(width: 4),
     Text(label, style: TextStyle(color: context.rq.muted, fontSize: 10)),
   ]);
 }
@@ -883,8 +883,8 @@ class _LoyaltyOverviewCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(gradient: kGoldGradient,
               borderRadius: BorderRadius.circular(14)),
-          child: const Row(children: [
-            const Icon(Icons.workspace_premium_rounded,
+          child: Row(children: [
+            Icon(Icons.workspace_premium_rounded,
                 color: context.rq.text, size: 22),
             SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
@@ -983,7 +983,7 @@ class _LoyaltyOverviewCard extends StatelessWidget {
                         color: context.rq.muted))),
                 const SizedBox(width: 4),
                 Icon(icon, size: 16, color: col),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(child: Text(maskedPhone,
                     style: TextStyle(fontWeight: FontWeight.w600,
                         fontSize: 12, color: context.rq.text))),
@@ -1090,7 +1090,7 @@ class _AddIncidentSheetState extends State<_AddIncidentSheet> {
               backgroundColor: kRed,
               padding: const EdgeInsets.symmetric(vertical: 14)),
           child: _loading
-              ? const SizedBox(width: 18, height: 18,
+              ? SizedBox(width: 18, height: 18,
                   child: CircularProgressIndicator(
                       color: context.rq.text, strokeWidth: 2))
               : const Text('Log Incident',

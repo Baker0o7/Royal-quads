@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       child: CircleAvatar(radius: 34,
                           backgroundImage: const AssetImage('assets/images/logo.png'),
                           backgroundColor: Colors.transparent)),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     Text('Royal Quad Bikes', style: TextStyle(
                         fontFamily: 'Playfair', fontSize: 22,
                         fontWeight: FontWeight.w700, color: context.rq.text,
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       Container(width: 4, height: 4,
                           decoration: const BoxDecoration(
                               color: kAccent, shape: BoxShape.circle)),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       Text('MAMBRUI SAND DUNES · KENYA',
                           style: TextStyle(color: context.rq.muted,
                               fontSize: 10, letterSpacing: 2)),
@@ -442,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         color: kAccent.withAlpha(50), blurRadius: 8,
                         offset: const Offset(0, 3))],
                   ),
-                  child: const Text('Apply', style: TextStyle(
+                  child: Text('Apply', style: TextStyle(
                       color: context.rq.text, fontWeight: FontWeight.w700)),
                 ),
               ),
@@ -507,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Row(children: [
                   const Icon(Icons.receipt_long_rounded,
                       color: kAccent, size: 20),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
                   Expanded(child: Text(
                     '${_selectedDuration} min ride',
                     style: const TextStyle(
@@ -665,7 +665,7 @@ class _QuadCardState extends State<_QuadCard>
                     boxShadow: [BoxShadow(
                         color: kAccent.withAlpha(60), blurRadius: 8)],
                   ),
-                  child: const Icon(Icons.check_rounded,
+                  child: Icon(Icons.check_rounded,
                       color: context.rq.text, size: 13))),
           ]),
         ),
@@ -736,7 +736,7 @@ class _ActiveTile extends StatelessWidget {
                         fontFamily: 'monospace',
                         color: overtime ? kRed : kAccent)),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(overtime ? 'overtime' : 'remaining',
                     style: TextStyle(
                         color: overtime
@@ -898,7 +898,7 @@ class _Step extends StatelessWidget {
             border: Border.all(color: kGreen.withAlpha(50))),
         child: Center(child: Text(num, style: const TextStyle(
             color: kGreen, fontSize: 10, fontWeight: FontWeight.w800)))),
-      const SizedBox(width: 8),
+      SizedBox(width: 8),
       Text(text, style: TextStyle(color: context.rq.text, fontSize: 13)),
     ]),
   );
@@ -937,10 +937,10 @@ class _EmptyState extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 32),
     child: Column(children: [
       Icon(icon, size: 48, color: Theme.of(context).dividerColor),
-      const SizedBox(height: 12),
+      SizedBox(height: 12),
       Text(title, style: TextStyle(
           fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface.withAlpha(120))),
-      const SizedBox(height: 4),
+      SizedBox(height: 4),
       Text(sub, style: TextStyle(color: context.rq.muted, fontSize: 12)),
     ]),
   );
@@ -976,7 +976,7 @@ class _StartButton extends StatelessWidget {
                   children: [
                     Icon(Icons.info_outline_rounded,
                         size: 13, color: context.rq.muted.withAlpha(160)),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     Text(_hints[step.clamp(0, 3)],
                         style: TextStyle(
                             color: context.rq.muted, fontSize: 12)),
@@ -1013,7 +1013,7 @@ class _StartButton extends StatelessWidget {
               onTap: ready && !loading ? onTap : null,
               child: Center(
                 child: loading
-                    ? const SizedBox(width: 24, height: 24,
+                    ? SizedBox(width: 24, height: 24,
                         child: CircularProgressIndicator(
                             color: context.rq.text, strokeWidth: 2.5))
                     : Row(
@@ -1026,7 +1026,7 @@ class _StartButton extends StatelessWidget {
                             color: ready ? Colors.white : context.rq.muted,
                             size: 22,
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           Text(
                             ready ? 'Start Ride' : 'Start Ride',
                             style: TextStyle(
@@ -1100,7 +1100,7 @@ class _BookingStepper extends StatelessWidget {
           ),
           child: Center(
             child: isDone
-                ? const Icon(Icons.check_rounded, color: context.rq.text, size: 14)
+                ? Icon(Icons.check_rounded, color: context.rq.text, size: 14)
                 : Text('${dotIdx + 1}', style: TextStyle(
                     fontSize: 11, fontWeight: FontWeight.w800,
                     color: isActive ? Colors.white : context.rq.muted)),

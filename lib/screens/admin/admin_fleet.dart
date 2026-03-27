@@ -364,7 +364,7 @@ class _QuadDialogState extends State<_QuadDialog> {
               else setState(() => _loading = false);
             },
             child: _loading
-                ? const SizedBox(width: 18, height: 18,
+                ? SizedBox(width: 18, height: 18,
                     child: CircularProgressIndicator(
                         color: context.rq.text, strokeWidth: 2))
                 : const Text('Save', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -442,7 +442,7 @@ class _QuadCardState extends State<_QuadCard> {
                 Row(children: [
                   StatusBadge(widget.quad.status),
                   if (widget.quad.imei != null) ...[
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text('SN: ${widget.quad.imei}',
                         style: TextStyle(color: context.rq.muted, fontSize: 10,
                             fontFamily: 'monospace')),
@@ -516,7 +516,7 @@ class _MiniStat extends StatelessWidget {
     ),
     child: Row(children: [
       Icon(icon, color: color, size: 14),
-      const SizedBox(width: 6),
+      SizedBox(width: 6),
       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(value, style: TextStyle(
             color: color, fontWeight: FontWeight.w800, fontSize: 13)),
@@ -558,7 +558,7 @@ class _FleetStat extends StatelessWidget {
     Text(value, style: TextStyle(
         fontFamily: 'Playfair', fontSize: 22,
         fontWeight: FontWeight.w900, color: color)),
-    const SizedBox(height: 2),
+    SizedBox(height: 2),
     Text(label, style: const TextStyle(
         color: context.rq.muted, fontSize: 10, letterSpacing: 0.3)),
   ]));
