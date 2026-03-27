@@ -225,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           decoration: const BoxDecoration(
                               color: kAccent, shape: BoxShape.circle)),
                       const SizedBox(width: 6),
-                      const Text('MAMBRUI SAND DUNES · KENYA',
+                      Text('MAMBRUI SAND DUNES · KENYA',
                           style: TextStyle(color: context.rq.muted,
                               fontSize: 10, letterSpacing: 2)),
                       const SizedBox(width: 6),

@@ -128,7 +128,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () => setState(() => _date = null),
-                      child: const Icon(Icons.close_rounded,
+                      child: Icon(Icons.close_rounded,
                           color: context.rq.text, size: 14)),
                   ],
                 ]),
