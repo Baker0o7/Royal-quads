@@ -217,8 +217,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 10),
                     Text('Royal Quad Bikes', style: TextStyle(
                         fontFamily: 'Playfair', fontSize: 22,
-                        fontWeight: FontWeight.w700, color: Colors.white,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 8)])),
+                        fontWeight: FontWeight.w700, color: context.rq.text,
+                        shadows: [Shadow(color: context.rq.muted, blurRadius: 8)])),
                     const SizedBox(height: 2),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Container(width: 4, height: 4,
@@ -443,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         offset: const Offset(0, 3))],
                   ),
                   child: const Text('Apply', style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700)),
+                      color: context.rq.text, fontWeight: FontWeight.w700)),
                 ),
               ),
             ]),
@@ -511,7 +511,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   Expanded(child: Text(
                     '${_selectedDuration} min ride',
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w600))),
+                        color: context.rq.text, fontWeight: FontWeight.w600))),
                   Text('${effectivePrice.kes} KES',
                       style: const TextStyle(
                           fontFamily: 'Playfair', color: kAccent2,
@@ -666,7 +666,7 @@ class _QuadCardState extends State<_QuadCard>
                         color: kAccent.withAlpha(60), blurRadius: 8)],
                   ),
                   child: const Icon(Icons.check_rounded,
-                      color: Colors.white, size: 13))),
+                      color: context.rq.text, size: 13))),
           ]),
         ),
       ),
@@ -1015,7 +1015,7 @@ class _StartButton extends StatelessWidget {
                 child: loading
                     ? const SizedBox(width: 24, height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2.5))
+                            color: context.rq.text, strokeWidth: 2.5))
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -1100,7 +1100,7 @@ class _BookingStepper extends StatelessWidget {
           ),
           child: Center(
             child: isDone
-                ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                ? const Icon(Icons.check_rounded, color: context.rq.text, size: 14)
                 : Text('${dotIdx + 1}', style: TextStyle(
                     fontSize: 11, fontWeight: FontWeight.w800,
                     color: isActive ? Colors.white : context.rq.muted)),

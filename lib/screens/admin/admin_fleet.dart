@@ -366,7 +366,7 @@ class _QuadDialogState extends State<_QuadDialog> {
             child: _loading
                 ? const SizedBox(width: 18, height: 18,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
+                        color: context.rq.text, strokeWidth: 2))
                 : const Text('Save', style: TextStyle(fontWeight: FontWeight.w700)),
           )),
         ]),
@@ -427,7 +427,7 @@ class _QuadCardState extends State<_QuadCard> {
                   width: 12, height: 12,
                   decoration: BoxDecoration(
                     color: _color, shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5),
+                    border: Border.all(color: context.rq.text, width: 1.5),
                   ),
                 )),
             ]),
@@ -560,7 +560,7 @@ class _FleetStat extends StatelessWidget {
         fontWeight: FontWeight.w900, color: color)),
     const SizedBox(height: 2),
     Text(label, style: const TextStyle(
-        color: Colors.white30, fontSize: 10, letterSpacing: 0.3)),
+        color: context.rq.muted, fontSize: 10, letterSpacing: 0.3)),
   ]));
 }
 

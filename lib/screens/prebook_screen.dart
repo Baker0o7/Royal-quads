@@ -320,7 +320,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                       child: _loading
                           ? const SizedBox(width: 22, height: 22,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5))
+                                  color: context.rq.text, strokeWidth: 2.5))
                           : const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -519,7 +519,7 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(children: [
     Icon(icon, size: 14, color: context.rq.muted),
     const SizedBox(width: 8),
-    Text(text, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+    Text(text, style: const TextStyle(color: context.rq.text, fontSize: 13)),
   ]);
 }
 

@@ -123,7 +123,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   if (_date != null) ...[
                     SizedBox(width: 6),
                     Text(_date!.dateOnly, style: const TextStyle(
-                        color: Colors.white, fontSize: 11,
+                        color: context.rq.text, fontSize: 11,
                         fontWeight: FontWeight.w700)),
                     const SizedBox(width: 4),
                     GestureDetector(
@@ -713,14 +713,14 @@ class _ExportSheetState extends State<_ExportSheet> {
                       Icon(_copied
                           ? Icons.check_circle_rounded
                           : Icons.copy_rounded,
-                          color: Colors.white, size: 20),
+                          color: context.rq.text, size: 20),
                       const SizedBox(width: 10),
                       Text(
                         _copied
                             ? 'Copied! Paste into Google Sheets'
                             : 'Copy ${widget.bookings.length} rows to clipboard',
                         style: const TextStyle(
-                            color: Colors.white,
+                            color: context.rq.text,
                             fontWeight: FontWeight.w800,
                             fontSize: 14)),
                     ],

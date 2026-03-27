@@ -376,7 +376,7 @@ class _EodCard extends StatelessWidget {
           icon: generating
               ? const SizedBox(width: 18, height: 18,
                   child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2))
+                      color: context.rq.text, strokeWidth: 2))
               : const Icon(Icons.picture_as_pdf_rounded, size: 18),
           label: Text(generating ? 'Generating...' : 'Generate PDF Report'),
           onPressed: generating ? null : onGenerate,
@@ -885,14 +885,14 @@ class _LoyaltyOverviewCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(14)),
           child: const Row(children: [
             const Icon(Icons.workspace_premium_rounded,
-                color: Colors.white, size: 22),
+                color: context.rq.text, size: 22),
             SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Loyalty Programme', style: TextStyle(color: Colors.white,
+                Text('Loyalty Programme', style: TextStyle(color: context.rq.text,
                     fontWeight: FontWeight.w800, fontSize: 13)),
                 Text('1 pt per 100 KES \u00b7 Bronze\u2192Silver\u2192Gold\u2192Platinum',
-                    style: TextStyle(color: Colors.white60, fontSize: 10)),
+                    style: TextStyle(color: context.rq.muted, fontSize: 10)),
               ])),
           ]),
         ),
@@ -1092,7 +1092,7 @@ class _AddIncidentSheetState extends State<_AddIncidentSheet> {
           child: _loading
               ? const SizedBox(width: 18, height: 18,
                   child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2))
+                      color: context.rq.text, strokeWidth: 2))
               : const Text('Log Incident',
                   style: TextStyle(fontWeight: FontWeight.w700)),
         ),

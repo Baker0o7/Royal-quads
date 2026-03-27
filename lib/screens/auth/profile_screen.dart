@@ -452,7 +452,7 @@ class _AuthViewState extends State<_AuthView> {
               child: _loading
                   ? const SizedBox(width: 22, height: 22,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5))
+                          color: context.rq.text, strokeWidth: 2.5))
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -762,7 +762,7 @@ class _RideHistoryTile extends StatelessWidget {
                     size: 8, color: Colors.white),
                 const SizedBox(width: 2),
                 Text('${booking.rating}', style: const TextStyle(
-                    color: Colors.white, fontSize: 8,
+                    color: context.rq.text, fontSize: 8,
                     fontWeight: FontWeight.w800)),
               ]),
             )),
@@ -1054,7 +1054,7 @@ class _OtpScreenState extends State<_OtpScreen>
               child: widget.loading
                   ? const SizedBox(width: 22, height: 22,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5))
+                          color: context.rq.text, strokeWidth: 2.5))
                   : Text('Verify & Create Account',
                       style: TextStyle(fontSize: 15,
                           fontWeight: FontWeight.w700)),

@@ -448,10 +448,10 @@ class _PinCard extends StatelessWidget {
               offset: const Offset(0, 3))],
         ),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.edit_rounded, color: Colors.white, size: 14),
+          Icon(Icons.edit_rounded, color: context.rq.text, size: 14),
           SizedBox(width: 6),
           Text('Change', style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.w700,
+              color: context.rq.text, fontWeight: FontWeight.w700,
               fontSize: 13)),
         ]),
       ),
@@ -722,7 +722,7 @@ class _ToolDialogState extends State<_ToolDialog> {
             child: _loading
                 ? const SizedBox(width: 18, height: 18,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
+                        color: context.rq.text, strokeWidth: 2))
                 : const Text('Save',
                     style: TextStyle(fontWeight: FontWeight.w700)),
           )),
@@ -745,8 +745,23 @@ class _BRCState extends State<_BackupRestoreCard> {
   int _refreshKey = 0;
 
   Future<Directory> _getDir() async {
-    final base = await getApplicationDocumentsDirectory();
-    return base;
+    // Try external storage (visible in Files app) first
+    try {
+      final ext = await getExternalStorageDirectory();
+      if (ext != null) {
+        // Go up to the root of external storage and use Downloads
+        final parts = ext.path.split('/');
+        final rootIdx = parts.indexOf('Android');
+        if (rootIdx > 0) {
+          final root = parts.sublist(0, rootIdx).join('/');
+          final downloads = Directory('$root/Downloads/RoyalQuadBikes');
+          if (!await downloads.exists()) await downloads.create(recursive: true);
+          return downloads;
+        }
+      }
+    } catch (_) {}
+    // Fallback: app documents directory
+    return getApplicationDocumentsDirectory();
   }
 
   // ── Export ─────────────────────────────────────────────────────────────────
