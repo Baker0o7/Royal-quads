@@ -1,6 +1,6 @@
 {
   "_comment": "Managed by Royal Quad Bikes admin app.",
-  "_updated": "2026-03-23T15:24:56.688637Z",
+  "_updated": "2026-03-27T21:58:08.037665Z",
   "business": {
     "name": "Royal Quad Bikes",
     "location": "Mambrui Sand Dunes, Kilifi County, Kenya",
@@ -13,37 +13,31 @@
   "quads": [
     {
       "id": 1,
-      "name": "BARRACUDA 200CC",
+      "name": "Quad 1",
       "status": "available",
       "emoji": "🏍️"
     },
     {
       "id": 2,
-      "name": "BLACK SHAFT 200CC",
+      "name": "Quad 2",
       "status": "available",
       "emoji": "🏍️"
     },
     {
       "id": 3,
-      "name": "BLACK CHAIN 200CC",
+      "name": "Quad 3",
       "status": "available",
       "emoji": "🏍️"
     },
     {
       "id": 4,
-      "name": "RED 200CC",
+      "name": "Quad 4",
       "status": "available",
       "emoji": "🏍️"
     },
     {
       "id": 5,
-      "name": "BUGGY RED",
-      "status": "available",
-      "emoji": "🏍️"
-    },
-    {
-      "id": 6,
-      "name": "BUGGY ORG",
+      "name": "Quad 5",
       "status": "available",
       "emoji": "🏍️"
     }
