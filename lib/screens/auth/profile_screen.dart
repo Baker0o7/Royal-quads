@@ -450,7 +450,7 @@ class _AuthViewState extends State<_AuthView> {
                 elevation: 0,
               ),
               child: _loading
-                  ? const SizedBox(width: 22, height: 22,
+                  ? SizedBox(width: 22, height: 22,
                       child: CircularProgressIndicator(
                           color: context.rq.text, strokeWidth: 2.5))
                   : Row(
@@ -573,7 +573,7 @@ class _LoggedInView extends StatelessWidget {
                             fontFamily: 'Playfair', fontSize: 20,
                             fontWeight: FontWeight.w700, color: Colors.white)),
                         if (user.phone.isNotEmpty)
-                          Text(user.phone, style: const TextStyle(
+                          Text(user.phone, style: TextStyle(
                               color: context.rq.muted, fontSize: 12)),
                         const SizedBox(height: 6),
                         Container(
@@ -585,7 +585,7 @@ class _LoggedInView extends StatelessWidget {
                             border: Border.all(
                                 color: Colors.white.withAlpha(18)),
                           ),
-                          child: const Row(
+                          child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                             Icon(Icons.verified_rounded,
@@ -761,7 +761,7 @@ class _RideHistoryTile extends StatelessWidget {
                 const Icon(Icons.star_rounded,
                     size: 8, color: Colors.white),
                 const SizedBox(width: 2),
-                Text('${booking.rating}', style: const TextStyle(
+                Text('${booking.rating}', style: TextStyle(
                     color: context.rq.text, fontSize: 8,
                     fontWeight: FontWeight.w800)),
               ]),
@@ -1052,7 +1052,7 @@ class _OtpScreenState extends State<_OtpScreen>
                 elevation: 0,
               ),
               child: widget.loading
-                  ? const SizedBox(width: 22, height: 22,
+                  ? SizedBox(width: 22, height: 22,
                       child: CircularProgressIndicator(
                           color: context.rq.text, strokeWidth: 2.5))
                   : Text('Verify & Create Account',

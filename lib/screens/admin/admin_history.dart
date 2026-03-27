@@ -122,7 +122,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                       color: _date != null ? Colors.white : context.rq.muted, size: 16),
                   if (_date != null) ...[
                     SizedBox(width: 6),
-                    Text(_date!.dateOnly, style: const TextStyle(
+                    Text(_date!.dateOnly, style: TextStyle(
                         color: context.rq.text, fontSize: 11,
                         fontWeight: FontWeight.w700)),
                     SizedBox(width: 4),
@@ -719,7 +719,7 @@ class _ExportSheetState extends State<_ExportSheet> {
                         _copied
                             ? 'Copied! Paste into Google Sheets'
                             : 'Copy ${widget.bookings.length} rows to clipboard',
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: context.rq.text,
                             fontWeight: FontWeight.w800,
                             fontSize: 14)),

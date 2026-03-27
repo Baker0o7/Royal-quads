@@ -510,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   SizedBox(width: 10),
                   Expanded(child: Text(
                     '${_selectedDuration} min ride',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: context.rq.text, fontWeight: FontWeight.w600))),
                   Text('${effectivePrice.kes} KES',
                       style: const TextStyle(

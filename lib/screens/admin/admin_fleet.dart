@@ -559,7 +559,7 @@ class _FleetStat extends StatelessWidget {
         fontFamily: 'Playfair', fontSize: 22,
         fontWeight: FontWeight.w900, color: color)),
     SizedBox(height: 2),
-    Text(label, style: const TextStyle(
+    Text(label, style: TextStyle(
         color: context.rq.muted, fontSize: 10, letterSpacing: 0.3)),
   ]));
 }
