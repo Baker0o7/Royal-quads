@@ -270,6 +270,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               const SizedBox(height: 20),
             ],
 
+            // ── Quick Actions ─────────────────────────────────────────────
+            _QuickActionsRow(),
+            const SizedBox(height: 20),
+
             // ── Booking stepper ──────────────────────────────────────────
             _BookingStepper(step: _step),
             const SizedBox(height: 20),
@@ -1190,4 +1194,135 @@ class _DunesHeroPainter extends CustomPainter {
   }
 
   @override bool shouldRepaint(_) => false;
+}
+
+// ── Quick Actions Row ──────────────────────────────────────────────────────────
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final active = context.watch<AppProvider>().active;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      SectionHeading('Quick Actions', icon: Icons.bolt_rounded,
+          color: kAccent),
+      const SizedBox(height: 10),
+      Row(children: [
+        // ── Quick Start ────────────────────────────────────────────────
+        Expanded(child: _QACard(
+          icon: Icons.play_circle_filled_rounded,
+          label: 'Quick\nStart',
+          color: kGreen,
+          onTap: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => DraggableScrollableSheet(
+              initialChildSize: .9, maxChildSize: .95, minChildSize: .5,
+              builder: (_, ctrl) => ChangeNotifierProvider.value(
+                value: context.read<AppProvider>(),
+                child: const _QuickStartSheet(),
+              ),
+            ),
+          ),
+        )),
+        const SizedBox(width: 10),
+        // ── Active Rides ───────────────────────────────────────────────
+        Expanded(child: _QACard(
+          icon: Icons.timer_rounded,
+          label: 'Active\nRides',
+          color: active.isEmpty ? kAccent : kRed,
+          badge: active.isEmpty ? null : '${active.length}',
+          onTap: () {
+            if (active.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No active rides right now')),
+              );
+            } else {
+              context.go('/ride/${active.first.id}');
+            }
+          },
+        )),
+        const SizedBox(width: 10),
+        // ── Pre-book ──────────────────────────────────────────────────
+        Expanded(child: _QACard(
+          icon: Icons.calendar_month_rounded,
+          label: 'Pre-\nBook',
+          color: kIndigo,
+          onTap: () => context.go('/prebook'),
+        )),
+        const SizedBox(width: 10),
+        // ── Dunes Info ────────────────────────────────────────────────
+        Expanded(child: _QACard(
+          icon: Icons.terrain_rounded,
+          label: 'Dunes\nInfo',
+          color: kOrange,
+          onTap: () => context.go('/dunes'),
+        )),
+      ]),
+    ]);
+  }
+}
+
+class _QACard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String? badge;
+  final VoidCallback onTap;
+  const _QACard({required this.icon, required this.label, required this.color,
+      required this.onTap, this.badge});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: color.withAlpha(14),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withAlpha(35)),
+        ),
+        child: Stack(alignment: Alignment.topCenter, children: [
+          Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 6),
+            Text(label, textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                    color: context.rq.text, height: 1.2)),
+          ]),
+          if (badge != null)
+            Positioned(top: -4, right: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: kRed,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(badge!, style: const TextStyle(
+                    color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
+              ),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _QuickStartSheet extends StatefulWidget {
+  const _QuickStartSheet();
+  @override State<_QuickStartSheet> createState() => _QSSheetState();
+}
+class _QSSheetState extends State<_QuickStartSheet> {
+  @override
+  Widget build(BuildContext context) {
+    // Delegate to the admin screen's quick start sheet via navigation
+    // Simple redirect to admin tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pop(context);
+      context.go('/admin');
+    });
+    return const SizedBox.shrink();
+  }
 }
