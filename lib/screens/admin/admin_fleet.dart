@@ -35,7 +35,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
           child: HeroCard(
             padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             child: Row(children: [
-              _FleetStat('Total',     '${allQuads.length}', Colors.white70),
+              _FleetStat('Total',     '${allQuads.length}', context.rq.text),
               _FleetDivider(),
               _FleetStat('Available', '$avail',  kGreen),
               _FleetDivider(),
@@ -233,7 +233,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
             child: const Icon(Icons.delete_outline_rounded,
                 color: kRed, size: 18)),
         const SizedBox(width: 10),
-        const Text('Delete Quad', style: TextStyle(
+        Text('Delete Quad', style: TextStyle(
             fontFamily: 'Playfair', fontWeight: FontWeight.w700)),
       ]),
       content: RichText(text: TextSpan(

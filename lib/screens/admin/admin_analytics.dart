@@ -790,7 +790,7 @@ class _IncidentsCard extends StatelessWidget {
               style: TextStyle(color: context.rq.muted, fontSize: 12))),
           TextButton.icon(
             icon: const Icon(Icons.add, size: 14),
-            label: const Text('Log Incident'),
+            label: Text('Log Incident'),
             onPressed: onAdd,
             style: TextButton.styleFrom(
                 foregroundColor: kRed,

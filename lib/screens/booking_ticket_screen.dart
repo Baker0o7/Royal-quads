@@ -56,7 +56,7 @@ class _BookingTicketScreenState extends State<BookingTicketScreen>
         body: Center(child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Booking not found'),
+            Text('Booking not found'),
             ElevatedButton(onPressed: () => context.go('/'),
                 child: const Text('Home')),
           ],
@@ -105,7 +105,7 @@ class _BookingTicketScreenState extends State<BookingTicketScreen>
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Your Ride is Ready!',
+                  Text('Your Ride is Ready!',
                       style: TextStyle(fontFamily: 'Playfair', fontSize: 26,
                           fontWeight: FontWeight.w700, color: Colors.white)),
                   const SizedBox(height: 4),

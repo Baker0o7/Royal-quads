@@ -248,7 +248,7 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
       builder: (_) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('GitHub API Token',
+        title: Text('GitHub API Token',
             style: TextStyle(fontFamily: 'Playfair', fontWeight: FontWeight.w700)),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           Text('A GitHub Personal Access Token with repo write access is needed to update the website.',
@@ -429,7 +429,7 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
                     TextButton.icon(
                       onPressed: _syncAndMark,
                       icon: const Icon(Icons.sync_rounded, size: 16),
-                      label: const Text('Sync from App'),
+                      label: Text('Sync from App'),
                     ),
                   ]),
                   Text('Quad names and list sync automatically from your fleet.',
@@ -559,7 +559,7 @@ class _AdminWebsiteTabState extends State<AdminWebsiteTab> {
                     TextButton.icon(
                       onPressed: _showAddPromoDialog,
                       icon: const Icon(Icons.add_rounded, size: 16),
-                      label: const Text('Add'),
+                      label: Text('Add'),
                     ),
                   ]),
                   if (_promos.isEmpty)

@@ -78,7 +78,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
               ),
               onChanged: (v) => setState(() => _search = v),
             )),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             // Export CSV
             const SizedBox(width: 8),
             GestureDetector(
@@ -121,7 +121,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   Icon(Icons.calendar_today_rounded,
                       color: _date != null ? Colors.white : context.rq.muted, size: 16),
                   if (_date != null) ...[
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     Text(_date!.dateOnly, style: const TextStyle(
                         color: Colors.white, fontSize: 11,
                         fontWeight: FontWeight.w700)),
@@ -129,7 +129,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                     GestureDetector(
                       onTap: () => setState(() => _date = null),
                       child: const Icon(Icons.close_rounded,
-                          color: Colors.white70, size: 14)),
+                          color: context.rq.text, size: 14)),
                   ],
                 ]),
               ),
@@ -278,7 +278,7 @@ class _EmptyHistory extends StatelessWidget {
     children: [
       Text(filtered ? '🔍' : '📋',
           style: const TextStyle(fontSize: 44)),
-      const SizedBox(height: 14),
+      SizedBox(height: 14),
       Text(
         filtered ? 'No results found' : 'No ride history yet',
         style: TextStyle(fontFamily: 'Playfair',
@@ -338,7 +338,7 @@ class _HistoryTile extends StatelessWidget {
                 style: const TextStyle(
                     color: kAccent, fontWeight: FontWeight.w800, fontSize: 17)),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -609,7 +609,7 @@ class _ExportSheetState extends State<_ExportSheet> {
         Center(child: Container(width: 40, height: 4,
             decoration: BoxDecoration(
                 color: kBorder, borderRadius: BorderRadius.circular(2)))),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Title
         Row(children: [

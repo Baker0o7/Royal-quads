@@ -52,7 +52,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Dashboard',
+        title: Text('Admin Dashboard',
             style: TextStyle(fontFamily: 'Playfair',
                 fontSize: 18, color: Colors.white)),
         backgroundColor: heroColor(context),
@@ -132,7 +132,7 @@ class _NavItem extends StatelessWidget {
               child: iconWidget != null
                   ? QuadIcon(size: 22,
                       color: active ? kAccent : Colors.white38)
-                  : Icon(icon!,
+                  : Icon(icon ?? Icons.circle_outlined,
                       color: active ? kAccent : Colors.white38,
                       size: 22),
             ),
@@ -279,7 +279,7 @@ class AdminOverviewTab extends StatelessWidget {
             AppCard(child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Column(children: [
-                const Text('🏜️', style: TextStyle(fontSize: 36)),
+                Text('🏜️', style: TextStyle(fontSize: 36)),
                 const SizedBox(height: 8),
                 Text('No active rides right now',
                     style: TextStyle(
@@ -376,7 +376,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
         Row(children: [
           const Icon(Icons.bar_chart_rounded, color: kAccent, size: 16),
           const SizedBox(width: 8),
-          const Text('7-Day Revenue', style: TextStyle(
+          Text('7-Day Revenue', style: TextStyle(
               fontWeight: FontWeight.w700, fontSize: 14)),
           const Spacer(),
           Text('${total7.kes} KES', style: const TextStyle(
@@ -1352,7 +1352,7 @@ class _DRSState extends State<_DailyReportSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Column(children: [
-              const Text('📭', style: TextStyle(fontSize: 32)),
+              Text('📭', style: TextStyle(fontSize: 32)),
               const SizedBox(height: 8),
               Text('No rides on ${_date.dateOnly}',
                   style: TextStyle(color: context.rq.muted)),

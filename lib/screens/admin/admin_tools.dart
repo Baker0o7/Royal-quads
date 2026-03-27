@@ -310,7 +310,7 @@ class _ToolHeader extends StatelessWidget {
       ),
       child: Icon(icon, color: color, size: 16),
     ),
-    const SizedBox(width: 10),
+    SizedBox(width: 10),
     Text(label, style: TextStyle(
         fontFamily: 'Playfair', fontSize: 16,
         fontWeight: FontWeight.w700, color: context.rq.text)),
@@ -376,7 +376,7 @@ class _PromoSection extends StatelessWidget {
                       fontSize: 14,
                       color: p.isActive ? kGreen : context.rq.muted)),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -420,7 +420,7 @@ class _PinCard extends StatelessWidget {
         border: Border.all(color: kIndigo.withAlpha(30)),
       ),
       child: const Icon(Icons.lock_open_rounded, color: kIndigo, size: 22)),
-    const SizedBox(width: 14),
+    SizedBox(width: 14),
     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
         children: [
       Text('Current PIN', style: TextStyle(
@@ -490,7 +490,7 @@ class _StaffSectionState extends State<_StaffSection> {
                       color: kAccent, fontWeight: FontWeight.w800,
                       fontSize: 16)),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -569,7 +569,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
         ),
         child: Row(children: [
           const Icon(Icons.analytics_outlined, color: kOrange, size: 14),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text('${logs.length} logs', style: const TextStyle(
               color: kOrange, fontWeight: FontWeight.w700, fontSize: 13)),
           const Spacer(),
@@ -594,7 +594,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(_typeIcon(l.type), color: tc, size: 18)),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -646,7 +646,7 @@ class _EmptyCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: kBorder, size: 20),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
         ],
       )),
@@ -845,7 +845,7 @@ class _BRCState extends State<_BackupRestoreCard> {
         ]),
 
         if (_status != null) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(_status!, style: TextStyle(fontSize: 12, color: context.rq.muted)),
         ],
 
@@ -886,7 +886,7 @@ class _BRCState extends State<_BackupRestoreCard> {
                   ),
                   child: Row(children: [
                     const Icon(Icons.description_rounded, size: 16, color: kIndigo),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(child: Text(display,
                         style: TextStyle(fontSize: 12,
                             fontWeight: FontWeight.w600, color: context.rq.text))),

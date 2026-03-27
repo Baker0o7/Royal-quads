@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           backgroundImage: const AssetImage('assets/images/logo.png'),
                           backgroundColor: Colors.transparent)),
                     const SizedBox(height: 10),
-                    const Text('Royal Quad Bikes', style: TextStyle(
+                    Text('Royal Quad Bikes', style: TextStyle(
                         fontFamily: 'Playfair', fontSize: 22,
                         fontWeight: FontWeight.w700, color: Colors.white,
                         shadows: [Shadow(color: Colors.black54, blurRadius: 8)])),
@@ -226,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               color: kAccent, shape: BoxShape.circle)),
                       const SizedBox(width: 6),
                       const Text('MAMBRUI SAND DUNES · KENYA',
-                          style: TextStyle(color: Colors.white38,
+                          style: TextStyle(color: context.rq.muted,
                               fontSize: 10, letterSpacing: 2)),
                       const SizedBox(width: 6),
                       Container(width: 4, height: 4,
@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 fontSize: 9,
                                 decoration: TextDecoration.lineThrough)),
                           Text('${actual.kes} KES', style: TextStyle(
-                              color: sel ? Colors.white54 : context.rq.muted,
+                              color: sel ? context.rq.muted : context.rq.muted,
                               fontSize: 11)),
                         ]);
                       }),

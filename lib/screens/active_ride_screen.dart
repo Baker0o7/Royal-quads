@@ -94,6 +94,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
   // ── Notifications ──────────────────────────────────────────────────────
   Future<void> _initNotif() async {
     if (_notifInit) return;
+    try {
     await _notif.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -101,10 +102,14 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
     );
     _notifInit = true;
     _updateNotif();
+    } catch (e) {
+      debugPrint('Notifications unavailable: \$e');
+    }
   }
 
   void _updateNotif() {
     if (_booking == null) return;
+    try {
     final durationSecs = _booking!.duration * 60;
     final remaining = durationSecs - _elapsed;
     final isOT = remaining < 0;
@@ -141,9 +146,10 @@ class _ActiveRideScreenState extends State<ActiveRideScreen>
         ),
       ),
     );
+    } catch (_) {}
   }
 
-  void _cancelNotif() => _notif.cancel(_notifId);
+  void _cancelNotif() { try { _notif.cancel(_notifId); } catch(_) {} }
 
   // ── Pause / Resume ──────────────────────────────────────────────────────
   void _togglePause() {
@@ -649,7 +655,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
           Row(children: [
             const Icon(Icons.receipt_long_rounded, size: 18, color: kAccent),
             const SizedBox(width: 10),
-            const Text('TOTAL', style: TextStyle(
+            Text('TOTAL', style: TextStyle(
                 fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.5)),
             const Spacer(),
             Text('${_total.kes} KES', style: const TextStyle(
@@ -799,7 +805,7 @@ class _ExtendSheetState extends State<_ExtendSheet> {
               color: kAccent, size: 20)),
         const SizedBox(width: 12),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Extend Ride', style: TextStyle(
+          Text('Extend Ride', style: TextStyle(
               fontFamily: 'Playfair', fontSize: 20,
               fontWeight: FontWeight.w700)),
           Text('Currently ${widget.booking.duration} min',

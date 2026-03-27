@@ -122,7 +122,7 @@ class _DunesScreenState extends State<DunesScreen> {
                             color: Colors.white, size: 18)),
                     ),
                     const SizedBox(width: 12),
-                    const Text('Location', style: TextStyle(
+                    Text('Location', style: TextStyle(
                         color: Colors.white54, fontSize: 13,
                         letterSpacing: 0.3)),
                   ]),

@@ -69,7 +69,7 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
         body: Center(child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Booking not found'),
+            Text('Booking not found'),
             ElevatedButton(onPressed: () => context.go('/'), child: const Text('Home')),
           ],
         )),

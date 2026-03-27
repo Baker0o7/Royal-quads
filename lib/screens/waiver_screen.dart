@@ -120,7 +120,7 @@ class _WaiverScreenState extends State<WaiverScreen>
                         child: const Icon(Icons.shield_rounded,
                             color: kRed, size: 22)),
                       const SizedBox(height: 10),
-                      const Text('Safety Waiver',
+                      Text('Safety Waiver',
                           style: TextStyle(fontFamily: 'Playfair',
                               fontSize: 20, fontWeight: FontWeight.w700,
                               color: Colors.white)),
@@ -393,7 +393,7 @@ class _RiskBanner extends StatelessWidget {
       Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('SAFETY WAIVER & LIABILITY RELEASE',
+          Text('SAFETY WAIVER & LIABILITY RELEASE',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12,
                   color: kRed, letterSpacing: 0.5)),
           const SizedBox(height: 5),

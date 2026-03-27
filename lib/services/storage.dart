@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 
@@ -131,12 +132,14 @@ class StorageService {
   }
 
   static Future<void> deleteBooking(int id) async {
-    final bookings = getBookings().where((b) => b.id != id).toList();
-    await saveBookings(bookings);
-    // Free the quad if booking was active
-    final deleted = getBookings().firstWhere((b) => b.id == id,
-        orElse: () => throw Exception());
-    await updateQuad(deleted.quadId, status: 'available');
+    final all = getBookings();
+    final target = all.where((b) => b.id == id).firstOrNull;
+    final remaining = all.where((b) => b.id != id).toList();
+    await saveBookings(remaining);
+    // Release quad if the booking was active
+    if (target != null && target.status == 'active') {
+      await updateQuad(target.quadId, status: 'available');
+    }
   }
 
   static Future<void> toggleGuidePaid(int id) async {
@@ -489,11 +492,23 @@ class StorageService {
   /// Import data from a JSON backup map. Returns list of restored keys.
   static Future<List<String>> importBackup(Map<String, dynamic> data) async {
     final restored = <String>[];
+    // Keys that are stored as non-String types
+    const intKeys  = {'rq:quad_seq','rq:booking_seq','rq:incident_seq','rq:user_seq'};
+    const boolKeys = {'rq:onboarded'};
     for (final key in _backupKeys) {
       final val = data[key];
-      if (val is String) {
-        await _p.setString(key, val);
+      if (val == null) continue;
+      try {
+        if (boolKeys.contains(key)) {
+          await _p.setBool(key, val.toString() == 'true');
+        } else if (intKeys.contains(key)) {
+          await _p.setInt(key, int.tryParse(val.toString()) ?? 0);
+        } else {
+          await _p.setString(key, val.toString());
+        }
         restored.add(key);
+      } catch (e) {
+        debugPrint('importBackup skip $key: $e');
       }
     }
     return restored;

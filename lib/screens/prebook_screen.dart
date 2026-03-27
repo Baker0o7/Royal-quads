@@ -122,7 +122,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                     decoration: const BoxDecoration(gradient: kGoldGradient))),
               ]),
             ),
-            title: const Text('Pre-Bookings',
+            title: Text('Pre-Bookings',
                 style: TextStyle(fontFamily: 'Playfair',
                     fontSize: 17, color: Colors.white)),
             bottom: PreferredSize(
@@ -134,7 +134,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                   indicatorColor: kAccent,
                   indicatorWeight: 3,
                   labelColor: kAccent,
-                  unselectedLabelColor: Colors.white38,
+                  unselectedLabelColor: context.rq.muted,
                   labelStyle: const TextStyle(
                       fontWeight: FontWeight.w700, fontSize: 13),
                   tabs: [
@@ -273,7 +273,7 @@ class _PrebookScreenState extends State<PrebookScreen>
                               const SizedBox(height: 2),
                               Text('${(p['price'] as int).kes} KES',
                                   style: TextStyle(fontSize: 11,
-                                      color: sel ? Colors.white54 : context.rq.muted)),
+                                      color: sel ? context.rq.muted : context.rq.muted)),
                             ],
                           ),
                         ),
@@ -488,8 +488,8 @@ class _BookingSummary extends StatelessWidget {
           ),
           child: const Icon(Icons.bookmark_rounded, color: kAccent, size: 18)),
         const SizedBox(width: 10),
-        const Text('Booking Summary', style: TextStyle(
-            color: Colors.white54, fontSize: 12,
+        Text('Booking Summary', style: TextStyle(
+            color: context.rq.muted, fontSize: 12,
             fontWeight: FontWeight.w600, letterSpacing: 0.5)),
         const Spacer(),
         Text('${price.kes} KES', style: const TextStyle(
@@ -517,7 +517,7 @@ class _SummaryRow extends StatelessWidget {
   const _SummaryRow(this.icon, this.text);
   @override
   Widget build(BuildContext context) => Row(children: [
-    Icon(icon, size: 14, color: Colors.white38),
+    Icon(icon, size: 14, color: context.rq.muted),
     const SizedBox(width: 8),
     Text(text, style: const TextStyle(color: Colors.white70, fontSize: 13)),
   ]);

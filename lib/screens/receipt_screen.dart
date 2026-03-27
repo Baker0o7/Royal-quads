@@ -90,7 +90,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
                           color: Colors.white, size: 30)),
                   ),
                   const SizedBox(height: 8),
-                  const Text('Ride Complete!', style: TextStyle(
+                  Text('Ride Complete!', style: TextStyle(
                       fontFamily: 'Playfair', fontSize: 18,
                       fontWeight: FontWeight.w700, color: Colors.white)),
                 ],
@@ -453,7 +453,7 @@ class _ReceiptCard extends StatelessWidget {
               const Icon(Icons.receipt_long_rounded,
                   color: Colors.white, size: 18),
               const SizedBox(width: 10),
-              const Text('TOTAL',
+              Text('TOTAL',
                   style: TextStyle(color: Colors.white,
                       fontWeight: FontWeight.w800, fontSize: 14,
                       letterSpacing: 1)),

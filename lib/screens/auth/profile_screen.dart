@@ -92,7 +92,7 @@ class _RoleViewState extends State<_RoleView>
                 border: Border.all(color: kAccent.withAlpha(50)),
               ),
               child: Row(children: [
-                const Text('🏆', style: TextStyle(fontSize: 18)),
+                Text('🏆', style: TextStyle(fontSize: 18)),
                 const SizedBox(width: 10),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,7 +574,7 @@ class _LoggedInView extends StatelessWidget {
                             fontWeight: FontWeight.w700, color: Colors.white)),
                         if (user.phone.isNotEmpty)
                           Text(user.phone, style: const TextStyle(
-                              color: Colors.white54, fontSize: 12)),
+                              color: context.rq.muted, fontSize: 12)),
                         const SizedBox(height: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -589,10 +589,10 @@ class _LoggedInView extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                             Icon(Icons.verified_rounded,
-                                size: 10, color: Colors.white38),
+                                size: 10, color: context.rq.muted),
                             SizedBox(width: 5),
                             Text('Verified Customer', style: TextStyle(
-                                color: Colors.white38, fontSize: 10,
+                                color: context.rq.muted, fontSize: 10,
                                 fontWeight: FontWeight.w600)),
                           ]),
                         ),
@@ -677,7 +677,7 @@ class _LoggedInView extends StatelessWidget {
                 AppCard(child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Column(children: [
-                    const Text('🏜️',
+                    Text('🏜️',
                         style: TextStyle(fontSize: 44)),
                     const SizedBox(height: 10),
                     const Text('No rides yet',
@@ -1055,7 +1055,7 @@ class _OtpScreenState extends State<_OtpScreen>
                   ? const SizedBox(width: 22, height: 22,
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2.5))
-                  : const Text('Verify & Create Account',
+                  : Text('Verify & Create Account',
                       style: TextStyle(fontSize: 15,
                           fontWeight: FontWeight.w700)),
             ),
