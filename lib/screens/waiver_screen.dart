@@ -228,12 +228,12 @@ class _WaiverScreenState extends State<WaiverScreen>
                   decoration: BoxDecoration(
                     color: _agreed
                         ? kGreen.withAlpha(10)
-                        : _readAll ? kCard : kBg2,
+                        : _readAll ? context.rq.card : kBg2,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: _agreed
                           ? kGreen.withAlpha(60)
-                          : _readAll ? kBorder : kBorder.withAlpha(80),
+                          : _readAll ? context.rq.border : context.rq.border.withAlpha(80),
                       width: _agreed ? 1.5 : 1,
                     ),
                     boxShadow: _agreed ? [
@@ -252,7 +252,7 @@ class _WaiverScreenState extends State<WaiverScreen>
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(
                             color: _agreed ? kGreen
-                                : _readAll ? kBorder : kBorder.withAlpha(80),
+                                : _readAll ? context.rq.border : context.rq.border.withAlpha(80),
                             width: 2,
                           ),
                         ),
@@ -296,7 +296,7 @@ class _WaiverScreenState extends State<WaiverScreen>
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              border: Border(top: BorderSide(color: kBorder)),
+              border: Border(top: BorderSide(color: context.rq.border)),
               boxShadow: [
                 BoxShadow(color: Colors.black.withAlpha(15),
                     blurRadius: 20, offset: const Offset(0, -4)),
@@ -477,7 +477,7 @@ class _ProgDot extends StatelessWidget {
         color: done ? kGreen : kBg2,
         shape: BoxShape.circle,
         border: Border.all(
-            color: done ? kGreen : kBorder, width: done ? 0 : 1.5),
+            color: done ? kGreen : context.rq.border, width: done ? 0 : 1.5),
       ),
       child: done ? const Icon(Icons.check_rounded,
           color: Colors.white, size: 13) : null,
@@ -497,7 +497,7 @@ class _ProgLine extends StatelessWidget {
     duration: const Duration(milliseconds: 400),
     width: 48, height: 2, margin: const EdgeInsets.only(bottom: 14),
     decoration: BoxDecoration(
-      color: done ? kGreen : kBorder,
+      color: done ? kGreen : context.rq.border,
       borderRadius: BorderRadius.circular(2),
     ),
   );

@@ -675,7 +675,7 @@ class _StatCard extends StatelessWidget {
     final mutedCol = isDark ? kDarkMuted : context.rq.muted;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? kDarkCard : kCard,
+        color: isDark ? kDarkCard : context.rq.card,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: color.withAlpha(isDark ? 40 : 25), width: 1.5),
@@ -875,7 +875,7 @@ class _QSSState extends State<_QuickStartSheet> {
         const SizedBox(height: 12),
         Center(child: Container(width: 40, height: 4,
             decoration: BoxDecoration(
-                color: kBorder, borderRadius: BorderRadius.circular(2)))),
+                color: context.rq.border, borderRadius: BorderRadius.circular(2)))),
         const SizedBox(height: 16),
 
         // ── Header ───────────────────────────────────────────────────────────
@@ -908,7 +908,7 @@ class _QSSState extends State<_QuickStartSheet> {
             separatorBuilder: (_, __) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(children: [
-                Expanded(child: Divider(color: kBorder)),
+                Expanded(child: Divider(color: context.rq.border)),
               ]),
             ),
             itemBuilder: (ctx, i) {
@@ -1216,7 +1216,7 @@ class _PayChip extends StatelessWidget {
         color: selected ? kGreen.withAlpha(18) : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: selected ? kGreen : kBorder,
+          color: selected ? kGreen : context.rq.border,
           width: selected ? 2 : 1.5,
         ),
       ),
@@ -1270,7 +1270,7 @@ class _DRSState extends State<_DailyReportSheet> {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Center(child: Container(width: 40, height: 4,
             decoration: BoxDecoration(
-                color: kBorder, borderRadius: BorderRadius.circular(2)))),
+                color: context.rq.border, borderRadius: BorderRadius.circular(2)))),
         const SizedBox(height: 16),
         Row(children: [
           const Text('Daily Report', style: TextStyle(
@@ -1317,7 +1317,7 @@ class _DRSState extends State<_DailyReportSheet> {
         ),
         if (rides.isNotEmpty) ...[
           const SizedBox(height: 12),
-          const Divider(color: kBorder),
+          Divider(color: context.rq.border),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200),
             child: ListView(children: rides.map((b) => Padding(

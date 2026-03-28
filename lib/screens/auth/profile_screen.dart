@@ -345,7 +345,7 @@ class _AuthViewState extends State<_AuthView> {
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(color: kBg2,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: kBorder)),
+                    border: Border.all(color: context.rq.border)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   _ModePill('Sign In', widget.mode == _Mode.signIn,
                       () => widget.mode != _Mode.signIn
@@ -512,7 +512,7 @@ class _ModePill extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: active ? kCard : Colors.transparent,
+        color: active ? context.rq.card : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         boxShadow: active ? kShadowSm : null,
       ),
@@ -713,7 +713,7 @@ class _LoggedInView extends StatelessWidget {
                   label: const Text('Sign Out'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.rq.muted,
-                    side: const BorderSide(color: kBorder),
+                    side: BorderSide(color: context.rq.border),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -861,7 +861,7 @@ class _InfoRow extends StatelessWidget {
             fontWeight: FontWeight.w600, fontSize: 13, color: context.rq.text)),
       ]),
     ),
-    if (!isLast) const Divider(height: 1, color: kBorder),
+    if (!isLast) Divider(height: 1, color: context.rq.border),
   ]);
 }
 
@@ -1146,7 +1146,7 @@ class _OtpBoxState extends State<_OtpBox> {
       border: Border.all(
         color: _focused ? kAccent
             : widget.controller.text.isNotEmpty ? kAccent.withAlpha(80)
-            : kBorder,
+            : context.rq.border,
         width: _focused ? 2 : 1.5,
       ),
       boxShadow: _focused ? [

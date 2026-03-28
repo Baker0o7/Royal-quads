@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         return Column(mainAxisSize: MainAxisSize.min, children: [
                           if (mult != 1.0)
                             Text('${base.kes}', style: TextStyle(
-                                color: sel ? Colors.white30 : kBorder,
+                                color: sel ? Colors.white30 : context.rq.border,
                                 fontSize: 9,
                                 decoration: TextDecoration.lineThrough)),
                           Text('${actual.kes} KES', style: TextStyle(
@@ -607,11 +607,11 @@ class _QuadCardState extends State<_QuadCard>
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: sel ? heroBg(context) : kCard,
+            color: sel ? heroBg(context) : context.rq.card,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: sel ? kAccent
-                  : isAvail ? kBorder : kRed.withAlpha(50),
+                  : isAvail ? context.rq.border : kRed.withAlpha(50),
               width: sel ? 2 : 1.5,
             ),
             boxShadow: sel
@@ -700,7 +700,7 @@ class _ActiveTile extends StatelessWidget {
             color: overtime ? kRed.withAlpha(10) : heroBg(context).withAlpha(6),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-                color: overtime ? kRed.withAlpha(50) : kBorder,
+                color: overtime ? kRed.withAlpha(50) : context.rq.border,
                 width: overtime ? 1.5 : 1),
             boxShadow: kShadowSm,
           ),
@@ -841,7 +841,7 @@ class _MpesaSection extends StatelessWidget {
                 color: copied ? kGreen.withAlpha(20) : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: copied ? kGreen : kBorder,
+                    color: copied ? kGreen : context.rq.border,
                     width: copied ? 1.5 : 1),
                 boxShadow: kShadowSm,
               ),
@@ -1078,7 +1078,7 @@ class _BookingStepper extends StatelessWidget {
             duration: const Duration(milliseconds: 400),
             height: 2,
             decoration: BoxDecoration(
-              color: step > lineIdx ? kAccent : kBorder,
+              color: step > lineIdx ? kAccent : context.rq.border,
               borderRadius: BorderRadius.circular(1),
             ),
           ));
@@ -1093,7 +1093,7 @@ class _BookingStepper extends StatelessWidget {
             shape: BoxShape.circle,
             color: isDone ? accent : isActive ? context.rq.text : Colors.transparent,
             border: Border.all(
-              color: isDone ? accent : isActive ? accent : kBorder,
+              color: isDone ? accent : isActive ? accent : context.rq.border,
               width: isActive ? 2 : 1.5,
             ),
             boxShadow: isActive ? [

@@ -162,7 +162,7 @@ class _AdminFleetTabState extends State<AdminFleetTab> {
           color: active ? c.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: active ? c.accent : kBorder,
+              color: active ? c.accent : context.rq.border,
               width: active ? 0 : 1),
           boxShadow: active ? kShadowSm : null,
         ),
@@ -466,7 +466,7 @@ class _QuadCardState extends State<_QuadCard> {
         curve: Curves.easeInOut,
         child: _expanded ? Column(children: [
           Container(
-            height: 1, color: kBorder,
+            height: 1, color: context.rq.border,
             margin: const EdgeInsets.symmetric(horizontal: 16)),
           // Stats row
           Padding(

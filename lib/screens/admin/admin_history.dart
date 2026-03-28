@@ -88,7 +88,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: kBorder),
+                  border: Border.all(color: context.rq.border),
                 ),
                 child: Icon(Icons.download_rounded, color: context.rq.muted, size: 16),
               ),
@@ -116,7 +116,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   color: _date != null ? kAccent : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: _date != null ? kAccent : kBorder)),
+                      color: _date != null ? kAccent : context.rq.border)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.calendar_today_rounded,
                       color: _date != null ? Colors.white : context.rq.muted, size: 16),
@@ -157,7 +157,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                         color: active ? kAccent : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: active ? kAccent : kBorder),
+                            color: active ? kAccent : context.rq.border),
                       ),
                       child: Text(label, style: TextStyle(
                           color: active ? Colors.white : context.rq.muted,
@@ -182,7 +182,7 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: kBorder),
+              border: Border.all(color: context.rq.border),
             ),
             child: Row(children: [
               _StatPill('${history.length}', 'rides', kAccent),
@@ -261,7 +261,7 @@ class _DateHeader extends StatelessWidget {
             color: context.rq.muted, fontSize: 11,
             fontWeight: FontWeight.w700, letterSpacing: 0.5)),
         const SizedBox(width: 10),
-        Expanded(child: Container(height: 1, color: kBorder)),
+        Expanded(child: Container(height: 1, color: context.rq.border)),
       ]),
     );
   }
@@ -321,7 +321,7 @@ class _HistoryTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kBorder),
+        border: Border.all(color: context.rq.border),
         boxShadow: kShadowSm,
       ),
       child: Column(children: [
@@ -541,7 +541,7 @@ class _StatPill extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(width: 1, height: 28, color: kBorder);
+      Container(width: 1, height: 28, color: context.rq.border);
 }
 
 // ── CSV Export Sheet ──────────────────────────────────────────────────────────
@@ -608,7 +608,7 @@ class _ExportSheetState extends State<_ExportSheet> {
         // Handle
         Center(child: Container(width: 40, height: 4,
             decoration: BoxDecoration(
-                color: kBorder, borderRadius: BorderRadius.circular(2)))),
+                color: context.rq.border, borderRadius: BorderRadius.circular(2)))),
         SizedBox(height: 16),
 
         // Title
@@ -636,7 +636,7 @@ class _ExportSheetState extends State<_ExportSheet> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: kBorder),
+            border: Border.all(color: context.rq.border),
           ),
           child: Row(children: [
             _ExStat('${widget.bookings.length}', 'Rides', kAccent),
@@ -654,7 +654,7 @@ class _ExportSheetState extends State<_ExportSheet> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Theme.of(context).dividerColor.withAlpha(60), borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: kBorder),
+            border: Border.all(color: context.rq.border),
           ),
           child: Wrap(
             spacing: 6, runSpacing: 6,
@@ -666,7 +666,7 @@ class _ExportSheetState extends State<_ExportSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: kBorder),
+                border: Border.all(color: context.rq.border),
               ),
               child: Text(col, style: TextStyle(
                   color: context.rq.muted, fontSize: 10, fontWeight: FontWeight.w600)),
@@ -752,5 +752,5 @@ class _ExStat extends StatelessWidget {
 class _ExDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(width: 1, height: 28, color: kBorder);
+      Container(width: 1, height: 28, color: context.rq.border);
 }

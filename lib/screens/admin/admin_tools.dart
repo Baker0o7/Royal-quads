@@ -356,7 +356,7 @@ class _PromoSection extends StatelessWidget {
         child: Column(children: promos.asMap().entries.map((e) {
           final i = e.key; final p = e.value;
           return Column(children: [
-            if (i > 0) const Divider(height: 1, color: kBorder),
+            if (i > 0) Divider(height: 1, color: context.rq.border),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(children: [
@@ -369,7 +369,7 @@ class _PromoSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                         color: p.isActive
-                            ? kGreen.withAlpha(40) : kBorder)),
+                            ? kGreen.withAlpha(40) : context.rq.border)),
                   child: Text(p.code, style: TextStyle(
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.w900,
@@ -476,7 +476,7 @@ class _StaffSectionState extends State<_StaffSection> {
       child: Column(children: staff.asMap().entries.map((e) {
         final i = e.key; final s = e.value;
         return Column(children: [
-          if (i > 0) const Divider(height: 1, color: kBorder),
+          if (i > 0) Divider(height: 1, color: context.rq.border),
           Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: 16, vertical: 12),
@@ -583,7 +583,7 @@ class _MaintenanceSectionState extends State<_MaintenanceSection> {
           final i = e.key; final l = e.value;
           final tc = _typeColor(l.type);
           return Column(children: [
-            if (i > 0) const Divider(height: 1, color: kBorder),
+            if (i > 0) Divider(height: 1, color: context.rq.border),
             Padding(
               padding: const EdgeInsets.all(14),
               child: Row(children: [
@@ -645,7 +645,7 @@ class _EmptyCard extends StatelessWidget {
       child: Center(child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: kBorder, size: 20),
+          Icon(icon, color: context.rq.border, size: 20),
           SizedBox(width: 10),
           Text(label, style: TextStyle(color: context.rq.muted, fontSize: 13)),
         ],

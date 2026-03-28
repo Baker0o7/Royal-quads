@@ -49,7 +49,7 @@ class _ReceiptScreenState extends State<ReceiptScreen>
       body: Center(child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.receipt_long_outlined, size: 56, color: kBorder),
+          Icon(Icons.receipt_long_outlined, size: 56, color: context.rq.border),
           const SizedBox(height: 16),
           Text('Receipt not found',
               style: TextStyle(color: context.rq.muted, fontSize: 16)),
@@ -536,7 +536,7 @@ class _PerforatedDivider extends StatelessWidget {
         final count = (c.maxWidth / 10).floor();
         return Row(children: List.generate(count, (i) => Expanded(child: Container(
           height: 1,
-          color: i % 2 == 0 ? kBorder : Colors.transparent))));
+          color: i % 2 == 0 ? context.rq.border : Colors.transparent))));
       })),
       Container(width: 10, height: 20,
           decoration: BoxDecoration(
@@ -601,7 +601,7 @@ class _RatingCard extends StatelessWidget {
               duration: const Duration(milliseconds: 150),
               child: Icon(
                 filled ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: filled ? kAccent : kBorder, size: 38)),
+                color: filled ? kAccent : context.rq.border, size: 38)),
           ),
         );
       })),

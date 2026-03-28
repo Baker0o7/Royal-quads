@@ -250,10 +250,10 @@ class _PrebookScreenState extends State<PrebookScreen>
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           decoration: BoxDecoration(
-                            color: sel ? context.rq.text : kCard,
+                            color: sel ? context.rq.text : context.rq.card,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                                color: sel ? kAccent : kBorder,
+                                color: sel ? kAccent : context.rq.border,
                                 width: sel ? 2 : 1),
                             boxShadow: sel
                                 ? [BoxShadow(color: kAccent.withAlpha(30),
@@ -394,7 +394,7 @@ class _DateTimePicker extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kBorder),
+          border: Border.all(color: context.rq.border),
           boxShadow: kShadowSm,
         ),
         child: Row(children: [
@@ -651,7 +651,7 @@ class _PrebookTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: kBorder),
+        border: Border.all(color: context.rq.border),
         boxShadow: kShadowSm,
       ),
       child: Column(children: [
@@ -697,7 +697,7 @@ class _PrebookTile extends StatelessWidget {
             color: isPast ? kBg2 : kGreen.withAlpha(6),
             borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(18)),
-            border: Border(top: BorderSide(color: kBorder)),
+            border: Border(top: BorderSide(color: context.rq.border)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

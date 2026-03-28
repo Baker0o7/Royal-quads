@@ -507,7 +507,7 @@ class _PeakHoursHeatmap extends StatelessWidget {
               final color = frac > 0.7 ? kRed
                   : frac > 0.4 ? kAccent
                   : frac > 0.1 ? kGreen
-                  : kBorder;
+                  : context.rq.border;
               return Expanded(child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -1052,7 +1052,7 @@ class _AddIncidentSheetState extends State<_AddIncidentSheet> {
         20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(width: 40, height: 4,
-          decoration: BoxDecoration(color: kBorder,
+          decoration: BoxDecoration(color: context.rq.border,
               borderRadius: BorderRadius.circular(2))),
       const SizedBox(height: 16),
       const Text('Log Incident',

@@ -606,7 +606,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
       // Handle
       Center(child: Container(width: 40, height: 4,
           decoration: BoxDecoration(
-              color: kBorder, borderRadius: BorderRadius.circular(2)))),
+              color: context.rq.border, borderRadius: BorderRadius.circular(2)))),
       const SizedBox(height: 16),
 
       // Title
@@ -634,12 +634,12 @@ class _EndRideSheetState extends State<_EndRideSheet> {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kBorder),
+          border: Border.all(color: context.rq.border),
         ),
         child: Column(children: [
           _SummaryRow(widget.booking.quadName, widget.booking.customerName,
               Icons.directions_bike_rounded, kAccent),
-          const Divider(color: kBorder, height: 20),
+          Divider(color: context.rq.border, height: 20),
           _SummaryRow('Duration', '${widget.booking.duration} min',
               Icons.timer_rounded, context.rq.muted),
           const SizedBox(height: 6),
@@ -651,7 +651,7 @@ class _EndRideSheetState extends State<_EndRideSheet> {
                 '+${_otCharge.kes} KES',
                 Icons.warning_amber_rounded, kRed),
           ],
-          const Divider(color: kBorder, height: 20),
+          Divider(color: context.rq.border, height: 20),
           Row(children: [
             const Icon(Icons.receipt_long_rounded, size: 18, color: kAccent),
             const SizedBox(width: 10),
@@ -793,7 +793,7 @@ class _ExtendSheetState extends State<_ExtendSheet> {
         crossAxisAlignment: CrossAxisAlignment.start, children: [
       Center(child: Container(width: 40, height: 4,
           decoration: BoxDecoration(
-              color: kBorder, borderRadius: BorderRadius.circular(2)))),
+              color: context.rq.border, borderRadius: BorderRadius.circular(2)))),
       const SizedBox(height: 16),
 
       Row(children: [
@@ -831,10 +831,10 @@ class _ExtendSheetState extends State<_ExtendSheet> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               decoration: BoxDecoration(
-                color: sel ? kAccent.withAlpha(20) : kCard,
+                color: sel ? kAccent.withAlpha(20) : context.rq.card,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: sel ? kAccent : kBorder,
+                    color: sel ? kAccent : context.rq.border,
                     width: sel ? 2 : 1),
                 boxShadow: sel ? kShadowSm : null,
               ),
