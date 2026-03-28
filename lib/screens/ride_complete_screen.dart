@@ -261,9 +261,9 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: context.rq.card,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF2D2820)),
+                      border: Border.all(color: context.rq.border),
                     ),
                     child: Row(children: [
                       ClipRRect(
@@ -280,8 +280,8 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
                       Expanded(child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Receipt ID',
-                              style: TextStyle(color: Colors.white38,
+                          Text('Receipt ID',
+                              style: TextStyle(color: context.rq.muted,
                                   fontSize: 11, letterSpacing: 1)),
                           const SizedBox(height: 4),
                           Text(booking.receiptId,
@@ -293,11 +293,11 @@ class _RideCompleteScreenState extends State<RideCompleteScreen>
                                   letterSpacing: 2)),
                           const SizedBox(height: 8),
                           Text(booking.customerName,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 13)),
+                              style: TextStyle(
+                                  color: context.rq.text, fontSize: 13)),
                           Text(booking.customerPhone,
-                              style: const TextStyle(
-                                  color: Colors.white38, fontSize: 12)),
+                              style: TextStyle(
+                                  color: context.rq.muted, fontSize: 12)),
                         ],
                       )),
                     ]),

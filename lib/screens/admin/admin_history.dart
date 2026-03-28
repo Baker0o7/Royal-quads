@@ -101,11 +101,30 @@ class _AdminHistoryTabState extends State<AdminHistoryTab> {
                   context: context,
                   initialDate: _date ?? DateTime.now(),
                   firstDate: DateTime(2024), lastDate: DateTime.now(),
-                  builder: (ctx, child) => Theme(
-                    data: Theme.of(ctx).copyWith(
-                        colorScheme: const ColorScheme.light(primary: kAccent)),
-                    child: child!,
-                  ),
+                  builder: (ctx, child) {
+                    final isDark = Theme.of(ctx).brightness == Brightness.dark;
+                    return Theme(
+                      data: Theme.of(ctx).copyWith(
+                        colorScheme: isDark
+                            ? ColorScheme.dark(
+                                primary: kAccent,
+                                onPrimary: Colors.white,
+                                surface: const Color(0xFF1A1612),
+                                onSurface: Colors.white,
+                              )
+                            : ColorScheme.light(
+                                primary: kAccent,
+                                onPrimary: Colors.white,
+                                surface: Colors.white,
+                                onSurface: Colors.black87,
+                              ),
+                        dialogBackgroundColor: isDark
+                            ? const Color(0xFF1A1612)
+                            : Colors.white,
+                      ),
+                      child: child!,
+                    );
+                  },
                 );
                 if (d != null) setState(() => _date = d);
               },
