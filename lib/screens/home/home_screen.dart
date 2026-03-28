@@ -1204,8 +1204,7 @@ class _QuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = context.watch<AppProvider>().active;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SectionHeading('Quick Actions', icon: Icons.bolt_rounded,
-          color: kAccent),
+      SectionHeading('Quick Actions', icon: Icons.bolt_rounded),
       const SizedBox(height: 10),
       Row(children: [
         // ── Quick Start ────────────────────────────────────────────────

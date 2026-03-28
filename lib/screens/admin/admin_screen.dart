@@ -953,7 +953,7 @@ class _QSSState extends State<_QuickStartSheet> {
           final total = _entries.fold<int>(0,
               (s, e) => s + (int.tryParse(e.priceCtrl.text.trim()) ?? 0));
           final comm  = (total * kGuideCommission).round();
-          final guide = _guideCtrl.text.trim();
+          final guide = _entries.isNotEmpty ? _entries.first.guideCtrl.text.trim() : '';
           if (total == 0) return const SizedBox.shrink();
           return Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
