@@ -1053,7 +1053,9 @@ class _QSSState extends State<_QuickStartSheet> {
                     customerPhone: '0000000000',
                     duration: int.parse(e.durCtrl.text.trim()),
                     price: int.parse(e.priceCtrl.text.trim()),
-                    mpesaRef: e.payMethod == 'mpesa' ? 'MPESA-PENDING' : 'CASH',
+                    mpesaRef: e.payMethod == 'mpesa' ? 'MPESA-PENDING'
+                        : e.payMethod == 'shee' ? 'SHEE'
+                        : 'CASH',
                     guideName: e.guideCtrl.text.trim().isEmpty ? null : e.guideCtrl.text.trim(),
                   );
                   bookings.add(b.id);
@@ -1178,7 +1180,7 @@ class _EntryRow extends StatelessWidget {
         )),
       ]),
       const SizedBox(height: 10),
-      // Per-quad payment method
+      // Per-quad payment method (3 options)
       Row(children: [
         Expanded(child: _PayChip(
           label: 'Cash',
@@ -1186,12 +1188,17 @@ class _EntryRow extends StatelessWidget {
           selected: entry.payMethod == 'cash',
           onTap: () { entry.payMethod = 'cash'; onChanged(); },
         )),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Expanded(child: _PayChip(
           label: 'M-Pesa',
           icon: Icons.phone_android_rounded,
           selected: entry.payMethod == 'mpesa',
           onTap: () { entry.payMethod = 'mpesa'; onChanged(); },
+        )),
+        const SizedBox(width: 6),
+        Expanded(child: _SheeChip(
+          selected: entry.payMethod == 'shee',
+          onTap: () { entry.payMethod = 'shee'; onChanged(); },
         )),
       ]),
     ]);
@@ -1577,6 +1584,42 @@ class _PinKeyState extends State<_PinKey> {
               fontSize: 24, fontWeight: FontWeight.w600))
           : Icon(widget.icon,
               color: _pressed ? kAccent : Colors.white54, size: 22)),
+    ),
+  );
+}
+
+// ── Shee Payment Chip ──────────────────────────────────────────────────────────
+class _SheeChip extends StatelessWidget {
+  final bool selected;
+  final VoidCallback onTap;
+  const _SheeChip({required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: selected ? kGreen.withAlpha(18) : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: selected ? kGreen : kBorder,
+          width: selected ? 2 : 1.5,
+        ),
+      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        ClipOval(
+          child: Image.asset(
+            'assets/images/shee_avatar.jpg',
+            width: 22, height: 22, fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text('Shee', style: TextStyle(
+            fontSize: 10, fontWeight: FontWeight.w700,
+            color: selected ? kGreen : context.rq.muted)),
+      ]),
     ),
   );
 }

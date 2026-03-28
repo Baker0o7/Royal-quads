@@ -385,18 +385,23 @@ class _HistoryTile extends StatelessWidget {
                 if (booking.mpesaRef != null) ...[
                   const SizedBox(height: 2),
                   Row(children: [
-                    Icon(
-                      booking.mpesaRef == 'CASH'
-                          ? Icons.payments_rounded
-                          : Icons.smartphone_rounded,
-                      size: 11, color: kGreen),
+                    booking.mpesaRef == 'SHEE'
+                      ? ClipOval(child: Image.asset('assets/images/shee_avatar.jpg',
+                          width: 14, height: 14, fit: BoxFit.cover))
+                      : Icon(
+                          booking.mpesaRef == 'CASH'
+                              ? Icons.payments_rounded
+                              : Icons.smartphone_rounded,
+                          size: 11, color: kGreen),
                     const SizedBox(width: 3),
                     Text(
                       booking.mpesaRef == 'MPESA-PENDING'
                           ? 'M-Pesa'
                           : booking.mpesaRef == 'CASH'
                               ? 'Cash'
-                              : booking.mpesaRef!,
+                              : booking.mpesaRef == 'SHEE'
+                                  ? 'Shee'
+                                  : booking.mpesaRef!,
                       style: const TextStyle(
                           color: kGreen, fontSize: 11,
                           fontWeight: FontWeight.w700)),
