@@ -10,7 +10,7 @@ const kHeroFrom = Color(0xFF2D2318);
 const kHeroMid  = Color(0xFF1A1008);
 const kHeroTo   = Color(0xFF0D0B09);
 const kBg       = Color(0xFFF7F2EA);
-const context.rq.bg2      = Color(0xFFEEE6D2);
+const kBg2      = Color(0xFFEEE6D2);
 const kSurface  = Color(0xFFFCF9F4);
 const kText     = Color(0xFF1A1612);
 const kMuted    = Color(0xFF7A6E60);
@@ -23,7 +23,7 @@ const kOrange   = Color(0xFFEA580C);
 
 // ── Dark palette ──────────────────────────────────────────────────────────────
 const kDarkBg     = Color(0xFF0F0D0A);
-const kDarcontext.rq.bg2    = Color(0xFF1A1612);
+const kDarkBg2    = Color(0xFF1A1612);
 const kDarkCard   = Color(0xFF201C18);
 const kDarkBorder = Color(0xFF2E2820);
 const kDarkText   = Color(0xFFF5EFE6);
@@ -84,7 +84,7 @@ class HeroCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         gradient: isDark ? kHeroGradient : LinearGradient(
-          colors: [context.rq.card, context.rq.bg2],
+          colors: [context.rq.card, kBg2],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -288,7 +288,7 @@ class StatusBadge extends StatelessWidget {
       'pending'     => (kIndigo.withAlpha(20), kIndigo, 'Pending',     true),
       'confirmed'   => (kGreen.withAlpha(20),  kGreen,  'Confirmed',   false),
       'cancelled'   => (kRed.withAlpha(20),    kRed,    'Cancelled',   false),
-      _             => (context.rq.bg2, kMuted, status, false),
+      _             => (kBg2, kMuted, status, false),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -401,7 +401,7 @@ extension ThemeContextX on BuildContext {
   Color get accent2   => Theme.of(this).colorScheme.secondary;
   bool  get isDark    => Theme.of(this).brightness == Brightness.dark;
   Color get cardColor => isDark ? kDarkCard : kCard;
-  Color get surfColor => isDark ? kDarcontext.rq.bg2  : kSurface;
+  Color get surfColor => isDark ? kDarkBg2  : kSurface;
   Color get textColor => isDark ? kDarkText : kText;
   Color get mutedColor=> isDark ? kDarkMuted: kMuted;
   Color get bordColor => isDark ? kDarkBorder: kBorder;
