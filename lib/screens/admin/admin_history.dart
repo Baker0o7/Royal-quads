@@ -413,7 +413,7 @@ class _HistoryTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Comm: \${(booking.totalPaid * 0.20).round().kes} KES',
+                      'Comm: ${(booking.totalPaid * 0.20).round().kes} KES',
                       style: const TextStyle(
                           color: kGreen, fontSize: 10, fontWeight: FontWeight.w700)),
                   ),
@@ -423,7 +423,10 @@ class _HistoryTile extends StatelessWidget {
                     onTap: () async {
                       final ok = await showDialog<bool>(
                         context: context,
+                        barrierDismissible: true,
                         builder: (ctx) => AlertDialog(
+                          backgroundColor: Theme.of(ctx).dialogTheme.backgroundColor
+                              ?? Theme.of(ctx).cardColor,
                           title: const Text('Delete Booking?'),
                           content: Text(
                               'Delete \${booking.quadName} · '

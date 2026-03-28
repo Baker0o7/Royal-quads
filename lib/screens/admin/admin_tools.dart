@@ -745,22 +745,30 @@ class _BRCState extends State<_BackupRestoreCard> {
   int _refreshKey = 0;
 
   Future<Directory> _getDir() async {
-    // Try external storage (visible in Files app) first
+    // Try /sdcard/Download/RoyalQuadBikes (always visible in Files app)
+    try {
+      const sdcard = '/sdcard/Download/RoyalQuadBikes';
+      final dir = Directory(sdcard);
+      if (!await dir.exists()) await dir.create(recursive: true);
+      if (await dir.exists()) return dir;
+    } catch (_) {}
+    // Try via getExternalStorageDirectory path manipulation
     try {
       final ext = await getExternalStorageDirectory();
       if (ext != null) {
-        // Go up to the root of external storage and use Downloads
         final parts = ext.path.split('/');
         final rootIdx = parts.indexOf('Android');
         if (rootIdx > 0) {
           final root = parts.sublist(0, rootIdx).join('/');
-          final downloads = Directory('$root/Downloads/RoyalQuadBikes');
-          if (!await downloads.exists()) await downloads.create(recursive: true);
-          return downloads;
+          for (final sub in ['Downloads', 'Download']) {
+            final dir = Directory('$root/$sub/RoyalQuadBikes');
+            if (!await dir.exists()) await dir.create(recursive: true);
+            if (await dir.exists()) return dir;
+          }
         }
       }
     } catch (_) {}
-    // Fallback: app documents directory
+    // Final fallback: app documents
     return getApplicationDocumentsDirectory();
   }
 

@@ -46,23 +46,39 @@ class _PrebookScreenState extends State<PrebookScreen>
       initialDate: _scheduled,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 90)),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: kAccent),
-        ),
-        child: child!,
-      ),
+      builder: (ctx, child) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: kAccent, onPrimary: Colors.white,
+                    surface: const Color(0xFF1A1612), onSurface: Colors.white)
+                : ColorScheme.light(primary: kAccent, onPrimary: Colors.white,
+                    surface: Colors.white, onSurface: Colors.black87),
+            dialogBackgroundColor: isDark ? const Color(0xFF1A1612) : Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
     if (!mounted || d == null) return;
     final t = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_scheduled),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: kAccent),
-        ),
-        child: child!,
-      ),
+      builder: (ctx, child) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: kAccent, onPrimary: Colors.white,
+                    surface: const Color(0xFF1A1612), onSurface: Colors.white)
+                : ColorScheme.light(primary: kAccent, onPrimary: Colors.white,
+                    surface: Colors.white, onSurface: Colors.black87),
+            dialogBackgroundColor: isDark ? const Color(0xFF1A1612) : Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
     if (!mounted || t == null) return;
     setState(() => _scheduled =
