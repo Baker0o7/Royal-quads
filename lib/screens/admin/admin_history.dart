@@ -333,8 +333,11 @@ class _HistoryTile extends StatelessWidget {
               radius: 22,
               backgroundColor: kAccent.withAlpha(15),
               child: Text(
-                booking.customerName.isNotEmpty
-                    ? booking.customerName[0].toUpperCase() : '?',
+                (booking.guideName?.isNotEmpty == true
+                    ? booking.guideName![0]
+                    : booking.customerName.isNotEmpty
+                        ? booking.customerName[0]
+                        : '?').toUpperCase(),
                 style: const TextStyle(
                     color: kAccent, fontWeight: FontWeight.w800, fontSize: 17)),
             ),
@@ -342,8 +345,12 @@ class _HistoryTile extends StatelessWidget {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(booking.customerName, style: TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
+                Text(
+                  booking.guideName?.isNotEmpty == true
+                      ? booking.guideName!
+                      : booking.customerName,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
                 SizedBox(height: 3),
                 Row(children: [
                   QuadIcon(size: 11, color: context.rq.muted),
@@ -376,7 +383,60 @@ class _HistoryTile extends StatelessWidget {
                           fontWeight: FontWeight.w700)),
                   ]),
                 ],
-                // Guide row
+                SizedBox(height: 6),
+                // Commission + delete row
+                Row(children: [
+                  // Commission amount (always show if any ride)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: kGreen.withAlpha(14),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Comm: \${(booking.totalPaid * 0.20).round().kes} KES',
+                      style: const TextStyle(
+                          color: kGreen, fontSize: 10, fontWeight: FontWeight.w700)),
+                  ),
+                  const Spacer(),
+                  // Delete button LEFT-aligned in this row
+                  GestureDetector(
+                    onTap: () async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Delete Booking?'),
+                          content: Text(
+                              'Delete \${booking.quadName} · '
+                              '\${booking.duration} min · '
+                              '\${booking.totalPaid.kes} KES?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel')),
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Delete',
+                                    style: TextStyle(color: kRed))),
+                          ],
+                        ),
+                      );
+                      if (ok == true && context.mounted) {
+                        await context.read<AppProvider>().deleteBooking(booking.id);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: kRed.withAlpha(12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.delete_outline_rounded,
+                          size: 16, color: kRed),
+                    ),
+                  ),
+                ]),
+                // Guide paid toggle
                 if (booking.guideName != null && booking.guideName!.isNotEmpty) ...[
                   SizedBox(height: 5),
                   Row(children: [
@@ -436,46 +496,14 @@ class _HistoryTile extends StatelessWidget {
                         const Icon(Icons.star_rounded, color: kAccent, size: 10))),
               ],
               SizedBox(height: 2),
-              Text(
-                '${booking.startTime.hour.toString().padLeft(2,'0')}:'
-                '${booking.startTime.minute.toString().padLeft(2,'0')}',
+              Text(() {
+                final h = booking.startTime.hour;
+                final m = booking.startTime.minute;
+                final h12 = h == 0 ? 12 : h > 12 ? h - 12 : h;
+                final ampm = h < 12 ? 'AM' : 'PM';
+                return '${h12.toString().padLeft(2,'0')}:${m.toString().padLeft(2,'0')} $ampm';
+              }(),
                 style: TextStyle(color: context.rq.muted, fontSize: 10)),
-              const SizedBox(height: 6),
-              GestureDetector(
-                onTap: () async {
-                  final ok = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Delete Booking?'),
-                      content: Text(
-                          'Delete ${booking.quadName} · '
-                          '${booking.duration} min · '
-                          '${booking.totalPaid.kes} KES?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel')),
-                        TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Delete',
-                                style: TextStyle(color: kRed))),
-                      ],
-                    ),
-                  );
-                  if (ok == true && context.mounted) {
-                    await context.read<AppProvider>().deleteBooking(booking.id);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: kRed.withAlpha(12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.delete_outline_rounded,
-                      size: 15, color: kRed),
-                ),
-              ),
             ]),
           ]),
         ),
