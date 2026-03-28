@@ -357,19 +357,29 @@ class _HistoryTile extends StatelessWidget {
                     : booking.customerName.isNotEmpty
                         ? booking.customerName[0]
                         : '?').toUpperCase(),
-                style: const TextStyle(
-                    color: kAccent, fontWeight: FontWeight.w800, fontSize: 17)),
+                style: TextStyle(
+                    color: booking.guideName?.isNotEmpty == true ? kAccent2 : kAccent,
+                    fontWeight: FontWeight.w800, fontSize: 17)),
             ),
             SizedBox(width: 12),
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  booking.guideName?.isNotEmpty == true
-                      ? booking.guideName!
-                      : booking.customerName,
+                  booking.customerName,
                   style: TextStyle(
                       fontWeight: FontWeight.w700, fontSize: 14, color: context.rq.text)),
+                if (booking.guideName != null && booking.guideName!.isNotEmpty) ...[
+                  SizedBox(height: 2),
+                  Row(children: [
+                    Icon(Icons.person_rounded, size: 12, color: kAccent),
+                    SizedBox(width: 4),
+                    Text(booking.guideName!,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w700,
+                            color: kAccent)),
+                  ]),
+                ],
                 SizedBox(height: 3),
                 Row(children: [
                   QuadIcon(size: 11, color: context.rq.muted),
