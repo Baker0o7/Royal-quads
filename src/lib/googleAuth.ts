@@ -31,19 +31,24 @@ export function decodeGoogleJwt(token: string): GoogleProfile {
 
 export function upsertGoogleUser(p: GoogleProfile): GoogleUser {
   type SU = User & { googleId?: string; password?: string; avatarUrl?: string; email?: string };
-  const users = JSON.parse(localStorage.getItem('rq:users') ?? '[]') as SU[];
-  let u = users.find(x => x.googleId === p.sub);
-  if (u) {
-    u.name = p.name; u.avatarUrl = p.picture; u.email = p.email;
-    localStorage.setItem('rq:users', JSON.stringify(users));
-  } else {
-    const seq = Number(localStorage.getItem('rq:user_seq') ?? '0') + 1;
-    localStorage.setItem('rq:user_seq', String(seq));
-    u = { id: seq, name: p.name, phone: '', role: 'user', password: '',
-          googleId: p.sub, avatarUrl: p.picture, email: p.email };
-    localStorage.setItem('rq:users', JSON.stringify([...users, u]));
+  try {
+    const users = JSON.parse(localStorage.getItem('rq:users') ?? '[]') as SU[];
+    let u = users.find(x => x.googleId === p.sub);
+    if (u) {
+      u.name = p.name; u.avatarUrl = p.picture; u.email = p.email;
+      localStorage.setItem('rq:users', JSON.stringify(users));
+    } else {
+      const seq = Number(localStorage.getItem('rq:user_seq') ?? '0') + 1;
+      localStorage.setItem('rq:user_seq', String(seq));
+      u = { id: seq, name: p.name, phone: '', role: 'user', password: '',
+            googleId: p.sub, avatarUrl: p.picture, email: p.email };
+      localStorage.setItem('rq:users', JSON.stringify([...users, u]));
+    }
+    return { ...u, googleId: p.sub, avatarUrl: p.picture, email: p.email };
+  } catch (e) {
+    console.error('[googleAuth] Failed to upsert user:', e);
+    return { id: 0, name: p.name, phone: '', role: 'user', googleId: p.sub, avatarUrl: p.picture, email: p.email };
   }
-  return { ...u, googleId: p.sub, avatarUrl: p.picture, email: p.email };
 }
 
 export function getClientId(): string {

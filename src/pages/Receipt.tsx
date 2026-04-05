@@ -81,7 +81,7 @@ export default function Receipt() {
     </div>
   );
 
-  const b = booking!;
+  const b = booking as Booking; // booking is non-null here — guarded by line 75+76
   const totalPaid = b.price + (b.overtimeCharge || 0);
 
   const rows: { label: string; value: string }[] = [

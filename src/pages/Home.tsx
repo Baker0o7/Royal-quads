@@ -8,6 +8,7 @@ import { haptic } from '../lib/utils';
 import { useToast } from '../lib/components/Toast';
 import { Spinner, StepHeader, ErrorMessage } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
+import { TILL_NUMBER } from '../lib/constants';
 import type { Quad } from '../types';
 import { PRICING } from '../types';
 
@@ -43,7 +44,7 @@ export default function Home() {
         const id = Number(qp);
         if (data.find(q => q.id === id && q.status === 'available')) setSelectedQuad(id);
       }
-    }).finally(() => setLoadingQuads(false));
+    }).catch(() => {}).finally(() => setLoadingQuads(false));
 
     const u = localStorage.getItem('user');
     if (u) {
@@ -78,13 +79,17 @@ export default function Home() {
     if (!selectedQuad)    { toast.error('Please choose a quad'); return; }
     if (!selectedDuration) { toast.error('Please select a duration'); return; }
     if (!customerName.trim()) { toast.error('Please enter your name'); return; }
+    if (customerName.trim().length < 2) { toast.error('Please enter a valid name (at least 2 characters)'); return; }
     if (!customerPhone.trim()) { toast.error('Please enter your M-Pesa number'); return; }
     if (customerPhone.replace(/\D/g,'').length < 9) { toast.error('Please enter a valid phone number'); return; }
 
     setLoading(true); setError('');
     try {
       const u = localStorage.getItem('user');
-      const userId = u ? JSON.parse(u).id : null;
+      let userId: number | null = null;
+      if (u) {
+        try { userId = JSON.parse(u).id ?? null; } catch {}
+      }
       const booking = await api.createBooking({
         quadId: selectedQuad,
         userId,
@@ -113,11 +118,15 @@ export default function Home() {
   };
 
   const copyTill = () => {
-    navigator.clipboard.writeText('6685024').catch(() => {}).then(() => {
-      toast.success('Till number copied!');
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(TILL_NUMBER)
+      .then(() => {
+        toast.success('Till number copied!');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        toast.error(`Clipboard access denied — please copy manually: ${TILL_NUMBER}`);
+      });
   };
 
   return (
@@ -375,7 +384,7 @@ export default function Home() {
               {[
                 { n: 1, text: 'Open M-Pesa on your phone' },
                 { n: 2, text: 'Select Lipa na M-Pesa → Buy Goods' },
-                { n: 3, text: <>Enter Till: <strong className="font-mono tracking-widest" style={{ color: 'var(--t-text)' }}>6685024</strong></> },
+                { n: 3, text: <>Enter Till: <strong className="font-mono tracking-widest" style={{ color: 'var(--t-text)' }}>{TILL_NUMBER}</strong></> },
                 { n: 4, text: <>Amount: <strong className="font-mono" style={{ color: 'var(--t-accent)' }}>{finalPrice ? `${finalPrice.toLocaleString()} KES` : '—'}{depositAmount > 0 ? ` + ${depositAmount.toLocaleString()} deposit` : ''}</strong></> },
               ].map(({ n, text }) => (
                 <div key={n} className="flex items-center gap-3">
@@ -396,7 +405,7 @@ export default function Home() {
                 style={{ borderColor: 'var(--t-border)', background: 'var(--t-bg2)', color: 'var(--t-text)' }}>
                 {copied
                   ? <><Check className="w-4 h-4" style={{ color: '#16a34a' }} /> Till Number Copied!</>
-                  : <><Copy className="w-4 h-4" /> Copy Till Number (6685024)</>}
+                  : <><Copy className="w-4 h-4" /> Copy Till Number ({TILL_NUMBER})</>}
               </button>
             </div>
           </div>

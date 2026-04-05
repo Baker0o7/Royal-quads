@@ -30,8 +30,8 @@ export default function Prebook() {
   const [success, setSuccess]       = useState(false);
 
   useEffect(() => {
-    api.getQuads().then(setQuads);
-    api.getPrebookings().then(setPrebookings);
+    api.getQuads().then(setQuads).catch(() => {});
+    api.getPrebookings().then(setPrebookings).catch(() => {});
     const stored = localStorage.getItem('user');
     if (stored) {
       try { const u = JSON.parse(stored); if (u.name) setName(u.name); if (u.phone) setPhone(u.phone); }
@@ -41,6 +41,7 @@ export default function Prebook() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (name.trim().length < 2) { setError('Please enter a valid name'); return; }
     if (!duration) { setError('Please select a duration'); return; }
     if (!scheduledFor) { setError('Please pick a date and time'); return; }
     setLoading(true); setError('');

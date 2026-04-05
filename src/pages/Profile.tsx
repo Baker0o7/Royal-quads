@@ -30,7 +30,7 @@ const GIcon = ({ s = 18 }: { s?: number }) => (
 );
 
 /* ─── GSI button with robust width measurement + remount-on-retry ─────────── */
-interface GBtnProps { onSuccess: (u: FullUser) => void; onError: (m: string) => void; }
+interface GBtnProps { onSuccess: (u: GoogleUser) => void; onError: (m: string) => void; }
 
 function GoogleBtn({ onSuccess, onError }: GBtnProps) {
   // Incrementing this key fully unmounts + remounts the inner component
@@ -63,7 +63,7 @@ function GoogleBtnInner({ onSuccess, onError, onRetry }: GBtnInnerProps) {
         innerRef.current.style.width = `${outerRef.current.clientWidth}px`;
         try {
           renderGoogleButton(innerRef.current, u => {
-            if (!dead.current) onSuccess(u as FullUser);
+            if (!dead.current) onSuccess(u);
           });
           setPhase('ready');
         } catch (e) {
@@ -627,25 +627,26 @@ export default function Profile() {
 
   // Restore persisted session
   useEffect(() => {
-    const raw = localStorage.getItem('user');
+    let raw = '';
+    try { raw = localStorage.getItem('user') || ''; } catch {}
     if (!raw) return;
     try {
       const u: FullUser = JSON.parse(raw);
       setUser(u);
-      api.getUserHistory(u.id).then(setHistory).catch(() => {});
+      api.getUserHistory(u.id).then(setHistory).catch((e) => console.warn('[Profile] getUserHistory failed:', e));
     } catch { /* corrupted session */ }
   }, []);
 
   const signIn = useCallback((u: FullUser) => {
-    localStorage.setItem('user', JSON.stringify(u));
+    try { localStorage.setItem('user', JSON.stringify(u)); } catch {}
     setUser(u);
-    api.getUserHistory(u.id).then(setHistory).catch(() => {});
+    api.getUserHistory(u.id).then(setHistory).catch((e) => console.warn('[Profile] signIn history load failed:', e));
     toast.success(`Welcome${u.name ? `, ${u.name.split(' ')[0]}` : ''}! 🏍️`);
   }, [toast]);
 
   const signOut = () => {
-    googleSignOut();
-    localStorage.removeItem('user');
+    googleSignOut().catch((e) => console.warn('[Profile] googleSignOut failed:', e));
+    try { localStorage.removeItem('user'); } catch {}
     setUser(null); setHistory([]); setRole(null);
   };
 

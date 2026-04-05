@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
+import { TILL_NUMBER } from '../lib/constants';
 import { api } from '../lib/api';
 import { EmptyState, ErrorMessage, StatusBadge, Spinner } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
@@ -122,9 +123,9 @@ function QuickBookModal({ quads, onClose, onBooked }: {
   const price     = pricing?.price ?? 0;
 
   const copyTill = () => {
-    navigator.clipboard.writeText('6685024').then(() => {
+    navigator.clipboard.writeText(TILL_NUMBER).then(() => {
       setCopied(true); setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => toast.error('Failed to copy — please copy manually'));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,7 +237,7 @@ function QuickBookModal({ quads, onClose, onBooked }: {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-mono text-xs" style={{ color: 'var(--t-muted)' }}>
-                    Till: <strong style={{ color: 'var(--t-text)' }}>6685024</strong>
+                    Till: <strong style={{ color: 'var(--t-text)' }}>{TILL_NUMBER}</strong>
                   </span>
                   <button type="button" onClick={copyTill}
                     className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg"
@@ -654,7 +655,7 @@ export default function Admin() {
                               <Navigation className="w-3 h-3" /> Track
                             </Link>
                           )}
-                          <button onClick={() => { if (confirm('Force complete this ride?')) api.completeBooking(b.id, 0).then(fetchAll); }}
+                          <button onClick={async () => { if (confirm('Force complete this ride?')) { try { await api.completeBooking(b.id, 0); fetchAll(); } catch { toast.error('Failed to end ride'); } } }}
                             className="text-[10px] font-semibold px-2 py-1 rounded-lg"
                             style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>End</button>
                         </div>
@@ -769,7 +770,7 @@ export default function Admin() {
                       {(b.depositAmount ?? 0).toLocaleString()} KES deposit
                     </p>
                   </div>
-                  <button onClick={() => api.returnDeposit(b.id).then(fetchAll)}
+                  <button onClick={() => api.returnDeposit(b.id).then(fetchAll).catch(() => toast.error('Failed to return deposit'))}
                     className="text-[10px] font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1"
                     style={{ background: 'rgba(34,197,94,0.1)', color: '#16a34a' }}>
                     <CheckCircle2 className="w-3 h-3" /> Returned
@@ -827,6 +828,7 @@ export default function Admin() {
                     <button onClick={() =>
                       api.updateQuad(quad.id, { name: editData.name, imageUrl: editData.imageUrl, imei: editData.imei, status: quad.status })
                         .then(() => { setEditId(null); fetchAll(); })
+                        .catch(() => toast.error('Failed to save quad'))
                     } className="p-2 rounded-xl"
                       style={{ background: 'color-mix(in srgb, var(--t-accent) 12%, transparent)', color: 'var(--t-accent)' }}>
                       <Save className="w-4 h-4" />
@@ -859,7 +861,7 @@ export default function Admin() {
                     </div>
                   </div>
                   <select value={quad.status}
-                    onChange={e => api.updateQuadStatus(quad.id, e.target.value).then(fetchAll)}
+                    onChange={e => api.updateQuadStatus(quad.id, e.target.value).then(fetchAll).catch(() => toast.error('Failed to update status'))}
                     className="input text-[10px] font-semibold w-auto px-2 py-1.5" style={{ width: 'auto' }}>
                     <option value="available">Available</option>
                     <option value="rented">Rented</option>
@@ -926,14 +928,14 @@ export default function Admin() {
                 </p>
               </div>
               <div className="flex gap-1.5">
-                <button onClick={() => api.togglePromotion(p.id, !p.isActive).then(fetchAll)}
+                <button onClick={() => api.togglePromotion(p.id, !p.isActive).then(fetchAll).catch(() => toast.error('Failed to toggle promotion'))}
                   className="p-2 rounded-xl transition-opacity hover:opacity-70"
                   style={p.isActive
                     ? { background: 'rgba(239,68,68,0.1)', color: '#ef4444' }
                     : { background: 'rgba(34,197,94,0.1)', color: '#16a34a' }}>
                   <Power className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => { if (confirm('Delete this promo?')) api.deletePromotion(p.id).then(fetchAll); }}
+                <button onClick={async () => { if (confirm('Delete this promo?')) { try { await api.deletePromotion(p.id); fetchAll(); } catch { toast.error('Failed to delete promo'); } } }}
                   className="p-2 rounded-xl transition-opacity hover:opacity-70"
                   style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
                   <Trash2 className="w-3.5 h-3.5" />
@@ -1002,7 +1004,7 @@ export default function Admin() {
               </div>
               <div className="flex flex-col items-end gap-2">
                 {log.cost > 0 && <span className="font-mono font-bold text-sm" style={{ color: 'var(--t-accent)' }}>{log.cost.toLocaleString()} KES</span>}
-                <button onClick={() => api.deleteMaintenanceLog(log.id).then(fetchAll)}
+                <button onClick={() => api.deleteMaintenanceLog(log.id).then(fetchAll).catch(() => toast.error('Failed to delete log'))}
                   className="p-1.5 rounded-lg transition-opacity hover:opacity-60"
                   style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}>
                   <Trash2 className="w-3.5 h-3.5" />
@@ -1076,7 +1078,7 @@ export default function Admin() {
                   </div>
                   {r.resolved
                     ? <span className="text-[10px] font-mono" style={{ color: '#16a34a' }}>✓ Resolved</span>
-                    : <button onClick={() => api.resolveDamageReport(r.id).then(fetchAll)}
+                    : <button onClick={() => api.resolveDamageReport(r.id).then(fetchAll).catch(() => toast.error('Failed to resolve report'))}
                         className="text-[10px] font-semibold px-2 py-1 rounded-lg"
                         style={{ background: 'rgba(34,197,94,0.1)', color: '#16a34a' }}>Mark Resolved</button>
                   }
@@ -1132,12 +1134,12 @@ export default function Admin() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: s.isActive ? '#22c55e' : 'var(--t-border)' }} />
-                <button onClick={() => api.updateStaff(s.id, { isActive: !s.isActive }).then(fetchAll)}
+                <button onClick={() => api.updateStaff(s.id, { isActive: !s.isActive }).then(fetchAll).catch(() => toast.error('Failed to update staff'))}
                   className="text-[10px] font-semibold px-2 py-1 rounded-lg"
                   style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
                   {s.isActive ? 'Deactivate' : 'Activate'}
                 </button>
-                <button onClick={() => { if (confirm('Remove this staff member?')) api.deleteStaff(s.id).then(fetchAll); }}
+                <button onClick={async () => { if (confirm('Remove this staff member?')) { try { await api.deleteStaff(s.id); fetchAll(); } catch { toast.error('Failed to remove staff'); } } }}
                   className="p-1.5 rounded-lg"
                   style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
                   <Trash2 className="w-3.5 h-3.5" />
@@ -1165,8 +1167,11 @@ export default function Admin() {
                 <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{w.customerName}</p>
                 {w.notified
                   ? <span className="text-[10px] font-mono" style={{ color: '#16a34a' }}>✓ Notified</span>
-                  : <button onClick={() => {
-                      api.notifyWaitlist(w.id).then(fetchAll);
+                  : <button onClick={async () => {
+                      try {
+                        await api.notifyWaitlist(w.id);
+                        fetchAll();
+                      } catch { toast.error('Failed to notify waitlist'); }
                       sendWhatsApp(w.customerPhone, smsTemplates.waitlistReady(w.customerName));
                       notifications.add('info', 'Waitlist notified',
                         `WhatsApp sent to ${w.customerName} — quad available`);
@@ -1183,7 +1188,7 @@ export default function Admin() {
               <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--t-muted)' }}>
                 Added {new Date(w.addedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
-              <button onClick={() => api.removeFromWaitlist(w.id).then(fetchAll)}
+              <button onClick={() => api.removeFromWaitlist(w.id).then(fetchAll).catch(() => toast.error('Failed to remove from waitlist'))}
                 className="mt-2 text-[10px] font-mono transition-opacity hover:opacity-70"
                 style={{ color: '#ef4444' }}>Remove</button>
             </div>
@@ -1226,8 +1231,11 @@ export default function Admin() {
                 </p>
                 {pb.status === 'pending' && (
                   <div className="flex gap-2 mt-3">
-                    <button onClick={() => {
-                        api.confirmPrebooking(pb.id).then(fetchAll);
+                    <button onClick={async () => {
+                        try {
+                          await api.confirmPrebooking(pb.id);
+                          fetchAll();
+                        } catch { toast.error('Failed to confirm pre-booking'); }
                         const dt = new Date(pb.scheduledFor).toLocaleString('en-KE', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
                         sendWhatsApp(pb.customerPhone, smsTemplates.prebookConfirmed(pb.customerName, pb.quadName || 'a quad', dt));
                         notifications.add('prebook_confirmed', 'Pre-booking confirmed',
@@ -1237,7 +1245,7 @@ export default function Admin() {
                       style={{ background: 'rgba(34,197,94,0.1)', color: '#16a34a' }}>
                       <CheckCircle2 className="w-3 h-3" /> Confirm + WhatsApp
                     </button>
-                    <button onClick={() => api.cancelPrebooking(pb.id).then(fetchAll)}
+                    <button onClick={() => api.cancelPrebooking(pb.id).then(fetchAll).catch(() => toast.error('Failed to cancel pre-booking'))}
                       className="flex-1 text-[10px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1"
                       style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>
                       <XCircle className="w-3 h-3" /> Cancel

@@ -6,7 +6,7 @@ export const ErrorBoundary: React.ComponentType<{
   fallback?: React.ReactNode;
 }> = (function () {
   function EB(this: any, props: any) {
-    React.Component.call(this, props);
+    React.Component.call(this as any, props, null);
     (this as any).state = { hasError: false, msg: '' };
   }
   EB.prototype = Object.create(React.Component.prototype);

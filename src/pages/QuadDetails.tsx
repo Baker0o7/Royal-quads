@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Navigation, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { api } from '../lib/api';
+import { BUSINESS_NAME } from '../lib/constants';
 import { LoadingScreen, StatusBadge } from '../lib/components/ui';
 import type { Quad } from '../types';
 
@@ -14,6 +15,7 @@ export default function QuadDetails() {
   useEffect(() => {
     api.getQuads()
       .then(data => setQuad(data.find(q => q.id === Number(id)) ?? null))
+      .catch(() => setQuad(null))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -75,7 +77,7 @@ export default function QuadDetails() {
             <div className="flex items-center gap-2 p-3 rounded-xl border"
               style={{ background: 'var(--t-bg2)', borderColor: 'var(--t-border)' }}>
               <span className="text-base">🏖️</span>
-              <span className="text-sm" style={{ color: 'var(--t-muted)' }}>Royal Quads Mambrui Fleet</span>
+              <span className="text-sm" style={{ color: 'var(--t-muted)' }}>{BUSINESS_NAME} Fleet</span>
             </div>
           </div>
 

@@ -1,4 +1,11 @@
-## 🏍️ Royal Quads v1.0.0 - Complete Quad Bike Rental System
+## 🏍️ Royal Quads v4.9.5 - Complete Quad Bike Rental System
+
+### New in v4.9.5:
+- **Live GPS Map**: Real OpenStreetMap tracking with polyline history, speed & location stats
+- **Bug Fixes**: Overtime calculation, name validation, TypeScript configuration
+- **Build Fixes**: Correct Vite build scripts, proper tsconfig.json, full type coverage
+
+### Features:
 
 ### Features:
 1. User-friendly interface for booking quad bikes.

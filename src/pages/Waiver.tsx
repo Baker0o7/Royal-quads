@@ -4,11 +4,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Shield, Pen, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
+import { useToast } from '../lib/components/Toast';
 import type { Booking } from '../types';
+import { BUSINESS_NAME } from '../lib/constants';
 
 export default function Waiver() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
+  const toast   = useToast();
   const [booking, setBooking]     = useState<Booking | null>(null);
   const [agreed, setAgreed]       = useState(false);
   const [signed, setSigned]       = useState(false);
@@ -21,14 +24,13 @@ export default function Waiver() {
     api.getActiveBookings().then(data => {
       const b = data.find(b => b.id === Number(bookingId));
       if (b) {
-        // Already signed → skip straight to ride
         if (b.waiverSigned) { navigate(`/ride/${bookingId}`, { replace: true }); return; }
         setBooking(b);
       } else {
         navigate(`/ride/${bookingId}`, { replace: true });
       }
-    });
-  }, [bookingId, navigate]);
+    }).catch(() => navigate(`/ride/${bookingId}`, { replace: true }));
+  }, [bookingId, navigate, api]);
 
   const getXY = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
@@ -42,8 +44,8 @@ export default function Waiver() {
   const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
     const { x, y } = getXY(e, canvas);
-    const ctx = canvas.getContext('2d')!;
     ctx.beginPath(); ctx.moveTo(x, y);
     setIsDrawing(true);
   };
@@ -52,7 +54,7 @@ export default function Waiver() {
     e.preventDefault();
     if (!isDrawing) return;
     const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
     ctx.strokeStyle = '#1a1612';
     ctx.lineWidth   = 2.5;
     ctx.lineCap     = 'round';
@@ -66,7 +68,8 @@ export default function Waiver() {
 
   const clearCanvas = () => {
     const canvas = canvasRef.current; if (!canvas) return;
-    canvas.getContext('2d')!.clearRect(0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasStroke(false);
   };
 
@@ -77,7 +80,10 @@ export default function Waiver() {
       await api.signWaiver(booking.id);
       setSigned(true);
       setTimeout(() => navigate(`/ride/${bookingId}`), 1000);
-    } catch { setSigning(false); }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to sign waiver');
+      setSigning(false);
+    }
   };
 
   if (!booking) return <LoadingScreen text="Loading waiver…" />;
@@ -129,7 +135,7 @@ export default function Waiver() {
           I, <strong style={{ color: 'var(--t-text)' }}>{booking.customerName}</strong>, acknowledge
           that quad biking carries inherent risks including physical injury or death. I voluntarily
           choose to participate in activities provided by{' '}
-          <strong style={{ color: 'var(--t-text)' }}>Royal Quads Mambrui</strong>.
+          <strong style={{ color: 'var(--t-text)' }}>{BUSINESS_NAME}</strong>.
         </p>
         <p><strong style={{ color: 'var(--t-text)' }}>I acknowledge that:</strong></p>
         <ul className="list-disc pl-4 space-y-1">
@@ -143,7 +149,7 @@ export default function Waiver() {
         </ul>
         <p>
           I hereby <strong style={{ color: 'var(--t-text)' }}>release, indemnify, and hold harmless</strong>{' '}
-          Royal Quads Mambrui, its owners, employees and agents from any claims, damages, or
+          {BUSINESS_NAME}, its owners, employees and agents from any claims, damages, or
           liability arising from my participation.
         </p>
         <p className="font-mono text-[10px]">

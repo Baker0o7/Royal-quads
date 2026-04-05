@@ -26,7 +26,8 @@ function load(): AppNotif[] {
   try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
 }
 function save(n: AppNotif[]) {
-  localStorage.setItem(KEY, JSON.stringify(n.slice(0, 60))); // keep latest 60
+  try { localStorage.setItem(KEY, JSON.stringify(n.slice(0, 60))); }
+  catch (e) { console.warn('[notifications] localStorage save failed:', e); }
 }
 
 export const notifications = {

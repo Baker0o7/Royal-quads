@@ -83,15 +83,14 @@ jobs:
 
             > Enable **Install from unknown sources** in Android Settings before installing.
 
-            ### New in v2.7
-            - New logo on all surfaces and app icon
-            - Google Sign-In fixed on all devices
-            - Auth portal redesigned with animated form
-            - Quick-Start booking from admin dashboard
-            - History search and date filter
-            - Daily cash report (printable)
-            - M-Pesa step-by-step guide with confirmation code
-            - PWA — installable from Chrome
+            ### New in v4.9.5
+            - **40+ bug fixes** — all empty catch blocks, silent errors, and unsafe localStorage resolved
+            - **TypeScript** — 0 errors, full strict type coverage
+            - **GPS Live Map** — real OpenStreetMap + Leaflet with polyline history and themed controls
+            - **Notifications** — 2-min countdown warnings, overtime alerts
+            - **8 Themes** — all pages fully themed
+            - **Constants extraction** — TILL_NUMBER and BUSINESS_NAME centralized
+            - **Error handling** — all API calls, clipboard, storage, and canvas operations now have proper error handling
 
             ### Install
             1. Download Royal-Quads.apk

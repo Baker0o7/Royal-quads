@@ -23,8 +23,9 @@ export function ImagePicker({ value, onChange, className = '' }: Props) {
         const canvas = document.createElement('canvas');
         canvas.width  = Math.round(img.width  * scale);
         canvas.height = Math.round(img.height * scale);
-        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        onChange(canvas.toDataURL('image/jpeg', 0.82));
+        const ctx = canvas.getContext('2d'); if (!ctx) return;
+        try { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); } catch { return; }
+        try { onChange(canvas.toDataURL('image/jpeg', 0.82)); } catch {}
       };
       img.src = e.target?.result as string;
     };

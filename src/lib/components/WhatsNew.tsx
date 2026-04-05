@@ -3,24 +3,26 @@ import { motion, AnimatePresence } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { X, Sparkles } from 'lucide-react';
 
-const VERSION = '2.5.0';
+const VERSION = '4.9.5';
 const STORAGE_KEY = `rq:whats_new_seen_${VERSION}`;
 
 const FEATURES = [
+  { emoji: '🗺️', title: 'Live GPS Map',           desc: 'Real OpenStreetMap tracking with polyline history, speed & location stats' },
   { emoji: '🔔', title: 'Notifications',          desc: 'Ride alerts, overtime warnings & 2-min countdowns in the bell icon' },
   { emoji: '📲', title: 'WhatsApp Alerts',        desc: 'One-tap message customers on overtime, waitlist & booking confirm' },
   { emoji: '📄', title: 'PDF Receipt Export',     desc: 'Save any receipt as a branded PDF with the download button' },
-  { emoji: '👤', title: 'Role Chooser',           desc: 'New sign-in screen — pick Admin, Customer or Guest' },
-  { emoji: '🔐', title: 'Google Sign-In Fixed',   desc: 'Works in all browsers and the Android app (no more "didn\'t load")' },
+  { emoji: '🎨', title: '8 Themes',              desc: 'All pages fully themed — tap the palette icon in the top bar' },
+  { emoji: '👤', title: 'Role Chooser',          desc: 'Sign in as Admin, Customer or Guest' },
   { emoji: '⏱️', title: 'Live Admin Countdown',   desc: 'Active rides show seconds ticking down with a progress bar' },
-  { emoji: '🎨', title: '8 Themes',               desc: 'All pages fully themed — tap the palette icon in the top bar' },
 ];
 
 export function WhatsNew() {
-  const [open, setOpen] = useState(() => !localStorage.getItem(STORAGE_KEY));
+  const [open, setOpen] = useState(() => {
+    try { return !localStorage.getItem(STORAGE_KEY); } catch { return false; }
+  });
 
   const dismiss = () => {
-    localStorage.setItem(STORAGE_KEY, '1');
+    try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
     setOpen(false);
   };
 

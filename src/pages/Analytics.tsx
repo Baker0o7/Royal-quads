@@ -22,6 +22,8 @@ export default function Analytics() {
       api.getRevenueChart(), api.getPeakHours(), api.getQuadUtilisation(), api.getCustomerStats(),
     ]).then(([c, p, u, cs]) => {
       setChart(c); setPeak(p); setUtil(u); setCustomers(cs);
+    }).catch((e) => {
+      console.warn('[Analytics] Failed to load data:', e);
     }).finally(() => setLoading(false));
   }, []);
 

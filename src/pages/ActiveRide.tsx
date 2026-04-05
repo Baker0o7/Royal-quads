@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, AlertTriangle, CheckCircle2, Navigation, Shield, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
+import { useToast } from '../lib/components/Toast';
 import { notifications } from '../lib/notifications';
 import { sendWhatsApp, smsTemplates } from '../lib/sms';
 import { haptic } from '../lib/utils';
@@ -15,6 +16,7 @@ function pad(n: number) { return String(Math.abs(n)).padStart(2, '0'); }
 export default function ActiveRide() {
   const { id }    = useParams<{ id: string }>();
   const navigate  = useNavigate();
+  const toast     = useToast();
   const [booking, setBooking]       = useState<Booking | null>(null);
   const [secondsLeft, setSeconds]   = useState(0);
   const [loading, setLoading]       = useState(true);
@@ -35,12 +37,14 @@ export default function ActiveRide() {
         setSeconds(calcSecs(cur));
         // Ride started notification (only once — check if already fired)
         const firedKey = `rq:notif_started_${cur.id}`;
-        if (!localStorage.getItem(firedKey)) {
-          localStorage.setItem(firedKey, '1');
-          notifications.add('ride_started', 'Ride Started! 🏍️',
-            `${cur.customerName} is riding ${cur.quadName} for ${cur.duration} min.`,
-            `/ride/${cur.id}`);
-        }
+        try {
+          if (!localStorage.getItem(firedKey)) {
+            localStorage.setItem(firedKey, '1');
+            notifications.add('ride_started', 'Ride Started! 🏍️',
+              `${cur.customerName} is riding ${cur.quadName} for ${cur.duration} min.`,
+              `/ride/${cur.id}`);
+          }
+        } catch {}
       } else {
         navigate(`/receipt/${id}`, { replace: true });
       }
@@ -79,14 +83,17 @@ export default function ActiveRide() {
     haptic('medium');
     setCompleting(true);
     try {
-      const overtimeMins = Math.max(0, Math.ceil(-Math.min(0, secondsLeft) / 60));
+      const overtimeMins = secondsLeft < 0 ? Math.max(0, Math.ceil(Math.abs(secondsLeft) / 60)) : 0;
       await api.completeBooking(booking.id, overtimeMins);
       const total = booking.price + overtimeMins * OVERTIME_RATE;
       notifications.add('ride_complete', 'Ride Complete ✅',
         `${booking.customerName} finished riding ${booking.quadName}. Total: ${total.toLocaleString()} KES.`,
         `/receipt/${id}`);
       navigate(`/receipt/${id}`);
-    } catch { setCompleting(false); }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to complete ride');
+      setCompleting(false);
+    }
   };
 
   if (loading) return <LoadingScreen text="Loading ride…" />;

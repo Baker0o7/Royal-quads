@@ -9,7 +9,10 @@ function load<T>(key: string, fallback: T): T {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) as T : fallback; }
   catch { return fallback; }
 }
-function save(key: string, value: unknown) { localStorage.setItem(key, JSON.stringify(value)); }
+function save(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch (e) { console.warn('[api] localStorage save failed:', e); }
+}
 function nextId(key: string): number { const id = load<number>(key, 0) + 1; save(key, id); return id; }
 
 // ─── Accessors ────────────────────────────────────────────────────────────────
@@ -327,7 +330,7 @@ export const api = {
   convertPrebooking: async (id: number) => { setPrebookings(getPrebookings().map(p => p.id === id ? { ...p, status: 'converted' } : p)); return { success: true }; },
 
   // ── Admin PIN ──
-  getAdminPin: () => localStorage.getItem('rq:admin_pin') || '1234',
-  setAdminPin: (pin: string) => { localStorage.setItem('rq:admin_pin', pin); },
-  verifyAdminPin: (pin: string) => pin === (localStorage.getItem('rq:admin_pin') || '1234'),
+  getAdminPin: () => { try { return localStorage.getItem('rq:admin_pin') || '1234'; } catch { return '1234'; } },
+  setAdminPin: (pin: string) => { try { localStorage.setItem('rq:admin_pin', pin); } catch {} },
+  verifyAdminPin: (pin: string) => { try { return pin === (localStorage.getItem('rq:admin_pin') || '1234'); } catch { return pin === '1234'; } },
 };

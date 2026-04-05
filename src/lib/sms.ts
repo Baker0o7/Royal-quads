@@ -1,3 +1,4 @@
+import { BUSINESS_NAME } from './constants';
 // ── SMS / WhatsApp alert helpers (Kenya-optimised) ────────────────────────────
 // WhatsApp is the dominant messaging platform in Kenya.
 // We use wa.me deep links which work on all devices.
@@ -24,20 +25,20 @@ export function sendSMS(phone: string, message: string): void {
 // ── Pre-built message templates ───────────────────────────────────────────────
 export const smsTemplates = {
   rideStarted: (name: string, quad: string, duration: number, receiptId: string) =>
-    `Hi ${name}! 🏍️ Your ${duration}-min quad ride on *${quad}* has started at Royal Quads Mambrui.\n\nReceipt: ${receiptId}\nEnjoy the dunes! 🏜️\n\n📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
+    `Hi ${name}! 🏍️ Your ${duration}-min quad ride on *${quad}* has started at ${BUSINESS_NAME}.\n\nReceipt: ${receiptId}\nEnjoy the dunes! 🏜️\n\n📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
 
   rideComplete: (name: string, total: number, receiptId: string) =>
-    `Hi ${name}! ✅ Your ride is complete.\n\nTotal paid: *${total.toLocaleString()} KES*\nReceipt: ${receiptId}\n\nThank you for riding with Royal Quads Mambrui! Come back soon 🏜️`,
+    `Hi ${name}! ✅ Your ride is complete.\n\nTotal paid: *${total.toLocaleString()} KES*\nReceipt: ${receiptId}\n\nThank you for riding with ${BUSINESS_NAME}! Come back soon 🏜️`,
 
   overtime: (name: string, mins: number, charge: number) =>
-    `⏰ Hi ${name}, your quad ride time has ended ${mins} minute(s) ago.\nOvertime charge: *${charge.toLocaleString()} KES* (100 KES/min)\n\nPlease return the quad to Royal Quads. Thank you!`,
+    `⏰ Hi ${name}, your quad ride time has ended ${mins} minute(s) ago.\nOvertime charge: *${charge.toLocaleString()} KES* (100 KES/min)\n\nPlease return the quad to ${BUSINESS_NAME}. Thank you!`,
 
   depositReminder: (name: string, amount: number) =>
-    `💰 Hi ${name}, reminder that your deposit of *${amount.toLocaleString()} KES* will be returned when the quad is back at Royal Quads Mambrui. Thank you!`,
+    `💰 Hi ${name}, reminder that your deposit of *${amount.toLocaleString()} KES* will be returned when the quad is back at ${BUSINESS_NAME}. Thank you!`,
 
   prebookConfirmed: (name: string, quad: string, dateTime: string) =>
-    `📅 Hi ${name}! Your quad booking at Royal Quads Mambrui is *CONFIRMED*.\n\n🏍️ Quad: ${quad}\n🕐 Time: ${dateTime}\n\nSee you at the dunes! 📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
+    `📅 Hi ${name}! Your quad booking at ${BUSINESS_NAME} is *CONFIRMED*.\n\n🏍️ Quad: ${quad}\n🕐 Time: ${dateTime}\n\nSee you at the dunes! 📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
 
   waitlistReady: (name: string) =>
-    `🔔 Hi ${name}! A quad is now available for you at Royal Quads Mambrui.\n\nCome quickly before it's taken! 📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
+    `🔔 Hi ${name}! A quad is now available for you at ${BUSINESS_NAME}.\n\nCome quickly before it's taken! 📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`,
 };
