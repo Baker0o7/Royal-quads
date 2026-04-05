@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, MapPin, CreditCard, ChevronRight, AlertCircle, Phone, Tag, Copy, Check, Users, Shield, Wallet, Calendar } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, Phone, Tag, Copy, Check, Users, Shield, Wallet, Calendar, Zap, Star, ChevronRight, CreditCard } from 'lucide-react';
 import { api } from '../lib/api';
 import { notifications } from '../lib/notifications';
 import { haptic } from '../lib/utils';
 import { useToast } from '../lib/components/Toast';
 import { Spinner, StepHeader, ErrorMessage } from '../lib/components/ui';
 import { ImagePicker } from '../lib/components/ImagePicker';
-import { TILL_NUMBER } from '../lib/constants';
-import type { Quad } from '../types';
+import { TILL_NUMBER, BUSINESS_NAME } from '../lib/constants';
+import type { Quad, Booking } from '../types';
 import { PRICING } from '../types';
+import { sendWhatsApp } from '../lib/sms';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -34,6 +35,10 @@ export default function Home() {
   const [showAdvanced, setShowAdvanced]       = useState(false);
   const [loadingQuads, setLoadingQuads]       = useState(true);
   const [mpesaRef, setMpesaRef]               = useState('');
+  const [liveRides, setLiveRides]             = useState<Booking[]>([]);
+  const [loyalty, setLoyalty]                 = useState<{ points: number; totalRides: number } | null>(null);
+  const [emergencyContact, setEmergencyContact] = useState('');
+  const [loyaltyOpen, setLoyaltyOpen]         = useState(false);
 
   useEffect(() => {
     setLoadingQuads(true);
@@ -46,12 +51,21 @@ export default function Home() {
       }
     }).catch(() => {}).finally(() => setLoadingQuads(false));
 
+    api.getActiveBookings().then(setLiveRides).catch(() => {});
+
     const u = localStorage.getItem('user');
     if (u) {
       try {
         const p = JSON.parse(u);
         if (p.name)  setCustomerName(p.name);
-        if (p.phone) setCustomerPhone(p.phone);
+        if (p.phone) {
+          setCustomerPhone(p.phone);
+          api.getLoyaltyAccount(p.phone).then(acc => {
+            if (acc) setLoyalty({ points: acc.points, totalRides: acc.totalRides });
+          }).catch(() => {});
+          const ec = api.getEmergencyContact(p.phone);
+          if (ec) setEmergencyContact(ec);
+        }
       } catch {}
     }
   }, [location.search]);
@@ -61,6 +75,18 @@ export default function Home() {
   const multiplier = api.getCurrentPriceMultiplier();
   const originalPrice = pricingRow ? Math.round(pricingRow.price * multiplier) : 0;
   const finalPrice = promoDiscount > 0 ? Math.round(originalPrice * (1 - promoDiscount / 100)) : originalPrice;
+  const promoSaved = promoDiscount > 0 ? originalPrice - finalPrice : 0;
+
+  const multiplierLabel = (() => {
+    if (multiplier === 1) return null;
+    if (multiplier < 1) {
+      const pct = Math.round((1 - multiplier) * 100);
+      return { label: `Early Bird —${pct}%`, color: '#16a34a' };
+    }
+    const pct = Math.round((multiplier - 1) * 100);
+    if (multiplier >= 1.5) return { label: `Peak +${pct}%`, color: '#ef4444' };
+    return { label: `Peak +${pct}%`, color: '#f59e0b' };
+  })();
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -92,6 +118,7 @@ export default function Home() {
       if (u) {
         try { userId = JSON.parse(u).id ?? null; } catch {}
       }
+      const quad = quads.find(q => q.id === selectedQuad);
       const booking = await api.createBooking({
         quadId: selectedQuad,
         userId,
@@ -107,10 +134,21 @@ export default function Home() {
         waiverSigned: false,
         mpesaRef: mpesaRef.trim().toUpperCase() || null,
       });
+
+      if (emergencyContact.trim()) {
+        api.setEmergencyContact(customerPhone, emergencyContact.trim());
+      }
+
+      api.addLoyaltyPoints(customerPhone, Math.floor(finalPrice / 100)).catch(() => {});
+
       notifications.add('ride_started', 'Booking Created 🏍️',
-        `${customerName.trim()} booked ${quads.find(q => q.id === selectedQuad)?.name} for ${selectedDuration} min — ${finalPrice.toLocaleString()} KES`,
+        `${customerName.trim()} booked ${quad?.name} for ${selectedDuration} min — ${finalPrice.toLocaleString()} KES`,
         `/ride/${booking.id}`);
       haptic('success');
+
+      const wMsg = `Hi ${customerName.trim()}! 🏍️ Your ${selectedDuration}-min quad ride on *${quad?.name}* has started at ${BUSINESS_NAME}.\n\nReceipt: ${booking.receiptId}\nEnjoy the dunes! 🏜️\n\n📍 https://maps.app.goo.gl/xrHm41wB8Gd6JKpa6`;
+      sendWhatsApp(customerPhone, wMsg);
+
       navigate(`/waiver/${booking.id}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Booking failed — please try again');
@@ -163,9 +201,45 @@ export default function Home() {
               className="inline-flex items-center gap-1.5 text-xs font-mono text-white/70 hover:text-white transition-colors bg-white/10 border border-white/15 px-3 py-1.5 rounded-full">
               <Calendar className="w-3 h-3" /> Pre-book
             </Link>
+            {loyalty && (
+              <button type="button" onClick={() => setLoyaltyOpen(o => !o)}
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-white/70 hover:text-white transition-colors bg-white/10 border border-white/15 px-3 py-1.5 rounded-full">
+                <Star className="w-3 h-3" /> {loyalty.points} pts
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* ── Live rides banner ── */}
+      {liveRides.length > 0 && (
+        <div className="p-3 rounded-2xl border"
+          style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-xs font-semibold" style={{ color: '#ef4444' }}>
+              {liveRides.length} ride{liveRides.length > 1 ? 's' : ''} in progress
+            </span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {liveRides.slice(0, 3).map(b => {
+              const elapsed = Math.floor((Date.now() - new Date(b.startTime).getTime()) / 1000);
+              const remaining = b.duration * 60 - elapsed;
+              return (
+                <div key={b.id} className="shrink-0 px-3 py-2 rounded-xl border"
+                  style={{ background: 'var(--t-card)', borderColor: 'var(--t-border)' }}>
+                  <p className="text-xs font-semibold truncate max-w-[120px]" style={{ color: 'var(--t-text)' }}>
+                    {b.quadName}
+                  </p>
+                  <p className="text-[10px] font-mono" style={{ color: 'var(--t-muted)' }}>
+                    {b.customerName} · {Math.max(0, Math.ceil(remaining / 60))}m left
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── No quads banner ── */}
       {!loadingQuads && available.length === 0 && (
@@ -247,10 +321,21 @@ export default function Home() {
 
         {/* Step 2 — Duration */}
         <section>
-          <StepHeader step={2} title="Select Duration" />
+          <div className="flex items-center justify-between mb-3">
+            <StepHeader step={2} title="Select Duration" />
+            {multiplierLabel && (
+              <span className="text-[10px] font-mono font-semibold px-2 py-1 rounded-full"
+                style={{ background: `${multiplierLabel.color}18`, color: multiplierLabel.color }}>
+                <Zap className="w-3 h-3 inline mr-1" />{multiplierLabel.label}
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-3 gap-2">
             {PRICING.map(p => {
               const active = selectedDuration === p.duration;
+              const basePrice = p.price;
+              const finalP = Math.round(basePrice * multiplier);
+              const hasMulti = multiplier !== 1;
               return (
                 <button key={p.duration} type="button"
                   onClick={() => { setSelectedDuration(p.duration); haptic('light'); }}
@@ -258,7 +343,7 @@ export default function Home() {
                   <Clock className="w-4 h-4" style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }} />
                   <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{p.label}</span>
                   <span className="text-[10px] font-mono font-medium" style={{ color: active ? 'var(--t-accent)' : 'var(--t-muted)' }}>
-                    {p.price.toLocaleString()} KES
+                    {finalP.toLocaleString()} KES{hasMulti && <span className="line-through opacity-50 ml-0.5">{basePrice}</span>}
                   </span>
                 </button>
               );
@@ -279,6 +364,8 @@ export default function Home() {
                 onChange={e => setCustomerPhone(e.target.value)}
                 style={{ paddingLeft: '2.75rem' }} className="input" required autoComplete="tel" />
             </div>
+            <input type="text" placeholder="Emergency Contact (optional)" value={emergencyContact}
+              onChange={e => setEmergencyContact(e.target.value)} className="input" autoComplete="tel" />
             {/* Group size */}
             <div className="flex items-center gap-3 p-3 rounded-xl border"
               style={{ background: 'color-mix(in srgb, var(--t-bg2) 60%, transparent)', borderColor: 'var(--t-border)' }}>
@@ -361,7 +448,9 @@ export default function Home() {
               </button>
             </div>
             {promoError   && <p className="text-xs font-mono pl-1" style={{ color: '#ef4444' }}>⚠ {promoError}</p>}
-            {promoSuccess && <p className="text-xs font-mono pl-1" style={{ color: '#16a34a' }}>✓ {promoSuccess}</p>}
+            {promoSuccess && <p className="text-xs font-mono pl-1" style={{ color: '#16a34a' }}>
+              ✓ {promoSuccess}{promoSaved > 0 && <span className="ml-1">(save {promoSaved.toLocaleString()} KES)</span>}
+            </p>}
           </div>
         </section>
 
@@ -442,6 +531,57 @@ export default function Home() {
             : <>Continue to Waiver <ChevronRight className="w-4 h-4" /></>}
         </button>
       </form>
+
+      {/* ── Loyalty Modal ── */}
+      <AnimatePresence>
+        {loyaltyOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setLoyaltyOpen(false)}>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl p-6 shadow-2xl"
+              style={{ background: 'var(--t-card)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: 'rgba(201,151,42,0.15)' }}>
+                  <Star className="w-6 h-6" style={{ color: 'var(--t-accent2)' }} />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold" style={{ color: 'var(--t-text)' }}>Loyalty Points</h3>
+                  <p className="text-xs" style={{ color: 'var(--t-muted)' }}>Earn 1 point per 100 KES spent</p>
+                </div>
+              </div>
+              {loyalty ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-4 rounded-2xl text-center border"
+                    style={{ background: 'rgba(201,151,42,0.08)', borderColor: 'rgba(201,151,42,0.2)' }}>
+                    <p className="font-mono text-3xl font-bold" style={{ color: 'var(--t-accent2)' }}>{loyalty.points}</p>
+                    <p className="text-xs font-semibold mt-1" style={{ color: 'var(--t-muted)' }}>Points Balance</p>
+                  </div>
+                  <div className="p-4 rounded-2xl text-center border"
+                    style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)' }}>
+                    <p className="font-mono text-3xl font-bold" style={{ color: '#10b981' }}>{loyalty.totalRides}</p>
+                    <p className="text-xs font-semibold mt-1" style={{ color: 'var(--t-muted)' }}>Total Rides</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-center" style={{ color: 'var(--t-muted)' }}>No loyalty account yet. Complete your first ride!</p>
+              )}
+              <button type="button" onClick={() => setLoyaltyOpen(false)}
+                className="w-full mt-4 btn-primary">
+                Got it!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
