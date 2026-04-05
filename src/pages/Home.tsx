@@ -58,7 +58,8 @@ export default function Home() {
 
   const available = quads.filter(q => q.status === 'available');
   const pricingRow = PRICING.find(p => p.duration === selectedDuration);
-  const originalPrice = pricingRow?.price ?? 0;
+  const multiplier = api.getCurrentPriceMultiplier();
+  const originalPrice = pricingRow ? Math.round(pricingRow.price * multiplier) : 0;
   const finalPrice = promoDiscount > 0 ? Math.round(originalPrice * (1 - promoDiscount / 100)) : originalPrice;
 
   const handleApplyPromo = async () => {
@@ -66,6 +67,7 @@ export default function Home() {
     setPromoError(''); setPromoSuccess('');
     try {
       const p = await api.validatePromotion(promoCode.trim());
+      if (!p) { setPromoDiscount(0); setPromoError('Invalid or inactive promo code'); return; }
       setPromoDiscount(p.discountPercentage);
       setPromoSuccess(`${p.discountPercentage}% discount applied!`);
     } catch (e) {
@@ -94,7 +96,7 @@ export default function Home() {
         quadId: selectedQuad,
         userId,
         customerName: customerName.trim(),
-        customerPhone: customerPhone.replace(/\s/g, ''),
+        customerPhone: customerPhone,
         duration: selectedDuration,
         price: finalPrice,
         originalPrice,

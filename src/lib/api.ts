@@ -1,6 +1,7 @@
 import type {
   Quad, Booking, User, Promotion, Package, SalesData,
-  MaintenanceLog, DamageReport, Staff, Shift, WaitlistEntry, Prebooking
+  MaintenanceLog, DamageReport, Staff, Shift, WaitlistEntry, Prebooking,
+  IncidentReport, LoyaltyAccount, DynamicPricingRule,
 } from '../types';
 import { OVERTIME_RATE } from '../types';
 
@@ -14,6 +15,14 @@ function save(key: string, value: unknown) {
   catch (e) { console.warn('[api] localStorage save failed:', e); }
 }
 function nextId(key: string): number { const id = load<number>(key, 0) + 1; save(key, id); return id; }
+
+function normPhone(phone: string): string {
+  return phone.replace(/[\s\-().]+/g, '').replace(/^0/, '254');
+}
+
+function receiptId(): string {
+  return 'RQ-' + Date.now().toString(36).toUpperCase().slice(-6);
+}
 
 // ─── Accessors ────────────────────────────────────────────────────────────────
 type StoredUser = User & { password: string };
@@ -50,6 +59,20 @@ function getWaitlist(): WaitlistEntry[] { return load<WaitlistEntry[]>('rq:waitl
 function setWaitlist(w: WaitlistEntry[]) { save('rq:waitlist', w); }
 function getPrebookings(): Prebooking[] { return load<Prebooking[]>('rq:prebookings', []); }
 function setPrebookings(p: Prebooking[]) { save('rq:prebookings', p); }
+function getIncidents(): IncidentReport[] { return load<IncidentReport[]>('rq:incidents', []); }
+function setIncidents(i: IncidentReport[]) { save('rq:incidents', i); }
+function getLoyalty(): Record<string, LoyaltyAccount> { return load<Record<string, LoyaltyAccount>>('rq:loyalty', {}); }
+function setLoyalty(m: Record<string, LoyaltyAccount>) { save('rq:loyalty', m); }
+function getDynamicPricing(): DynamicPricingRule[] { return load<DynamicPricingRule[]>('rq:dynamic_pricing', []); }
+function setDynamicPricing(r: DynamicPricingRule[]) { save('rq:dynamic_pricing', r); }
+
+const BACKUP_KEYS = [
+  'rq:quads','rq:bookings','rq:prebookings','rq:promotions',
+  'rq:incidents','rq:staff','rq:maintenance','rq:loyalty',
+  'rq:admin_pin','rq:theme','rq:onboarded',
+  'rq:quad_seq','rq:booking_seq','rq:incident_seq','rq:user_seq',
+  'rq:dynamic_pricing',
+];
 
 // ─── CSV export helper ────────────────────────────────────────────────────────
 function toCSV(rows: Record<string, unknown>[]): string {
@@ -91,21 +114,21 @@ export const api = {
     duration: number; price: number; originalPrice: number; promoCode?: string | null;
     isPrebooked?: boolean; prebookTime?: string; groupSize?: number;
     idPhotoUrl?: string | null; waiverSigned?: boolean; depositAmount?: number;
-    operatorId?: number | null; mpesaRef?: string | null;
+    operatorId?: number | null; mpesaRef?: string | null; guideName?: string | null;
   }): Promise<{ id: number; receiptId: string; startTime: string }> => {
     const quads = getQuads();
     const quad = quads.find(q => q.id === body.quadId);
     if (!quad) throw new Error('Quad not found');
     if (quad.status !== 'available') throw new Error('Quad is not available');
     const id = nextId('rq:booking_seq');
-    const receiptId = 'RQ-' + Math.random().toString(36).slice(2, 8).toUpperCase();
     const startTime = new Date().toISOString();
+    const guideName = body.guideName?.trim().length ? body.guideName.trim() : null;
     const booking: Booking = {
       id, quadId: body.quadId, userId: body.userId ?? null,
-      customerName: body.customerName.trim(), customerPhone: body.customerPhone,
+      customerName: body.customerName.trim(), customerPhone: normPhone(body.customerPhone),
       duration: body.duration, price: body.price, originalPrice: body.originalPrice,
       promoCode: body.promoCode ?? null, startTime, endTime: null, status: 'active',
-      receiptId, rating: null, feedback: null,
+      receiptId: receiptId(), rating: null, feedback: null,
       quadName: quad.name, quadImageUrl: quad.imageUrl, quadImei: quad.imei,
       isPrebooked: body.isPrebooked ?? false, prebookTime: body.prebookTime ?? null,
       groupSize: body.groupSize ?? 1, idPhotoUrl: body.idPhotoUrl ?? null,
@@ -113,12 +136,13 @@ export const api = {
       waiverSignedAt: body.waiverSigned ? new Date().toISOString() : null,
       depositAmount: body.depositAmount ?? 0, depositReturned: false,
       operatorId: body.operatorId ?? null,
-      mpesaRef: body.mpesaRef ?? null,
+      mpesaRef: body.mpesaRef?.trim().toUpperCase() ?? null,
       overtimeMinutes: 0, overtimeCharge: 0,
+      guideName, guidePaid: false,
     };
     setBookings([...getBookings(), booking]);
     setQuads(quads.map(q => q.id === body.quadId ? { ...q, status: 'rented' } : q));
-    return { id, receiptId, startTime };
+    return { id, receiptId: booking.receiptId, startTime };
   },
 
   getActiveBookings: async (): Promise<Booking[]> => getBookings().filter(b => b.status === 'active'),
@@ -228,8 +252,8 @@ export const api = {
 
   // ── Auth ──
   login: async (phone: string, password: string): Promise<User> => {
-    const norm = phone.replace(/[\s\-().]/g, '');
-    const user = getUsers().find(u => u.phone.replace(/[\s\-().]/g, '') === norm && u.password === password);
+    const norm = normPhone(phone);
+    const user = getUsers().find(u => normPhone(u.phone) === norm && u.password === password);
     if (!user) throw new Error('Invalid phone number or password');
     const { password: _, ...safe } = user; void _; return safe;
   },
@@ -237,9 +261,9 @@ export const api = {
     if (!name?.trim()) throw new Error('Name is required');
     if (!phone?.trim()) throw new Error('Phone number is required');
     if (!password || password.length < 4) throw new Error('Password must be at least 4 characters');
-    const norm = phone.replace(/[\s\-().]/g, '');
+    const norm = normPhone(phone);
     if (norm.length < 9) throw new Error('Enter a valid phone number');
-    if (getUsers().find(u => u.phone.replace(/[\s\-().]/g, '') === norm)) throw new Error('Phone number already registered');
+    if (getUsers().find(u => normPhone(u.phone) === norm)) throw new Error('Phone number already registered');
     const user: StoredUser = { id: nextId('rq:user_seq'), name: name.trim(), phone: norm, role: 'user', password };
     setUsers([...getUsers(), user]);
     const { password: _, ...safe } = user; void _; return safe;
@@ -258,9 +282,9 @@ export const api = {
   },
   togglePromotion: async (id: number, isActive: boolean) => { setPromotions(getPromotions().map(p => p.id === id ? { ...p, isActive: isActive ? 1 : 0 } : p)); return { success: true }; },
   deletePromotion: async (id: number) => { setPromotions(getPromotions().filter(p => p.id !== id)); return { success: true }; },
-  validatePromotion: async (code: string): Promise<Promotion> => {
+  validatePromotion: async (code: string): Promise<Promotion | null> => {
     const promo = getPromotions().find(p => p.code === code.toUpperCase().trim() && p.isActive === 1);
-    if (!promo) throw new Error('Invalid or inactive promo code'); return promo;
+    return promo ?? null;
   },
 
   // ── Packages ──
@@ -333,4 +357,145 @@ export const api = {
   getAdminPin: () => { try { return localStorage.getItem('rq:admin_pin') || '1234'; } catch { return '1234'; } },
   setAdminPin: (pin: string) => { try { localStorage.setItem('rq:admin_pin', pin); } catch {} },
   verifyAdminPin: (pin: string) => { try { return pin === (localStorage.getItem('rq:admin_pin') || '1234'); } catch { return pin === '1234'; } },
+
+  // ── Incidents ──
+  getIncidents: async () => getIncidents().slice().reverse(),
+  addIncident: async (body: { quadName: string; customerName: string; type: IncidentReport['type']; description: string; reportedBy: string; bookingId?: number | null }): Promise<IncidentReport> => {
+    const entry: IncidentReport = { id: nextId('rq:incident_seq'), ...body, date: new Date().toISOString() };
+    setIncidents([...getIncidents(), entry]); return entry;
+  },
+  deleteIncident: async (id: number) => { setIncidents(getIncidents().filter(i => i.id !== id)); return { success: true }; },
+
+  // ── Loyalty ──
+  getLoyaltyAccount: async (phone: string): Promise<LoyaltyAccount | null> => {
+    const all = getLoyalty();
+    const norm = normPhone(phone);
+    return all[norm] ?? null;
+  },
+  addLoyaltyPoints: async (phone: string, pointsEarned: number) => {
+    const all = getLoyalty();
+    const norm = normPhone(phone);
+    const existing = all[norm];
+    if (existing) {
+      all[norm] = { phone: norm, points: existing.points + pointsEarned, totalEarned: existing.totalEarned + pointsEarned, totalRides: existing.totalRides + 1 };
+    } else {
+      all[norm] = { phone: norm, points: pointsEarned, totalEarned: pointsEarned, totalRides: 1 };
+    }
+    setLoyalty(all);
+  },
+  redeemLoyaltyPoints: async (phone: string, points: number) => {
+    const all = getLoyalty();
+    const norm = normPhone(phone);
+    if (!all[norm]) return;
+    const existing = all[norm];
+    all[norm] = { phone: norm, points: Math.max(0, existing.points - points), totalEarned: existing.totalEarned, totalRides: existing.totalRides };
+    setLoyalty(all);
+  },
+
+  // ── Dynamic Pricing ──
+  getDynamicPricing: async (): Promise<DynamicPricingRule[]> => {
+    const stored = getDynamicPricing();
+    if (stored.length === 0) {
+      const defaults: DynamicPricingRule[] = [
+        { id: 1, label: 'Early Bird',   startHour: 6,  endHour: 9,  multiplier: 0.9, active: false },
+        { id: 2, label: 'Morning',      startHour: 9,  endHour: 12, multiplier: 1.0, active: true  },
+        { id: 3, label: 'Afternoon',   startHour: 12, endHour: 16, multiplier: 1.0, active: true  },
+        { id: 4, label: 'Peak (4-6pm)',startHour: 16, endHour: 18, multiplier: 1.25, active: false },
+        { id: 5, label: 'Sunset',      startHour: 18, endHour: 20, multiplier: 1.5, active: false },
+        { id: 6, label: 'Off-peak',    startHour: 20, endHour: 6,  multiplier: 0.8, active: false },
+      ];
+      setDynamicPricing(defaults); return defaults;
+    }
+    return stored;
+  },
+  saveDynamicPricing: async (rules: DynamicPricingRule[]) => { setDynamicPricing(rules); return { success: true }; },
+  getCurrentPriceMultiplier: (): number => {
+    const hour = new Date().getHours();
+    const rules = getDynamicPricing();
+    for (const r of rules) {
+      if (!r.active) continue;
+      if (r.startHour <= r.endHour) {
+        if (hour >= r.startHour && hour < r.endHour) return r.multiplier;
+      } else {
+        if (hour >= r.startHour || hour < r.endHour) return r.multiplier;
+      }
+    }
+    return 1.0;
+  },
+
+  // ── Waiver Expiry (30-day) ──
+  hasValidWaiver: (phone: string): boolean => {
+    try {
+      const raw = localStorage.getItem(`rq:waiver:${normPhone(phone)}`);
+      if (!raw) return false;
+      const signed = new Date(raw);
+      if (isNaN(signed.getTime())) return false;
+      return (Date.now() - signed.getTime()) < 30 * 86400_000;
+    } catch { return false; }
+  },
+  recordWaiverSigned: (phone: string) => {
+    try { localStorage.setItem(`rq:waiver:${normPhone(phone)}`, new Date().toISOString()); } catch {}
+  },
+
+  // ── Emergency Contacts ──
+  getEmergencyContact: (phone: string): string | null => {
+    try { return localStorage.getItem(`rq:emergency:${normPhone(phone)}`); } catch { return null; }
+  },
+  setEmergencyContact: (phone: string, contact: string) => {
+    try { localStorage.setItem(`rq:emergency:${normPhone(phone)}`, contact); } catch {}
+  },
+
+  // ── Guide ──
+  toggleGuidePaid: async (id: number) => {
+    setBookings(getBookings().map(b => b.id === id ? { ...b, guidePaid: !b.guidePaid } : b));
+    return { success: true };
+  },
+
+  // ── Extend booking ──
+  extendBooking: async (id: number, addedMins: number, addedPrice: number) => {
+    setBookings(getBookings().map(b => {
+      if (b.id !== id) return b;
+      return { ...b, duration: (b.duration || 0) + addedMins, price: (b.price || 0) + addedPrice };
+    }));
+    return { success: true };
+  },
+
+  // ── Update M-Pesa ref ──
+  updateBookingMpesa: async (id: number, mpesaRef: string) => {
+    setBookings(getBookings().map(b => b.id === id ? { ...b, mpesaRef: mpesaRef.trim().toUpperCase() } : b));
+    return { success: true };
+  },
+
+  // ── Get booking by ID ──
+  getBookingById: async (id: number): Promise<Booking | null> => {
+    try { return getBookings().find(b => b.id === id) ?? null; } catch { return null; }
+  },
+
+  // ── Backup & Restore ──
+  exportBackup: (): void => {
+    const data: Record<string, unknown> = { _version: 1, _exported: new Date().toISOString() };
+    for (const key of BACKUP_KEYS) {
+      try { const val = localStorage.getItem(key); if (val !== null) data[key] = JSON.parse(val); } catch {}
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `royal-quads-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+    URL.revokeObjectURL(url);
+  },
+  importBackup: async (jsonStr: string): Promise<{ restored: string[] }> => {
+    const data = JSON.parse(jsonStr) as Record<string, unknown>;
+    const restored: string[] = [];
+    const intKeys = new Set(['rq:quad_seq','rq:booking_seq','rq:incident_seq','rq:user_seq']);
+    const boolKeys = new Set(['rq:onboarded']);
+    for (const key of BACKUP_KEYS) {
+      if (data[key] === undefined) continue;
+      try {
+        if (boolKeys.has(key)) { localStorage.setItem(key, String(data[key] === true)); }
+        else if (intKeys.has(key)) { localStorage.setItem(key, String(Number(data[key]))); }
+        else { localStorage.setItem(key, JSON.stringify(data[key])); }
+        restored.push(key);
+      } catch (e) { console.warn(`[api] importBackup skip ${key}:`, e); }
+    }
+    return { restored };
+  },
 };

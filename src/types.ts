@@ -27,7 +27,6 @@ export interface Booking {
   quadName: string;
   quadImageUrl?: string | null;
   quadImei?: string | null;
-  // new fields
   isPrebooked?: boolean;
   prebookTime?: string | null;
   groupSize?: number;
@@ -40,6 +39,8 @@ export interface Booking {
   mpesaRef?: string | null;
   depositReturned?: boolean;
   operatorId?: number | null;
+  guideName?: string | null;
+  guidePaid?: boolean;
 }
 
 export interface User {
@@ -129,6 +130,8 @@ export interface Prebooking {
   scheduledFor: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'converted';
   createdAt: string;
+  mpesaRef?: string | null;
+  notes?: string | null;
 }
 
 export interface SalesData {
@@ -139,7 +142,34 @@ export interface SalesData {
   overtimeRevenue: number;
 }
 
-export const OVERTIME_RATE = 100; // KES per minute
+export interface IncidentReport {
+  id: number;
+  bookingId?: number | null;
+  quadName: string;
+  customerName: string;
+  type: 'fall' | 'mechanical' | 'medical' | 'other';
+  description: string;
+  date: string;
+  reportedBy: string;
+}
+
+export interface LoyaltyAccount {
+  phone: string;
+  points: number;
+  totalEarned: number;
+  totalRides: number;
+}
+
+export interface DynamicPricingRule {
+  id: number;
+  label: string;
+  startHour: number;
+  endHour: number;
+  multiplier: number;
+  active: boolean;
+}
+
+export const OVERTIME_RATE = 100;
 
 export const PRICING = [
   { duration: 5,  price: 1000, label: '5 min'  },
