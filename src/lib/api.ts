@@ -107,6 +107,10 @@ export const api = {
     setQuads(getQuads().map(q => q.id === id ? { ...q, status: status as Quad['status'] } : q));
     return { success: true };
   },
+  deleteQuad: async (id: number) => {
+    setQuads(getQuads().filter(q => q.id !== id));
+    return { success: true };
+  },
 
   // ── Bookings ──
   createBooking: async (body: {
@@ -159,6 +163,10 @@ export const api = {
     }));
     if (quadId) setQuads(getQuads().map(q => q.id === quadId ? { ...q, status: 'available' } : q));
     return { success: true, endTime };
+  },
+  updateBookingStartTime: async (id: number, newStartTime: string) => {
+    setBookings(getBookings().map(b => b.id === id ? { ...b, startTime: newStartTime } : b));
+    return { success: true };
   },
 
   returnDeposit: async (id: number) => {

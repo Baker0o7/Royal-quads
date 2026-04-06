@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, Home, Download, Star, MapPin, AlertTriangle, MessageCircle, Phone } from 'lucide-react';
+import { CheckCircle2, Home, Download, Star, MapPin, AlertTriangle, MessageCircle, Phone, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
 import { notifications } from '../lib/notifications';
@@ -120,10 +121,16 @@ export default function Receipt() {
           <p className="font-mono text-[10px] tracking-[0.15em] mt-1 text-white/40">#{b.receiptId}</p>
         </div>
 
-        {/* Tear line */}
-        <div className="flex items-center" style={{ background: 'var(--t-bg)' }}>
+        {/* Perforated divider */}
+        <div className="flex items-center px-4" style={{ background: 'var(--t-bg)' }}>
           <div className="w-5 h-5 rounded-full -ml-2.5 shrink-0" style={{ background: 'var(--t-bg2)' }} />
-          <div className="flex-1 border-t-2 border-dashed mx-1" style={{ borderColor: 'var(--t-border)' }} />
+          <div className="flex-1 flex gap-0.5 mx-1">
+            {Array.from({ length: 28 }).map((_, i) => (
+              <div key={i} className="flex-1 h-px" style={{
+                background: i % 2 === 0 ? 'var(--t-border)' : 'transparent',
+              }} />
+            ))}
+          </div>
           <div className="w-5 h-5 rounded-full -mr-2.5 shrink-0" style={{ background: 'var(--t-bg2)' }} />
         </div>
 
@@ -182,6 +189,19 @@ export default function Receipt() {
               </p>
             </div>
           )}
+
+          {/* QR code for verification */}
+          <div className="mt-4 p-3 rounded-xl flex items-center gap-3"
+            style={{ background: 'var(--t-bg2)', border: '1px solid var(--t-border)' }}>
+            <div className="shrink-0">
+              <QRCodeSVG value={b.receiptId} size={64} level="M" bgColor="#ffffff" fgColor="#1a1612" />
+            </div>
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'var(--t-muted)' }}>Scan to verify</p>
+              <p className="font-mono font-bold text-[11px] tracking-wider" style={{ color: 'var(--t-text)' }}>#{b.receiptId}</p>
+              <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--t-muted)' }}>Royal Quad Bikes · Mambrui, Kenya</p>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}

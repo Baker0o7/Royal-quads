@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, Phone, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, Phone, CheckCircle2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { ErrorMessage, LoadingScreen, Spinner } from '../lib/components/ui';
@@ -25,6 +25,8 @@ export default function Prebook() {
   const [duration, setDuration]     = useState<number | null>(null);
   const [quadId, setQuadId]         = useState<number | null>(null);
   const [scheduledFor, setScheduledFor] = useState('');
+  const [notes, setNotes]           = useState('');
+  const [mpesaRef, setMpesaRef]     = useState('');
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
   const [success, setSuccess]       = useState(false);
@@ -56,6 +58,8 @@ export default function Prebook() {
         duration,
         price,
         scheduledFor: new Date(scheduledFor).toISOString(),
+        notes: notes.trim() || undefined,
+        mpesaRef: mpesaRef.trim() || undefined,
       });
       notifications.add('prebook_reminder', 'Pre-booking Requested 📅',
         `${name.trim()} requested a ${duration}min ride for ${new Date(scheduledFor).toLocaleString()}`);
@@ -162,6 +166,27 @@ export default function Prebook() {
                 onChange={e => setScheduledFor(e.target.value)} className="input font-mono" required />
             </div>
 
+            {/* M-Pesa ref */}
+            <div>
+              <label className="text-xs font-mono uppercase tracking-wider mb-2 block" style={{ color: 'var(--t-muted)' }}>
+                M-Pesa Ref <span className="normal-case">(optional)</span>
+              </label>
+              <input type="text" placeholder="e.g. AA11BB22CC" value={mpesaRef}
+                onChange={e => setMpesaRef(e.target.value.toUpperCase())}
+                className="input font-mono uppercase" maxLength={12}
+                style={{ letterSpacing: '0.05em' }} />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-xs font-mono uppercase tracking-wider mb-2 block" style={{ color: 'var(--t-muted)' }}>
+                Special Requests <span className="normal-case">(optional)</span>
+              </label>
+              <textarea placeholder="Group size, special occasion, accessibility needs…"
+                value={notes} onChange={e => setNotes(e.target.value)}
+                className="input resize-none text-sm" rows={2} />
+            </div>
+
             <ErrorMessage message={error} />
 
             <button type="submit" disabled={loading} className="btn-primary">
@@ -196,6 +221,16 @@ export default function Prebook() {
                   <p className="font-mono text-[10px] flex items-center gap-1" style={{ color: 'var(--t-muted)' }}>
                     <Calendar className="w-3 h-3" /> {new Date(pb.scheduledFor).toLocaleString()}
                   </p>
+                  {pb.notes && (
+                    <p className="font-mono text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--t-muted)' }}>
+                      <MessageSquare className="w-3 h-3" /> {pb.notes}
+                    </p>
+                  )}
+                  {pb.mpesaRef && (
+                    <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--t-accent)' }}>
+                      📱 {pb.mpesaRef}
+                    </p>
+                  )}
                   {pb.status === 'pending' && (
                     <button onClick={() => api.cancelPrebooking(pb.id).then(() => api.getPrebookings().then(setPrebookings))}
                       className="mt-2 text-[10px] font-mono transition-opacity hover:opacity-70"

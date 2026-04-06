@@ -3,17 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { X, Sparkles } from 'lucide-react';
 
-const VERSION = '4.9.5';
+const VERSION = '4.9.6';
 const STORAGE_KEY = `rq:whats_new_seen_${VERSION}`;
 
 const FEATURES = [
+  { emoji: '⚡', title: 'Quick Start Multi-Quad', desc: 'Start unlimited rides at once with per-quad guide names, payment methods (Cash/M-Pesa/Shee) and live commission breakdown' },
+  { emoji: '⏸️', title: 'Pause & Extend Rides',  desc: 'Pause active rides and resume later. Extend rides with +5/10/15/30 min options' },
+  { emoji: '📊', title: 'Enhanced Admin Fleet',   desc: 'Expandable quad cards with total rides, revenue and minutes stats per quad' },
+  { emoji: '🔍', title: 'History Search & Sort',  desc: 'Search by name/phone/quad, sort by newest/oldest/highest/lowest, date group headers, CSV export' },
+  { emoji: '📋', title: '9-Clause Waiver',       desc: 'Detailed safety waiver with 9 clauses, scroll-to-read enforcement and risk banner' },
+  { emoji: '📲', title: 'QR Code Receipts',      desc: 'Every receipt has a QR code for quick verification' },
+  { emoji: '💬', title: 'Pre-book Notes',         desc: 'Add special requests and M-Pesa ref when pre-booking a ride' },
   { emoji: '🗺️', title: 'Live GPS Map',           desc: 'Real OpenStreetMap tracking with polyline history, speed & location stats' },
-  { emoji: '🔔', title: 'Notifications',          desc: 'Ride alerts, overtime warnings & 2-min countdowns in the bell icon' },
-  { emoji: '📲', title: 'WhatsApp Alerts',        desc: 'One-tap message customers on overtime, waitlist & booking confirm' },
-  { emoji: '📄', title: 'PDF Receipt Export',     desc: 'Save any receipt as a branded PDF with the download button' },
-  { emoji: '🎨', title: '8 Themes',              desc: 'All pages fully themed — tap the palette icon in the top bar' },
-  { emoji: '👤', title: 'Role Chooser',          desc: 'Sign in as Admin, Customer or Guest' },
-  { emoji: '⏱️', title: 'Live Admin Countdown',   desc: 'Active rides show seconds ticking down with a progress bar' },
 ];
 
 export function WhatsNew() {

@@ -1,12 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Shield, Pen, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Shield, Pen, CheckCircle2, AlertTriangle, AlertOctagon, HeartPulse, Eye, Scale, Ban, CreditCard, Users, UserX } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingScreen, Spinner } from '../lib/components/ui';
 import { useToast } from '../lib/components/Toast';
 import type { Booking } from '../types';
 import { BUSINESS_NAME } from '../lib/constants';
+
+const WAIVER_CLAUSES = [
+  { icon: <Users className="w-3.5 h-3.5" />, text: 'I voluntarily participate in quad biking activities at Royal Quad Bikes, Mambrui Sand Dunes, Kilifi County, Kenya.' },
+  { icon: <AlertOctagon className="w-3.5 h-3.5" />, text: 'I acknowledge that quad biking involves inherent risks including falls, rollovers, collisions, and serious physical injury.' },
+  { icon: <HeartPulse className="w-3.5 h-3.5" />, text: 'I confirm that I am in good physical health and have no medical conditions (heart conditions, epilepsy, back injuries, pregnancy) that would prevent safe participation.' },
+  { icon: <Shield className="w-3.5 h-3.5" />, text: 'I agree to wear all provided safety equipment — including helmet and protective gear — throughout the entire ride without exception.' },
+  { icon: <Eye className="w-3.5 h-3.5" />, text: 'I will follow all instructions given by Royal Quad Bikes staff and operate the vehicle responsibly within designated riding areas.' },
+  { icon: <Ban className="w-3.5 h-3.5" />, text: 'I will not operate the vehicle under the influence of alcohol, drugs, or any impairing substances.' },
+  { icon: <CreditCard className="w-3.5 h-3.5" />, text: 'I accept full financial responsibility for any damage caused to the vehicle through negligent, reckless, or deliberate operation.' },
+  { icon: <Scale className="w-3.5 h-3.5" />, text: 'I release Royal Quad Bikes, its owners, employees, and agents from any liability for personal injury or property damage arising from my participation.' },
+  { icon: <UserX className="w-3.5 h-3.5" />, text: 'Parents or legal guardians must sign this waiver on behalf of all participants under 18 years of age.' },
+];
 
 export default function Waiver() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -18,6 +30,8 @@ export default function Waiver() {
   const [signing, setSigning]     = useState(false);
   const [hasStroke, setHasStroke] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const waiverRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -30,7 +44,7 @@ export default function Waiver() {
         navigate(`/ride/${bookingId}`, { replace: true });
       }
     }).catch(() => navigate(`/ride/${bookingId}`, { replace: true }));
-  }, [bookingId, navigate, api]);
+  }, [bookingId, navigate]);
 
   const getXY = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
@@ -74,7 +88,7 @@ export default function Waiver() {
   };
 
   const handleSign = async () => {
-    if (!agreed || !hasStroke || !booking || signing) return;
+    if (!agreed || !hasStroke || !booking || signing || !scrolledToBottom) return;
     setSigning(true);
     try {
       await api.signWaiver(booking.id);
@@ -116,45 +130,58 @@ export default function Waiver() {
         </div>
       </div>
 
-      {/* Warning banner */}
-      <div className="p-4 rounded-2xl flex items-start gap-3"
-        style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#b45309' }} />
-        <p className="text-xs font-medium" style={{ color: '#b45309' }}>
-          Please read and sign this indemnity form before starting your ride.
-        </p>
+      {/* Risk banner */}
+      <div className="p-4 rounded-2xl flex flex-col gap-2.5"
+        style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+        <div className="flex items-start gap-2.5">
+          <AlertOctagon className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#ef4444' }} />
+          <p className="text-xs font-semibold" style={{ color: '#ef4444' }}>
+            Important — Please Read Before Signing
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {['Inherent Risks', 'Physical Injury', 'Death', 'Financial Liability', 'Alcohol/Drugs'].map(tag => (
+            <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}>
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Waiver text */}
-      <div className="p-5 rounded-2xl t-card max-h-60 overflow-y-auto text-xs leading-relaxed space-y-3"
+      {/* Waiver clauses */}
+      <div
+        ref={waiverRef}
+        onScroll={() => {
+          const el = waiverRef.current;
+          if (!el) return;
+          const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 10;
+          if (atBottom) setScrolledToBottom(true);
+        }}
+        className="p-5 rounded-2xl t-card text-xs leading-relaxed space-y-3 max-h-80 overflow-y-auto"
         style={{ color: 'var(--t-muted)' }}>
-        <p className="font-display font-bold text-sm" style={{ color: 'var(--t-text)' }}>
-          INDEMNITY & WAIVER AGREEMENT
+        <p className="font-display font-bold text-sm mb-1" style={{ color: 'var(--t-text)' }}>
+          INDEMNITY &amp; WAIVER AGREEMENT
         </p>
         <p>
-          I, <strong style={{ color: 'var(--t-text)' }}>{booking.customerName}</strong>, acknowledge
-          that quad biking carries inherent risks including physical injury or death. I voluntarily
-          choose to participate in activities provided by{' '}
-          <strong style={{ color: 'var(--t-text)' }}>{BUSINESS_NAME}</strong>.
+          I, <strong style={{ color: 'var(--t-text)' }}>{booking.customerName}</strong>, voluntarily
+          participate in quad biking activities at{' '}
+          <strong style={{ color: 'var(--t-text)' }}>{BUSINESS_NAME}</strong>, Mambrui Sand Dunes, Kilifi County, Kenya.
         </p>
-        <p><strong style={{ color: 'var(--t-text)' }}>I acknowledge that:</strong></p>
-        <ul className="list-disc pl-4 space-y-1">
-          <li>Quad biking involves significant physical risk.</li>
-          <li>I am physically fit and capable of operating the quad safely.</li>
-          <li>I will follow all safety instructions provided by Royal Quads staff.</li>
-          <li>I will not operate the quad under the influence of alcohol or drugs.</li>
-          <li>I will remain within the designated riding area at all times.</li>
-          <li>I will wear all safety equipment provided.</li>
-          <li>I accept full responsibility for damage caused through my negligence.</li>
-        </ul>
-        <p>
-          I hereby <strong style={{ color: 'var(--t-text)' }}>release, indemnify, and hold harmless</strong>{' '}
-          {BUSINESS_NAME}, its owners, employees and agents from any claims, damages, or
-          liability arising from my participation.
-        </p>
-        <p className="font-mono text-[10px]">
-          By signing below I confirm I have read and agree to all terms of this waiver.
-        </p>
+        {WAIVER_CLAUSES.map((clause, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <div className="shrink-0 mt-0.5" style={{ color: 'var(--t-accent)' }}>{clause.icon}</div>
+            <p>{clause.text}</p>
+          </div>
+        ))}
+        {!scrolledToBottom && (
+          <div className="sticky bottom-0 pt-2 text-center"
+            style={{ background: 'linear-gradient(transparent, var(--t-card))' }}>
+            <p className="text-[10px] font-semibold" style={{ color: 'var(--t-accent)' }}>
+              ↓ Scroll to read all clauses ↓
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Signature pad */}
@@ -206,15 +233,15 @@ export default function Waiver() {
           )}
         </button>
         <p className="text-xs leading-relaxed" style={{ color: 'var(--t-muted)' }}>
-          I have read and agree to the terms of this indemnity waiver. All information provided is accurate.
+          I have read and agree to all {WAIVER_CLAUSES.length} clauses of this indemnity waiver.
         </p>
       </label>
 
       {/* Sign button */}
       <button onClick={handleSign}
-        disabled={!agreed || !hasStroke || signing}
+        disabled={!agreed || !hasStroke || !scrolledToBottom || signing}
         className="btn-primary">
-        {signing ? <><Spinner /> Signing…</> : <><Shield className="w-4 h-4" /> Sign & Start Ride</>}
+        {signing ? <><Spinner /> Signing…</> : <><Shield className="w-4 h-4" /> Sign &amp; Start Ride</>}
       </button>
 
       {/* Skip */}

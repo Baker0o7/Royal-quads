@@ -4,7 +4,7 @@ import {
   TrendingUp, Calendar, Tag, Plus, Power, Edit2, X, Save, QrCode,
   Navigation, Trash2, RefreshCw, Users, Activity, Wrench, AlertOctagon,
   UserCheck, Clock, BarChart3, List, Wallet, CheckCircle2, XCircle, Lock,
-  FileText, Search, CreditCard, Copy, Check,
+  FileText, Search, CreditCard, Copy, Check, Zap, Download, ChevronDown,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -102,51 +102,84 @@ function StatCard({ icon, label, value, accent = false }: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Quick-Start Booking Modal
+// Quick Start — unlimited quads, per-quad guide + payment + commission
 // ─────────────────────────────────────────────────────────────────────────────
+interface QSEntry {
+  id:        number;
+  quadId:    number | '';
+  payMethod: 'cash' | 'mpesa' | 'shee';
+  duration:  number | '';
+  price:     number | '';
+  guideName: string;
+}
+
 function QuickBookModal({ quads, onClose, onBooked }: {
   quads: Quad[];
   onClose: () => void;
   onBooked: () => void;
 }) {
   const toast = useToast();
-  const [quadId,   setQuadId]   = useState<number | ''>('');
-  const [duration, setDuration] = useState<number | ''>('');
-  const [name,     setName]     = useState('');
-  const [phone,    setPhone]    = useState('');
-  const [mpesaRef, setMpesaRef] = useState('');
-  const [copied,   setCopied]   = useState(false);
-  const [loading,  setLoading]  = useState(false);
+  const [entries, setEntries]   = useState<QSEntry[]>([{ id: 1, quadId: '', payMethod: 'cash', duration: '', price: '', guideName: '' }]);
+  const [nextId,  setNextId]    = useState(2);
+  const [loading, setLoading]   = useState(false);
+  const [copied,  setCopied]    = useState(false);
 
   const available = quads.filter(q => q.status === 'available');
-  const pricing   = PRICING.find(p => p.duration === duration);
-  const price     = pricing?.price ?? 0;
+
+  const addEntry = () => {
+    if (entries.length < available.length) {
+      setEntries(e => [...e, { id: nextId, quadId: '', payMethod: 'cash', duration: '', price: '', guideName: '' }]);
+      setNextId(n => n + 1);
+    }
+  };
+
+  const removeEntry = (id: number) => {
+    setEntries(e => e.filter(x => x.id !== id));
+  };
+
+  const updateEntry = (id: number, patch: Partial<QSEntry>) => {
+    setEntries(e => e.map(x => x.id === id ? { ...x, ...patch } : x));
+  };
+
+  const totalRevenue = entries.reduce((s, e) => s + (Number(e.price) || 0), 0);
+  const commission   = Math.round(totalRevenue * 0.20);
+  const usedIds      = new Set(entries.map(e => e.quadId).filter(Boolean));
 
   const copyTill = () => {
-    navigator.clipboard.writeText(TILL_NUMBER).then(() => {
-      setCopied(true); setTimeout(() => setCopied(false), 2000);
-    }).catch(() => toast.error('Failed to copy — please copy manually'));
+    navigator.clipboard.writeText(TILL_NUMBER).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })
+      .catch(() => toast.error('Failed to copy — please copy manually'));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quadId || !duration || !name.trim() || !phone.trim()) {
-      toast.error('Please fill in all required fields'); return;
+    for (let i = 0; i < entries.length; i++) {
+      const e2 = entries[i];
+      if (!e2.quadId || !e2.duration || !e2.price) {
+        toast.error(`Complete all fields for Quad ${i + 1}`); return;
+      }
     }
     setLoading(true);
     try {
-      const b = await api.createBooking({
-        quadId: quadId as number,
-        customerName: name.trim(),
-        customerPhone: phone.replace(/\s/g, ''),
-        duration: duration as number,
-        price,
-        originalPrice: price,
-        mpesaRef: mpesaRef.trim().toUpperCase() || null,
-      });
-      toast.success(`Ride started! Receipt #${b.receiptId}`);
+      let firstBookingId: number | null = null;
+      for (const e2 of entries) {
+        const b = await api.createBooking({
+          quadId: e2.quadId as number,
+          customerName: 'Walk-in',
+          customerPhone: '0000000000',
+          duration: Number(e2.duration),
+          price: Number(e2.price),
+          originalPrice: Number(e2.price),
+          mpesaRef: e2.payMethod === 'mpesa' ? 'MPESA-PENDING' : e2.payMethod === 'shee' ? 'SHEE' : 'CASH',
+          guideName: e2.guideName.trim() || undefined,
+        });
+        if (firstBookingId === null) firstBookingId = b.id;
+      }
+      toast.success(`${entries.length} ride${entries.length > 1 ? 's' : ''} started!`);
       onBooked();
       onClose();
+      if (firstBookingId !== null) {
+        window.location.href = `/waiver/${firstBookingId}`;
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Booking failed');
     } finally { setLoading(false); }
@@ -169,91 +202,172 @@ function QuickBookModal({ quads, onClose, onBooked }: {
         </div>
 
         <div className="px-5 pb-8 pt-2">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display text-lg font-bold" style={{ color: 'var(--t-text)' }}>
-              ⚡ Quick Start Ride
-            </h2>
-            <button onClick={onClose} className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
-              <X className="w-4 h-4" />
-            </button>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white"
+                style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}>
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="font-display text-lg font-bold" style={{ color: 'var(--t-text)' }}>Quick Start</h2>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="pill text-xs font-mono font-bold"
+                style={{ background: 'rgba(34,197,94,0.12)', color: '#16a34a' }}>
+                {entries.length} quad{entries.length === 1 ? '' : 's'}
+              </span>
+              <button onClick={onClose} className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Quad */}
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Quad *</label>
-              <select value={quadId} onChange={e => setQuadId(Number(e.target.value) || '')} className="input">
-                <option value="">Select a quad…</option>
-                {available.map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
-              </select>
-              {available.length === 0 && (
-                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>All quads are currently rented</p>
-              )}
-            </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {/* Quad entries */}
+            <div className="flex flex-col gap-4">
+              {entries.map((entry, i) => {
+                const localAvail = available.filter(q => q.id === entry.quadId || !usedIds.has(q.id));
+                return (
+                  <div key={entry.id} className="rounded-2xl p-4" style={{ background: 'var(--t-bg2)', border: '1px solid var(--t-border)' }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center font-mono font-bold text-xs"
+                          style={{ background: 'rgba(34,197,94,0.12)', color: '#16a34a' }}>
+                          {i + 1}
+                        </div>
+                        <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>Quad {i + 1}</span>
+                      </div>
+                      {entries.length > 1 && (
+                        <button type="button" onClick={() => removeEntry(entry.id)}
+                          className="p-1 rounded-lg transition-opacity hover:opacity-60"
+                          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
 
-            {/* Duration grid */}
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Duration *</label>
-              <div className="grid grid-cols-3 gap-2">
-                {PRICING.map(p => (
-                  <button key={p.duration} type="button"
-                    onClick={() => setDuration(p.duration)}
-                    className="py-2.5 rounded-xl text-xs font-semibold border transition-all"
-                    style={{
-                      background:   duration === p.duration ? 'var(--t-accent)' : 'var(--t-bg2)',
-                      color:        duration === p.duration ? 'white' : 'var(--t-text)',
-                      borderColor:  duration === p.duration ? 'var(--t-accent)' : 'var(--t-border)',
-                    }}>
-                    <div>{p.label}</div>
-                    <div className="font-mono text-[10px] opacity-70">{p.price.toLocaleString()} KES</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+                    {/* Quad selector */}
+                    <select value={entry.quadId} onChange={e => updateEntry(entry.id, { quadId: Number(e.target.value) || '' })}
+                      className="input mb-2.5 text-xs">
+                      <option value="">Select Quad *</option>
+                      {localAvail.map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
+                    </select>
 
-            {/* Customer details */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Name *</label>
-                <input type="text" placeholder="Full name" value={name} onChange={e => setName(e.target.value)} className="input" />
-              </div>
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider mb-1.5" style={{ color: 'var(--t-muted)' }}>Phone *</label>
-                <input type="tel" placeholder="07xx xxx xxx" value={phone} onChange={e => setPhone(e.target.value)} className="input" />
-              </div>
-            </div>
+                    {/* Guide name */}
+                    <input type="text" placeholder="Guide name (optional)"
+                      value={entry.guideName}
+                      onChange={e => updateEntry(entry.id, { guideName: e.target.value })}
+                      className="input mb-2.5 text-xs" />
 
-            {/* M-Pesa block */}
-            {price > 0 && (
-              <div className="p-4 rounded-2xl" style={{ background: 'var(--t-bg2)', border: '1px solid var(--t-border)' }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" style={{ color: 'var(--t-accent)' }} />
-                    <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>M-Pesa</span>
+                    {/* Duration + Amount */}
+                    <div className="grid grid-cols-2 gap-2 mb-2.5">
+                      <select value={entry.duration} onChange={e => {
+                        const d = Number(e.target.value);
+                        const pricing = PRICING.find(p => p.duration === d);
+                        updateEntry(entry.id, { duration: d || '', price: pricing?.price ?? entry.price });
+                      }} className="input text-xs">
+                        <option value="">Duration *</option>
+                        {PRICING.map(p => <option key={p.duration} value={p.duration}>{p.label} ({p.price.toLocaleString()} KES)</option>)}
+                      </select>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono pointer-events-none" style={{ color: 'var(--t-muted)' }}>KES</span>
+                        <input type="number" placeholder="Amount *" value={entry.price}
+                          onChange={e => updateEntry(entry.id, { price: Number(e.target.value) || '' })}
+                          className="input text-xs pl-10" />
+                      </div>
+                    </div>
+
+                    {/* Payment method */}
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {(['cash', 'mpesa', 'shee'] as const).map(method => (
+                        <button type="button" key={method}
+                          onClick={() => updateEntry(entry.id, { payMethod: method })}
+                          className="py-2 rounded-xl text-xs font-semibold border transition-all"
+                          style={{
+                            background:   entry.payMethod === method ? 'rgba(34,197,94,0.12)' : 'transparent',
+                            color:        entry.payMethod === method ? '#16a34a' : 'var(--t-muted)',
+                            borderColor:  entry.payMethod === method ? '#16a34a' : 'var(--t-border)',
+                            borderWidth:  entry.payMethod === method ? 2 : 1,
+                          }}>
+                          {method === 'cash' && '💵 Cash'}
+                          {method === 'mpesa' && '📱 M-Pesa'}
+                          {method === 'shee' && '✨ Shee'}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <span className="font-display font-bold text-lg" style={{ color: 'var(--t-accent)' }}>
-                    {price.toLocaleString()} KES
-                  </span>
+                );
+              })}
+            </div>
+
+            {/* Add another */}
+            {entries.length < available.length && (
+              <button type="button" onClick={addEntry}
+                className="py-3 rounded-xl text-xs font-semibold border transition-all"
+                style={{ borderColor: 'rgba(34,197,94,0.3)', color: '#16a34a', background: 'transparent' }}>
+                + Add Another Quad
+              </button>
+            )}
+
+            {/* Commission breakdown */}
+            {totalRevenue > 0 && (
+              <div className="rounded-2xl p-4" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                <p className="text-[11px] font-mono uppercase tracking-wider mb-3" style={{ color: 'var(--t-muted)' }}>
+                  Revenue Breakdown
+                </p>
+                <div className="flex justify-between text-xs mb-1">
+                  <span style={{ color: 'var(--t-muted)' }}>Total charged</span>
+                  <span className="font-semibold" style={{ color: 'var(--t-text)' }}>{totalRevenue.toLocaleString()} KES</span>
                 </div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs" style={{ color: 'var(--t-muted)' }}>
-                    Till: <strong style={{ color: 'var(--t-text)' }}>{TILL_NUMBER}</strong>
-                  </span>
-                  <button type="button" onClick={copyTill}
-                    className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg"
-                    style={{ background: 'var(--t-bg)', color: copied ? '#16a34a' : 'var(--t-muted)' }}>
-                    {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
-                  </button>
+                <div className="flex justify-between text-xs mb-1">
+                  <span style={{ color: 'var(--t-muted)' }}>Guide commission 20%</span>
+                  <span className="font-semibold" style={{ color: '#16a34a' }}>{commission.toLocaleString()} KES</span>
                 </div>
-                <input type="text" placeholder="Confirmation code (optional)"
-                  value={mpesaRef} onChange={e => setMpesaRef(e.target.value.toUpperCase())}
-                  className="input font-mono text-sm" maxLength={12}
-                  style={{ letterSpacing: '0.08em' }} />
+                <div className="border-t my-2" style={{ borderColor: 'var(--t-border)' }} />
+                <div className="flex justify-between text-xs font-bold">
+                  <span style={{ color: 'var(--t-text)' }}>Business keeps</span>
+                  <span style={{ color: 'var(--t-accent)' }}>{(totalRevenue - commission).toLocaleString()} KES</span>
+                </div>
+                {entries.some(e => e.payMethod !== 'cash') && (
+                  <div className="mt-2 flex flex-col gap-1">
+                    {entries.map((e2, i) => (
+                      e2.payMethod !== 'cash' && (
+                        <div key={e2.id} className="flex items-center gap-1 text-[11px]">
+                          <span style={{ color: 'var(--t-muted)' }}>Quad {i + 1}:</span>
+                          <span className="font-semibold" style={{ color: 'var(--t-accent)' }}>
+                            {e2.payMethod === 'mpesa' ? 'M-Pesa' : 'Shee'}
+                          </span>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            <button type="submit" disabled={loading || available.length === 0} className="btn-primary">
-              {loading ? <><Spinner /> Starting…</> : <><CheckCircle2 className="w-4 h-4" /> Start Ride</>}
+            {/* Till number reminder */}
+            {entries.some(e => e.payMethod === 'mpesa') && (
+              <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--t-bg2)', border: '1px solid var(--t-border)' }}>
+                <span className="font-mono text-xs" style={{ color: 'var(--t-muted)' }}>
+                  Till: <strong style={{ color: 'var(--t-text)' }}>{TILL_NUMBER}</strong>
+                </span>
+                <button type="button" onClick={copyTill}
+                  className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg"
+                  style={{ background: 'var(--t-bg)', color: copied ? '#16a34a' : 'var(--t-muted)' }}>
+                  {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                </button>
+              </div>
+            )}
+
+            <button type="submit" disabled={loading || available.length === 0}
+              className="btn-primary py-3.5 text-sm font-bold">
+              {loading ? 'Starting…' : (
+                entries.length === 1
+                  ? (totalRevenue > 0 ? `Start Ride  ·  ${totalRevenue.toLocaleString()} KES` : 'Start Ride')
+                  : (totalRevenue > 0 ? `Start ${entries.length} Rides  ·  ${totalRevenue.toLocaleString()} KES` : `Start ${entries.length} Rides`)
+              )}
             </button>
           </form>
         </div>
@@ -405,6 +519,7 @@ export default function Admin() {
   const [tab, setTab]           = useState<Tab>('overview');
   const [historySearch, setHistorySearch] = useState('');
   const [historyDate,   setHistoryDate]   = useState('');
+  const [historySort,   setHistorySort]   = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
   const [showQuickBook,    setShowQuickBook]    = useState(false);
   const [showDailyReport,  setShowDailyReport]  = useState(false);
   const [sales, setSales]       = useState<SalesData>({ total: 0, today: 0, thisWeek: 0, thisMonth: 0, overtimeRevenue: 0 });
@@ -670,10 +785,42 @@ export default function Admin() {
 
         {/* Recent rides */}
         <section>
-          <h2 className="section-heading" style={{ color: 'var(--t-text)' }}>Recent Rides</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="section-heading mb-0" style={{ color: 'var(--t-text)' }}>Recent Rides</h2>
+            {history.length > 0 && (
+              <button
+                onClick={() => {
+                  const rows = [
+                    ['Date', 'Time', 'Customer', 'Phone', 'Quad', 'Duration', 'Price', 'Overtime', 'Total', 'M-Pesa Ref', 'Receipt ID'],
+                    ...history.map(b => [
+                      new Date(b.startTime).toLocaleDateString('en-KE'),
+                      new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }),
+                      b.customerName,
+                      b.customerPhone,
+                      b.quadName,
+                      `${b.duration} min`,
+                      `${b.price}`,
+                      `${b.overtimeCharge ?? 0}`,
+                      `${b.price + (b.overtimeCharge ?? 0)}`,
+                      b.mpesaRef ?? '',
+                      b.receiptId,
+                    ]),
+                  ];
+                  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url; a.download = `royal-quads-rides-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1.5 rounded-xl border transition-opacity hover:opacity-70"
+                style={{ borderColor: 'var(--t-border)', color: 'var(--t-muted)', background: 'var(--t-bg2)' }}>
+                <Download className="w-3 h-3" /> Export CSV
+              </button>
+            )}
+          </div>
 
-          {/* Search + date filter */}
-          <div className="flex gap-2 mb-3">
+          {/* Search + date filter + sort */}
+          <div className="flex gap-2 mb-3 flex-wrap">
             <input
               type="text"
               placeholder="Search name, phone, quad…"
@@ -689,6 +836,13 @@ export default function Admin() {
               className="input text-xs py-2"
               style={{ width: 130 }}
             />
+            <select value={historySort} onChange={e => setHistorySort(e.target.value as typeof historySort)}
+              className="input text-xs py-2" style={{ width: 110 }}>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="highest">Highest $</option>
+              <option value="lowest">Lowest $</option>
+            </select>
             {(historySearch || historyDate) && (
               <button onClick={() => { setHistorySearch(''); setHistoryDate(''); }}
                 className="px-3 rounded-xl border text-xs font-semibold"
@@ -700,57 +854,114 @@ export default function Admin() {
 
           {(() => {
             const q = historySearch.toLowerCase();
-            const filtered = history.filter(b => {
+            let filtered = history.filter(b => {
               const matchText = !q || [b.customerName, b.customerPhone, b.quadName, b.receiptId, b.mpesaRef ?? '']
                 .some(v => v.toLowerCase().includes(q));
               const matchDate = !historyDate || b.startTime.startsWith(historyDate);
               return matchText && matchDate;
             });
-            const shown = filtered.slice(0, historySearch || historyDate ? 50 : 20);
-            return filtered.length === 0
-              ? <EmptyState message={historySearch || historyDate ? 'No rides match this filter.' : 'No completed rides yet.'} />
-              : (
-                <>
-                  {(historySearch || historyDate) && (
-                    <p className="text-[10px] font-mono mb-2" style={{ color: 'var(--t-muted)' }}>
-                      {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-                      {' · '}
-                      {filtered.reduce((s,b) => s + b.price + (b.overtimeCharge ?? 0), 0).toLocaleString()} KES total
+            const sortMap: Record<typeof historySort, (a: Booking, b: Booking) => number> = {
+              newest:  (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime(),
+              oldest:  (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+              highest: (a, b) => (b.price + (b.overtimeCharge ?? 0)) - (a.price + (a.overtimeCharge ?? 0)),
+              lowest:  (a, b) => (a.price + (a.overtimeCharge ?? 0)) - (b.price + (b.overtimeCharge ?? 0)),
+            };
+            filtered = filtered.sort(sortMap[historySort]);
+
+            // Group by date when no filter active
+            const isFiltered = !!(historySearch || historyDate);
+            const groups = isFiltered ? null : (() => {
+              const g: Record<string, Booking[]> = {};
+              filtered.forEach(b => {
+                const d = b.startTime.slice(0, 10);
+                if (!g[d]) g[d] = [];
+                g[d].push(b);
+              });
+              return g;
+            })();
+
+            const shown = filtered.slice(0, isFiltered ? 50 : 20);
+            const totalFiltered = filtered.reduce((s, b) => s + b.price + (b.overtimeCharge ?? 0), 0);
+
+            if (filtered.length === 0) {
+              return <EmptyState message={isFiltered ? 'No rides match this filter.' : 'No completed rides yet.'} />;
+            }
+
+            const renderRow = (b: Booking) => (
+              <Link to={`/receipt/${b.id}`} key={b.id}
+                className="t-card rounded-xl px-4 py-3 flex justify-between items-center hover:opacity-80 transition-opacity">
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
+                  <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
+                    {b.customerName} · {b.duration}min
+                  </p>
+                  {b.mpesaRef && (
+                    <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-accent)' }}>
+                      📱 {b.mpesaRef}
                     </p>
                   )}
-                  <div className="flex flex-col gap-2">
-                    {shown.map(b => (
-                      <Link to={`/receipt/${b.id}`} key={b.id}
-                        className="t-card rounded-xl px-4 py-3 flex justify-between items-center hover:opacity-80 transition-opacity">
-                        <div>
-                          <p className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{b.quadName}</p>
-                          <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>
-                            {b.customerName} · {b.duration}min
-                          </p>
-                          {b.mpesaRef && (
-                            <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-accent)' }}>
-                              📱 {b.mpesaRef}
+                  {b.guideName && (
+                    <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
+                      Guide: {b.guideName}
+                    </p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>
+                    +{(b.price + (b.overtimeCharge ?? 0)).toLocaleString()} KES
+                  </p>
+                  {(b.overtimeCharge ?? 0) > 0 && (
+                    <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
+                      +{(b.overtimeCharge ?? 0).toLocaleString()} OT
+                    </p>
+                  )}
+                  <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-muted)' }}>
+                    {new Date(b.startTime).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' })}
+                    {' · '}
+                    {new Date(b.startTime).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </Link>
+            );
+
+            return (
+              <>
+                {isFiltered && (
+                  <p className="text-[10px] font-mono mb-2" style={{ color: 'var(--t-muted)' }}>
+                    {filtered.length} result{filtered.length !== 1 ? 's' : ''} · {totalFiltered.toLocaleString()} KES total
+                  </p>
+                )}
+                {groups ? (
+                  <div className="flex flex-col gap-4">
+                    {Object.entries(groups).sort(([a], [b]) => b.localeCompare(a)).map(([date, rides]) => {
+                      const dayTotal = rides.reduce((s, b) => s + b.price + (b.overtimeCharge ?? 0), 0);
+                      const label = date === new Date().toISOString().slice(0, 10) ? 'Today'
+                        : date === new Date(Date.now() - 86400000).toISOString().slice(0, 10) ? 'Yesterday'
+                        : new Date(date + 'T12:00:00').toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short' });
+                      return (
+                        <div key={date}>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[11px] font-mono font-bold uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>
+                              {label}
                             </p>
-                          )}
+                            <span className="font-mono text-[11px] font-bold" style={{ color: 'var(--t-accent)' }}>
+                              {dayTotal.toLocaleString()} KES
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {rides.map(renderRow)}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>
-                            +{(b.price + (b.overtimeCharge ?? 0)).toLocaleString()} KES
-                          </p>
-                          {(b.overtimeCharge ?? 0) > 0 && (
-                            <p className="font-mono text-[9px]" style={{ color: '#b45309' }}>
-                              +{(b.overtimeCharge ?? 0).toLocaleString()} overtime
-                            </p>
-                          )}
-                          <p className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--t-muted)' }}>
-                            {new Date(b.startTime).toLocaleDateString('en-KE', { day:'numeric', month:'short' })}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
+                      );
+                    })}
                   </div>
-                </>
-              );
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {shown.map(renderRow)}
+                  </div>
+                )}
+              </>
+            );
           })()}
         </section>
 
@@ -808,77 +1019,126 @@ export default function Admin() {
 
         <div className="flex flex-col gap-3">
           {quads.length === 0 && <EmptyState message="No quads in fleet yet." />}
-          {quads.map(quad => (
-            <div key={quad.id} className="t-card rounded-2xl p-4 flex flex-col gap-3">
-              {editId === quad.id ? (
-                <div className="flex flex-col gap-3">
-                  <input value={editData.name}
-                    onChange={e => setEditData({ ...editData, name: e.target.value })}
-                    className="input font-semibold" placeholder="Quad name" />
-                  <ImagePicker value={editData.imageUrl}
-                    onChange={v => setEditData({ ...editData, imageUrl: v })} />
-                  <input value={editData.imei}
-                    onChange={e => setEditData({ ...editData, imei: e.target.value })}
-                    className="input font-mono text-sm" placeholder="IMEI (optional)" />
-                  <div className="flex gap-2 justify-end">
-                    <button onClick={() => setEditId(null)}
-                      className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
-                      <X className="w-4 h-4" />
-                    </button>
-                    <button onClick={() =>
-                      api.updateQuad(quad.id, { name: editData.name, imageUrl: editData.imageUrl, imei: editData.imei, status: quad.status })
-                        .then(() => { setEditId(null); fetchAll(); })
-                        .catch(() => toast.error('Failed to save quad'))
-                    } className="p-2 rounded-xl"
-                      style={{ background: 'color-mix(in srgb, var(--t-accent) 12%, transparent)', color: 'var(--t-accent)' }}>
-                      <Save className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3">
-                    {quad.imageUrl
-                      ? <img src={quad.imageUrl} alt={quad.name} className="w-14 h-14 rounded-xl object-cover shrink-0 border" style={{ borderColor: 'var(--t-border)' }} />
-                      : <div className="w-14 h-14 rounded-xl hero-card flex items-center justify-center text-2xl shrink-0">🏍️</div>
-                    }
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{quad.name}</span>
-                        <button onClick={() => { setEditId(quad.id); setEditData({ name: quad.name, imageUrl: quad.imageUrl ?? '', imei: quad.imei ?? '' }); }}
-                          className="transition-opacity hover:opacity-60" style={{ color: 'var(--t-muted)' }}>
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <StatusBadge status={quad.status} />
-                      {quad.imei && <p className="font-mono text-[9px] mt-1" style={{ color: 'var(--t-muted)' }}>{quad.imei}</p>}
-                      <button onClick={() => setShowQr(showQr === quad.id ? null : quad.id)}
-                        className="mt-1 flex items-center gap-1 text-[10px] font-semibold transition-opacity hover:opacity-70"
-                        style={{ color: 'var(--t-muted)' }}>
-                        <QrCode className="w-2.5 h-2.5" />
-                        {showQr === quad.id ? 'Hide QR' : 'Show QR'}
+          {quads.map(quad => {
+            const quadRides = history.filter(b => b.quadId === quad.id);
+            const totalRevenue = quadRides.reduce((s, b) => s + b.price + (b.overtimeCharge ?? 0), 0);
+            const totalMinutes = quadRides.reduce((s, b) => s + b.duration, 0);
+            const expanded = showQr === quad.id;
+
+            return (
+              <div key={quad.id} className="t-card rounded-2xl p-4 flex flex-col gap-3">
+                {editId === quad.id ? (
+                  <div className="flex flex-col gap-3">
+                    <input value={editData.name}
+                      onChange={e => setEditData({ ...editData, name: e.target.value })}
+                      className="input font-semibold" placeholder="Quad name" />
+                    <ImagePicker value={editData.imageUrl}
+                      onChange={v => setEditData({ ...editData, imageUrl: v })} />
+                    <input value={editData.imei}
+                      onChange={e => setEditData({ ...editData, imei: e.target.value })}
+                      className="input font-mono text-sm" placeholder="IMEI (optional)" />
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setEditId(null)}
+                        className="p-2 rounded-xl" style={{ background: 'var(--t-bg2)', color: 'var(--t-muted)' }}>
+                        <X className="w-4 h-4" />
+                      </button>
+                      <button onClick={() =>
+                        api.updateQuad(quad.id, { name: editData.name, imageUrl: editData.imageUrl, imei: editData.imei, status: quad.status })
+                          .then(() => { setEditId(null); fetchAll(); })
+                          .catch(() => toast.error('Failed to save quad'))
+                      } className="p-2 rounded-xl"
+                        style={{ background: 'color-mix(in srgb, var(--t-accent) 12%, transparent)', color: 'var(--t-accent)' }}>
+                        <Save className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  <select value={quad.status}
-                    onChange={e => api.updateQuadStatus(quad.id, e.target.value).then(fetchAll).catch(() => toast.error('Failed to update status'))}
-                    className="input text-[10px] font-semibold w-auto px-2 py-1.5" style={{ width: 'auto' }}>
-                    <option value="available">Available</option>
-                    <option value="rented">Rented</option>
-                    <option value="maintenance">Maintenance</option>
-                  </select>
-                </div>
-              )}
-              {showQr === quad.id && editId !== quad.id && (
-                <div className="pt-3 border-t flex flex-col items-center gap-2" style={{ borderColor: 'var(--t-border)' }}>
-                  <div className="bg-white p-2 rounded-xl shadow-sm">
-                    <QRCodeSVG value={`${window.location.origin}/quad/${quad.id}`} size={130} level="H" includeMargin />
-                  </div>
-                  <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>Scan to book {quad.name}</p>
-                </div>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-start gap-3">
+                        {quad.imageUrl
+                          ? <img src={quad.imageUrl} alt={quad.name} className="w-14 h-14 rounded-xl object-cover shrink-0 border" style={{ borderColor: 'var(--t-border)' }} />
+                          : <div className="w-14 h-14 rounded-xl hero-card flex items-center justify-center text-2xl shrink-0">🏍️</div>
+                        }
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>{quad.name}</span>
+                            <button onClick={() => { setEditId(quad.id); setEditData({ name: quad.name, imageUrl: quad.imageUrl ?? '', imei: quad.imei ?? '' }); }}
+                              className="transition-opacity hover:opacity-60" style={{ color: 'var(--t-muted)' }}>
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <StatusBadge status={quad.status} />
+                          {quad.imei && (
+                            <p className="font-mono text-[9px] mt-1" style={{ color: 'var(--t-muted)' }}>
+                              IMEI: {quad.imei}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select value={quad.status}
+                          onChange={e => api.updateQuadStatus(quad.id, e.target.value).then(fetchAll).catch(() => toast.error('Failed to update status'))}
+                          className="input text-[10px] font-semibold w-auto px-2 py-1.5">
+                          <option value="available">Available</option>
+                          <option value="rented">Rented</option>
+                          <option value="maintenance">Maintenance</option>
+                        </select>
+                        <button onClick={() => setShowQr(expanded ? null : quad.id)}
+                          className="p-2 rounded-xl transition-all"
+                          style={{ background: expanded ? 'color-mix(in srgb, var(--t-accent) 15%, transparent)' : 'var(--t-bg2)', color: expanded ? 'var(--t-accent)' : 'var(--t-muted)' }}>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expandable stats */}
+                    <div className="border-t pt-3" style={{ borderColor: 'var(--t-border)' }}>
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="text-center p-2 rounded-xl" style={{ background: 'var(--t-bg2)' }}>
+                          <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>{quadRides.length}</p>
+                          <p className="font-mono text-[9px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>Total Rides</p>
+                        </div>
+                        <div className="text-center p-2 rounded-xl" style={{ background: 'var(--t-bg2)' }}>
+                          <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>{totalRevenue.toLocaleString()}</p>
+                          <p className="font-mono text-[9px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>Revenue KES</p>
+                        </div>
+                        <div className="text-center p-2 rounded-xl" style={{ background: 'var(--t-bg2)' }}>
+                          <p className="font-display font-bold text-sm" style={{ color: 'var(--t-accent)' }}>{totalMinutes.toLocaleString()}</p>
+                          <p className="font-mono text-[9px] uppercase tracking-wider" style={{ color: 'var(--t-muted)' }}>Minutes</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setShowQr(showQr === -quad.id ? null : -quad.id)}
+                          className="flex-1 py-2 rounded-xl text-[10px] font-semibold border transition-opacity hover:opacity-70"
+                          style={{ borderColor: 'var(--t-border)', color: 'var(--t-muted)', background: 'var(--t-bg2)' }}>
+                          <QrCode className="w-3 h-3 inline-block mr-1" /> QR Code
+                        </button>
+                        <button onClick={() => {
+                          if (confirm(`Delete "${quad.name}" from fleet? This cannot be undone.`)) {
+                            api.deleteQuad(quad.id).then(fetchAll).catch(() => toast.error('Failed to delete quad'));
+                          }
+                        }}
+                          className="px-3 py-2 rounded-xl transition-opacity hover:opacity-70"
+                          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {showQr === -quad.id && (
+                      <div className="pt-3 border-t flex flex-col items-center gap-2" style={{ borderColor: 'var(--t-border)' }}>
+                        <div className="bg-white p-2 rounded-xl shadow-sm">
+                          <QRCodeSVG value={`${window.location.origin}/quad/${quad.id}`} size={130} level="H" includeMargin />
+                        </div>
+                        <p className="font-mono text-[10px]" style={{ color: 'var(--t-muted)' }}>Scan to book {quad.name}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </>)}
 
