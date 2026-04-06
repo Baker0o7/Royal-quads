@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Extra release notes'
+        required: false
+        default: ''
 
 jobs:
   build-android:
@@ -27,7 +32,7 @@ jobs:
       - name: Build web app
         run: npm run build
         env:
-          GOOGLE_CLIENT_ID: 979880974098-uvtfo8sokk6bemv38h9dm89gfl84raj7.apps.googleusercontent.com
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || '979880974098-uvtfo8sokk6bemv38h9dm89gfl84raj7.apps.googleusercontent.com' }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -48,54 +53,130 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build debug APK
+      # ── Version sync from package.json ──────────────────────────────────────
+      - name: Sync version into build.gradle
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          # Convert semver X.Y.Z → integer code  (e.g. 5.0.0 → 50000, 4.9.6 → 40906)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH ))
+          echo "VERSION=$VERSION  VERSION_CODE=$VERSION_CODE"
+          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" android/app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION\"/" android/app/build.gradle
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "APP_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+
+      # ── Signing setup ────────────────────────────────────────────────────────
+      - name: Set up release signing
+        id: signing
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Using stored release keystore"
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/royal-quads.keystore
+            echo "SIGNED=true" >> "$GITHUB_ENV"
+          else
+            echo "No KEYSTORE_BASE64 secret — generating a CI keystore"
+            keytool -genkeypair -v \
+              -keystore android/app/royal-quads.keystore \
+              -alias royal-quads \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Royal Quads CI, OU=CI, O=RoyalQuads, L=Mambrui, ST=Coast, C=KE" \
+              -storepass cipassword -keypass cipassword 2>/dev/null
+            echo "SIGNED=ci" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure signing in build.gradle
+        run: |
+          STOREPASS="${{ secrets.KEYSTORE_STOREPASS || 'cipassword' }}"
+          KEYPASS="${{ secrets.KEYSTORE_KEYPASS || 'cipassword' }}"
+          KEYALIAS="${{ secrets.KEYSTORE_ALIAS || 'royal-quads' }}"
+          # Inject signingConfigs block before android { ... defaultConfig
+          python3 - <<PYEOF
+          import re
+          with open('android/app/build.gradle', 'r') as f:
+              content = f.read()
+
+          signing_block = '''
+    signingConfigs {
+        release {
+            storeFile file("royal-quads.keystore")
+            storePassword "$STOREPASS"
+            keyAlias "$KEYALIAS"
+            keyPassword "$KEYPASS"
+        }
+    }
+    '''
+          # Add signingConfig reference in release buildType
+          content = content.replace(
+              'release {',
+              'release {\n            signingConfig signingConfigs.release',
+              1  # only first occurrence (inside buildTypes)
+          )
+          # Insert signingConfigs before buildTypes
+          content = content.replace('    buildTypes {', signing_block + '    buildTypes {', 1)
+          with open('android/app/build.gradle', 'w') as f:
+              f.write(content)
+          print("Signing config injected.")
+          PYEOF
+
+      # ── Build release APK ────────────────────────────────────────────────────
+      - name: Build release APK
         run: |
           chmod +x android/gradlew
-          cd android && ./gradlew assembleDebug --no-daemon
+          cd android && ./gradlew assembleRelease --no-daemon 2>&1 | tail -20
 
-      - name: Stage APK for release
+      - name: Stage APK
         run: |
           mkdir -p output
-          cp android/app/build/outputs/apk/debug/app-debug.apk output/Royal-Quads.apk
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          cp "$APK" "output/Royal-Quads-v${APP_VERSION}.apk"
+          # Also keep a fixed-name copy for easy linking
+          cp "$APK" "output/Royal-Quads-latest.apk"
+          ls -lh output/
 
+      # ── GitHub Release ───────────────────────────────────────────────────────
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Royal-Quads-APK
-          path: output/Royal-Quads.apk
-          retention-days: 30
+          name: Royal-Quads-v${{ env.APP_VERSION }}
+          path: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
+          retention-days: 90
 
       - name: Generate release tag
-        id: version
+        id: tag
         run: |
           SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "tag=v$(date +'%Y.%m.%d')-${SHA}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${APP_VERSION}-${SHA}" >> "$GITHUB_OUTPUT"
+          echo "TAG=v${APP_VERSION}-${SHA}" >> "$GITHUB_ENV"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Royal Quad Bikes ${{ steps.version.outputs.tag }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "Royal Quad Bikes v${{ env.APP_VERSION }}"
           body: |
-            ## Royal Quad Bikes — Android APK
+            ## 🏍️ Royal Quad Bikes v${{ env.APP_VERSION }}
 
-            Download `Royal-Quads.apk` below and install on your device.
+            Download `Royal-Quads-v${{ env.APP_VERSION }}.apk` below and sideload on your Android device.
 
-            > Enable **Install from unknown sources** in Android Settings before installing.
+            > **Install steps**
+            > 1. Download the APK
+            > 2. On your phone: **Settings → Security → Install unknown apps** → enable for your browser/Files app
+            > 3. Open the downloaded APK and tap **Install**
 
-            ### New in v4.9.5
-            - **40+ bug fixes** — all empty catch blocks, silent errors, and unsafe localStorage resolved
-            - **TypeScript** — 0 errors, full strict type coverage
-            - **GPS Live Map** — real OpenStreetMap + Leaflet with polyline history and themed controls
-            - **Notifications** — 2-min countdown warnings, overtime alerts
-            - **8 Themes** — all pages fully themed
-            - **Constants extraction** — TILL_NUMBER and BUSINESS_NAME centralized
-            - **Error handling** — all API calls, clipboard, storage, and canvas operations now have proper error handling
+            ---
 
-            ### Install
-            1. Download Royal-Quads.apk
-            2. Settings > Security > Install unknown apps > enable
-            3. Open APK and tap Install
-          files: output/Royal-Quads.apk
+            ### What's new in v5.0.0
+            - 📊 **Today's Revenue Bar** — admins see live earnings at a glance on the Home screen
+            - 🔐 **Signed release APK** — R8 minification, proper signing, `applicationIdSuffix` on debug builds
+            - 🔢 **Version sync** — `versionCode`/`versionName` auto-synced from `package.json` on every build
+            - 📦 **Smaller APK** — `minifyEnabled true` + `proguard-android-optimize.txt`
+            - 🏷️ **Debug suffix** — debug builds get `.debug` suffix so both can coexist on the same device
+            ${{ github.event.inputs.release_notes && format('- 📝 {0}', github.event.inputs.release_notes) || '' }}
+
+            ---
+            *Built from commit [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})*
+          files: |
+            output/Royal-Quads-v${{ env.APP_VERSION }}.apk
           draft: false
           prerelease: false

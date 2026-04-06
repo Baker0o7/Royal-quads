@@ -1,6 +1,6 @@
 {
   "name": "royal-quads",
-  "version": "4.9.6",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

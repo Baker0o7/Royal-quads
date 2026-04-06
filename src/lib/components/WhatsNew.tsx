@@ -3,18 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { X, Sparkles } from 'lucide-react';
 
-const VERSION = '4.9.6';
+const VERSION = '5.0.0';
 const STORAGE_KEY = `rq:whats_new_seen_${VERSION}`;
 
 const FEATURES = [
-  { emoji: '⚡', title: 'Quick Start Multi-Quad', desc: 'Start unlimited rides at once with per-quad guide names, payment methods (Cash/M-Pesa/Shee) and live commission breakdown' },
-  { emoji: '⏸️', title: 'Pause & Extend Rides',  desc: 'Pause active rides and resume later. Extend rides with +5/10/15/30 min options' },
-  { emoji: '📊', title: 'Enhanced Admin Fleet',   desc: 'Expandable quad cards with total rides, revenue and minutes stats per quad' },
-  { emoji: '🔍', title: 'History Search & Sort',  desc: 'Search by name/phone/quad, sort by newest/oldest/highest/lowest, date group headers, CSV export' },
-  { emoji: '📋', title: '9-Clause Waiver',       desc: 'Detailed safety waiver with 9 clauses, scroll-to-read enforcement and risk banner' },
-  { emoji: '📲', title: 'QR Code Receipts',      desc: 'Every receipt has a QR code for quick verification' },
-  { emoji: '💬', title: 'Pre-book Notes',         desc: 'Add special requests and M-Pesa ref when pre-booking a ride' },
-  { emoji: '🗺️', title: 'Live GPS Map',           desc: 'Real OpenStreetMap tracking with polyline history, speed & location stats' },
+  { emoji: '📊', title: "Today's Revenue Bar",   desc: "Admins see today's earnings, active rides, and total bookings at a glance directly on the Home screen — no need to open the Admin dashboard." },
+  { emoji: '📦', title: 'Signed Release APK',    desc: 'R8 minification enabled — the APK is now smaller and faster. Properly signed for sideloading on any Android device.' },
+  { emoji: '🔢', title: 'Auto Version Sync',     desc: 'versionCode and versionName auto-sync from package.json on every CI build, keeping the app store listing always accurate.' },
+  { emoji: '⚡', title: 'Quick Start Multi-Quad', desc: 'Start unlimited rides at once with per-quad guide names, payment methods (Cash/M-Pesa/Shee) and live commission breakdown.' },
+  { emoji: '⏸️', title: 'Pause & Extend Rides',  desc: 'Pause active rides and resume later. Extend rides with +5/10/15/30 min options.' },
+  { emoji: '🔍', title: 'History Search & Sort',  desc: 'Search by name/phone/quad, sort by newest/oldest/highest/lowest, date group headers, CSV export.' },
+  { emoji: '🗺️', title: 'Live GPS Map',           desc: 'Real OpenStreetMap tracking with polyline history, speed & location stats.' },
+  { emoji: '📲', title: 'QR Code Receipts',      desc: 'Every receipt has a QR code for quick verification.' },
 ];
 
 export function WhatsNew() {
