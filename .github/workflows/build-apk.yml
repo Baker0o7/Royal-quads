@@ -17,11 +17,9 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: npm
@@ -34,8 +32,7 @@ jobs:
         env:
           GOOGLE_CLIENT_ID: 979880974098-uvtfo8sokk6bemv38h9dm89gfl84raj7.apps.googleusercontent.com
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
@@ -53,127 +50,84 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # ── Version sync from package.json ──────────────────────────────────────
-      - name: Sync version into build.gradle
+      # ── Version sync ─────────────────────────────────────────────────────────
+      - name: Sync version from package.json
         run: |
           VERSION=$(node -p "require('./package.json').version")
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH ))
-          echo "Syncing version $VERSION (code $VERSION_CODE)"
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" android/app/build.gradle
-          sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION\"/" android/app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "'"$VERSION"'"/' android/app/build.gradle
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Synced: $VERSION ($VERSION_CODE)"
 
-      # ── Signing setup ────────────────────────────────────────────────────────
-      - name: Set up release keystore
+      # ── Keystore setup ───────────────────────────────────────────────────────
+      - name: Prepare keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/royal-quads.keystore
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+            echo "KS_PATH=$PWD/keystore.jks"               >> "$GITHUB_ENV"
+            echo "KS_STOREPASS=${{ secrets.KEYSTORE_STOREPASS }}" >> "$GITHUB_ENV"
+            echo "KS_KEYPASS=${{ secrets.KEYSTORE_KEYPASS }}"     >> "$GITHUB_ENV"
+            echo "KS_ALIAS=${{ secrets.KEYSTORE_ALIAS }}"         >> "$GITHUB_ENV"
           else
-            keytool -genkeypair -v \
-              -keystore android/app/royal-quads.keystore \
-              -alias royal-quads \
+            keytool -genkeypair \
+              -keystore keystore.jks -alias royal-quads \
               -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Royal Quads CI, OU=CI, O=RoyalQuads, L=Mambrui, ST=Coast, C=KE" \
-              -storepass cipassword -keypass cipassword 2>/dev/null
-            echo "Using CI-generated keystore"
+              -dname "CN=Royal Quads CI,OU=CI,O=RoyalQuads,L=Mambrui,ST=Coast,C=KE" \
+              -storepass cipassword -keypass cipassword -noprompt
+            echo "KS_PATH=$PWD/keystore.jks" >> "$GITHUB_ENV"
+            echo "KS_STOREPASS=cipassword"   >> "$GITHUB_ENV"
+            echo "KS_KEYPASS=cipassword"     >> "$GITHUB_ENV"
+            echo "KS_ALIAS=royal-quads"      >> "$GITHUB_ENV"
           fi
 
-      - name: Inject signing config into build.gradle
-        run: |
-          STOREPASS="${{ secrets.KEYSTORE_STOREPASS || 'cipassword' }}"
-          KEYPASS="${{ secrets.KEYSTORE_KEYPASS || 'cipassword' }}"
-          KEYALIAS="${{ secrets.KEYSTORE_ALIAS || 'royal-quads' }}"
-          python3 - "$STOREPASS" "$KEYPASS" "$KEYALIAS" << 'PYEOF'
-import sys, re
-
-storepass, keypass, keyalias = sys.argv[1], sys.argv[2], sys.argv[3]
-
-with open('android/app/build.gradle', 'r') as f:
-    content = f.read()
-
-signing_block = f"""
-    signingConfigs {{
-        release {{
-            storeFile file("royal-quads.keystore")
-            storePassword "{storepass}"
-            keyAlias "{keyalias}"
-            keyPassword "{keypass}"
-        }}
-    }}
-"""
-
-# Insert signingConfigs before buildTypes
-content = content.replace('    buildTypes {', signing_block + '    buildTypes {', 1)
-
-# Add signingConfig to release buildType (first occurrence only)
-content = content.replace(
-    'release {\n            signingConfig signingConfigs.release',
-    'release {',
-    1
-)
-content = re.sub(
-    r'(buildTypes\s*\{[^}]*?release\s*\{)',
-    r'\1\n            signingConfig signingConfigs.release',
-    content,
-    count=1,
-    flags=re.DOTALL
-)
-
-with open('android/app/build.gradle', 'w') as f:
-    f.write(content)
-print("Signing config injected successfully.")
-PYEOF
-
-      # ── Build release APK ────────────────────────────────────────────────────
+      # ── Build ────────────────────────────────────────────────────────────────
       - name: Build release APK
         run: |
           chmod +x android/gradlew
-          cd android && ./gradlew assembleRelease --no-daemon 2>&1 | tail -30
+          cd android && ./gradlew assembleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$KS_PATH" \
+            -Pandroid.injected.signing.store.password="$KS_STOREPASS" \
+            -Pandroid.injected.signing.key.alias="$KS_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KS_KEYPASS"
 
       - name: Stage APK
         run: |
           mkdir -p output
-          cp android/app/build/outputs/apk/release/app-release.apk "output/Royal-Quads-v${APP_VERSION}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "output/Royal-Quads-v${APP_VERSION}.apk"
           ls -lh output/
 
-      # ── Artifacts & Release ──────────────────────────────────────────────────
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      # ── Release ──────────────────────────────────────────────────────────────
+      - uses: actions/upload-artifact@v4
         with:
           name: Royal-Quads-v${{ env.APP_VERSION }}
           path: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
           retention-days: 90
 
-      - name: Generate release tag
+      - name: Generate tag
         id: tag
         run: |
           SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
           echo "tag=v${APP_VERSION}-${SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: "Royal Quad Bikes v${{ env.APP_VERSION }}"
+          name: Royal Quad Bikes v${{ env.APP_VERSION }}
           body: |
             ## 🏍️ Royal Quad Bikes v${{ env.APP_VERSION }}
 
-            Download **Royal-Quads-v${{ env.APP_VERSION }}.apk** below and install on your Android device.
+            Download **Royal-Quads-v${{ env.APP_VERSION }}.apk** and install on your Android device.
 
-            > **Install steps**
-            > 1. Download the APK
-            > 2. On your phone: **Settings → Security → Install unknown apps** → enable for your browser/Files app
-            > 3. Open the APK and tap **Install**
+            **Install steps**
+            1. Download the APK
+            2. Settings → Security → Install unknown apps → enable
+            3. Open the APK → Install
 
             ---
-
-            ### What's new in v5.0.0
-            - 📊 **Today's Revenue Bar** — admins see live earnings on the Home screen
-            - 🔐 **Signed release APK** — R8 minification + proper signing
-            - 🔢 **Auto version sync** — versionCode/versionName synced from package.json
-            - 📦 **Smaller APK** — minifyEnabled + proguard-android-optimize
-
+            Built from [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
           files: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
           draft: false
           prerelease: false
