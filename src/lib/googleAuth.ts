@@ -52,7 +52,7 @@ export function upsertGoogleUser(p: GoogleProfile): GoogleUser {
 }
 
 export function getClientId(): string {
-  const id = process.env.GOOGLE_CLIENT_ID as string;
+  const id = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
   return typeof id === 'string' && id.length > 10 ? id : '';
 }
 export const isGoogleEnabled = (): boolean => getClientId().length > 0;

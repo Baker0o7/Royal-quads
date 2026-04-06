@@ -12,7 +12,14 @@ function load<T>(key: string, fallback: T): T {
 }
 function save(key: string, value: unknown) {
   try { localStorage.setItem(key, JSON.stringify(value)); }
-  catch (e) { console.warn('[api] localStorage save failed:', e); }
+  catch (e) {
+    if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22)) {
+      console.error('[api] localStorage quota exceeded!');
+      window.dispatchEvent(new CustomEvent('storage-full', { detail: { key } }));
+    } else {
+      console.warn('[api] localStorage save failed:', e);
+    }
+  }
 }
 function nextId(key: string): number { const id = load<number>(key, 0) + 1; save(key, id); return id; }
 
