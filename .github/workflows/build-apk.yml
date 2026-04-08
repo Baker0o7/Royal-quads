@@ -17,10 +17,8 @@ jobs:
       contents: write
 
     steps:
-      # ── Checkout ─────────────────────────────────────────────────────────────
       - uses: actions/checkout@v4
 
-      # ── Node + npm cache ─────────────────────────────────────────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
@@ -29,24 +27,20 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      # ── Lint ─────────────────────────────────────────────────────────────────
       - name: Lint
         run: npm run lint || true
 
-      # ── Build web app ────────────────────────────────────────────────────────
       - name: Build web app
         run: npm run build
         env:
           GOOGLE_CLIENT_ID: 979880974098-uvtfo8sokk6bemv38h9dm89gfl84raj7.apps.googleusercontent.com
 
-      # ── Java ─────────────────────────────────────────────────────────────────
       - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
           cache: gradle
 
-      # ── Capacitor ────────────────────────────────────────────────────────────
       - name: Add Android platform
         run: npx cap add android || true
 
@@ -59,7 +53,6 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # ── Version sync ─────────────────────────────────────────────────────────
       - name: Sync version from package.json
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -71,7 +64,6 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
           echo "✅ Version: $VERSION ($VERSION_CODE)"
 
-      # ── Keystore ─────────────────────────────────────────────────────────────
       - name: Prepare keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
@@ -91,10 +83,9 @@ jobs:
             echo "KS_STOREPASS=cipassword"   >> "$GITHUB_ENV"
             echo "KS_KEYPASS=cipassword"     >> "$GITHUB_ENV"
             echo "KS_ALIAS=royal-quads"      >> "$GITHUB_ENV"
-            echo "⚠️  Using CI-generated keystore (add KEYSTORE_BASE64 secret for production)"
+            echo "⚠️  CI keystore (add KEYSTORE_BASE64 secret for production signing)"
           fi
 
-      # ── Build APK ────────────────────────────────────────────────────────────
       - name: Build release APK
         run: |
           chmod +x android/gradlew
@@ -107,29 +98,25 @@ jobs:
             -Pandroid.injected.signing.key.alias="$KS_ALIAS" \
             -Pandroid.injected.signing.key.password="$KS_KEYPASS"
 
-      # ── Stage ────────────────────────────────────────────────────────────────
       - name: Stage APK
         run: |
           mkdir -p output
           cp android/app/build/outputs/apk/release/app-release.apk \
              "output/Royal-Quads-v${APP_VERSION}.apk"
-          echo "📦 APK size: $(du -sh output/Royal-Quads-v${APP_VERSION}.apk | cut -f1)"
+          echo "📦 $(du -sh output/Royal-Quads-v${APP_VERSION}.apk | cut -f1)"
 
-      # ── Upload artifact ──────────────────────────────────────────────────────
       - uses: actions/upload-artifact@v4
         with:
           name: Royal-Quads-v${{ env.APP_VERSION }}
           path: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
           retention-days: 90
 
-      # ── Tag ──────────────────────────────────────────────────────────────────
       - name: Generate release tag
         id: tag
         run: |
           SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
           echo "tag=v${APP_VERSION}-${SHA}" >> "$GITHUB_OUTPUT"
 
-      # ── GitHub Release ───────────────────────────────────────────────────────
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
