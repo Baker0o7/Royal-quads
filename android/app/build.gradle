@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'dagger.hilt.android.plugin'
 
@@ -38,8 +39,6 @@ android {
     kotlinOptions { jvmTarget = '17' }
 
     buildFeatures { compose = true }
-
-    composeOptions { kotlinCompilerExtensionVersion = '1.5.15' }
 
     packaging { resources { excludes += '/META-INF/{AL2.0,LGPL2.1}' } }
 }
@@ -85,26 +84,11 @@ dependencies {
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
 
-    // Coil (images)
+    // Coil
     implementation 'io.coil-kt:coil-compose:2.7.0'
-
-    // Vico charts
-    implementation 'com.patrykandpatrick.vico:compose-m3:2.0.1'
-
-    // QR Code (ZXing)
-    implementation 'com.google.zxing:core:3.5.3'
 
     // Splash screen
     implementation 'androidx.core:core-splashscreen:1.0.1'
-
-    // Maps (OpenStreetMap via OSMDroid)
-    implementation 'org.osmdroid:osmdroid-android:6.1.20'
-
-    // PDF
-    implementation 'com.itextpdf:itext7-core:7.2.6'
-
-    // JSON (for backup/restore)
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
