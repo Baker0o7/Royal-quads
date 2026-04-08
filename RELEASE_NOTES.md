@@ -1,62 +1,70 @@
-## 🏍️ Royal Quads v5.0.1 — Stability & Performance Release
+## 🏍️ Royal Quads v5.1.0 — Kotlin Native Rewrite
 
-### Release Date: 2026-04-06
-
----
-
-### What's New in v5.0.1
-
-#### 🐛 Bug Fixes & Stability
-- Fixed localStorage quota exceeded handling — graceful fallback with user notification
-- All async operations now have proper `.catch()` error handlers throughout Admin.tsx
-- Clipboard API wrapped in try/catch for devices that block it
-- Waiver scroll-enforcement now reliable on all screen sizes
-
-#### ⚡ Performance
-- React 19 upgrade for faster rendering and concurrent features
-- Capacitor 8.1 for improved Android bridge performance
-- Tailwind 4 for smaller CSS bundle
-- Vite 6 for faster builds
-
-#### 🔒 Security
-- Sentry error monitoring active for real-time crash visibility
-- Input sanitization hardened via `sanitize.ts`
-- Zod 4 schema validation on all form inputs
+### Release Date: 2026-04-08
 
 ---
 
-### Features in v5.0.0+
+### 🚀 Major: Full Kotlin + Jetpack Compose Architecture
 
-#### 🏍️ Ride Management
-- **Quick Start Multi-Quad** — Start unlimited rides simultaneously with per-quad guide names, payment method (Cash / M-Pesa / Shee) and live 20% commission breakdown
-- **Pause & Extend Rides** — Pause active rides and resume later; extend with +5/10/15/30 min quick-select
-- **Live Ride Timer** — Real-time elapsed time display per active booking
+Complete native Android foundation replacing the Capacitor bridge layer. Native performance, offline-first SQLite storage, and full Android system integration.
 
-#### 📋 Booking System
-- **Pre-booking** — Reserve quads in advance with notes and M-Pesa reference
-- **Waiver System** — 9-clause digital safety waiver with scroll-to-read enforcement
-- **QR Code Receipts** — Every receipt includes a QR code with perforated divider design
+#### New Kotlin Architecture
+- **Jetpack Compose UI** — declarative, fully themed UI system (Material3)
+- **Room Database** — local SQLite with 14 entities replacing localStorage
+- **Hilt Dependency Injection** — clean, testable, scoped architecture  
+- **DataStore Preferences** — typed async key-value storage
+- **Repository Pattern** — single source of truth for all data operations
+- **Kotlin Coroutines + Flow** — reactive, cancellation-safe async throughout
 
-#### 👤 Customer & Admin
-- **Admin Fleet View** — Expandable quad cards with total rides, revenue (KES) and minutes stats per quad
-- **History Search & Sort** — Search by name/phone/quad/receipt; date filter; CSV export
-- **Analytics Dashboard** — Revenue trends, peak hours, guide commissions
-- **Loyalty Accounts** — Track repeat customer rewards
+#### Data Layer (14 Room Entities + DAOs)
+Quads · Bookings · Users · Promotions · Packages · MaintenanceLogs · DamageReports · Staff · Shifts · Waitlist · Prebookings · Incidents · LoyaltyAccounts · DynamicPricingRules
 
-#### 💳 Payments
-- Cash, M-Pesa, and Shee payment methods
-- Dynamic pricing rules
-- Promotion & package management
+#### 8-Theme System (Material3)
+🏜️ Desert · 🌑 Midnight · 🌊 Ocean · 🌿 Forest · 🌅 Sunset · ❄️ Arctic · 🌋 Volcanic · 🌸 Rose
+
+---
+
+### ⚡ Build Improvements
+- Gradle `--build-cache --parallel` flags for faster CI builds
+- KSP replaces KAPT (2x faster annotation processing)
+- ABI split: arm64-v8a + armeabi-v7a only (drops ~20MB from APK)
+- `minifyEnabled true` + `shrinkResources true` in release builds
+- Kotlin 2.0.21 with Compose compiler plugin
+
+---
+
+### 🐛 Bug Fixes (from v5.0.1)
+- localStorage quota exceeded handled gracefully
+- All async `.then()` chains have `.catch()` handlers
+- Clipboard API wrapped in try/catch
+- Waiver scroll-enforcement reliable on all screen sizes
+
+---
+
+### Features
+1. Quick Start Multi-Quad — start unlimited rides simultaneously
+2. Pause & Extend Rides — +5/10/15/30 min quick-select
+3. 9-Clause Digital Waiver with scroll-to-read enforcement
+4. QR Code Receipts with perforated divider design
+5. Admin Fleet View — expandable cards with revenue/stats per quad
+6. History Search & Sort — name/phone/quad/receipt, CSV export
+7. Analytics Dashboard — revenue trends, peak hours, guide commissions
+8. Pre-booking with M-Pesa reference and notes
+9. Dynamic Pricing Rules — peak/off-peak multipliers
+10. Loyalty Points & Tiers
+11. Waitlist management
+12. Incident & Damage reporting
+13. Staff shifts & clock-in/out
+14. Backup & Restore (JSON export)
 
 ---
 
 ### Install Instructions (Android)
-1. Download **Royal-Quads-v5.0.1.apk** from the Assets below
-2. On your device: **Settings → Security → Install unknown apps → enable**
-3. Open the APK → **Install**
+1. Download **Royal-Quads-v5.1.0.apk** from Assets below
+2. **Settings → Security → Install unknown apps → enable**
+3. Open APK → Install
 
 ### Default Admin PIN: `1234`
 
 ---
-
-*Built from commit [`$GITHUB_SHA`](https://github.com/Baker0o7/royal-quads)*
+Built from [`$GITHUB_SHA`](https://github.com/Baker0o7/Royal-quads)
