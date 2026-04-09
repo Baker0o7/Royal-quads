@@ -4,11 +4,6 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
-    inputs:
-      release_notes:
-        description: 'Extra release notes'
-        required: false
-        default: ''
 
 jobs:
   build-android:
@@ -17,17 +12,14 @@ jobs:
       contents: write
 
     steps:
-      # ── 1. Checkout ───────────────────────────────────────────────────────────
       - uses: actions/checkout@v4
 
-      # ── 2. Java 21 ───────────────────────────────────────────────────────────
       - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
           cache: gradle
 
-      # ── 3. Sync version from package.json ────────────────────────────────────
       - name: Sync version
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -35,11 +27,10 @@ jobs:
           VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH ))
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" android/app/build.gradle
           sed -i 's/versionName "[^"]*"/versionName "'"$VERSION"'"/'  android/app/build.gradle
-          echo "APP_VERSION=$VERSION"      >> "$GITHUB_ENV"
+          echo "APP_VERSION=$VERSION"       >> "$GITHUB_ENV"
           echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
           echo "✅ $VERSION ($VERSION_CODE)"
 
-      # ── 4. Keystore ──────────────────────────────────────────────────────────
       - name: Prepare keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
@@ -59,11 +50,9 @@ jobs:
             echo "KS_STOREPASS=cipassword"   >> "$GITHUB_ENV"
             echo "KS_KEYPASS=cipassword"     >> "$GITHUB_ENV"
             echo "KS_ALIAS=royal-quads"      >> "$GITHUB_ENV"
-            echo "⚠️  CI keystore — add KEYSTORE_BASE64 secret for production signing"
           fi
 
-      # ── 5. Gradle build ──────────────────────────────────────────────────────
-      - name: Build release APK
+      - name: Build split APKs
         run: |
           chmod +x android/gradlew
           cd android && ./gradlew assembleRelease \
@@ -76,35 +65,60 @@ jobs:
             -Pandroid.injected.signing.key.alias="$KS_ALIAS" \
             -Pandroid.injected.signing.key.password="$KS_KEYPASS"
 
-      # ── 6. Stage ─────────────────────────────────────────────────────────────
-      - name: Stage APK
+      - name: Stage APKs
         run: |
           mkdir -p output
-          cp android/app/build/outputs/apk/release/app-release.apk \
-             "output/Royal-Quads-v${APP_VERSION}.apk"
-          echo "📦 APK: $(du -sh output/Royal-Quads-v${APP_VERSION}.apk | cut -f1)"
+          V="${APP_VERSION}"
+          # Rename split APKs
+          cp android/app/build/outputs/apk/release/app-arm64-v8a-release.apk \
+             "output/Royal-Quads-v${V}-arm64-v8a.apk"
+          cp android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk \
+             "output/Royal-Quads-v${V}-armeabi-v7a.apk"
+          echo "📦 arm64-v8a:   $(du -sh output/Royal-Quads-v${V}-arm64-v8a.apk | cut -f1)"
+          echo "📦 armeabi-v7a: $(du -sh output/Royal-Quads-v${V}-armeabi-v7a.apk | cut -f1)"
+          ls -lh output/
 
-      # ── 7. Upload artifact ───────────────────────────────────────────────────
       - uses: actions/upload-artifact@v4
         with:
           name: Royal-Quads-v${{ env.APP_VERSION }}
-          path: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
+          path: output/
           retention-days: 90
 
-      # ── 8. Tag ───────────────────────────────────────────────────────────────
       - name: Generate tag
         id: tag
         run: |
           SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
           echo "tag=v${APP_VERSION}-${SHA}" >> "$GITHUB_OUTPUT"
 
-      # ── 9. GitHub Release ────────────────────────────────────────────────────
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: 🏍️ Royal Quad Bikes v${{ env.APP_VERSION }}
-          body_path: RELEASE_NOTES.md
-          files: output/Royal-Quads-v${{ env.APP_VERSION }}.apk
+          body: |
+            ## 🏍️ Royal Quad Bikes v${{ env.APP_VERSION }}
+
+            ### Download the right APK for your device
+
+            | APK | Device type |
+            |-----|-------------|
+            | `Royal-Quads-v${{ env.APP_VERSION }}-arm64-v8a.apk` | ✅ All modern phones (2015+) — **recommended** |
+            | `Royal-Quads-v${{ env.APP_VERSION }}-armeabi-v7a.apk` | Older 32-bit Android phones |
+
+            > **Note:** Plain `armeabi` (ARMv5/v6) is no longer supported by the Android NDK
+            > or any device running Android 8+. Use `armeabi-v7a` for 32-bit ARM devices.
+
+            ### Install
+            1. Download the APK for your device
+            2. **Settings → Security → Install unknown apps → enable**
+            3. Open APK → Install
+
+            **Default Admin PIN:** `1234`
+
+            ---
+            Built from [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          files: |
+            output/Royal-Quads-v${{ env.APP_VERSION }}-arm64-v8a.apk
+            output/Royal-Quads-v${{ env.APP_VERSION }}-armeabi-v7a.apk
           draft: false
           prerelease: false
         env:
