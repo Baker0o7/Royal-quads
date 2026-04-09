@@ -2,6 +2,7 @@ package com.royalquads.app.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -59,7 +60,7 @@ fun ProfileScreen(nav: NavController, vm: ProfileViewModel = hiltViewModel()) {
             item {
                 Text("Theme", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(RQ_THEMES) { t ->
                         FilterChip(selected = themeId == t.id, onClick = { vm.setTheme(t.id) }, label = { Text("${t.emoji} ${t.label}") })
                     }

@@ -177,7 +177,7 @@ fun AdminScreen(nav: NavController, vm: AdminViewModel = hiltViewModel()) {
                 }
                 // Prebookings
                 4 -> LazyColumn(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    val pending by derivedStateOf { prebookings.filter { it.status == PrebookStatus.PENDING || it.status == PrebookStatus.CONFIRMED } }
+                    val pending = prebookings.filter { it.status == PrebookStatus.PENDING || it.status == PrebookStatus.CONFIRMED }
                     if (prebookings.isEmpty()) item { Text("No pre-bookings", Modifier.padding(16.dp)) }
                     items(prebookings) { pb ->
                         Card(Modifier.fillMaxWidth()) {

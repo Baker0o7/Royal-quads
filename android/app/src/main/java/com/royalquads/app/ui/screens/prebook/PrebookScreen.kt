@@ -65,7 +65,7 @@ fun PrebookScreen(nav: NavController, vm: PrebookViewModel = hiltViewModel()) {
                 onClick = { vm.createPrebook(name, phone, selectedTier.duration, selectedTier.price, System.currentTimeMillis() + 3600_000L, mpesaRef, notes) { nav.navigate(Screen.Home.route) { popUpTo(0) } } },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = name.isNotBlank() && phone.isNotBlank()
-            ) { Icon(Icons.Default.BookOnline, null); Spacer(Modifier.width(8.dp)); Text("Confirm Pre-Booking") }
+            ) { Icon(Icons.Default.DateRange, null); Spacer(Modifier.width(8.dp)); Text("Confirm Pre-Booking") }
         }
     }
 }

@@ -1,7 +1,10 @@
 package com.royalquads.app.ui.screens.home
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -28,9 +31,18 @@ class HomeViewModel @Inject constructor(private val repo: RoyalQuadRepository) :
     val quads = repo.quads.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val activeBookings = repo.activeBookings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun startRide(quadId: Int, name: String, phone: String, duration: Int, price: Int, guideName: String?, onDone: (Int) -> Unit) {
+    fun startRide(
+        quadId: Int, name: String, phone: String,
+        duration: Int, price: Int, guideName: String?,
+        onDone: (Int) -> Unit
+    ) {
         viewModelScope.launch {
-            val b = repo.createBooking(quadId = quadId, userId = null, customerName = name, customerPhone = phone, duration = duration, price = price, originalPrice = price, guideName = guideName)
+            val b = repo.createBooking(
+                quadId = quadId, userId = null,
+                customerName = name, customerPhone = phone,
+                duration = duration, price = price, originalPrice = price,
+                guideName = guideName
+            )
             onDone(b.id)
         }
     }
@@ -43,22 +55,50 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = hiltViewModel()) {
     val active by vm.activeBookings.collectAsState()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(BUSINESS_NAME, fontWeight = FontWeight.Bold) }, actions = {
-            IconButton(onClick = { nav.navigate(Screen.Admin.route) }) { Icon(Icons.Default.AdminPanelSettings, "Admin") }
-            IconButton(onClick = { nav.navigate(Screen.Profile.route) }) { Icon(Icons.Default.Person, "Profile") }
-        }) },
-        floatingActionButton = { FloatingActionButton(onClick = { nav.navigate(Screen.Prebook.route) }) { Icon(Icons.Default.BookOnline, "Prebook") } }
+        topBar = {
+            TopAppBar(
+                title = { Text(BUSINESS_NAME, fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { nav.navigate(Screen.Admin.route) }) {
+                        Icon(Icons.Default.AdminPanelSettings, "Admin")
+                    }
+                    IconButton(onClick = { nav.navigate(Screen.Profile.route) }) {
+                        Icon(Icons.Default.Person, "Profile")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { nav.navigate(Screen.Prebook.route) }) {
+                Icon(Icons.Default.DateRange, "Prebook")
+            }
+        }
     ) { pad ->
-        Column(Modifier.fillMaxSize().padding(pad).padding(16.dp)) {
-            // Active rides summary
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .padding(16.dp)
+        ) {
+            // Active rides banner
             if (active.isNotEmpty()) {
                 Card(Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.DirectionsBike, null, tint = MaterialTheme.colorScheme.primary)
+                    Row(
+                        Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.TwoWheeler, null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(8.dp))
-                        Text("${active.size} active ride${if (active.size != 1) "s" else ""}", fontWeight = FontWeight.Bold)
+                        Text(
+                            "${active.size} active ride${if (active.size != 1) "s" else ""}",
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(Modifier.weight(1f))
-                        active.firstOrNull()?.let { TextButton(onClick = { nav.navigate(Screen.ActiveRide.go(it.id)) }) { Text("View") } }
+                        active.firstOrNull()?.let { booking ->
+                            TextButton(onClick = { nav.navigate(Screen.ActiveRide.go(booking.id)) }) {
+                                Text("View")
+                            }
+                        }
                     }
                 }
             }
@@ -66,7 +106,12 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = hiltViewModel()) {
             Text("Fleet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
 
-            LazyVerticalGrid(columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(quads) { quad ->
                     QuadCard(quad, onStart = { nav.navigate(Screen.ActiveRide.go(-quad.id)) })
                 }
@@ -77,7 +122,7 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = hiltViewModel()) {
 
 @Composable
 fun QuadCard(quad: Quad, onStart: () -> Unit) {
-    val color = when (quad.status) {
+    val statusColor = when (quad.status) {
         QuadStatus.AVAILABLE   -> MaterialTheme.colorScheme.primary
         QuadStatus.RENTED      -> MaterialTheme.colorScheme.error
         QuadStatus.MAINTENANCE -> MaterialTheme.colorScheme.secondary
@@ -86,10 +131,14 @@ fun QuadCard(quad: Quad, onStart: () -> Unit) {
         Column(Modifier.padding(12.dp)) {
             Text(quad.name, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(4.dp))
-            Badge(containerColor = color) { Text(quad.status.name, color = MaterialTheme.colorScheme.onPrimary) }
+            Badge(containerColor = statusColor) {
+                Text(quad.status.name, color = MaterialTheme.colorScheme.onPrimary)
+            }
             if (quad.status == QuadStatus.AVAILABLE) {
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text("Start") }
+                Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
+                    Text("Start")
+                }
             }
         }
     }
