@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Framework theme — no library dependency required.
-         Compose replaces this at runtime via MaterialTheme {}. -->
+    <!-- Base XML theme for Compose. Compose overrides all styling at runtime.
+         android:Theme.Material.Light.NoActionBar is part of the Android framework
+         (no library needed) and safe for minSdk 26+. -->
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/splashBg</item>
-        <item name="android:navigationBarColor">@color/splashBg</item>
         <item name="android:windowBackground">@color/splashBg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 
-    <!-- Splash screen (core-splashscreen dep already in build.gradle) -->
+    <!-- Splash screen theme (androidx.core:core-splashscreen) -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splashBg</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>

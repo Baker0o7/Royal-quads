@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var prefs: AppPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // installSplashScreen MUST be before super.onCreate()
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -30,7 +31,10 @@ class MainActivity : ComponentActivity() {
             val themeId by prefs.theme.collectAsState(initial = "midnight")
             val theme = RQ_THEMES.find { it.id == themeId } ?: RQ_THEMES[1]
             RoyalQuadTheme(theme) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     RoyalQuadNavHost()
                 }
             }
